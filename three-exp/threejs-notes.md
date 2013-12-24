@@ -9,5 +9,17 @@ Elements
 - Camera
 - Objects
 
-Need proficiency with Javascript
+Need proficiency with Javascript.
+WebGL is probably best because it has GPU support (frees up CPU to do other things)
+
+==12/24==
+Following: http://threejs.org/docs/index.html#Manual/Introduction/Creating_a_scene
+- Camera
+ - Field of view
+ - Aspect ratio: width of element / height
+ - Near and far clipping plane: only objects within this range will get rendered
+
+Making an object
+- Material: colors it
+- Mesh: object that takes a geometry and applies a material to it
 
