@@ -59,4 +59,12 @@ Y-axis increases upward
 
 Chrome script editor - breakpoints
 
+http://stackoverflow.com/questions/7956442/detect-clicked-object-in-three-js
+
+We want a grid-based system
+http://mrdoob.github.io/three.js/examples/#misc_controls_transform
+
+http://stackoverflow.com/questions/11093084/fill-three-js-scene-with-a-grid
+
+
 
