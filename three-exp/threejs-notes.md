@@ -66,5 +66,10 @@ http://mrdoob.github.io/three.js/examples/#misc_controls_transform
 
 http://stackoverflow.com/questions/11093084/fill-three-js-scene-with-a-grid
 
+## Simple examples
 
+http://stemkoski.github.io/Three.js/
+
+Placing things on a grid (aka Chess)
+view-source:http://schteppe.github.io/ammo.js-demos/demos/ChessDemo/
 
