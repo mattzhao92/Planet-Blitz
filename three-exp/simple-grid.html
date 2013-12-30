@@ -48,6 +48,7 @@
             this.camera = new THREE.PerspectiveCamera(45, this.SCREEN_WIDTH / this.SCREEN_HEIGHT, 1, 1000);
             // set camera position
             this.camera.position.z = this.SCREEN_HEIGHT / (2 * Math.tan(45 / 2 * (Math.PI / 180))); // ?
+            
             this.camera.position.y = 0;
 
             // add the camera to the scene
@@ -113,10 +114,14 @@
 
         // drawGrid will determine blocksize based on the 
         // amount of horizontal gridlines to draw
-        drawGrid: function(numHorizontalGridLines) {
+        drawGrid: function(numGridLines) {
+            this.drawHorizontalLines(numGridLines);
+            this.drawVerticalLines(numGridLines);
+        },
 
+        drawHorizontalLines: function(numLines) {
             // Determine the size of a grid block (square)
-            this.gridBlockSize = this.SCREEN_HEIGHT / numHorizontalGridLines;
+            this.gridBlockSize = this.SCREEN_HEIGHT / numLines;
 
             var geometry = new THREE.Geometry();
             geometry.vertices.push(this.getNWScreenVector());
@@ -127,12 +132,30 @@
                 opacity: 0.2
             });
 
-            for (var c = 0; c <= numHorizontalGridLines; c++) {
+            for (var c = 0; c <= numLines; c++) {
                 var line = new THREE.Line(geometry, material);
                 line.position.y = -c * this.gridBlockSize;
                 this.scene.add(line);
             }
+        },
 
+        drawVerticalLines: function(numLines) {
+            this.gridBlockSize = this.SCREEN_WIDTH / numLines;
+
+            var geometry = new THREE.Geometry();
+            geometry.vertices.push(this.getSWScreenVector());
+            geometry.vertices.push(this.getSEScreenVector());
+
+            var material = new THREE.LineBasicMaterial({
+                color: 0x000000,
+                opacity: 0.2
+            });
+
+            for (var i = 0; i <= numLines; i++) {
+                var line = new THREE.Line(geometry, material);
+                line.position.z = -i * this.gridBlockSize;
+                this.scene.add(line);
+            }
         }
 
     };

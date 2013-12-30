@@ -73,3 +73,6 @@ http://stemkoski.github.io/Three.js/
 Placing things on a grid (aka Chess)
 view-source:http://schteppe.github.io/ammo.js-demos/demos/ChessDemo/
 
+## Javascript notes
+
+Object is just a dictionary mapping of functions {name: func()}
