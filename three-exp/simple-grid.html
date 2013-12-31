@@ -55,10 +55,10 @@
 
 
         // rotate and position the plane
-        plane.rotation.x=-0.5*Math.PI;
-        plane.position.x=0
-        plane.position.y=0
-        plane.position.z=0
+        plane.rotation.x = -0.5 * Math.PI;
+        plane.position.x = 0
+        plane.position.y = 0
+        plane.position.z = 0
 
         // add the plane to the scene
         scene.add(plane);
@@ -145,14 +145,17 @@
             };
         }
 
-        var gui = new dat.GUI();
-        gui.add(controls, 'switchCamera');
-        gui.add(controls, 'perspective').listen();
-
+        addControlGUI();
         // make sure that for the first time, the
         // camera is looking at the scene
         camera.lookAt(scene.position);
         render();
+
+        function addControlGUI() {
+            var gui = new dat.GUI();
+            gui.add(controls, 'switchCamera');
+            gui.add(controls, 'perspective').listen();
+        }
 
         function render() {
 
