@@ -1,173 +1,181 @@
+<!DOCTYPE html>
+
 <html>
+
 <head>
-    <script src="build/jquery.min.js"></script>
-    <script src="build/three.min.js"></script>
-    <script src="build/trackballcontrols.js"></script>
+    <title>Example 02.07 - Cameras</title>
+    <script type="text/javascript" src="../libs/three.js"></script>
+    <script type="text/javascript" src="../libs/jquery-1.9.0.js"></script>
+    <script type="text/javascript" src="../libs/stats.js"></script>
+    <script type="text/javascript" src="../libs/dat.gui.js"></script>
+    <style>
+        body{
+            /* set margin to 0 and overflow to hidden, to go fullscreen */
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
 </head>
 <body>
-    <div id="3d_scene"></div>
 
-    <script>
-    // jsHint
-    /*global window */
-    /*global THREE */
+<div id="Stats-output">
+</div>
+<!-- Div which will hold the Output -->
+<div id="WebGL-output">
+</div>
 
-    // requestAnim shim layer by Paul Irish
-    window.requestAnimFrame = (function() {
-        return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
-        function( /* function */ callback, /* DOMElement */ element) {
-            window.setTimeout(callback, 1000 / 60);
-        };
-    })();
+<!-- Javascript code that runs our Three.js examples -->
+<script type="text/javascript">
 
-    var App = {};
+    // once everything is loaded, we run our Three.js stuff.
+    $(function () {
 
-    App = function(sceneContainerName) {
-        this.sceneContainerName = sceneContainerName;
+        var stats = initStats();
 
-        this.SCREEN_WIDTH = window.innerWidth;
-        this.SCREEN_HEIGHT = window.innerHeight;
+        // create a scene, that will hold all our elements such as objects, cameras and lights.
+        var scene = new THREE.Scene();
 
-        this.MAX_X = this.SCREEN_WIDTH / 2;
-        this.MIN_X = 0 - (this.SCREEN_WIDTH / 2);
-        this.MAX_Y = this.SCREEN_HEIGHT / 2;
-        this.MIN_Y = 0 - (this.SCREEN_HEIGHT / 2);
+        // create a camera, which defines where we're looking at.
+        var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.x = 120;
+        camera.position.y = 60;
+        camera.position.z = 180;
 
-        this.NUM_HORIZONTAL_LINES = 50;
+        // create a render and set the size
+        var renderer = new THREE.WebGLRenderer();
 
-        this.init();
-    };
+        renderer.setClearColorHex(0xEEEEEE, 1.0);
+        // renderer.setClearColor();
+        renderer.setSize(window.innerWidth, window.innerHeight);
 
-    App.prototype = {
-        init: function() {
-            // init scene
-            this.scene = new THREE.Scene();
+        // create the ground plane
+        var planeGeometry = new THREE.PlaneGeometry(180,180);
+        var planeMaterial =    new THREE.MeshLambertMaterial({color: 0xffffff});
+        var plane = new THREE.Mesh(planeGeometry,planeMaterial);
 
-            // init camera
-            // View Angle, Aspect, Near, Far
-            this.camera = new THREE.PerspectiveCamera(45, this.SCREEN_WIDTH / this.SCREEN_HEIGHT, 1, 1000);
-            // set camera position
-            // this.camera.position.z = this.SCREEN_HEIGHT / (2 * Math.tan(45 / 2 * (Math.PI / 180))); // ?
+
+        // rotate and position the plane
+        plane.rotation.x=-0.5*Math.PI;
+        plane.position.x=0
+        plane.position.y=0
+        plane.position.z=0
+
+        // add the plane to the scene
+        scene.add(plane);
+
+        // var cubeGeometry = new THREE.CubeGeometry(4,4,4);
+        // var cubeMaterial = new THREE.MeshLambertMaterial({color: 0x00ee22});
+
+        var MIN_Z = 0 - (planeGeometry.height / 2); 
+        var MAX_Z = (planeGeometry.height / 2);
+
+        var topHorizontalScreenVector = new THREE.Vector3(0, 0, MAX_Z);
+        var bottomHorizontalScreenVector = new THREE.Vector3(0, 0, MIN_Z);
+
+        var lineGeometry = new THREE.Geometry();
+        lineGeometry.vertices.push(topHorizontalScreenVector);
+        lineGeometry.vertices.push(bottomHorizontalScreenVector);
+
+        var lineMaterial = new THREE.LineBasicMaterial({
+            color: 0x000000,
+            opacity: 1
+        });
+
+        for (var j = 0 ; j < (planeGeometry.height/5) ; j++) {
+            var line = new THREE.Line(lineGeometry, lineMaterial);
+            // line.position.y = 0;
+            // line.position.x = 0;
+            // line.position.z = -(planeGeometry.height/2) + (j * 5);
+            line.position.x = j * 5;
+            scene.add(line);
+            // for (var i = 0 ; i < planeGeometry.width/5 ; i++) {
+                // var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+
+                // cube.position.z = -((planeGeometry.height)/2)+2+(j*5);
+                // cube.position.x = -((planeGeometry.width)/2)+2+(i*5);
+                // cube.position.y = 2;
+
+                // scene.add(cube);
             
-            this.camera.position.z = 300;
-            this.camera.position.x = 100;
-            this.camera.position.y = 100;
 
-            // add the camera to the scene
-            this.scene.add(this.camera);
-
-            this.projector = new THREE.Projector();
-
-            // init renderer
-            this.renderer = new THREE.CanvasRenderer();
-            // start the renderer
-            this.renderer.setSize(this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
-
-            this.drawGrid(this.NUM_HORIZONTAL_LINES);
-
-            this.trackball = new THREE.TrackballControls(this.camera, this.renderer.domElement);
-            this.trackball.staticMoving = true;
-
-            // add trackball controls listener
-            var me = this;
-            this.trackball.addEventListener('change', function() {
-                me.render();
-
-            });
-
-            // attach the render-supplied DOM element
-            var container = document.getElementById(this.sceneContainerName);
-            container.appendChild(this.renderer.domElement);
-
-            this.animate();
-        },
-
-        getNWScreenVector: function() {
-            return new THREE.Vector3(this.MIN_X, this.MAX_Y, 0);
-        },
-
-        getNEScreenVector: function() {
-            return new THREE.Vector3(this.MAX_X, this.MAX_Y, 0);
-        },
-
-        getSWScreenVector: function() {
-            return new THREE.Vector3(this.MIN_X, this.MIN_Y, 0);
-        },
-
-        getSEScreenVector: function() {
-            return new THREE.Vector3(this.MAX_X, this.MIN_Y, 0);
-        },
-
-        animate: function() {
-            var me = this;
-
-            // build custom animation frame request
-            window.requestAnimFrame(function() {
-                me.animate();
-
-            });
-
-            this.trackball.update();
-        },
-
-        render: function() {
-            this.renderer.render(this.scene, this.camera);
-        },
-
-        // drawGrid will determine blocksize based on the 
-        // amount of horizontal gridlines to draw
-        drawGrid: function(numGridLines) {
-            this.drawHorizontalLines(numGridLines);
-            // this.drawVerticalLines(numGridLines);
-        },
-
-        drawHorizontalLines: function(numLines) {
-            // Determine the size of a grid block (square)
-            this.gridBlockSize = this.SCREEN_HEIGHT / numLines;
-
-            var geometry = new THREE.Geometry();
-            geometry.vertices.push(this.getNWScreenVector());
-            geometry.vertices.push(this.getNEScreenVector());
-
-            var material = new THREE.LineBasicMaterial({
-                color: 0x000000,
-                opacity: 0.2
-            });
-
-            for (var c = 0; c <= numLines; c++) {
-                var line = new THREE.Line(geometry, material);
-                line.position.y = -c * this.gridBlockSize;
-                this.scene.add(line);
-            }
-        },
-
-        drawVerticalLines: function(numLines) {
-            this.gridBlockSize = this.SCREEN_WIDTH / numLines;
-
-            var geometry = new THREE.Geometry();
-            geometry.vertices.push(this.getSWScreenVector());
-            geometry.vertices.push(this.getSEScreenVector());
-
-            // change this vector
-            var material = new THREE.LineBasicMaterial({
-                color: 0x000000,
-                opacity: 0.2
-            });
-
-            for (var i = 0; i <= numLines; i++) {
-                var line = new THREE.Line(geometry, material);
-                line.position.x = i * this.gridBlockSize;
-                this.scene.add(line);
-            }
+            // }
         }
 
-    };
+        // draw vertical lines
+        
 
-    ////////////////////////////////////
-    // pass the name of the scene container
-    var appRun = new App('3d_scene');
-    </script>
+        var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.7 );
+        directionalLight.position.set( -20, 40, 60 );
+        scene.add(directionalLight);
 
+        // add subtle ambient lighting
+        var ambientLight = new THREE.AmbientLight(0x292929);
+        scene.add(ambientLight);
+
+        // add the output of the renderer to the html element
+        $("#WebGL-output").append(renderer.domElement);
+
+        // call the render function
+        var step=0;
+
+        var controls = new function() {
+            this.perspective = "Perspective";
+            this.switchCamera = function() {
+                if (camera instanceof THREE.PerspectiveCamera) {
+                    camera = new THREE.OrthographicCamera( window.innerWidth / - 16, window.innerWidth / 16, window.innerHeight / 16, window.innerHeight / - 16, -200, 500 );
+                    camera.position.x = 3;
+                    camera.position.y = 1;
+                    camera.position.z = 3;
+                    camera.lookAt(scene.position);
+                    this.perspective = "Orthographic";
+                } else {
+                    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+                    camera.position.x = 120;
+                    camera.position.y = 60;
+                    camera.position.z = 180;
+
+                    camera.lookAt(scene.position);
+                    this.perspective = "Perspective";
+                }
+            };
+        }
+
+        var gui = new dat.GUI();
+        gui.add(controls, 'switchCamera');
+        gui.add(controls, 'perspective').listen();
+
+        // make sure that for the first time, the
+        // camera is looking at the scene
+        camera.lookAt(scene.position);
+        render();
+
+        function render() {
+
+            stats.update();
+            // render using requestAnimationFrame
+            requestAnimationFrame(render);
+            renderer.render(scene, camera);
+        }
+
+        function initStats() {
+
+            var stats = new Stats();
+
+            stats.setMode(0); // 0: fps, 1: ms
+
+            // Align top-left
+            stats.domElement.style.position = 'absolute';
+            stats.domElement.style.left = '0px';
+            stats.domElement.style.top = '0px';
+
+            $("#Stats-output").append( stats.domElement );
+
+            return stats;
+        }
+    });
+
+
+
+</script>
 </body>
 </html>
-
