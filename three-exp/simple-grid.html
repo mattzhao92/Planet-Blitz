@@ -73,7 +73,7 @@
                 this.scene.add(ambientLight);
 
                 var app = this;
-                this.controls = new function() {
+                this.datGuiControls = new function() {
                     this.perspective = "Perspective";
                     this.switchCamera = function() {
                         if (app.camera instanceof THREE.PerspectiveCamera) {
@@ -95,24 +95,27 @@
                     };
                 }
 
-                this.initTrackballControls();
+                this.initControls();
 
                 this.addControlGUI();
                 this.camera.lookAt(this.scene.position);
                 this.animate();
             }, 
 
-            initTrackballControls: function() {
-                this.trackballControls = new THREE.TrackballControls(this.camera);
-                this.trackballControls.rotateSpeed = 1.0;
-                this.trackballControls.zoomSpeed = 1.0;
-                this.trackballControls.panSpeed = 1.0;
+            initControls: function() {
+                var controls = new THREE.TrackballControls(this.camera);
+                controls.rotateSpeed = 1.0;
+                controls.zoomSpeed = 1.0;
+                controls.panSpeed = 1.0;
+                controls.noRotate = true;
+
+                this.controls = controls;
             },
 
             addControlGUI: function() {
                 var gui = new dat.GUI();
-                gui.add(this.controls, 'switchCamera');
-                gui.add(this.controls, 'perspective').listen();
+                gui.add(this.datGuiControls, 'switchCamera');
+                gui.add(this.datGuiControls, 'perspective').listen();
             },
 
             drawGamePlane: function() {
@@ -137,7 +140,7 @@
                 this.stats.update();
 
                 var delta = this.clock.getDelta();
-                this.trackballControls.update(delta);
+                this.controls.update(delta);
 
                 // standard: render using requestAnimationFrame
                 var me = this;
