@@ -70,24 +70,25 @@
                 var ambientLight = new THREE.AmbientLight(0x292929);
                 this.scene.add(ambientLight);
 
+                var app = this;
                 this.controls = new function() {
                     this.perspective = "Perspective";
                     this.switchCamera = function() {
-                        if (this.camera instanceof THREE.PerspectiveCamera) {
-                            this.camera = new THREE.OrthographicCamera( window.innerWidth / - 16, window.innerWidth / 16, window.innerHeight / 16, window.innerHeight / - 16, -200, 500 );
-                            this.camera.position.x = 3;
-                            this.camera.position.y = 1;
-                            this.camera.position.z = 3;
-                            this.camera.lookAt(this.scene.position);
-                            this.perspective = "Orthographic";
+                        if (app.camera instanceof THREE.PerspectiveCamera) {
+                            app.camera = new THREE.OrthographicCamera( window.innerWidth / - 16, window.innerWidth / 16, window.innerHeight / 16, window.innerHeight / - 16, -200, 500 );
+                            app.camera.position.x = 3;
+                            app.camera.position.y = 1;
+                            app.camera.position.z = 3;
+                            app.camera.lookAt(app.scene.position);
+                            app.perspective = "Orthographic";
                         } else {
-                            this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-                            this.camera.position.x = 120;
-                            this.camera.position.y = 60;
-                            this.camera.position.z = 180;
+                            app.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+                            app.camera.position.x = 120;
+                            app.camera.position.y = 60;
+                            app.camera.position.z = 180;
 
-                            this.camera.lookAt(this.scene.position);
-                            this.perspective = "Perspective";
+                            app.camera.lookAt(app.scene.position);
+                            app.perspective = "Perspective";
                         }
                     };
                 }
