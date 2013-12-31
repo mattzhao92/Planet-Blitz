@@ -53,7 +53,6 @@
         var planeMaterial = new THREE.MeshLambertMaterial({color: 0xffffff});
         var plane = new THREE.Mesh(planeGeometry,planeMaterial);
 
-
         // rotate and position the plane
         plane.rotation.x = -0.5 * Math.PI;
         plane.position.x = 0
@@ -63,51 +62,8 @@
         // add the plane to the scene
         scene.add(plane);
 
-        // var cubeGeometry = new THREE.CubeGeometry(4,4,4);
-        // var cubeMaterial = new THREE.MeshLambertMaterial({color: 0x00ee22});
-
-        var MIN_Z = -planeGeometry.height / 2;
-        var MAX_Z = (planeGeometry.height / 2);
-
-        var topHorizontalScreenVector = new THREE.Vector3(0, 0, MAX_Z);
-        var bottomHorizontalScreenVector = new THREE.Vector3(0, 0, MIN_Z);
-
-        var lineGeometry = new THREE.Geometry();
-        lineGeometry.vertices.push(topHorizontalScreenVector);
-        lineGeometry.vertices.push(bottomHorizontalScreenVector);
-
-        var lineMaterial = new THREE.LineBasicMaterial({
-            color: 0x000000,
-            opacity: 1
-        });
-
-        for (var j = 0 ; j < (planeGeometry.height/5) ; j++) {
-            var line = new THREE.Line(lineGeometry, lineMaterial);
-            line.position.x = (-planeGeometry.height/2) + j * 5;
-            scene.add(line);
-        }
-
-        // draw vertical lines
-        var MIN_X = -planeGeometry.width / 2;
-        var MAX_X = planeGeometry.width / 2;
-
-        var leftVerticalScreenVector = new THREE.Vector3(MIN_X, 0, 0);
-        var rightVerticalScreenVector = new THREE.Vector3(MAX_X, 0, 0);
-
-        var vertLineGeometry = new THREE.Geometry();
-        vertLineGeometry.vertices.push(leftVerticalScreenVector);
-        vertLineGeometry.vertices.push(rightVerticalScreenVector);
-
-        var vertLineMaterial = new THREE.LineBasicMaterial({
-            color: 0x000000,
-            opacity: 1
-        });
-
-        for (var i = 0; i < (planeGeometry.width/5); i++) {
-            var line = new THREE.Line(vertLineGeometry, vertLineMaterial);
-            line.position.z = (-planeGeometry.width/2) + i * 5;
-            scene.add(line);
-        }
+        drawHorizontalLines();
+        drawVerticalLines();
 
         var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.7 );
         directionalLight.position.set( -20, 40, 60 );
@@ -151,6 +107,54 @@
         camera.lookAt(scene.position);
         render();
 
+        function drawHorizontalLines() {
+            var MIN_Z = -planeGeometry.height / 2;
+            var MAX_Z = (planeGeometry.height / 2);
+
+            var topHorizontalScreenVector = new THREE.Vector3(0, 0, MAX_Z);
+            var bottomHorizontalScreenVector = new THREE.Vector3(0, 0, MIN_Z);
+
+            var lineGeometry = new THREE.Geometry();
+            lineGeometry.vertices.push(topHorizontalScreenVector);
+            lineGeometry.vertices.push(bottomHorizontalScreenVector);
+
+            var lineMaterial = new THREE.LineBasicMaterial({
+                color: 0x000000,
+                opacity: 1
+            });
+
+            for (var j = 0 ; j < (planeGeometry.height/5) ; j++) {
+                var line = new THREE.Line(lineGeometry, lineMaterial);
+                line.position.x = (-planeGeometry.height/2) + j * 5;
+                scene.add(line);
+            }
+        }
+
+        // draw vertical lines
+        function drawVerticalLines() {
+            var MIN_X = -planeGeometry.width / 2;
+            var MAX_X = planeGeometry.width / 2;
+
+            var leftVerticalScreenVector = new THREE.Vector3(MIN_X, 0, 0);
+            var rightVerticalScreenVector = new THREE.Vector3(MAX_X, 0, 0);
+
+            var vertLineGeometry = new THREE.Geometry();
+            vertLineGeometry.vertices.push(leftVerticalScreenVector);
+            vertLineGeometry.vertices.push(rightVerticalScreenVector);
+
+            var vertLineMaterial = new THREE.LineBasicMaterial({
+                color: 0x000000,
+                opacity: 1
+            });
+
+            for (var i = 0; i < (planeGeometry.width/5); i++) {
+                var line = new THREE.Line(vertLineGeometry, vertLineMaterial);
+                line.position.z = (-planeGeometry.width/2) + i * 5;
+                scene.add(line);
+            }
+        }
+
+
         function addControlGUI() {
             var gui = new dat.GUI();
             gui.add(controls, 'switchCamera');
@@ -158,7 +162,6 @@
         }
 
         function render() {
-
             stats.update();
             // render using requestAnimationFrame
             requestAnimationFrame(render);
@@ -166,7 +169,6 @@
         }
 
         function initStats() {
-
             var stats = new Stats();
 
             stats.setMode(0); // 0: fps, 1: ms
