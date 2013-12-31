@@ -8,6 +8,7 @@
     <script type="text/javascript" src="../libs/jquery-1.9.0.js"></script>
     <script type="text/javascript" src="../libs/stats.js"></script>
     <script type="text/javascript" src="../libs/dat.gui.js"></script>
+    <script type="text/javascript" src="../libs/TrackballControls.js"></script>
     <style>
         body{
             /* set margin to 0 and overflow to hidden, to go fullscreen */
@@ -50,7 +51,7 @@
             this.renderer.setSize(window.innerWidth, window.innerHeight);
 
             // add the output of the renderer to the html element
-            $("#WebGL-output").append(this.renderer.domElement);
+            $(containerName).append(this.renderer.domElement);
 
             this.init();
         };
@@ -58,6 +59,7 @@
         App.prototype = {
             init: function() {
                 this.stats = this.initStats();
+                this.clock = new THREE.Clock();
 
                 this.drawGamePlane();
 
@@ -93,11 +95,19 @@
                     };
                 }
 
+                this.initTrackballControls();
+
                 this.addControlGUI();
                 this.camera.lookAt(this.scene.position);
                 this.animate();
-
             }, 
+
+            initTrackballControls: function() {
+                this.trackballControls = new THREE.TrackballControls(this.camera);
+                this.trackballControls.rotateSpeed = 1.0;
+                this.trackballControls.zoomSpeed = 1.0;
+                this.trackballControls.panSpeed = 1.0;
+            },
 
             addControlGUI: function() {
                 var gui = new dat.GUI();
@@ -125,7 +135,11 @@
 
             animate: function() {
                 this.stats.update();
-                // render using requestAnimationFrame
+
+                var delta = this.clock.getDelta();
+                this.trackballControls.update(delta);
+
+                // standard: render using requestAnimationFrame
                 var me = this;
                 requestAnimationFrame(function() {
                     me.animate();
@@ -197,7 +211,7 @@
 
         };
 
-        var app = new App("hello");
+        var app = new App("#WebGL-output");
     });
 
 </script>
