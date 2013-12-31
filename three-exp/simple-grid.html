@@ -9,6 +9,8 @@
     <script type="text/javascript" src="../libs/stats.js"></script>
     <script type="text/javascript" src="../libs/dat.gui.js"></script>
     <script type="text/javascript" src="../libs/TrackballControls.js"></script>
+    <script type="text/javascript" src="../libs/OrbitControls.js"></script>
+
     <style>
         body{
             /* set margin to 0 and overflow to hidden, to go fullscreen */
@@ -103,12 +105,7 @@
             }, 
 
             initControls: function() {
-                var controls = new THREE.TrackballControls(this.camera);
-                controls.rotateSpeed = 1.0;
-                controls.zoomSpeed = 1.0;
-                controls.panSpeed = 1.0;
-                controls.noRotate = true;
-
+                var controls = new THREE.OrbitControls(this.camera);
                 this.controls = controls;
             },
 
