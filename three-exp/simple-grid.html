@@ -49,8 +49,8 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
 
         // create the ground plane
-        var planeGeometry = new THREE.PlaneGeometry(180,180);
-        var planeMaterial =    new THREE.MeshLambertMaterial({color: 0xffffff});
+        var planeGeometry = new THREE.PlaneGeometry(180, 180);
+        var planeMaterial = new THREE.MeshLambertMaterial({color: 0xffffff});
         var plane = new THREE.Mesh(planeGeometry,planeMaterial);
 
 
@@ -66,7 +66,7 @@
         // var cubeGeometry = new THREE.CubeGeometry(4,4,4);
         // var cubeMaterial = new THREE.MeshLambertMaterial({color: 0x00ee22});
 
-        var MIN_Z = 0 - (planeGeometry.height / 2); 
+        var MIN_Z = -planeGeometry.height / 2;
         var MAX_Z = (planeGeometry.height / 2);
 
         var topHorizontalScreenVector = new THREE.Vector3(0, 0, MAX_Z);
@@ -83,22 +83,8 @@
 
         for (var j = 0 ; j < (planeGeometry.height/5) ; j++) {
             var line = new THREE.Line(lineGeometry, lineMaterial);
-            // line.position.y = 0;
-            // line.position.x = 0;
-            // line.position.z = -(planeGeometry.height/2) + (j * 5);
-            line.position.x = j * 5;
+            line.position.x = (-planeGeometry.width/2) + j * 5;
             scene.add(line);
-            // for (var i = 0 ; i < planeGeometry.width/5 ; i++) {
-                // var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
-
-                // cube.position.z = -((planeGeometry.height)/2)+2+(j*5);
-                // cube.position.x = -((planeGeometry.width)/2)+2+(i*5);
-                // cube.position.y = 2;
-
-                // scene.add(cube);
-            
-
-            // }
         }
 
         // draw vertical lines
