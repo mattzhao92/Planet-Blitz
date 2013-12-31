@@ -83,12 +83,31 @@
 
         for (var j = 0 ; j < (planeGeometry.height/5) ; j++) {
             var line = new THREE.Line(lineGeometry, lineMaterial);
-            line.position.x = (-planeGeometry.width/2) + j * 5;
+            line.position.x = (-planeGeometry.height/2) + j * 5;
             scene.add(line);
         }
 
         // draw vertical lines
-        
+        var MIN_X = -planeGeometry.width / 2;
+        var MAX_X = planeGeometry.width / 2;
+
+        var leftVerticalScreenVector = new THREE.Vector3(MIN_X, 0, 0);
+        var rightVerticalScreenVector = new THREE.Vector3(MAX_X, 0, 0);
+
+        var vertLineGeometry = new THREE.Geometry();
+        vertLineGeometry.vertices.push(leftVerticalScreenVector);
+        vertLineGeometry.vertices.push(rightVerticalScreenVector);
+
+        var vertLineMaterial = new THREE.LineBasicMaterial({
+            color: 0x000000,
+            opacity: 1
+        });
+
+        for (var i = 0; i < (planeGeometry.width/5); i++) {
+            var line = new THREE.Line(vertLineGeometry, vertLineMaterial);
+            line.position.z = (-planeGeometry.width/2) + i * 5;
+            scene.add(line);
+        }
 
         var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.7 );
         directionalLight.position.set( -20, 40, 60 );
