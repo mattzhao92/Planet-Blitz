@@ -1,6 +1,6 @@
 <html>
 <head>
-    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+    <script src="build/jquery.min.js"></script>
     <script src="build/three.min.js"></script>
     <script src="build/trackballcontrols.js"></script>
 </head>
@@ -47,9 +47,11 @@
             // View Angle, Aspect, Near, Far
             this.camera = new THREE.PerspectiveCamera(45, this.SCREEN_WIDTH / this.SCREEN_HEIGHT, 1, 1000);
             // set camera position
-            this.camera.position.z = this.SCREEN_HEIGHT / (2 * Math.tan(45 / 2 * (Math.PI / 180))); // ?
+            // this.camera.position.z = this.SCREEN_HEIGHT / (2 * Math.tan(45 / 2 * (Math.PI / 180))); // ?
             
-            this.camera.position.y = 0;
+            this.camera.position.z = 300;
+            this.camera.position.x = 100;
+            this.camera.position.y = 100;
 
             // add the camera to the scene
             this.scene.add(this.camera);
@@ -116,7 +118,7 @@
         // amount of horizontal gridlines to draw
         drawGrid: function(numGridLines) {
             this.drawHorizontalLines(numGridLines);
-            this.drawVerticalLines(numGridLines);
+            // this.drawVerticalLines(numGridLines);
         },
 
         drawHorizontalLines: function(numLines) {
@@ -146,6 +148,7 @@
             geometry.vertices.push(this.getSWScreenVector());
             geometry.vertices.push(this.getSEScreenVector());
 
+            // change this vector
             var material = new THREE.LineBasicMaterial({
                 color: 0x000000,
                 opacity: 0.2
@@ -153,7 +156,7 @@
 
             for (var i = 0; i <= numLines; i++) {
                 var line = new THREE.Line(geometry, material);
-                line.position.z = -i * this.gridBlockSize;
+                line.position.x = i * this.gridBlockSize;
                 this.scene.add(line);
             }
         }
