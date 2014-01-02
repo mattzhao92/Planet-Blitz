@@ -9,6 +9,8 @@
     <script type="text/javascript" src="../libs/stats.js"></script>
     <script type="text/javascript" src="../libs/dat.gui.js"></script>
     <script type="text/javascript" src="../libs/MapControls.js"></script>
+    <script type="text/javascript" src="../libs/Plane.js"></script>
+
     <style>
         body{
             /* set margin to 0 and overflow to hidden, to go fullscreen */
@@ -46,9 +48,13 @@
             // create a render and set the size
             this.renderer = new THREE.WebGLRenderer();
 
-            this.renderer.setClearColorHex(0xEEEEEE, 1.0);
+            // this.renderer.setClearColorHex(0xEEEEEE, 1.0);
             // renderer.setClearColor();
             this.renderer.setSize(window.innerWidth, window.innerHeight);
+
+            // render objects as they were rendered to the scene
+            // optional (more complex / sophisticated): use multiple scenes. Ex. http://stackoverflow.com/questions/12666570/how-to-change-the-zorder-of-object-with-threejs
+            // this.renderer.sortObjects = false;
 
             // add the output of the renderer to the html element
             $(containerName).append(this.renderer.domElement);
@@ -64,13 +70,31 @@
                 this.drawGamePlane();
 
                 // add some lighting
-                var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.7 );
-                directionalLight.position.set( -20, 40, 60 );
-                this.scene.add(directionalLight);
+                // var directionalLight = new THREE.DirectionalLight(0xffffff);
+                // directionalLight.position.set( -20, 40, 60 );
+                // this.scene.add(directionalLight);
 
                 // add subtle ambient lighting
-                var ambientLight = new THREE.AmbientLight(0x292929);
-                this.scene.add(ambientLight);
+                // var ambientLight = new THREE.AmbientLight(0x292929);
+                // this.scene.add(ambientLight);
+
+                var ambientLight = new THREE.AmbientLight( 0x404040 );
+                this.scene.add( ambientLight );
+
+                var directionalLight = new THREE.DirectionalLight( 0xffffff );
+                directionalLight.position.x = 1;
+                directionalLight.position.y = 1;
+                directionalLight.position.z = 0.75;
+                directionalLight.position.normalize();
+                this.scene.add( directionalLight );
+
+                var directionalLight = new THREE.DirectionalLight( 0x808080 );
+                directionalLight.position.x = - 1;
+                directionalLight.position.y = 1;
+                directionalLight.position.z = - 0.75;
+                directionalLight.position.normalize();
+                this.scene.add( directionalLight );
+
 
                 var app = this;
                 this.datGuiControls = new function() {
@@ -117,10 +141,11 @@
                 // create the ground plane
                 this.planeGeometry = new THREE.PlaneGeometry(180, 180);
                 var planeMaterial = new THREE.MeshLambertMaterial({color: 0xffffff});
+                // var planeMaterial = new THREE.MeshLambertMaterial({color: 0xffffff, opacity: 0});
                 this.plane = new THREE.Mesh(this.planeGeometry,planeMaterial);
 
                 // rotate and position the plane
-                this.plane.rotation.x = -0.5 * Math.PI;
+                // this.plane.rotation.x = -0.5 * Math.PI;
                 this.plane.position.x = 0;
                 this.plane.position.y = 0;
                 this.plane.position.z = 0;
@@ -128,7 +153,7 @@
                 this.drawHorizontalLines();
                 this.drawVerticalLines();
 
-                this.scene.add(this.plane);
+                // this.scene.add(this.plane);
             }, 
 
             animate: function() {
@@ -158,13 +183,13 @@
 
                 var lineMaterial = new THREE.LineBasicMaterial({
                     color: 0x000000,
-                    opacity: 1,
-                    lineWidth: 3
+                    opacity: 1
                 });
 
-                for (var j = 0 ; j < (this.planeGeometry.height/5) ; j++) {
+                for (var j = 0 ; j <= (this.planeGeometry.height/5) ; j++) {
                     var line = new THREE.Line(lineGeometry, lineMaterial);
                     line.position.x = (-this.planeGeometry.height/2) + j * 5;
+                    // line.position.y = 1;
                     this.scene.add(line);
                 }
             },
@@ -185,9 +210,10 @@
                     opacity: 1
                 });
 
-                for (var i = 0; i < (this.planeGeometry.width/5); i++) {
+                for (var i = 0; i <= (this.planeGeometry.width/5); i++) {
                     var line = new THREE.Line(vertLineGeometry, vertLineMaterial);
                     line.position.z = (-this.planeGeometry.width/2) + i * 5;
+                    // line.position.y = 1;
                     this.scene.add(line);
                 }
             }, 
