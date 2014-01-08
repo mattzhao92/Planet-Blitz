@@ -9,6 +9,8 @@
     <script type="text/javascript" src="../libs/stats.js"></script>
     <script type="text/javascript" src="../libs/dat.gui.js"></script>
     <script type="text/javascript" src="../libs/MapControls.js"></script>
+    <script type="text/javascript" src="../libs/FlyControls.js"></script>
+
     <script type="text/javascript" src="../libs/Plane.js"></script>
 
     <style>
@@ -128,6 +130,7 @@
 
             initControls: function() {
                 var controls = new THREE.MapControls(this.camera);
+                
                 this.controls = controls;
             },
 
@@ -145,15 +148,16 @@
                 this.plane = new THREE.Mesh(this.planeGeometry,planeMaterial);
 
                 // rotate and position the plane
-                // this.plane.rotation.x = -0.5 * Math.PI;
+                this.plane.rotation.x = -0.5 * Math.PI;
                 this.plane.position.x = 0;
                 this.plane.position.y = 0;
                 this.plane.position.z = 0;
 
+                // this.scene.add(this.plane);
+
                 this.drawHorizontalLines();
                 this.drawVerticalLines();
 
-                // this.scene.add(this.plane);
             }, 
 
             animate: function() {
