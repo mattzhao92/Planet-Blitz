@@ -10,9 +10,6 @@
     <script type="text/javascript" src="../libs/dat.gui.js"></script>
     <script type="text/javascript" src="../libs/MapControls.js"></script>
     <script type="text/javascript" src="../libs/FlyControls.js"></script>
-
-    <script type="text/javascript" src="../libs/Plane.js"></script>
-
     <style>
         body{
             /* set margin to 0 and overflow to hidden, to go fullscreen */
@@ -41,22 +38,9 @@
             // create a scene, that will hold all our elements such as objects, cameras and lights.
             this.scene = new THREE.Scene();
 
-            // create a camera, which defines where we're looking at.
-            this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-            this.camera.position.x = 120;
-            this.camera.position.y = 60;
-            this.camera.position.z = 180;
-
             // create a render and set the size
             this.renderer = new THREE.WebGLRenderer();
-
-            // this.renderer.setClearColorHex(0xEEEEEE, 1.0);
-            // renderer.setClearColor();
             this.renderer.setSize(window.innerWidth, window.innerHeight);
-
-            // render objects as they were rendered to the scene
-            // optional (more complex / sophisticated): use multiple scenes. Ex. http://stackoverflow.com/questions/12666570/how-to-change-the-zorder-of-object-with-threejs
-            // this.renderer.sortObjects = false;
 
             // add the output of the renderer to the html element
             $(containerName).append(this.renderer.domElement);
@@ -66,11 +50,33 @@
 
         App.prototype = {
             init: function() {
+                this.setupCamera();
+
                 this.stats = this.initStats();
                 this.clock = new THREE.Clock();
 
                 this.drawGamePlane();
+                this.addLighting();
 
+                this.app = this;
+
+                this.initControls();
+                this.addControlGUI();
+
+                // begin animation
+                this.animate();
+            }, 
+
+            setupCamera: function() {
+                // create a camera, which defines where we're looking at
+                this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+                this.camera.position.x = 120;
+                this.camera.position.y = 60;
+                this.camera.position.z = 180;
+                this.camera.lookAt(this.scene.position);
+            },
+
+            addLighting: function() {
                 // add some lighting
                 // var directionalLight = new THREE.DirectionalLight(0xffffff);
                 // directionalLight.position.set( -20, 40, 60 );
@@ -96,8 +102,14 @@
                 directionalLight.position.z = - 0.75;
                 directionalLight.position.normalize();
                 this.scene.add( directionalLight );
+            },
 
-                var app = this;
+            initControls: function() {
+                var controls = new THREE.MapControls(this.camera);
+                this.controls = controls;
+            },
+
+            addControlGUI: function() {
                 this.datGuiControls = new function() {
                     this.perspective = "Perspective";
                     this.switchCamera = function() {
@@ -120,21 +132,8 @@
                     };
                 }
 
-                this.initControls();
-                this.addControlGUI();
-                this.camera.lookAt(this.scene.position);
-                
-                // begin animation
-                this.animate();
-            }, 
-
-            initControls: function() {
-                var controls = new THREE.MapControls(this.camera);
-                this.controls = controls;
-            },
-
-            addControlGUI: function() {
                 var gui = new dat.GUI();
+
                 gui.add(this.datGuiControls, 'switchCamera');
                 gui.add(this.datGuiControls, 'perspective').listen();
             },
@@ -144,7 +143,7 @@
                 this.planeGeometry = new THREE.PlaneGeometry(180, 180);
                 var planeMaterial = new THREE.MeshLambertMaterial({color: 0xffffff});
                 // var planeMaterial = new THREE.MeshLambertMaterial({color: 0xffffff, opacity: 0});
-                this.plane = new THREE.Mesh(this.planeGeometry,planeMaterial);
+                this.plane = new THREE.Mesh(this.planeGeometry, planeMaterial);
 
                 // rotate and position the plane
                 this.plane.rotation.x = -0.5 * Math.PI;
