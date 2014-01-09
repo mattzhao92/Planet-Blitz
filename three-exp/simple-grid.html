@@ -3,7 +3,7 @@
 <html>
 
 <head>
-    <title>Example 02.07 - Cameras</title>
+    <title>Chase Camera</title>
     <script type="text/javascript" src="../libs/three.js"></script>
     <script type="text/javascript" src="../libs/jquery-1.9.0.js"></script>
     <script type="text/javascript" src="../libs/stats.js"></script>
@@ -58,14 +58,44 @@
                 this.drawGamePlane();
                 this.addLighting();
 
-                this.app = this;
-
                 this.initControls();
                 this.addControlGUI();
+
+                this.addChaseCube();
 
                 // begin animation
                 this.animate();
             }, 
+
+            addChaseCube: function() {
+                // add a cube to the scene, which will be used to implement the chase camera
+
+                var cubeGeometry = new THREE.CubeGeometry(5, 5, 5);
+                var cubeMaterial = new THREE.MeshLambertMaterial({color: 0xFF0000});
+                this.chaseCamCube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+                this.scene.add(this.chaseCamCube);
+
+                this.chaseCamCube.add(this.camera);
+
+                var app = this;
+                document.addEventListener('keydown', function(event) {
+                    var rotateAngle = 0.05;
+
+                    switch (event.keyCode) {
+                        case 68: // D
+                            var rotationMatrix = new THREE.Matrix4.makeRotationZ(rotateAngle);
+                            app.chaseCamCube.matrix.multiplySelf(rotationMatrix);
+                            app.chaseCamCube.rotation.setEulerFromRotationMatrix(app.chaseCamCube.matrix);
+                            break;
+                        case 65: // A
+                            var rotationMatrix = new THREE.Matrix4.makeRotationZ(-rotateAngle);
+                            app.chaseCamCube.matrix.multiplySelf(-rotationMatrix);
+                            app.chaseCamCube.rotationMatrix.setEulerFromRotationMatrix(app.chaseCamCube.matrix);
+                            break;
+                    }
+
+                }, false);
+            },
 
             setupCamera: function() {
                 // create a camera, which defines where we're looking at
@@ -73,7 +103,7 @@
                 this.camera.position.x = 120;
                 this.camera.position.y = 60;
                 this.camera.position.z = 180;
-                this.camera.lookAt(this.scene.position);
+                // this.camera.lookAt(this.scene.position);
             },
 
             addLighting: function() {
@@ -105,8 +135,8 @@
             },
 
             initControls: function() {
-                var controls = new THREE.MapControls(this.camera);
-                this.controls = controls;
+                // var controls = new THREE.MapControls(this.camera);
+                // this.controls = controls;
             },
 
             addControlGUI: function() {
@@ -118,7 +148,7 @@
                             app.camera.position.x = 3;
                             app.camera.position.y = 1;
                             app.camera.position.z = 3;
-                            app.camera.lookAt(app.scene.position);
+                            // app.camera.lookAt(app.scene.position);
                             app.perspective = "Orthographic";
                         } else {
                             app.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -126,7 +156,7 @@
                             app.camera.position.y = 60;
                             app.camera.position.z = 180;
 
-                            app.camera.lookAt(app.scene.position);
+                            // app.camera.lookAt(app.scene.position);
                             app.perspective = "Perspective";
                         }
                     };
@@ -142,7 +172,7 @@
                 // create the ground plane
                 this.planeGeometry = new THREE.PlaneGeometry(180, 180);
                 var planeMaterial = new THREE.MeshLambertMaterial({color: 0xffffff});
-                // var planeMaterial = new THREE.MeshLambertMaterial({color: 0xffffff, opacity: 0});
+                // var planeMaterial = new THREE.MeshBasicMaterial({color: 0xffffff, wireframe: true});
                 this.plane = new THREE.Mesh(this.planeGeometry, planeMaterial);
 
                 // rotate and position the plane
@@ -150,7 +180,6 @@
                 this.plane.position.x = 0;
                 this.plane.position.y = 0;
                 this.plane.position.z = 0;
-
                 // this.scene.add(this.plane);
 
                 var lineSpacing = 5;
@@ -162,8 +191,8 @@
             animate: function() {
                 this.stats.update();
 
-                var delta = this.clock.getDelta();
-                this.controls.update(delta);
+                // var delta = this.clock.getDelta();
+                // this.controls.update(delta);
 
                 // standard: render using requestAnimationFrame
                 var me = this;
