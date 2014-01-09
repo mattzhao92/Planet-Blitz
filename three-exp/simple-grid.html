@@ -97,7 +97,6 @@
                 directionalLight.position.normalize();
                 this.scene.add( directionalLight );
 
-
                 var app = this;
                 this.datGuiControls = new function() {
                     this.perspective = "Perspective";
@@ -122,15 +121,15 @@
                 }
 
                 this.initControls();
-
                 this.addControlGUI();
                 this.camera.lookAt(this.scene.position);
+                
+                // begin animation
                 this.animate();
             }, 
 
             initControls: function() {
                 var controls = new THREE.MapControls(this.camera);
-                
                 this.controls = controls;
             },
 
@@ -155,8 +154,9 @@
 
                 // this.scene.add(this.plane);
 
-                this.drawHorizontalLines();
-                this.drawVerticalLines();
+                var lineSpacing = 5;
+                this.drawHorizontalLines(lineSpacing);
+                this.drawVerticalLines(lineSpacing);
 
             }, 
 
@@ -174,7 +174,7 @@
                 this.renderer.render(this.scene, this.camera);
             }, 
 
-            drawHorizontalLines: function() {
+            drawHorizontalLines: function(lineSpacing) {
                 var MIN_Z = -this.planeGeometry.height / 2;
                 var MAX_Z = (this.planeGeometry.height / 2);
 
@@ -190,15 +190,14 @@
                     opacity: 1
                 });
 
-                for (var j = 0 ; j <= (this.planeGeometry.height/5) ; j++) {
+                for (var j = 0 ; j <= (this.planeGeometry.height/lineSpacing) ; j++) {
                     var line = new THREE.Line(lineGeometry, lineMaterial);
-                    line.position.x = (-this.planeGeometry.height/2) + j * 5;
-                    // line.position.y = 1;
+                    line.position.x = (-this.planeGeometry.height/2) + j * lineSpacing;
                     this.scene.add(line);
                 }
             },
 
-            drawVerticalLines: function() {
+            drawVerticalLines: function(lineSpacing) {
                 var MIN_X = -this.planeGeometry.width / 2;
                 var MAX_X = this.planeGeometry.width / 2;
 
@@ -214,10 +213,9 @@
                     opacity: 1
                 });
 
-                for (var i = 0; i <= (this.planeGeometry.width/5); i++) {
+                for (var i = 0; i <= (this.planeGeometry.width/lineSpacing); i++) {
                     var line = new THREE.Line(vertLineGeometry, vertLineMaterial);
-                    line.position.z = (-this.planeGeometry.width/2) + i * 5;
-                    // line.position.y = 1;
+                    line.position.z = (-this.planeGeometry.width/2) + i * lineSpacing;
                     this.scene.add(line);
                 }
             }, 
