@@ -77,25 +77,35 @@
 
                 this.chaseCamCube.add(this.camera);
 
-                var app = this;
+                var app = MAPGAME;
+                var againThree = THREE;
+                
                 document.addEventListener('keydown', function(event) {
                     var rotateAngle = 0.05;
 
                     switch (event.keyCode) {
                         case 68: // D
-                            var rotationMatrix = new THREE.Matrix4.makeRotationZ(rotateAngle);
+                            console.log("rotate right");
+                            var rotationMatrix = new againThree.Matrix4.makeRotationZ(rotateAngle);
                             app.chaseCamCube.matrix.multiplySelf(rotationMatrix);
                             app.chaseCamCube.rotation.setEulerFromRotationMatrix(app.chaseCamCube.matrix);
                             break;
                         case 65: // A
-                            var rotationMatrix = new THREE.Matrix4.makeRotationZ(-rotateAngle);
-                            app.chaseCamCube.matrix.multiplySelf(-rotationMatrix);
-                            app.chaseCamCube.rotationMatrix.setEulerFromRotationMatrix(app.chaseCamCube.matrix);
+                            console.log("rotate left");
+                            // var rotationMatrix = new THREE.Matrix4.makeRotationZ(-rotateAngle);
+                            // app.chaseCamCube.matrix.multiplySelf(-rotationMatrix);
+                            // app.chaseCamCube.rotationMatrix.setEulerFromRotationMatrix(app.chaseCamCube.matrix);
                             break;
                     }
 
                 }, false);
             },
+
+            // rotateToRight: function(rotateAngle) {
+            //     var rotationMatrix = new THREE.Matrix4.makeRotationZ(rotateAngle);
+            //     this.chaseCamCube.matrix.multiplySelf(rotationMatrix);
+            //     this.chaseCamCube.rotation.setEulerFromRotationMatrix(this.chaseCamCube.matrix);
+            // },
 
             setupCamera: function() {
                 // create a camera, which defines where we're looking at
@@ -266,6 +276,10 @@
         };
 
         var app = new App("#WebGL-output");
+        var MAPGAME = app;
+
+
+
     });
 
 </script>
