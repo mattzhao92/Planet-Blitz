@@ -69,21 +69,21 @@
 
             addChaseCube: function() {
                 // add a cube to the scene, which will be used to implement the chase camera
-
                 var cubeGeometry = new THREE.CubeGeometry(5, 5, 5);
                 var cubeMaterial = new THREE.MeshLambertMaterial({color: 0xFF0000});
                 this.chaseCamCube = new THREE.Mesh(cubeGeometry, cubeMaterial);
                 this.scene.add(this.chaseCamCube);
-
-                // this.chaseCamCube.add(this.camera);
-
-                // var app = MAPGAME;
 
                 var againThree = THREE;
                 console.log(THREE + "");
                 var app = this;
                 var keyDownListener = function(event) {
                     var rotateAngle = 0.05;
+
+                    // actually perform rotations (can't get this to work)
+                    // var rotationMatrix = new this.m4.makeRotationZ(rotateAngle);
+                    // this.chaseCamCube.matrix.multiplySelf(rotationMatrix);
+                    // this.chaseCamCube.rotation.setEulerFromRotationMatrix(this.chaseCamCube.matrix);
 
                     switch (event.keyCode) {
                         case 87: // W
@@ -105,15 +105,6 @@
             },
 
             panForward: function(event) {
-                console.log("rotateToRight invoked");
-
-                var rotateAngle = 0.05;
-
-                // actually perform rotations (can't get this to work)
-                // var rotationMatrix = new this.m4.makeRotationZ(rotateAngle);
-                // this.chaseCamCube.matrix.multiplySelf(rotationMatrix);
-                // this.chaseCamCube.rotation.setEulerFromRotationMatrix(this.chaseCamCube.matrix);
-              
                 this.camera.position.z -= 1;
             },
 
@@ -141,7 +132,6 @@
                 this.camera.position.x = 0;
                 this.camera.position.y = 150;
                 this.camera.position.z = 270;
-                // this.camera.lookAt(this.scene.position);
 
                 var origin = new THREE.Vector3(0, 0, 0);
                 this.camera.lookAt(origin);
@@ -312,8 +302,6 @@
 
         var app = new App("#WebGL-output");
         var MAPGAME = app;
-
-
 
     });
 
