@@ -75,30 +75,58 @@
                 this.chaseCamCube = new THREE.Mesh(cubeGeometry, cubeMaterial);
                 this.scene.add(this.chaseCamCube);
 
-                this.chaseCamCube.add(this.camera);
+                // this.chaseCamCube.add(this.camera);
 
-                var app = MAPGAME;
+                // var app = MAPGAME;
+
                 var againThree = THREE;
-                
-                document.addEventListener('keydown', function(event) {
+                console.log(THREE + "");
+                var app = this;
+                var keyDownListener = function(event) {
                     var rotateAngle = 0.05;
 
                     switch (event.keyCode) {
-                        case 68: // D
-                            console.log("rotate right");
-                            var rotationMatrix = new againThree.Matrix4.makeRotationZ(rotateAngle);
-                            app.chaseCamCube.matrix.multiplySelf(rotationMatrix);
-                            app.chaseCamCube.rotation.setEulerFromRotationMatrix(app.chaseCamCube.matrix);
+                        case 87: // W
+                            app.panForward(event);
                             break;
                         case 65: // A
-                            console.log("rotate left");
-                            // var rotationMatrix = new THREE.Matrix4.makeRotationZ(-rotateAngle);
-                            // app.chaseCamCube.matrix.multiplySelf(-rotationMatrix);
-                            // app.chaseCamCube.rotationMatrix.setEulerFromRotationMatrix(app.chaseCamCube.matrix);
+                            app.panLeft(event);
+                            break;
+                        case 83: // S
+                            app.panBackward(event);
+                            break;
+                        case 68: // D
+                            app.panRight(event);
                             break;
                     }
+                };
 
-                }, false);
+                document.addEventListener('keydown', keyDownListener, false);
+            },
+
+            panForward: function(event) {
+                console.log("rotateToRight invoked");
+
+                var rotateAngle = 0.05;
+
+                // actually perform rotations (can't get this to work)
+                // var rotationMatrix = new this.m4.makeRotationZ(rotateAngle);
+                // this.chaseCamCube.matrix.multiplySelf(rotationMatrix);
+                // this.chaseCamCube.rotation.setEulerFromRotationMatrix(this.chaseCamCube.matrix);
+              
+                this.camera.position.z -= 1;
+            },
+
+            panLeft: function(event) {
+                this.camera.position.x -= 1;
+            }, 
+
+            panRight: function(event) {
+                this.camera.position.x += 1;
+            }, 
+
+            panBackward: function(event) {
+                this.camera.position.z += 1;
             },
 
             // rotateToRight: function(rotateAngle) {
