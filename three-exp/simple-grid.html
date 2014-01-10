@@ -3,13 +3,13 @@
 <html>
 
 <head>
-    <title>Chase Camera</title>
+    <title>ccam</title>
     <script type="text/javascript" src="../libs/three.js"></script>
     <script type="text/javascript" src="../libs/jquery-1.9.0.js"></script>
     <script type="text/javascript" src="../libs/stats.js"></script>
     <script type="text/javascript" src="../libs/dat.gui.js"></script>
     <script type="text/javascript" src="../libs/MapControls.js"></script>
-    <script type="text/javascript" src="../libs/FlyControls.js"></script>
+    <script type="text/javascript" src="../libs/QuaternionControls.js"></script>
     <style>
         body{
             /* set margin to 0 and overflow to hidden, to go fullscreen */
@@ -138,10 +138,13 @@
             setupCamera: function() {
                 // create a camera, which defines where we're looking at
                 this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-                this.camera.position.x = 120;
-                this.camera.position.y = 60;
-                this.camera.position.z = 180;
+                this.camera.position.x = 0;
+                this.camera.position.y = 150;
+                this.camera.position.z = 270;
                 // this.camera.lookAt(this.scene.position);
+
+                var origin = new THREE.Vector3(0, 0, 0);
+                this.camera.lookAt(origin);
             },
 
             addLighting: function() {
@@ -175,6 +178,9 @@
             initControls: function() {
                 // var controls = new THREE.MapControls(this.camera);
                 // this.controls = controls;
+            
+                // var controls = new THREE.FreeCamera(this.camera);
+                // this.controls = controls;
             },
 
             addControlGUI: function() {
@@ -186,6 +192,7 @@
                             app.camera.position.x = 3;
                             app.camera.position.y = 1;
                             app.camera.position.z = 3;
+
                             // app.camera.lookAt(app.scene.position);
                             app.perspective = "Orthographic";
                         } else {
