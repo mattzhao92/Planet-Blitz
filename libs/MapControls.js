@@ -24,7 +24,7 @@ THREE.MapControls = function ( object, domElement ) {
     this.userRotateSpeed = 1.0;
 
     this.userPan = true;
-    this.userPanSpeed = 2.5;
+    this.userPanSpeed = 2.9;
 
     this.autoRotate = false;
     this.autoRotateSpeed = 2.0; // 30 seconds per round when fps is 60

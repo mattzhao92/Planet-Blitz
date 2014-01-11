@@ -73,47 +73,6 @@
                 var cubeMaterial = new THREE.MeshLambertMaterial({color: 0xFF0000});
                 this.chaseCamCube = new THREE.Mesh(cubeGeometry, cubeMaterial);
                 this.scene.add(this.chaseCamCube);
-
-                var againThree = THREE;
-                console.log(THREE + "");
-                var app = this;
-                // var keyDownListener = function(event) {
-                //     var rotateAngle = 0.05;
-
-                //     // actually perform rotations (can't get this to work)
-                //     // var rotationMatrix = new this.m4.makeRotationZ(rotateAngle);
-                //     // this.chaseCamCube.matrix.multiplySelf(rotationMatrix);
-                //     // this.chaseCamCube.rotation.setEulerFromRotationMatrix(this.chaseCamCube.matrix);
-
-                //     switch (event.keyCode) {
-                //         case 87: // W
-                //             app.panForward(event);
-                //             break;
-                //         case 65: // A
-                //             app.panLeft(event);
-                //             break;
-                //         case 83: // S
-                //             app.panBackward(event);
-                //             break;
-                //         case 68: // D
-                //             app.panRight(event);
-                //             break;
-                //         case 37: // left
-                //             // app.camera.rotation.y -= 0.05;
-                //             break;
-                //         case 39: // right
-                //             // app.camera.rotation.y += 0.05;
-                //             break;
-                //         case 38: // up
-                //            //app.camera.rotation.x += 0.05;
-                //             break;
-                //         case 40: // down
-                //            //app.camera.rotation.x -= 0.05;
-                //             break;
-                //     }
-                // };
-
-                // document.addEventListener('keydown', keyDownListener, false);
             },
 
             panForward: function(event) {
@@ -144,15 +103,6 @@
             },
 
             addLighting: function() {
-                // add some lighting
-                // var directionalLight = new THREE.DirectionalLight(0xffffff);
-                // directionalLight.position.set( -20, 40, 60 );
-                // this.scene.add(directionalLight);
-
-                // add subtle ambient lighting
-                // var ambientLight = new THREE.AmbientLight(0x292929);
-                // this.scene.add(ambientLight);
-
                 var ambientLight = new THREE.AmbientLight( 0x404040 );
                 this.scene.add( ambientLight );
 
@@ -173,7 +123,6 @@
 
             setupControls: function() {
                 var controls = new THREE.MapControls(this.camera);
-                // controls.userPanSpeed = 0.5;
                 this.controls = controls;
             },
 
