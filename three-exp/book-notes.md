@@ -112,7 +112,7 @@ http://0.0.0.0:8000/chapter-09/04-trackball-controls-camera.html
 
 `
 // first set controls of camera
-var trackballControls = new THREE.TrackballCOntrols(camera);
+var trackballControls = new THREE.TrackballControls(camera);
 trackballControls.rotateSpeed = 1.0;
 trackballControls.zoomSpeed = 1.0;
 trackballControls.panSpeed = 1.0;
