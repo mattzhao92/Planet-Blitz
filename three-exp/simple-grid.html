@@ -77,31 +77,43 @@
                 var againThree = THREE;
                 console.log(THREE + "");
                 var app = this;
-                var keyDownListener = function(event) {
-                    var rotateAngle = 0.05;
+                // var keyDownListener = function(event) {
+                //     var rotateAngle = 0.05;
 
-                    // actually perform rotations (can't get this to work)
-                    // var rotationMatrix = new this.m4.makeRotationZ(rotateAngle);
-                    // this.chaseCamCube.matrix.multiplySelf(rotationMatrix);
-                    // this.chaseCamCube.rotation.setEulerFromRotationMatrix(this.chaseCamCube.matrix);
+                //     // actually perform rotations (can't get this to work)
+                //     // var rotationMatrix = new this.m4.makeRotationZ(rotateAngle);
+                //     // this.chaseCamCube.matrix.multiplySelf(rotationMatrix);
+                //     // this.chaseCamCube.rotation.setEulerFromRotationMatrix(this.chaseCamCube.matrix);
 
-                    switch (event.keyCode) {
-                        case 87: // W
-                            app.panForward(event);
-                            break;
-                        case 65: // A
-                            app.panLeft(event);
-                            break;
-                        case 83: // S
-                            app.panBackward(event);
-                            break;
-                        case 68: // D
-                            app.panRight(event);
-                            break;
-                    }
-                };
+                //     switch (event.keyCode) {
+                //         case 87: // W
+                //             app.panForward(event);
+                //             break;
+                //         case 65: // A
+                //             app.panLeft(event);
+                //             break;
+                //         case 83: // S
+                //             app.panBackward(event);
+                //             break;
+                //         case 68: // D
+                //             app.panRight(event);
+                //             break;
+                //         case 37: // left
+                //             // app.camera.rotation.y -= 0.05;
+                //             break;
+                //         case 39: // right
+                //             // app.camera.rotation.y += 0.05;
+                //             break;
+                //         case 38: // up
+                //            //app.camera.rotation.x += 0.05;
+                //             break;
+                //         case 40: // down
+                //            //app.camera.rotation.x -= 0.05;
+                //             break;
+                //     }
+                // };
 
-                document.addEventListener('keydown', keyDownListener, false);
+                // document.addEventListener('keydown', keyDownListener, false);
             },
 
             panForward: function(event) {
@@ -119,12 +131,6 @@
             panBackward: function(event) {
                 this.camera.position.z += 1;
             },
-
-            // rotateToRight: function(rotateAngle) {
-            //     var rotationMatrix = new THREE.Matrix4.makeRotationZ(rotateAngle);
-            //     this.chaseCamCube.matrix.multiplySelf(rotationMatrix);
-            //     this.chaseCamCube.rotation.setEulerFromRotationMatrix(this.chaseCamCube.matrix);
-            // },
 
             setupCamera: function() {
                 // create a camera, which defines where we're looking at
@@ -167,11 +173,8 @@
 
             setupControls: function() {
                 var controls = new THREE.MapControls(this.camera);
-                controls.userPanSpeed = 0.5;
+                // controls.userPanSpeed = 0.5;
                 this.controls = controls;
-            
-                // var controls = new THREE.FreeCamera(this.camera);
-                // this.controls = controls;
             },
 
             addControlGUI: function() {
@@ -227,8 +230,8 @@
             animate: function() {
                 this.stats.update();
 
-                // var delta = this.clock.getDelta();
-                // this.controls.update(delta);
+                var delta = this.clock.getDelta();
+                this.controls.update(delta);
 
                 // standard: render using requestAnimationFrame
                 var me = this;
