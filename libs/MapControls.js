@@ -140,7 +140,7 @@ THREE.MapControls = function ( object, domElement ) {
 
     this.pan = function ( distance ) {
 
-        distance.transformDirection( this.object.matrix );
+        // distance.transformDirection( this.object.matrix );
         distance.multiplyScalar( scope.userPanSpeed );
 
         this.object.position.add( distance );
@@ -284,7 +284,7 @@ THREE.MapControls = function ( object, domElement ) {
             var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
             var movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
 
-            scope.pan( new THREE.Vector3( - movementX, movementY, 0 ) );
+            scope.pan( new THREE.Vector3( - movementX, 0, -movementY ) );
 
         }
 
@@ -339,10 +339,10 @@ THREE.MapControls = function ( object, domElement ) {
         switch ( event.keyCode ) {
 
             case scope.keys.UP:
-                scope.pan( new THREE.Vector3( 0, 1, 0 ) );
+                scope.pan( new THREE.Vector3( 0, 0, -1 ) );
                 break;
             case scope.keys.BOTTOM:
-                scope.pan( new THREE.Vector3( 0, - 1, 0 ) );
+                scope.pan( new THREE.Vector3( 0, 0, 1 ) );
                 break;
             case scope.keys.LEFT:
                 scope.pan( new THREE.Vector3( - 1, 0, 0 ) );

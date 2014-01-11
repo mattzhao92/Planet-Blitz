@@ -58,7 +58,7 @@
                 this.drawGamePlane();
                 this.addLighting();
 
-                this.initControls();
+                this.setupControls();
                 this.addControlGUI();
 
                 this.addChaseCube();
@@ -165,9 +165,10 @@
                 this.scene.add( directionalLight );
             },
 
-            initControls: function() {
-                // var controls = new THREE.MapControls(this.camera);
-                // this.controls = controls;
+            setupControls: function() {
+                var controls = new THREE.MapControls(this.camera);
+                controls.userPanSpeed = 0.5;
+                this.controls = controls;
             
                 // var controls = new THREE.FreeCamera(this.camera);
                 // this.controls = controls;
