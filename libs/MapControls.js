@@ -63,11 +63,14 @@ THREE.MapControls = function ( object, domElement ) {
 
 
     // merged in from trackball controls
-    this.screen = { width: 0, height: 0, offsetLeft: 0, offsetTop: 0 };
+    this.screen = { width: window.innerWidth, height: window.innerHeight, offsetLeft: 0, offsetTop: 0, top: 0, left: 0};
+
+    // can put in resize logic later
     this.radius = ( this.screen.width + this.screen.height ) / 4;
 
     var _this = this;
     this.dynamicDampingFactor = 0.2;
+    this.panSpeed = 2;
 
 
     // events
@@ -91,10 +94,16 @@ THREE.MapControls = function ( object, domElement ) {
 
     this.getMouseOnScreen = function ( clientX, clientY ) {
 
-        return new THREE.Vector2(
-            ( clientX - _this.screen.offsetLeft ) / _this.radius * 0.5,
-            ( clientY - _this.screen.offsetTop ) / _this.radius * 0.5
+        var result = new THREE.Vector2(
+            ( clientX - _this.screen.left ) / _this.screen.width,
+            ( clientY - _this.screen.top ) / _this.screen.height
         );
+        console.log("getMouseOnScreen (%4f, %4f)", result.x, result.y);
+
+        console.log("%d, %d", _this.screen.left, _this.screen.top);
+        console.log("%d, %d", _this.screen.width, _this.screen.height);
+
+        return result;
 
     };
 
@@ -158,18 +167,34 @@ THREE.MapControls = function ( object, domElement ) {
 
     };
 
-    this.pan = function ( distance ) {
+    this.pan = function () {
 
-        distance.transformDirection( this.object.matrix );
-        distance.multiplyScalar( scope.userPanSpeed );
-        distance.y = 0;
+        var mouseChange = _panEnd.clone().sub(_panStart );
 
-        this.object.position.add( distance );
-        this.center.add( distance );
+        if (mouseChange.lengthSq()) {
+            // console.log("Chose to pan. Destination %4d, start %4d", _panEnd, _panStart);
 
+            // modify : * eye_length?
+            mouseChange.multiplyScalar(_this.panSpeed);
+            
+            // distance = pan
+            var distance = new THREE.Vector3(mouseChange.x, 0, mouseChange.y);
+            distance.transformDirection( this.object.matrix );
+            // distance.multiplyScalar( scope.userPanSpeed );
+            // distance.y = 0;          
+
+            this.object.position.add( distance );
+            this.center.add( distance );
+
+            _panStart.add(mouseChange.subVectors(_panEnd, _panStart).multiplyScalar(_this.dynamicDampingFactor));
+        } else {
+            // console.log("Chose not to pan");
+        }
     };
 
     this.update = function () {
+
+        _this.pan();
 
         var position = this.object.position;
         var offset = position.clone().sub( this.center );
@@ -249,6 +274,7 @@ THREE.MapControls = function ( object, domElement ) {
             state = STATE.PAN;
 
             _panStart = _panEnd = _this.getMouseOnScreen(event.clientX, event.clientY);
+            console.log("Set pan start and end (%d, %d)", _panStart, _panEnd);
 
         } else if ( event.button === 1 ) {
 
@@ -274,6 +300,7 @@ THREE.MapControls = function ( object, domElement ) {
         if ( scope.enabled === false ) return;
 
         event.preventDefault();
+        event.stopPropagation();
 
         if ( state === STATE.ROTATE ) {
 
@@ -307,9 +334,11 @@ THREE.MapControls = function ( object, domElement ) {
             var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
             var movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
 
-            scope.pan( new THREE.Vector3( - movementX, 0, -movementY ) );
+            // scope.pan( new THREE.Vector3( - movementX, 0, -movementY ) );
 
+            // _panEnd = _this.getMouseOnScreen(movementX, movementY);
             _panEnd = _this.getMouseOnScreen(event.clientX, event.clientY);
+
         }
 
     }
