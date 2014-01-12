@@ -68,9 +68,11 @@ THREE.MapControls = function ( object, domElement ) {
     // can put in resize logic later
     this.radius = ( this.screen.width + this.screen.height ) / 4;
 
+    _eye = new THREE.Vector3();
+
     var _this = this;
-    this.dynamicDampingFactor = 0.2;
-    this.panSpeed = 2;
+    this.dynamicDampingFactor = 0.15;
+    this.panSpeed = 0.3;
 
 
     // events
@@ -176,13 +178,22 @@ THREE.MapControls = function ( object, domElement ) {
             console.log("panEnd %f, %f", _panEnd.x, _panEnd.y);
 
             // modify : * eye_length?
-            mouseChange.multiplyScalar(_this.panSpeed * 308);
+            mouseChange.multiplyScalar(_this.panSpeed * _eye.length());
             
             // distance = pan
-            var distance = new THREE.Vector3(-mouseChange.x, 0, -mouseChange.y);
-            distance.transformDirection( this.object.matrix );
-            distance.multiplyScalar( 1 );
-            distance.y = 0;          
+            // var distance = new THREE.Vector3(-mouseChange.x, 0, -mouseChange.y);
+            // distance.transformDirection( this.object.matrix );
+            // distance.multiplyScalar( 1 );
+            // distance.y = 0;
+
+            var distance = _eye.clone().cross(this.object.up).setLength(mouseChange.x);
+            // distance.add(this.object.up.clone().setLength(mouseChange.y));
+            var unitZVector = new THREE.Vector3(0, 0, -1);
+            distance.add(unitZVector.setLength(mouseChange.y));
+            // distance.y = 0;
+
+            // distance.setLength(distance.lengthSq() * 3);
+            // mouseChange.x
 
             this.object.position.add( distance );
             this.center.add( distance );
@@ -194,7 +205,7 @@ THREE.MapControls = function ( object, domElement ) {
     };
 
     this.update = function () {
-
+        _eye.subVectors(_this.object.position, this.center);
         _this.pan();
 
         var position = this.object.position;
