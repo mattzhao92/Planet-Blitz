@@ -61,10 +61,95 @@ THREE.MapControls = function ( object, domElement ) {
     var STATE = { NONE: -1, ROTATE: 0, ZOOM: 1, PAN: 2 };
     var state = STATE.NONE;
 
+
+    // merged in from trackball controls
+    this.screen = { width: window.innerWidth, height: window.innerHeight, offsetLeft: 0, offsetTop: 0, top: 0, left: 0};
+
+    // can put in resize logic later
+    this.radius = ( this.screen.width + this.screen.height ) / 4;
+
+    _eye = new THREE.Vector3();
+
+    var _this = this;
+    this.dynamicDampingFactor = 0.15;
+    this.panSpeed = 0.35;
+
+
     // events
 
     var changeEvent = { type: 'change' };
 
+    var _panStart = new THREE.Vector2();
+    var _panEnd = new THREE.Vector2();
+
+    this.handleResize = function () {
+
+        if ( this.domElement === document ) {
+
+            this.screen.left = 0;
+            this.screen.top = 0;
+            this.screen.width = window.innerWidth;
+            this.screen.height = window.innerHeight;
+
+        } else {
+
+            this.screen = this.domElement.getBoundingClientRect();
+
+        }
+
+    };
+
+    this.getMouseProjectionOnBall = function ( clientX, clientY ) {
+
+        var mouseOnBall = new THREE.Vector3(
+            ( clientX - _this.screen.width * 0.5 - _this.screen.left ) / (_this.screen.width*.5),
+            ( _this.screen.height * 0.5 + _this.screen.top - clientY ) / (_this.screen.height*.5),
+            0.0
+        );
+
+        var length = mouseOnBall.length();
+
+        if ( _this.noRoll ) {
+
+            if ( length < Math.SQRT1_2 ) {
+
+                mouseOnBall.z = Math.sqrt( 1.0 - length*length );
+
+            } else {
+
+                mouseOnBall.z = .5 / length;
+                
+            }
+
+        } else if ( length > 1.0 ) {
+
+            mouseOnBall.normalize();
+
+        } else {
+
+            mouseOnBall.z = Math.sqrt( 1.0 - length * length );
+
+        }
+
+        _eye.copy( _this.object.position ).sub( _this.target );
+
+        var projection = _this.object.up.clone().setLength( mouseOnBall.y );
+        projection.add( _this.object.up.clone().cross( _eye ).setLength( mouseOnBall.x ) );
+        projection.add( _eye.setLength( mouseOnBall.z ) );
+
+        return projection;
+
+    };
+
+    this.handleEvent = function ( event ) {
+
+        if ( typeof this[ event.type ] == 'function' ) {
+
+            this[ event.type ]( event );
+
+        }
+
+    };
 
     this.rotateLeft = function ( angle ) {
 
@@ -74,11 +159,33 @@ THREE.MapControls = function ( object, domElement ) {
 
         }
 
+        var quaternion = new THREE.Quaternion();
+        var axis = (new THREE.Vector3()).crossVectors(rotateStart, rotateEnd).normalize();
+        quaternion.setFromAxisAngle(axis, -angle);
+        _eye.applyQuaternion(quaternion);
+        // _this.object.up.applyQuaternion(quaternion);
+
+
         thetaDelta -= angle;
 
     };
 
-    this.rotateRight = function ( angle ) {
+    this.getMouseOnScreen = function ( clientX, clientY ) {
+
+        var result = new THREE.Vector2(
+            ( clientX - _this.screen.left ) / _this.screen.width,
+            ( clientY - _this.screen.top ) / _this.screen.height
+        );
+        console.log("getMouseOnScreen (%4f, %4f)", result.x, result.y);
+
+        console.log("%d, %d", _this.screen.left, _this.screen.top);
+        console.log("%d, %d", _this.screen.width, _this.screen.height);
+
+        return result;
+
+    };
+
+    this.rotateRight = function ( angle, rotateStart, rotateEnd) {
 
         if ( angle === undefined ) {
 
@@ -86,11 +193,12 @@ THREE.MapControls = function ( object, domElement ) {
 
         }
 
+
         thetaDelta += angle;
 
     };
 
-    this.rotateUp = function ( angle ) {
+    this.rotateUp = function ( angle, rotateStart, rotateEnd ) {
 
         if ( angle === undefined ) {
 
@@ -138,18 +246,35 @@ THREE.MapControls = function ( object, domElement ) {
 
     };
 
-    this.pan = function ( distance ) {
+    this.pan = function () {
 
-        distance.transformDirection( this.object.matrix );
-        distance.multiplyScalar( scope.userPanSpeed );
-        distance.y = 0;
+        var mouseChange = _panEnd.clone().sub(_panStart );
 
-        this.object.position.add( distance );
-        this.center.add( distance );
+        if ( mouseChange.lengthSq() > 0.00000001) {
+            // console.log("panStart %f, %f", _panStart.x, _panStart.y);
+            // console.log("panEnd %f, %f", _panEnd.x, _panEnd.y);
 
+            mouseChange.multiplyScalar(_this.panSpeed * _eye.length());
+
+            var distance = _eye.clone();
+            distance = distance.cross(this.object.up).setLength(mouseChange.x);
+
+            var unitZVector = new THREE.Vector3(0, 0, -1);
+            // transform the unit z vector into camera's local space
+            distance.add(unitZVector.transformDirection(this.object.matrix).setLength(mouseChange.y));
+            // prevent camera from getting closer to grid
+            distance.y = 0;
+
+            this.object.position.add( distance );
+            this.center.add( distance );
+
+            _panStart.add(mouseChange.subVectors(_panEnd, _panStart).multiplyScalar(_this.dynamicDampingFactor));
+        }
     };
 
     this.update = function () {
+        _eye.subVectors(_this.object.position, this.center);
+        _this.pan();
 
         var position = this.object.position;
         var offset = position.clone().sub( this.center );
@@ -228,6 +353,9 @@ THREE.MapControls = function ( object, domElement ) {
 
             state = STATE.PAN;
 
+            _panStart = _panEnd = _this.getMouseOnScreen(event.clientX, event.clientY);
+            console.log("Set pan start and end (%d, %d)", _panStart, _panEnd);
+
         } else if ( event.button === 1 ) {
 
             state = STATE.ZOOM;
@@ -252,14 +380,15 @@ THREE.MapControls = function ( object, domElement ) {
         if ( scope.enabled === false ) return;
 
         event.preventDefault();
+        event.stopPropagation();
 
         if ( state === STATE.ROTATE ) {
 
             rotateEnd.set( event.clientX, event.clientY );
             rotateDelta.subVectors( rotateEnd, rotateStart );
 
-            scope.rotateLeft( 2 * Math.PI * rotateDelta.x / PIXELS_PER_ROUND * scope.userRotateSpeed );
-            scope.rotateUp( 2 * Math.PI * rotateDelta.y / PIXELS_PER_ROUND * scope.userRotateSpeed );
+            scope.rotateLeft( 2 * Math.PI * rotateDelta.x / PIXELS_PER_ROUND * scope.userRotateSpeed, rotateStart, rotateEnd);
+            scope.rotateUp( 2 * Math.PI * rotateDelta.y / PIXELS_PER_ROUND * scope.userRotateSpeed, rotateStart, rotateEnd);
 
             rotateStart.copy( rotateEnd );
 
@@ -285,7 +414,10 @@ THREE.MapControls = function ( object, domElement ) {
             var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
             var movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
 
-            scope.pan( new THREE.Vector3( - movementX, 0, -movementY ) );
+            // scope.pan( new THREE.Vector3( - movementX, 0, -movementY ) );
+
+            // _panEnd = _this.getMouseOnScreen(movementX, movementY);
+            _panEnd = _this.getMouseOnScreen(event.clientX, event.clientY);
 
         }
 
