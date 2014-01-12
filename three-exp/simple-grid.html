@@ -124,6 +124,9 @@
 
             setupControls: function() {
                 var controls = new THREE.MapControls(this.camera);
+                // var controls = new THREE.TrackballControls(this.camera);
+                controls.panSpeed = .3;
+
                 this.controls = controls;
             },
 
