@@ -61,10 +61,21 @@ THREE.MapControls = function ( object, domElement ) {
     var STATE = { NONE: -1, ROTATE: 0, ZOOM: 1, PAN: 2 };
     var state = STATE.NONE;
 
+
+    // merged in from trackball controls
+    this.screen = { width: 0, height: 0, offsetLeft: 0, offsetTop: 0 };
+    this.radius = ( this.screen.width + this.screen.height ) / 4;
+
+    var _this = this;
+    this.dynamicDampingFactor = 0.2;
+
+
     // events
 
     var changeEvent = { type: 'change' };
 
+    var _panStart = new THREE.Vector2();
+    var _panEnd = new THREE.Vector2();
 
     this.rotateLeft = function ( angle ) {
 
@@ -75,6 +86,15 @@ THREE.MapControls = function ( object, domElement ) {
         }
 
         thetaDelta -= angle;
+
+    };
+
+    this.getMouseOnScreen = function ( clientX, clientY ) {
+
+        return new THREE.Vector2(
+            ( clientX - _this.screen.offsetLeft ) / _this.radius * 0.5,
+            ( clientY - _this.screen.offsetTop ) / _this.radius * 0.5
+        );
 
     };
 
@@ -228,6 +248,8 @@ THREE.MapControls = function ( object, domElement ) {
 
             state = STATE.PAN;
 
+            _panStart = _panEnd = _this.getMouseOnScreen(event.clientX, event.clientY);
+
         } else if ( event.button === 1 ) {
 
             state = STATE.ZOOM;
@@ -287,6 +309,7 @@ THREE.MapControls = function ( object, domElement ) {
 
             scope.pan( new THREE.Vector3( - movementX, 0, -movementY ) );
 
+            _panEnd = _this.getMouseOnScreen(event.clientX, event.clientY);
         }
 
     }
