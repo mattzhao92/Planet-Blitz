@@ -171,17 +171,18 @@ THREE.MapControls = function ( object, domElement ) {
 
         var mouseChange = _panEnd.clone().sub(_panStart );
 
-        if (mouseChange.lengthSq()) {
-            // console.log("Chose to pan. Destination %4d, start %4d", _panEnd, _panStart);
+        if ( mouseChange.lengthSq() > 0.00000001) {
+            console.log("panStart %f, %f", _panStart.x, _panStart.y);
+            console.log("panEnd %f, %f", _panEnd.x, _panEnd.y);
 
             // modify : * eye_length?
-            mouseChange.multiplyScalar(_this.panSpeed);
+            mouseChange.multiplyScalar(_this.panSpeed * 308);
             
             // distance = pan
-            var distance = new THREE.Vector3(mouseChange.x, 0, mouseChange.y);
+            var distance = new THREE.Vector3(-mouseChange.x, 0, -mouseChange.y);
             distance.transformDirection( this.object.matrix );
-            // distance.multiplyScalar( scope.userPanSpeed );
-            // distance.y = 0;          
+            distance.multiplyScalar( 1 );
+            distance.y = 0;          
 
             this.object.position.add( distance );
             this.center.add( distance );
