@@ -21,7 +21,7 @@ window.onload = function() {
 	renderer.setSize( containerWidth, containerHeight );
 	container.appendChild( renderer.domElement );
 
-	renderer.setClearColorHex( 0xeeeedd, 1.0 );
+	// renderer.setClearColorHex( 0xeeeedd, 1.0 );
 
 	scene = new THREE.Scene();
 
@@ -67,7 +67,7 @@ window.onload = function() {
 	window.addEventListener( 'mousemove', onMouseMove, false );
 	window.addEventListener( 'resize', onWindowResize, false );
 
-	controls = new THREE.TrackballControls( camera );
+	controls = new THREE.MapControls( camera );
 	controls.zoomSpeed = 0.1;
 
 	// And go!

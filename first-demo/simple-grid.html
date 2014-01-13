@@ -175,10 +175,39 @@
                 // this.scene.add(this.plane);
 
                 var lineSpacing = 5;
-                this.drawHorizontalLines(lineSpacing);
-                this.drawVerticalLines(lineSpacing);
-
+                // this.drawHorizontalLines(lineSpacing);
+                // this.drawVerticalLines(lineSpacing);
+                var size = 5;
+                this.drawGridSquares(size);
             }, 
+
+            drawGridSquares: function(size) {
+                console.log("draw grid squares called");
+                var geom = new THREE.PlaneGeometry(size, size);
+
+                var cubes = new THREE.Object3D();
+                this.scene.add( cubes );
+
+                for (var j = 0 ; j < this.planeGeometry.height/size; j++) {
+                    for (var i = 0 ; i < this.planeGeometry.width/size ; i++) {
+
+                        var grayness = Math.random() * 0.5 + 0.25;
+                        var mat = new THREE.MeshBasicMaterial({overdraw: true});
+                        var cube = new THREE.Mesh( geom, mat );
+                        
+                        mat.color.setRGB( grayness, grayness, grayness );
+                        cube.grayness = grayness;
+
+                        cube.position.x =- ((this.planeGeometry.width)/2)+2+(i*size);
+                        cube.position.y = 1;
+                        cube.position.z =- ((this.planeGeometry.height)/2)+2+(j*size);
+                        cube.rotation.x = -0.5 * Math.PI;
+
+                        cubes.add(cube);
+                    }
+                }
+
+            },
 
             animate: function() {
                 this.stats.update();
