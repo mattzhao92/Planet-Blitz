@@ -156,8 +156,11 @@
 
             setupControls: function() {
                 var controls = new THREE.MapControls(this.camera);
-                // var controls = new THREE.TrackballControls(this.camera);
-                controls.panSpeed = .3;
+                controls.panSpeed = .31;
+
+                // ensure that camera can't rotate too far down or up
+                controls.minPolarAngle = 0.3;
+                controls.maxPolarAngle = 1.26;
 
                 this.controls = controls;
             },
@@ -206,15 +209,11 @@
                 this.plane.position.z = 0;
                 // this.scene.add(this.plane);
 
-                var lineSpacing = 5;
-                // this.drawHorizontalLines(lineSpacing);
-                // this.drawVerticalLines(lineSpacing);
-                var size = 5;
-                this.drawGridSquares(size);
+                var squareSize = 5;
+                this.drawGridSquares(squareSize);
             }, 
 
             drawGridSquares: function(size) {
-                console.log("draw grid squares called");
                 var geom = new THREE.PlaneGeometry(size, size);
 
                 this.scene.add( this.cubes );
