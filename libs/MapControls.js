@@ -176,10 +176,10 @@ THREE.MapControls = function ( object, domElement ) {
             ( clientX - _this.screen.left ) / _this.screen.width,
             ( clientY - _this.screen.top ) / _this.screen.height
         );
-        console.log("getMouseOnScreen (%4f, %4f)", result.x, result.y);
+        // console.log("getMouseOnScreen (%4f, %4f)", result.x, result.y);
 
-        console.log("%d, %d", _this.screen.left, _this.screen.top);
-        console.log("%d, %d", _this.screen.width, _this.screen.height);
+        // console.log("%d, %d", _this.screen.left, _this.screen.top);
+        // console.log("%d, %d", _this.screen.width, _this.screen.height);
 
         return result;
 
@@ -294,7 +294,8 @@ THREE.MapControls = function ( object, domElement ) {
         }
 
         theta += thetaDelta;
-        phi += phiDelta;
+        
+        phi += phiDelta;            
 
         // restrict phi to be between desired limits
         phi = Math.max( this.minPolarAngle, Math.min( this.maxPolarAngle, phi ) );
@@ -354,7 +355,7 @@ THREE.MapControls = function ( object, domElement ) {
             state = STATE.PAN;
 
             _panStart = _panEnd = _this.getMouseOnScreen(event.clientX, event.clientY);
-            console.log("Set pan start and end (%d, %d)", _panStart, _panEnd);
+            // console.log("Set pan start and end (%d, %d)", _panStart, _panEnd);
 
         } else if ( event.button === 1 ) {
 
