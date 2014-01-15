@@ -36,14 +36,18 @@
  */
     var Grid = Class.extend({
         // Class constructor
-        init: function (args) {
+        init: function (width, length, squareSize) {
             'use strict';
             // Set the "world" modelisation object
             this.cubes = new THREE.Object3D();
             this.characters = new THREE.Object3D();
 
+            this.planeGeometry = new THREE.PlaneGeometry(width, length);
+
             this.numOfCharacters = 1;
             this.users = [];
+
+            this.squareSize = squareSize;
 
             for (var i = 0; i < this.numOfCharacters; i++) {
                 this.user = new Character({
@@ -53,10 +57,12 @@
                 this.characters.add(this.user.mesh);
             }
 
-            var size = 100;
+            this.drawGridSquares(this.squareSize);
+        },
+
+        drawGridSquares: function(size) {
             var geom = new THREE.PlaneGeometry(size, size);
 
-            this.planeGeometry = new THREE.PlaneGeometry(512, 1024);
             var planeMaterial = new THREE.MeshLambertMaterial({color: 0xffffff});
 
             this.numberSquaresOnXAxis = this.planeGeometry.width/size;
@@ -82,8 +88,6 @@
                     this.cubes.add(cube);
                 }
             }
-
-            //this.setControls();
         },
 
         getNumberSquaresOnXAxis: function () {
@@ -99,7 +103,6 @@
 
         },
 
-
         hasCharacterAtCell: function(args) {
 
         },
@@ -107,7 +110,6 @@
         isCellOutOfBounds: function(args) {
 
         },
-
 
         motion: function(args) {
             // move the selected character to new location
@@ -370,7 +372,7 @@
 
             setupCamera: function() {
                 // create a camera, which defines where we're looking at
-                this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+                this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 10000);
                 this.camera.position.x = 0;
                 this.camera.position.y = 150;
                 this.camera.position.z = 270;
@@ -443,7 +445,6 @@
                 // create the ground plane
                 this.planeGeometry = new THREE.PlaneGeometry(180, 180);
                 var planeMaterial = new THREE.MeshLambertMaterial({color: 0xffffff});
-                // var planeMaterial = new THREE.MeshBasicMaterial({color: 0xffffff, wireframe: true});
                 this.plane = new THREE.Mesh(this.planeGeometry, planeMaterial);
 
                 // rotate and position the plane
@@ -459,9 +460,11 @@
 
             drawGridSquares: function(size) {
                 
-                this.grid = new Grid({
-                    color: 0xF5F5F5
-                });
+                // this.grid = new Grid({
+                //     color: 0xF5F5F5
+                // });
+                
+                this.grid = new Grid(400, 400, 40);
 
                 this.cubes = this.grid.cubes;
                 this.scene.add(this.grid.cubes);
