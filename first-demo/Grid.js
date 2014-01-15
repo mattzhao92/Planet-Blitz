@@ -22,11 +22,14 @@
                      color: 0x7A43B6
                 });
                 this.users.push(this.user);
-                this.characters.add(this.user.mesh);
+                this.characters = this.user.mesh;
             }
+
+            console.log("000 characters length "+this.characters.children.length);
 
             this.drawGridSquares(this.squareSize);
         },
+
 
         drawGridSquares: function(size) {
             var geom = new THREE.PlaneGeometry(size, size);

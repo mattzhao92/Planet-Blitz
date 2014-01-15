@@ -32,5 +32,557 @@
 <div id="WebGL-output">
 </div>
 
+<<<<<<< HEAD
+=======
+<!-- Javascript code that runs our Three.js examples -->
+<script type="text/javascript">
+/* 
+ * Grid
+ * constructor input args : {d_x, d_y, square_size}
+ */
+    var Grid = Class.extend({
+        // Class constructor
+        init: function (width, length, squareSize) {
+            'use strict';
+            // Set the "world" modelisation object
+            this.cubes = new THREE.Object3D();
+            this.characters = new THREE.Object3D();
+
+            this.planeGeometry = new THREE.PlaneGeometry(width, length);
+
+            this.numOfCharacters = 1;
+            this.users = [];
+
+            this.squareSize = squareSize;
+
+            for (var i = 0; i < this.numOfCharacters; i++) {
+                this.user = new Character({
+                     color: 0x7A43B6
+                });
+                this.users.push(this.user);
+                this.characters = this.user.mesh;
+            }
+
+            console.log("000 characters length "+this.characters.children.length);
+
+            this.drawGridSquares(this.squareSize);
+        },
+
+        drawGridSquares: function(size) {
+            var geom = new THREE.PlaneGeometry(size, size);
+
+            var planeMaterial = new THREE.MeshLambertMaterial({color: 0xffffff});
+
+            this.numberSquaresOnXAxis = this.planeGeometry.width/size;
+            this.numberSquaresOnZAxis = this.planeGeometry.height/size;
+
+            for (var j = 0 ; j < this.numberSquaresOnZAxis; j++) {
+                for (var i = 0 ; i < this.numberSquaresOnXAxis; i++) {
+
+                    var grayness = Math.random() * 0.5 + 0.25;
+                    var mat = new THREE.MeshBasicMaterial({overdraw: true});
+                    var cube = new THREE.Mesh( geom, mat );
+                            
+                    mat.color.setRGB( grayness, grayness, grayness );
+                    cube.grayness = grayness;
+
+                    cube.position.x =- ((this.planeGeometry.width)/2)+2+(i*size);
+                    cube.position.y = 1;
+                    cube.position.z =- ((this.planeGeometry.height)/2)+2+(j*size);
+                    cube.rotation.x = -0.5 * Math.PI;
+
+                    console.log("cube x : " + cube.position.x + " cube z : " + cube.position.z);
+
+                    this.cubes.add(cube);
+                }
+            }
+        },
+
+        getNumberSquaresOnXAxis: function () {
+            return this.numberSquaresOnXAxis;
+        },
+
+        getNumberSquaresOnZAxis: function () {
+            return this.numberSquaresOnZAxis;
+        },
+
+
+        hasObstacleAtCell: function(args) {
+
+        },
+
+        hasCharacterAtCell: function(args) {
+
+        },
+
+        isCellOutOfBounds: function(args) {
+
+        },
+
+        motion: function(args) {
+            // move the selected character to new location
+            if (this.selectedCharacter) {
+                this.selectedCharacter = null;
+                this.selectedCharacter.motion();
+                this.selectedCharacter = null;
+            }
+        },
+
+         // Event handlers
+        setControls: function () {
+            'use strict';
+            // Within jQuery's methods, we won't be able to access "this"
+            var user = this.selectedCharacter;
+            var controls = {
+                    left: false,
+                    up: false,
+                    right: false,
+                    down: false
+                };
+            // When the user presses a key 
+            jQuery(document).keydown(function (e) {
+                console.log("keydown");
+                var prevent = true;
+                // Update the state of the attached control to "true"
+                switch (e.keyCode) {
+                    case 37:
+                    controls.left = true;
+                    break;
+                    case 38:
+                    controls.up = true;
+                    break;
+                    case 39:
+                    controls.right = true;
+                    break;
+                    case 40:
+                    controls.down = true;
+                    break;
+                    default:
+                    prevent = false;
+                }
+                // Avoid the browser to react unexpectedly
+                if (prevent) {
+                    e.preventDefault();
+                } else {
+                    return;
+                }
+                // Update the character's direction
+                if (user) {
+                    user.setDirection(controls);
+                }
+            });
+            // When the user releases a key
+            jQuery(document).keyup(function (e) {
+                var prevent = true;
+                // Update the state of the attached control to "false"
+                switch (e.keyCode) {
+                    case 37:
+                    controls.left = false;
+                    break;
+                    case 38:
+                    controls.up = false;
+                    break;
+                    case 39:
+                    controls.right = false;
+                    break;
+                    case 40:
+                    controls.down = false;
+                    break;
+                    default:
+                    prevent = false;
+                }
+                // Avoid the browser to react unexpectedly
+                if (prevent) {
+                    e.preventDefault();
+                } else {
+                    return;
+                }
+                // Update the character's direction
+                if (user) {
+                    user.setDirection(controls);
+                }
+            });
+            // On resize
+            jQuery(window).resize(function () {
+                // Redefine the size of the renderer
+                basicScene.setAspect();
+            });
+        },
+
+    });
+
+    var Character = Class.extend({
+    // Class constructor
+        init: function (args) {
+            'use strict';
+            // Set the different geometries composing the humanoid
+            var head = new THREE.SphereGeometry(32, 8, 8),
+                // Set the material, the "skin"
+            material = new THREE.MeshLambertMaterial(args);
+            // Set the character modelisation object
+            this.mesh = new THREE.Object3D();
+            this.mesh.position.y = 48;
+            // Set and add its head
+            this.head = new THREE.Mesh(head, material);
+            this.head.position.y = 0;
+            this.mesh.add(this.head);
+            // Set the vector of the current motion
+            this.direction = new THREE.Vector3(0, 0, 0);
+            // Set the current animation step
+            this.step = 0;
+        },
+        // Update the direction of the current motion
+        setDirection: function (controls) {
+            'use strict';
+            // Either left or right, and either up or down (no jump or dive (on the Y axis), so far ...)
+            var x = controls.left ? 1 : controls.right ? -1 : 0,
+                y = 0,
+                z = controls.up ? 1 : controls.down ? -1 : 0;
+            this.direction.set(x, y, z);
+        },
+        // Process the character motions
+        motion: function () {
+            'use strict';
+            // (if any)
+            if (this.direction.x !== 0 || this.direction.z !== 0) {
+                // Rotate the character
+                this.rotate();
+                // And, only if we're not colliding with an obstacle or a wall ...
+                if (this.collide()) {
+                    return false;
+                }
+                // ... we move the character
+                this.move();
+                return true;
+            }
+        },
+        // Rotate the character
+        rotate: function () {
+            'use strict';
+            // Set the direction's angle, and the difference between it and our Object3D's current rotation
+
+            var angle = Math.atan2(this.direction.x, this.direction.z),
+            difference = angle - this.mesh.rotation.y;
+
+            // Now if we haven't reached our target angle
+            if (difference !== 0) {
+                // We slightly get closer to it
+                this.mesh.rotation.y += difference / 4;
+            }
+        },
+        move: function () {
+            'use strict';
+            // We update our Object3D's position from our "direction"
+            this.mesh.position.x += this.direction.x * ((this.direction.z === 0) ? 4 : Math.sqrt(8));
+            this.mesh.position.z += this.direction.z * ((this.direction.x === 0) ? 4 : Math.sqrt(8));
+            // Now let's use Sine and Cosine curves, using our "step" property ...
+            this.step += 1 / 4;
+        },
+        collide: function () {
+            'use strict';
+            // INSERT SOME MAGIC HERE
+            return false;
+        }
+    });
+
+    // once everything is loaded, we run our Three.js stuff.
+    $(function () {
+
+        var App = {};
+
+        App = function(containerName) {
+            // create a scene, that will hold all our elements such as objects, cameras and lights.
+            this.scene = new THREE.Scene();
+
+            // create a render and set the size
+            this.renderer = new THREE.WebGLRenderer();
+            this.renderer.setSize(window.innerWidth, window.innerHeight);
+
+            // add the output of the renderer to the html element
+            $(containerName).append(this.renderer.domElement);
+
+            this.init();
+        };
+
+        App.prototype = {
+            init: function() {
+
+                this.setupCamera();
+
+                this.stats = this.initStats();
+                this.clock = new THREE.Clock();
+
+                this.drawGamePlane();
+                this.addLighting();
+
+                this.setupControls();
+                this.addControlGUI();
+
+                this.addChaseCube();
+
+                // begin animation
+                this.animate();
+
+                this.setupMouseMoveListener();
+            }, 
+
+            setupMouseMoveListener: function() {
+                var scope = this;
+
+                window.addEventListener( 'mousemove', 
+                    function(event) {
+
+                        var projector = new THREE.Projector();
+                        var mouseVector = new THREE.Vector3();
+            
+                        mouseVector.x = 2 * (event.clientX / window.innerWidth) - 1;
+                        mouseVector.y = 1 - 2 * ( event.clientY / window.innerHeight );
+
+                        var raycaster = projector.pickingRay( mouseVector.clone(), scope.camera ),
+                            intersects = raycaster.intersectObjects( scope.cubes.children );
+
+                        scope.cubes.children.forEach(function( cube ) {
+                            cube.material.color.setRGB( cube.grayness, cube.grayness, cube.grayness );
+                        });
+                        
+                        for( var i = 0; i < intersects.length; i++ ) {
+                            var intersection = intersects[ i ],
+                                obj = intersection.object;
+
+                            obj.material.color.setRGB( 1.0 - i / intersects.length, 0, 0 );
+                        }
+                    }, false );
+
+                window.addEventListener( 'mousedown', 
+                                        function(event) {
+
+                        var projector = new THREE.Projector();
+                        var mouseVector = new THREE.Vector3();
+            
+                        mouseVector.x = 2 * (event.clientX / window.innerWidth) - 1;
+                        mouseVector.y = 1 - 2 * ( event.clientY / window.innerHeight );
+
+                        var raycaster = projector.pickingRay( mouseVector.clone(), scope.camera ),
+                            intersects = raycaster.intersectObjects( scope.characters.children );
+
+                        console.log("number of intersects " + intersects.length);
+                        scope.characters.children.forEach(function (character) {
+                            console.log(character);
+                            character.material.color.setRGB(10,0,0);
+                        });
+
+                    }, false );
+            },
+
+            addChaseCube: function() {
+                // add a cube to the scene, which will be used to implement the chase camera
+                var cubeGeometry = new THREE.CubeGeometry(5, 5, 5);
+                var cubeMaterial = new THREE.MeshLambertMaterial({color: 0xFF0000});
+                this.chaseCamCube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+                this.scene.add(this.chaseCamCube);
+            },
+
+            panForward: function(event) {
+                this.camera.position.z -= 1;
+            },
+
+            panLeft: function(event) {
+                this.camera.position.x -= 1;
+            }, 
+
+            panRight: function(event) {
+                this.camera.position.x += 1;
+            }, 
+
+            panBackward: function(event) {
+                this.camera.position.z += 1;
+            },
+
+            setupCamera: function() {
+                // create a camera, which defines where we're looking at
+                this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 10000);
+                this.camera.position.x = 0;
+                this.camera.position.y = 150;
+                this.camera.position.z = 270;
+
+                var origin = new THREE.Vector3(0, 0, 0);
+                this.camera.lookAt(origin);
+            },
+
+            addLighting: function() {
+                var ambientLight = new THREE.AmbientLight( 0x404040 );
+                this.scene.add( ambientLight );
+
+                var directionalLight = new THREE.DirectionalLight( 0xffffff );
+                directionalLight.position.x = 1;
+                directionalLight.position.y = 1;
+                directionalLight.position.z = 0.75;
+                directionalLight.position.normalize();
+                this.scene.add( directionalLight );
+
+                var directionalLight = new THREE.DirectionalLight( 0x808080 );
+                directionalLight.position.x = - 1;
+                directionalLight.position.y = 1;
+                directionalLight.position.z = - 0.75;
+                directionalLight.position.normalize();
+                this.scene.add( directionalLight );
+            },
+
+            setupControls: function() {
+                var controls = new THREE.MapControls(this.camera);
+                controls.panSpeed = .31;
+
+                // ensure that camera can't rotate too far down or up
+                controls.minPolarAngle = 0.3;
+                controls.maxPolarAngle = 1.26;
+
+                this.controls = controls;
+            },
+
+            addControlGUI: function() {
+                this.datGuiControls = new function() {
+                    this.perspective = "Perspective";
+                    this.switchCamera = function() {
+                        if (app.camera instanceof THREE.PerspectiveCamera) {
+                            app.camera = new THREE.OrthographicCamera( window.innerWidth / - 16, window.innerWidth / 16, window.innerHeight / 16, window.innerHeight / - 16, -200, 500 );
+                            app.camera.position.x = 3;
+                            app.camera.position.y = 1;
+                            app.camera.position.z = 3;
+
+                            // app.camera.lookAt(app.scene.position);
+                            app.perspective = "Orthographic";
+                        } else {
+                            app.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+                            app.camera.position.x = 120;
+                            app.camera.position.y = 60;
+                            app.camera.position.z = 180;
+
+                            // app.camera.lookAt(app.scene.position);
+                            app.perspective = "Perspective";
+                        }
+                    };
+                }
+
+                var gui = new dat.GUI();
+
+                gui.add(this.datGuiControls, 'switchCamera');
+                gui.add(this.datGuiControls, 'perspective').listen();
+            },
+
+            drawGamePlane: function() {
+                // create the ground plane
+                this.planeGeometry = new THREE.PlaneGeometry(180, 180);
+                var planeMaterial = new THREE.MeshLambertMaterial({color: 0xffffff});
+                this.plane = new THREE.Mesh(this.planeGeometry, planeMaterial);
+
+                // rotate and position the plane
+                this.plane.rotation.x = -0.5 * Math.PI;
+                this.plane.position.x = 0;
+                this.plane.position.y = 0;
+                this.plane.position.z = 0;
+                // this.scene.add(this.plane);
+
+                var squareSize = 5;
+                this.drawGridSquares(squareSize);
+            }, 
+
+            drawGridSquares: function(size) {
+                
+                // this.grid = new Grid({
+                //     color: 0xF5F5F5
+                // });
+                
+                this.grid = new Grid(400, 400, 40);
+
+                this.cubes = this.grid.cubes;
+                this.characters = this.grid.characters;
+                this.scene.add(this.grid.cubes);
+                this.scene.add(this.grid.characters);
+            },
+
+            animate: function() {
+                this.stats.update();
+
+                var delta = this.clock.getDelta();
+                this.controls.update(delta);
+
+                // standard: render using requestAnimationFrame
+                var me = this;
+                requestAnimationFrame(function() {
+                    me.animate();
+                });
+                this.renderer.render(this.scene, this.camera);
+            }, 
+
+            drawHorizontalLines: function(lineSpacing) {
+                var MIN_Z = -this.planeGeometry.height / 2;
+                var MAX_Z = (this.planeGeometry.height / 2);
+
+                var topHorizontalScreenVector = new THREE.Vector3(0, 0, MAX_Z);
+                var bottomHorizontalScreenVector = new THREE.Vector3(0, 0, MIN_Z);
+
+                var lineGeometry = new THREE.Geometry();
+                lineGeometry.vertices.push(topHorizontalScreenVector);
+                lineGeometry.vertices.push(bottomHorizontalScreenVector);
+
+                var lineMaterial = new THREE.LineBasicMaterial({
+                    color: 0x000000,
+                    opacity: 1
+                });
+
+                for (var j = 0 ; j <= (this.planeGeometry.height/lineSpacing) ; j++) {
+                    var line = new THREE.Line(lineGeometry, lineMaterial);
+                    line.position.x = (-this.planeGeometry.height/2) + j * lineSpacing;
+                    this.scene.add(line);
+                }
+            },
+
+            drawVerticalLines: function(lineSpacing) {
+                var MIN_X = -this.planeGeometry.width / 2;
+                var MAX_X = this.planeGeometry.width / 2;
+
+                var leftVerticalScreenVector = new THREE.Vector3(MIN_X, 0, 0);
+                var rightVerticalScreenVector = new THREE.Vector3(MAX_X, 0, 0);
+
+                var vertLineGeometry = new THREE.Geometry();
+                vertLineGeometry.vertices.push(leftVerticalScreenVector);
+                vertLineGeometry.vertices.push(rightVerticalScreenVector);
+
+                var vertLineMaterial = new THREE.LineBasicMaterial({
+                    color: 0x000000,
+                    opacity: 1
+                });
+
+                for (var i = 0; i <= (this.planeGeometry.width/lineSpacing); i++) {
+                    var line = new THREE.Line(vertLineGeometry, vertLineMaterial);
+                    line.position.z = (-this.planeGeometry.width/2) + i * lineSpacing;
+                    this.scene.add(line);
+                }
+            }, 
+
+            initStats: function() {
+                var stats = new Stats();
+
+                stats.setMode(0); // 0: fps, 1: ms
+
+                // Align top-left
+                stats.domElement.style.position = 'absolute';
+                stats.domElement.style.left = '0px';
+                stats.domElement.style.top = '0px';
+
+                $("#Stats-output").append( stats.domElement );
+
+                return stats;
+            }
+
+        };
+
+        var app = new App("#WebGL-output");
+        var MAPGAME = app;
+
+    });
+
+</script>
+>>>>>>> 75aaae8672f0f8be39c3cacf9a4613426994b7aa
 </body>
 </html>
