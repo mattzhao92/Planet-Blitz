@@ -221,52 +221,6 @@ $(function () {
             this.renderer.render(this.scene, this.camera);
         }, 
 
-        drawHorizontalLines: function(lineSpacing) {
-            var MIN_Z = -this.planeGeometry.height / 2;
-            var MAX_Z = (this.planeGeometry.height / 2);
-
-            var topHorizontalScreenVector = new THREE.Vector3(0, 0, MAX_Z);
-            var bottomHorizontalScreenVector = new THREE.Vector3(0, 0, MIN_Z);
-
-            var lineGeometry = new THREE.Geometry();
-            lineGeometry.vertices.push(topHorizontalScreenVector);
-            lineGeometry.vertices.push(bottomHorizontalScreenVector);
-
-            var lineMaterial = new THREE.LineBasicMaterial({
-                color: 0x000000,
-                opacity: 1
-            });
-
-            for (var j = 0 ; j <= (this.planeGeometry.height/lineSpacing) ; j++) {
-                var line = new THREE.Line(lineGeometry, lineMaterial);
-                line.position.x = (-this.planeGeometry.height/2) + j * lineSpacing;
-                this.scene.add(line);
-            }
-        },
-
-        drawVerticalLines: function(lineSpacing) {
-            var MIN_X = -this.planeGeometry.width / 2;
-            var MAX_X = this.planeGeometry.width / 2;
-
-            var leftVerticalScreenVector = new THREE.Vector3(MIN_X, 0, 0);
-            var rightVerticalScreenVector = new THREE.Vector3(MAX_X, 0, 0);
-
-            var vertLineGeometry = new THREE.Geometry();
-            vertLineGeometry.vertices.push(leftVerticalScreenVector);
-            vertLineGeometry.vertices.push(rightVerticalScreenVector);
-
-            var vertLineMaterial = new THREE.LineBasicMaterial({
-                color: 0x000000,
-                opacity: 1
-            });
-
-            for (var i = 0; i <= (this.planeGeometry.width/lineSpacing); i++) {
-                var line = new THREE.Line(vertLineGeometry, vertLineMaterial);
-                line.position.z = (-this.planeGeometry.width/2) + i * lineSpacing;
-                this.scene.add(line);
-            }
-        }, 
-
         initStats: function() {
             var stats = new Stats();
 
