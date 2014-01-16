@@ -74,6 +74,11 @@ THREE.MapControls = function ( object, domElement ) {
     this.dynamicDampingFactor = 0.15;
     this.panSpeed = 0.35;
 
+    // camera boundary settings
+    this.minX = -Infinity;
+    this.maxX = Infinity;
+    this.minZ = -Infinity;
+    this.maxZ = Infinity;
 
     // events
 
@@ -186,10 +191,6 @@ THREE.MapControls = function ( object, domElement ) {
             ( clientX - _this.screen.left ) / _this.screen.width,
             ( clientY - _this.screen.top ) / _this.screen.height
         );
-        // console.log("getMouseOnScreen (%4f, %4f)", result.x, result.y);
-
-        // console.log("%d, %d", _this.screen.left, _this.screen.top);
-        // console.log("%d, %d", _this.screen.width, _this.screen.height);
 
         return result;
 
@@ -261,9 +262,7 @@ THREE.MapControls = function ( object, domElement ) {
         var mouseChange = _panEnd.clone().sub(_panStart );
 
         if ( mouseChange.lengthSq() > 0.00000001) {
-            // console.log("panStart %f, %f", _panStart.x, _panStart.y);
-            // console.log("panEnd %f, %f", _panEnd.x, _panEnd.y);
-
+            
             mouseChange.multiplyScalar(_this.panSpeed * _eye.length());
 
             var distance = _eye.clone();
@@ -275,10 +274,42 @@ THREE.MapControls = function ( object, domElement ) {
             // prevent camera from getting closer to grid
             distance.y = 0;
 
+            // enforce camera boundaries when panning
+            var newZ = distance.z + this.object.position.z;
+            var newX = distance.x + this.object.position.x;
+
+            // console.log(newX + " " + newZ);
+
+            var verticalFOV = this.object.fov * ( Math.PI / 180);
+
+            var fieldOfVisionHeight = 2 * Math.tan(verticalFOV / 2) * _eye.length();
+
+            var aspect = this.screen.width / this.screen.height;
+            var fieldOfVisionWidth = fieldOfVisionHeight * aspect;
+
+            var widthMargin = fieldOfVisionWidth / 4;
+            var heightMargin = fieldOfVisionHeight / 4;
+
+            // if (newZ - heightMargin > this.maxZ || newZ + heightMargin < this.minZ) {
+            //     distance.z = 0;
+            //     _panStart.z = _panEnd.z;
+            // }
+
+            if (newX - widthMargin > this.maxX || newX + widthMargin < this.minX) {
+                distance.x = 0;
+                _panStart.x = _panStart.x;
+            }
+
             this.object.position.add( distance );
             this.center.add( distance );
 
             _panStart.add(mouseChange.subVectors(_panEnd, _panStart).multiplyScalar(_this.dynamicDampingFactor));
+
+
+
+            // console.log("viewable width " + width);
+
+            // otherwise, end the pan
         }
     };
 
@@ -338,6 +369,16 @@ THREE.MapControls = function ( object, domElement ) {
 
         }
 
+        // calculating field of view - width and height
+        var verticalFOV = this.object.fov * ( Math.PI / 180);
+
+        var height = 2 * Math.tan(verticalFOV / 2) * _eye.length();
+
+        var aspect = this.screen.width / this.screen.height;
+        // calculated 
+        var width = height * aspect;
+
+        // console.log("viewable width " + width);
     };
 
 

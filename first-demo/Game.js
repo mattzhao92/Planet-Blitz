@@ -18,6 +18,8 @@ $(function () {
 
     App.prototype = {
         init: function() {
+            this.GRID_WIDTH = 400;
+            this.GRID_LENGTH = 400;
 
             this.stats = this.initStats();
 
@@ -100,6 +102,13 @@ $(function () {
             // ensure that camera can't rotate too far down or up
             controls.minPolarAngle = 0.3;
             controls.maxPolarAngle = 1.26;
+
+            // set up control boundaries
+            controls.minX = -this.GRID_WIDTH / 2;
+            controls.maxX = this.GRID_WIDTH / 2;
+
+            controls.minZ = -this.GRID_LENGTH / 2;
+            controls.maxZ = this.GRID_LENGTH / 2;
 
             this.controls = controls;
         },
