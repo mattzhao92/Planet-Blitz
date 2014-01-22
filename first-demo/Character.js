@@ -57,7 +57,7 @@ var Character = Class.extend({
         var angle = Math.atan2(this.direction.x, this.direction.z),
         difference = angle - this.mesh.rotation.y;
 
-        var count =  5;
+        var count =  10;
         while (count-- >= 0) {
         	// Now if we haven't reached our target angle
         	if (difference !== 0) {
@@ -65,6 +65,7 @@ var Character = Class.extend({
             	this.mesh.rotation.y += difference / 4;
         	}
         }
+        this.mesh.rotation.y = angle;
     },
     move: function () {
         'use strict';
