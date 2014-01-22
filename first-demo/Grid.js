@@ -13,16 +13,16 @@
             this.planeGeometry = new THREE.PlaneGeometry(width, length);
 
             this.numOfCharacters = 1;
-            this.users = [];
+            this.currentlySelectedUsers = [];
 
             this.squareSize = squareSize;
 
             for (var i = 0; i < this.numOfCharacters; i++) {
-                this.user = new Character({
+                this.currentlySelectedUser = new Character({
                      color: 0x7A43B6
                 });
-                this.users.push(this.user);
-                this.characters = this.user.mesh;
+                this.currentlySelectedUsers.push(this.currentlySelectedUser);
+                this.characters = this.currentlySelectedUser.mesh;
             }
 
             console.log("000 characters length "+this.characters.children.length);
@@ -89,14 +89,14 @@
             //     this.selectedCharacter.motion();
             //     this.selectedCharacter = null;
             // }
-            this.user.motion();
+            this.currentlySelectedUser.motion();
         },
 
          // Event handlers
         setControls: function () {
             'use strict';
             // Within jQuery's methods, we won't be able to access "this"
-            var user = this.user;
+            var user = this.currentlySelectedUser;
             var controls = {
                     left: false,
                     up: false,

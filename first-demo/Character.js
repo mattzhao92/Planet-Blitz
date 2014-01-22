@@ -70,10 +70,31 @@ var Character = Class.extend({
         'use strict';
         // We update our Object3D's position from our "direction"
         console.log("called once \n");
-        this.mesh.position.x += this.direction.x * (40);
-        this.mesh.position.z += this.direction.z * (40);
-        // Now let's use Sine and Cosine curves, using our "step" property ...
-        this.direction.set(0,0,0);
+
+        var oldX = this.mesh.position.x;
+        var newX = this.mesh.position.x + this.direction.x * 40;
+
+        var oldZ = this.mesh.position.z;
+        var newZ = this.mesh.position.z + this.direction.z * 40;
+
+        // var easing = TWEEN.Easing.Elastic.InOut;
+        // var easing = TWEEN.Easing.Linear.None;
+        var easing = TWEEN.Easing.Quadratic.Out;
+        var tween = new TWEEN.Tween({x: oldX, z: oldZ}).to({x: newX, z: newZ}, 400).easing(easing);
+
+        var myMesh = this.mesh;
+        var onUpdate = function() {
+            var xCoord = this.x;
+            var zCoord = this.z;
+            myMesh.position.x = xCoord;
+            myMesh.position.z = zCoord;
+        }
+
+        tween.onUpdate(onUpdate);
+
+        tween.start();
+
+        this.direction.set(0, 0, 0);
     },
     collide: function () {
         'use strict';

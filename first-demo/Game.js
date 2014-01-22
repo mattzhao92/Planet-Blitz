@@ -209,6 +209,7 @@ $(function () {
         },
 
         animate: function() {
+            TWEEN.update();
             this.stats.update();
 
             var delta = this.clock.getDelta();
