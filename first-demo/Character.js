@@ -5,14 +5,20 @@ var Character = Class.extend({
         // Set the different geometries composing the humanoid
         var head = new THREE.SphereGeometry(32, 8, 8),
             // Set the material, the "skin"
-        material = new THREE.MeshLambertMaterial(args);
+            nose = new THREE.SphereGeometry(4, 4, 4),
+        	material = new THREE.MeshLambertMaterial(args);
         // Set the character modelisation object
         this.mesh = new THREE.Object3D();
         this.mesh.position.y = 48;
         // Set and add its head
+        this.nose = new THREE.Mesh(nose, material);
+        this.nose.position.y = 0;
+        this.nose.position.z = 32;
+
         this.head = new THREE.Mesh(head, material);
         this.head.position.y = 0;
         this.mesh.add(this.head);
+        this.mesh.add(this.nose);
         // Set the vector of the current motion
         this.direction = new THREE.Vector3(0, 0, 0);
         // Set the current animation step
@@ -47,23 +53,27 @@ var Character = Class.extend({
     rotate: function () {
         'use strict';
         // Set the direction's angle, and the difference between it and our Object3D's current rotation
-
+        console.log("rotation \n");
         var angle = Math.atan2(this.direction.x, this.direction.z),
         difference = angle - this.mesh.rotation.y;
 
-        // Now if we haven't reached our target angle
-        if (difference !== 0) {
-            // We slightly get closer to it
-            this.mesh.rotation.y += difference / 4;
+        var count =  5;
+        while (count-- >= 0) {
+        	// Now if we haven't reached our target angle
+        	if (difference !== 0) {
+            	// We slightly get closer to it
+            	this.mesh.rotation.y += difference / 4;
+        	}
         }
     },
     move: function () {
         'use strict';
         // We update our Object3D's position from our "direction"
+        console.log("called once \n");
         this.mesh.position.x += this.direction.x * (40);
         this.mesh.position.z += this.direction.z * (40);
         // Now let's use Sine and Cosine curves, using our "step" property ...
-        this.step += 1 / 4;
+        this.direction.set(0,0,0);
     },
     collide: function () {
         'use strict';
