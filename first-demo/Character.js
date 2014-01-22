@@ -60,8 +60,8 @@ var Character = Class.extend({
     move: function () {
         'use strict';
         // We update our Object3D's position from our "direction"
-        this.mesh.position.x += this.direction.x * ((this.direction.z === 0) ? 4 : Math.sqrt(8));
-        this.mesh.position.z += this.direction.z * ((this.direction.x === 0) ? 4 : Math.sqrt(8));
+        this.mesh.position.x += this.direction.x * (40);
+        this.mesh.position.z += this.direction.z * (40);
         // Now let's use Sine and Cosine curves, using our "step" property ...
         this.step += 1 / 4;
     },

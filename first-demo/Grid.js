@@ -84,18 +84,19 @@
 
         motion: function(args) {
             // move the selected character to new location
-            if (this.selectedCharacter) {
-                this.selectedCharacter = null;
-                this.selectedCharacter.motion();
-                this.selectedCharacter = null;
-            }
+            // if (this.selectedCharacter) {
+            //     this.selectedCharacter = null;
+            //     this.selectedCharacter.motion();
+            //     this.selectedCharacter = null;
+            // }
+            this.user.motion();
         },
 
          // Event handlers
         setControls: function () {
             'use strict';
             // Within jQuery's methods, we won't be able to access "this"
-            var user = this.selectedCharacter;
+            var user = this.user;
             var controls = {
                     left: false,
                     up: false,
@@ -104,21 +105,20 @@
                 };
             // When the user presses a key 
             jQuery(document).keydown(function (e) {
-                console.log("keydown");
                 var prevent = true;
                 // Update the state of the attached control to "true"
                 switch (e.keyCode) {
                     case 37:
-                    controls.left = true;
-                    break;
-                    case 38:
-                    controls.up = true;
-                    break;
-                    case 39:
                     controls.right = true;
                     break;
-                    case 40:
+                    case 38:
                     controls.down = true;
+                    break;
+                    case 39:
+                    controls.left = true;
+                    break;
+                    case 40:
+                    controls.up = true;
                     break;
                     default:
                     prevent = false;
@@ -140,16 +140,16 @@
                 // Update the state of the attached control to "false"
                 switch (e.keyCode) {
                     case 37:
-                    controls.left = false;
-                    break;
-                    case 38:
-                    controls.up = false;
-                    break;
-                    case 39:
                     controls.right = false;
                     break;
-                    case 40:
+                    case 38:
                     controls.down = false;
+                    break;
+                    case 39:
+                    controls.left = false;
+                    break;
+                    case 40:
+                    controls.up = false;
                     break;
                     default:
                     prevent = false;

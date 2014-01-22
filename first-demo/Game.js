@@ -201,6 +201,7 @@ $(function () {
         drawGridSquares: function(size) {
             this.grid = new Grid(400, 400, 40);
 
+            this.grid.setControls();
             this.cubes = this.grid.cubes;
             this.characters = this.grid.characters;
             this.scene.add(this.grid.cubes);
@@ -212,12 +213,15 @@ $(function () {
 
             var delta = this.clock.getDelta();
             this.controls.update(delta);
+            this.grid.motion();
 
             // standard: render using requestAnimationFrame
             var me = this;
             requestAnimationFrame(function() {
                 me.animate();
             });
+
+
             this.renderer.render(this.scene, this.camera);
         }, 
 
