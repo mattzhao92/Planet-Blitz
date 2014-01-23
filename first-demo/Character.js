@@ -11,6 +11,10 @@ var Character = Class.extend({
         this.mesh = new THREE.Object3D();
         this.mesh.position.y = -10;
 
+        // TODO: replace this with some type of grid position
+        this.mesh.position.x = 5;
+        this.mesh.position.z = 5;
+
         // Set the vector of the current motion
         this.direction = new THREE.Vector3(0, 0, 0);
         // Set the current animation step
@@ -78,9 +82,9 @@ var Character = Class.extend({
 
         // transition from current rotation (mesh.rotation.y) to desired angle 'angle'
 
-        var easing = TWEEN.Easing.Linear.None;
+        var easing = TWEEN.Easing.Quadratic.Out;
         var oldRotationY = this.mesh.rotation.y;
-        var tween = new TWEEN.Tween({rotationY: oldRotationY}).to({rotationY: angle}, 300).easing(easing);
+        var tween = new TWEEN.Tween({rotationY: oldRotationY}).to({rotationY: angle}, 200).easing(easing);
 
         var myMesh = this.mesh;
         var onUpdate = function() {
