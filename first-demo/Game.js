@@ -24,56 +24,15 @@ $(function () {
             this.stats = this.initStats();
             this.clock = new THREE.Clock();
 
-            this.drawGamePlane();
+            this.setupGameGrid();
             this.addLighting();
 
             this.setupControls();
             this.addControlGUI();
 
-            this.addChaseCube();
-
-            // begin animation
+            // begin animation loop
             this.animate();
-
-            this.setupMouseMoveListener();
-            
         }, 
-
-        setupMouseMoveListener: function() {
-            var scope = this;
-
-            window.addEventListener( 'mousemove', 
-                function(event) {
-
-                    var projector = new THREE.Projector();
-                    var mouseVector = new THREE.Vector3();
-        
-                    mouseVector.x = 2 * (event.clientX / window.innerWidth) - 1;
-                    mouseVector.y = 1 - 2 * ( event.clientY / window.innerHeight );
-
-                    var raycaster = projector.pickingRay( mouseVector.clone(), scope.camera ),
-                        intersects = raycaster.intersectObjects( scope.cubes.children );
-
-                    scope.cubes.children.forEach(function( cube ) {
-                        cube.material.color.setRGB( cube.grayness, cube.grayness, cube.grayness );
-                    });
-                    
-                    for( var i = 0; i < intersects.length; i++ ) {
-                        var intersection = intersects[ i ],
-                            obj = intersection.object;
-
-                        obj.material.color.setRGB( 1.0 - i / intersects.length, 0, 0 );
-                    }
-                }, false );
-        },
-
-        addChaseCube: function() {
-            // add a cube to the scene, which will be used to implement the chase camera
-            var cubeGeometry = new THREE.CubeGeometry(5, 5, 5);
-            var cubeMaterial = new THREE.MeshLambertMaterial({color: 0xFF0000});
-            this.chaseCamCube = new THREE.Mesh(cubeGeometry, cubeMaterial);
-            this.scene.add(this.chaseCamCube);
-        },
 
         panForward: function(event) {
             this.camera.position.z -= 1;
@@ -162,32 +121,10 @@ $(function () {
             gui.add(this.datGuiControls, 'perspective').listen();
         },
 
-        drawGamePlane: function() {
-            // create the ground plane
-            this.planeGeometry = new THREE.PlaneGeometry(180, 180);
-            var planeMaterial = new THREE.MeshLambertMaterial({color: 0xffffff});
-            this.plane = new THREE.Mesh(this.planeGeometry, planeMaterial);
-
-            // rotate and position the plane
-            this.plane.rotation.x = -0.5 * Math.PI;
-            this.plane.position.x = 0;
-            this.plane.position.y = 0;
-            this.plane.position.z = 0;
-            // this.scene.add(this.plane);
-
-            var squareSize = 5;
-            this.drawGridSquares(squareSize);
+        setupGameGrid: function() {
+            var squareSize = 40;
+            this.grid = new Grid(400, 400, squareSize, this.scene, this.camera);
         }, 
-
-        drawGridSquares: function(size) {
-            this.grid = new Grid(400, 400, 40, this.camera);
-
-            this.grid.setControls();
-            this.cubes = this.grid.cubes;
-            this.characters = this.grid.characters;
-            this.scene.add(this.grid.cubes);
-            this.scene.add(this.grid.characters);
-        },
 
         animate: function() {
             TWEEN.update();

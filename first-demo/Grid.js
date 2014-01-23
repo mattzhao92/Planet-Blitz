@@ -4,7 +4,7 @@
  */
     var Grid = Class.extend({
         // Class constructor
-        init: function (width, length, squareSize, camera) {
+        init: function (width, length, squareSize, scene, camera) {
             'use strict';
             // Set the "world" modelisation object
             this.cubes = new THREE.Object3D();
@@ -28,10 +28,42 @@
             //console.log("000 characters length "+this.characters.children.length);
 
             this.drawGridSquares(this.squareSize);
+            this.setControls();
+            this.setupMouseMoveListener();
+
+            this.scene = scene;
             this.camera = camera;
+            this.scene.add(this.cubes);
+            this.scene.add(this.characters);
         },
 
+        setupMouseMoveListener: function() {
+            var scope = this;
 
+            window.addEventListener( 'mousemove', 
+                function(event) {
+
+                    var projector = new THREE.Projector();
+                    var mouseVector = new THREE.Vector3();
+        
+                    mouseVector.x = 2 * (event.clientX / window.innerWidth) - 1;
+                    mouseVector.y = 1 - 2 * ( event.clientY / window.innerHeight );
+
+                    var raycaster = projector.pickingRay( mouseVector.clone(), scope.camera ),
+                        intersects = raycaster.intersectObjects( scope.cubes.children );
+
+                    scope.cubes.children.forEach(function( cube ) {
+                        cube.material.color.setRGB( cube.grayness, cube.grayness, cube.grayness );
+                    });
+                    
+                    for( var i = 0; i < intersects.length; i++ ) {
+                        var intersection = intersects[ i ],
+                            obj = intersection.object;
+
+                        obj.material.color.setRGB( 1.0 - i / intersects.length, 0, 0 );
+                    }
+                }, false );
+        },
 
         drawGridSquares: function(size) {
             var geom = new THREE.PlaneGeometry(size, size);
