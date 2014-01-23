@@ -36,6 +36,7 @@ $(function () {
             this.animate();
 
             this.setupMouseMoveListener();
+            
         }, 
 
         setupMouseMoveListener: function() {
@@ -63,26 +64,6 @@ $(function () {
 
                         obj.material.color.setRGB( 1.0 - i / intersects.length, 0, 0 );
                     }
-                }, false );
-
-            window.addEventListener( 'mousedown', 
-                                    function(event) {
-
-                    var projector = new THREE.Projector();
-                    var mouseVector = new THREE.Vector3();
-        
-                    mouseVector.x = 2 * (event.clientX / window.innerWidth) - 1;
-                    mouseVector.y = 1 - 2 * ( event.clientY / window.innerHeight );
-
-                    var raycaster = projector.pickingRay( mouseVector.clone(), scope.camera ),
-                        intersects = raycaster.intersectObjects( scope.characters.children );
-
-                    console.log("number of intersects " + intersects.length);
-                    scope.characters.children.forEach(function (character) {
-                        console.log(character);
-                        character.material.color.setRGB(10,0,0);
-                    });
-
                 }, false );
         },
 
@@ -199,7 +180,7 @@ $(function () {
         }, 
 
         drawGridSquares: function(size) {
-            this.grid = new Grid(400, 400, 40);
+            this.grid = new Grid(400, 400, 40, this.camera);
 
             this.grid.setControls();
             this.cubes = this.grid.cubes;
