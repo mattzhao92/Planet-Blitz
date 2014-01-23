@@ -50,33 +50,46 @@ var Character = Class.extend({
         // (if any)
         if (this.direction.x !== 0 || this.direction.z !== 0) {
             // Rotate the character
-            this.rotate();
+            var rotateTween = this.rotate();
             // And, only if we're not colliding with an obstacle or a wall ...
             if (this.collide()) {
                 return false;
             }
             // ... we move the character
-            this.move();
+            var moveTween = this.move();
+            this.direction.set(0, 0, 0);
+
+            var blankTween = new TWEEN.Tween({}).to({}, 100);
+
+            rotateTween.chain(blankTween);
+            rotateTween.chain(moveTween);
+            rotateTween.start();
+
             return true;
         }
     },
+
     // Rotate the character
     rotate: function () {
         'use strict';
         // Set the direction's angle, and the difference between it and our Object3D's current rotation
         console.log("rotation \n");
-        var angle = Math.atan2(this.direction.x, this.direction.z),
-        difference = angle - this.mesh.rotation.y;
+        var angle = Math.atan2(this.direction.x, this.direction.z);
 
-        var count =  10;
-        while (count-- >= 0) {
-        	// Now if we haven't reached our target angle
-        	if (difference !== 0) {
-            	// We slightly get closer to it
-            	this.mesh.rotation.y += difference / 4;
-        	}
+        // transition from current rotation (mesh.rotation.y) to desired angle 'angle'
+
+        var easing = TWEEN.Easing.Linear.None;
+        var oldRotationY = this.mesh.rotation.y;
+        var tween = new TWEEN.Tween({rotationY: oldRotationY}).to({rotationY: angle}, 300).easing(easing);
+
+        var myMesh = this.mesh;
+        var onUpdate = function() {
+            myMesh.rotation.y = this.rotationY;
         }
-        this.mesh.rotation.y = angle;
+
+        tween.onUpdate(onUpdate);
+        // tween.start();
+        return tween;
     },
     move: function () {
         'use strict';
@@ -92,7 +105,8 @@ var Character = Class.extend({
         // var easing = TWEEN.Easing.Elastic.InOut;
         // var easing = TWEEN.Easing.Linear.None;
         var easing = TWEEN.Easing.Quadratic.Out;
-        var tween = new TWEEN.Tween({x: oldX, z: oldZ}).to({x: newX, z: newZ}, 400).easing(easing);
+        // var easing = TWEEN.Easing.Exponential.EaseOut;
+        var tween = new TWEEN.Tween({x: oldX, z: oldZ}).to({x: newX, z: newZ}, 450).easing(easing);
 
         var myMesh = this.mesh;
         var onUpdate = function() {
@@ -104,9 +118,8 @@ var Character = Class.extend({
 
         tween.onUpdate(onUpdate);
 
-        tween.start();
-
-        this.direction.set(0, 0, 0);
+        // tween.start();
+        return tween;
     },
     collide: function () {
         'use strict';
