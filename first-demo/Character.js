@@ -9,21 +9,32 @@ var Character = Class.extend({
         	material = new THREE.MeshLambertMaterial(args);
         // Set the character modelisation object
         this.mesh = new THREE.Object3D();
-        this.mesh.position.y = 48;
-        // Set and add its head
-        this.nose = new THREE.Mesh(nose, material);
-        this.nose.position.y = 0;
-        this.nose.position.z = 32;
+        this.mesh.position.y = -10;
 
-        this.head = new THREE.Mesh(head, material);
-        this.head.position.y = 0;
-        this.mesh.add(this.head);
-        this.mesh.add(this.nose);
         // Set the vector of the current motion
         this.direction = new THREE.Vector3(0, 0, 0);
         // Set the current animation step
         this.step = 0;
+
+        this.loader = new THREE.JSONLoader();
+        this.loadFile("headcombinedtextured.js");
+
     },
+
+
+    loadFile: function(filename) {
+        var scope = this;
+
+        this.loader.load(filename, function(geometry) {
+            mesh = new THREE.Mesh(geometry, new THREE.MeshNormalMaterial());
+            mesh.scale.set(24, 24, 24);
+            mesh.position.y = 0;
+            mesh.position.x = 0;
+            mesh.position.z = 10;
+                    scope.mesh.add(mesh);
+                })
+    },
+
     // Update the direction of the current motion
     setDirection: function (controls) {
         'use strict';

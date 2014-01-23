@@ -4,7 +4,7 @@
  */
     var Grid = Class.extend({
         // Class constructor
-        init: function (width, length, squareSize) {
+        init: function (width, length, squareSize, camera) {
             'use strict';
             // Set the "world" modelisation object
             this.cubes = new THREE.Object3D();
@@ -25,10 +25,12 @@
                 this.characters = this.user.mesh;
             }
 
-            console.log("000 characters length "+this.characters.children.length);
+            //console.log("000 characters length "+this.characters.children.length);
 
             this.drawGridSquares(this.squareSize);
+            this.camera = camera;
         },
+
 
 
         drawGridSquares: function(size) {
@@ -168,8 +170,29 @@
             // On resize
             jQuery(window).resize(function () {
                 // Redefine the size of the renderer
-                basicScene.setAspect();
+                //basicScene.setAspect();
             });
+
+            var scope = this;
+            window.addEventListener( 'mousedown', 
+                                    function(event) {
+
+                    var projector = new THREE.Projector();
+                    var mouseVector = new THREE.Vector3();
+        
+                    mouseVector.x = 2 * (event.clientX / window.innerWidth) - 1;
+                    mouseVector.y = 1 - 2 * ( event.clientY / window.innerHeight );
+
+                    var raycaster = projector.pickingRay( mouseVector.clone(), scope.camera ),
+                         intersects = raycaster.intersectObjects(scope.characters.children );
+
+                    console.log("number of intersects " + intersects.length);
+                    scope.characters.children.forEach(function (character) {
+                            console.log(character);
+                            //character.material.color.setRGB(10,0,0);
+                    });
+
+                }, false );
         },
 
     });
