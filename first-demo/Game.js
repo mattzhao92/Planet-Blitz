@@ -19,15 +19,14 @@ $(function () {
     App.prototype = {
         init: function() {
 
-            this.setupCamera();
-
             this.stats = this.initStats();
-            this.clock = new THREE.Clock();
+
+            this.setupCamera();
+            this.setupCameraControls();
 
             this.setupGameGrid();
             this.addLighting();
 
-            this.setupCameraControls();
             this.addControlGUI();
 
             // begin animation loop
@@ -65,6 +64,7 @@ $(function () {
         },
 
         setupCameraControls: function() {
+            this.clock = new THREE.Clock();
             var controls = new THREE.MapControls(this.camera);
             controls.panSpeed = .31;
 
