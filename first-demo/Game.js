@@ -27,28 +27,12 @@ $(function () {
             this.setupGameGrid();
             this.addLighting();
 
-            this.setupControls();
+            this.setupCameraControls();
             this.addControlGUI();
 
             // begin animation loop
             this.animate();
         }, 
-
-        panForward: function(event) {
-            this.camera.position.z -= 1;
-        },
-
-        panLeft: function(event) {
-            this.camera.position.x -= 1;
-        }, 
-
-        panRight: function(event) {
-            this.camera.position.x += 1;
-        }, 
-
-        panBackward: function(event) {
-            this.camera.position.z += 1;
-        },
 
         setupCamera: function() {
             // create a camera, which defines where we're looking at
@@ -80,7 +64,7 @@ $(function () {
             this.scene.add( directionalLight );
         },
 
-        setupControls: function() {
+        setupCameraControls: function() {
             var controls = new THREE.MapControls(this.camera);
             controls.panSpeed = .31;
 
@@ -92,33 +76,7 @@ $(function () {
         },
 
         addControlGUI: function() {
-            this.datGuiControls = new function() {
-                this.perspective = "Perspective";
-                this.switchCamera = function() {
-                    if (app.camera instanceof THREE.PerspectiveCamera) {
-                        app.camera = new THREE.OrthographicCamera( window.innerWidth / - 16, window.innerWidth / 16, window.innerHeight / 16, window.innerHeight / - 16, -200, 500 );
-                        app.camera.position.x = 3;
-                        app.camera.position.y = 1;
-                        app.camera.position.z = 3;
-
-                        // app.camera.lookAt(app.scene.position);
-                        app.perspective = "Orthographic";
-                    } else {
-                        app.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-                        app.camera.position.x = 120;
-                        app.camera.position.y = 60;
-                        app.camera.position.z = 180;
-
-                        // app.camera.lookAt(app.scene.position);
-                        app.perspective = "Perspective";
-                    }
-                };
-            }
-
             var gui = new dat.GUI();
-
-            gui.add(this.datGuiControls, 'switchCamera');
-            gui.add(this.datGuiControls, 'perspective').listen();
         },
 
         setupGameGrid: function() {
