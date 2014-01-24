@@ -6,22 +6,24 @@
         // Class constructor
         init: function (width, length, squareSize, scene, camera) {
             'use strict';
+
+            this.scene = scene;
+            this.camera = camera;
+
             // Set the "world" modelisation object
             this.cubes = new THREE.Object3D();
+            this.drawGridSquares(width, length, squareSize);
+
             this.characters = new THREE.Object3D();
-            this.planeGeometry = new THREE.PlaneGeometry(width, length);
             this.numOfCharacters = 3;
             this.charactersOnMap = [];
             this.characterMeshes = [];
             this.squareSize = squareSize;
 
-            this.scene = scene;
-            this.camera = camera;
-
             for (var i = 0; i < this.numOfCharacters; i++) {
                 var character = new Character({
                      color: 0x7A43B6,
-                     position : {x : -((this.planeGeometry.width)/2)+2+((i+3)*this.squareSize), y : 5}
+                     position : {x : -((width)/2)+2+((i+3)*this.squareSize), y : 5}
                 });
                 this.charactersOnMap.push(character);
                 this.characterMeshes.push(character.mesh);
@@ -29,10 +31,8 @@
                 this.scene.add(character.mesh);
             }
 
-            this.drawGridSquares(this.squareSize);
             this.setControls();
             this.setupMouseMoveListener();
-            this.scene.add(this.cubes);
         },
 
         setupMouseMoveListener: function() {
@@ -63,13 +63,15 @@
                 }, false );
         },
 
-        drawGridSquares: function(size) {
+        drawGridSquares: function(width, length, size) {
+            var planeGeometry = new THREE.PlaneGeometry(width, length);
+
             var geom = new THREE.PlaneGeometry(size, size);
 
             var planeMaterial = new THREE.MeshLambertMaterial({color: 0xffffff});
 
-            this.numberSquaresOnXAxis = this.planeGeometry.width/size;
-            this.numberSquaresOnZAxis = this.planeGeometry.height/size;
+            this.numberSquaresOnXAxis = planeGeometry.width/size;
+            this.numberSquaresOnZAxis = planeGeometry.height/size;
 
             for (var j = 0 ; j < this.numberSquaresOnZAxis; j++) {
                 for (var i = 0 ; i < this.numberSquaresOnXAxis; i++) {
@@ -81,9 +83,9 @@
                     mat.color.setRGB( grayness, grayness, grayness );
                     cube.grayness = grayness;
 
-                    cube.position.x =- ((this.planeGeometry.width)/2) + (i * size);
+                    cube.position.x =- ((planeGeometry.width)/2) + (i * size);
                     cube.position.y = 0;
-                    cube.position.z =- ((this.planeGeometry.height)/2) + (j * size);
+                    cube.position.z =- ((planeGeometry.height)/2) + (j * size);
                     cube.rotation.x = -0.5 * Math.PI;
 
                     //console.log("cube x : " + cube.position.x + " cube z : " + cube.position.z);
@@ -91,6 +93,8 @@
                     this.cubes.add(cube);
                 }
             }
+
+            this.scene.add(this.cubes);
         },
 
         getNumberSquaresOnXAxis: function () {
