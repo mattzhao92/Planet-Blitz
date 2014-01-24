@@ -25,7 +25,7 @@
                 });
                 this.charactersOnMap.push(character);
                 this.characterMeshes.push(character.mesh);
-                console.log("remove me " + character.mesh);
+                console.log("added character " + character.mesh);
                 this.scene.add(character.mesh);
             }
 
@@ -211,19 +211,23 @@
                     mouseVector.x = 2 * (event.clientX / window.innerWidth) - 1;
                     mouseVector.y = 1 - 2 * ( event.clientY / window.innerHeight );
 
-                    var raycaster = projector.pickingRay( mouseVector.clone(), scope.camera ),
-                         intersects = raycaster.intersectObjects(scope.scene.children);
+                    var raycaster = projector.pickingRay( mouseVector.clone(), scope.camera );
 
-                    console.log("intersect length is!!!!  "+ intersects.length+ "  "+ scope.characterMeshes);
+                    // recursively call intersects
+                    var intersects = raycaster.intersectObjects(scope.characterMeshes, true);
+
+                    console.log("intersect length is  "+ intersects.length+ "  "+ scope.characterMeshes);
                     if (intersects.length > 0) {
-                        console.log("MEEEEE "+scope.characterMeshes[0].children[0].material);
-                        scope.characterMeshes[0].children[0].material.color.setRGB( 1.0, 0, 0 );
+                        // only care about first intersection
+                        var firstIntersect = intersects[0];
+                        console.log("Character selected");
+                        firstIntersect.object.material.color.setRGB(1.0, 0, 0);
                     }
 
-                    scope.characters.children.forEach(function (character) {
-                            console.log(character);
-                            //character.material.color.setRGB(10,0,0);
-                    });
+                    // scope.characters.children.forEach(function (character) {
+                    //         console.log(character);
+                    //         //character.material.color.setRGB(10,0,0);
+                    // });
 
                 }, false );
         },

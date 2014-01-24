@@ -31,7 +31,7 @@ var Character = Class.extend({
         var scope = this;
 
         this.loader.load(filename, function(geometry) {
-            mesh = new THREE.Mesh(geometry, new THREE.MeshNormalMaterial());
+            mesh = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial());
             mesh.scale.set(24, 24, 24);
             mesh.position.y = 0;
             mesh.position.x = 0;
