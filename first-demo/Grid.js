@@ -232,7 +232,7 @@
                                 if (scope.characterBeingSelected != null && 
                                     scope.characterBeingSelected != scope.charactersOnMap[i]) {
                                     console.log("to differnt color")
-                                    //scope.characterBeingSelected.mesh.material.color.setRGB(0, 0, 1);
+                                    scope.characterBeingSelected.mesh.children[0].material.color.setRGB(1, 1, 1);
                                 }
                                 scope.characterBeingSelected = scope.charactersOnMap[i];
                                 if (scope.characterBeingSelected) {
