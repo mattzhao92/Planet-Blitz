@@ -6,20 +6,21 @@ var Character = Class.extend({
         var head = new THREE.SphereGeometry(32, 8, 8),
             // Set the material, the "skin"
             nose = new THREE.SphereGeometry(4, 4, 4),
-        	material = new THREE.MeshLambertMaterial(args);
+        	material = new THREE.MeshLambertMaterial({color : args.color});
         // Set the character modelisation object
         this.mesh = new THREE.Object3D();
-        this.mesh.position.y = -10;
+        //this.mesh.position.y = -10;
 
         // TODO: replace this with some type of grid position
-        this.mesh.position.x = 5;
-        this.mesh.position.z = 5;
+        this.mesh.position.x = args.position.x;
+        this.mesh.position.z = args.position.y;
 
         // Set the vector of the current motion
         this.direction = new THREE.Vector3(0, 0, 0);
         // Set the current animation step
         this.step = 0;
-
+        this.motionInProess = false;
+        this.motionQueue = [];
         this.loader = new THREE.JSONLoader();
         this.loadFile("headcombinedtextured.js");
 
@@ -48,28 +49,58 @@ var Character = Class.extend({
             z = controls.up ? 1 : controls.down ? -1 : 0;
         this.direction.set(x, y, z);
     },
-    // Process the character motions
-    motion: function () {
-        'use strict';
-        // (if any)
-        if (this.direction.x !== 0 || this.direction.z !== 0) {
-            // Rotate the character
-            var rotateTween = this.rotate();
-            // And, only if we're not colliding with an obstacle or a wall ...
-            if (this.collide()) {
-                return false;
+
+
+    enqueueMotion: function() {
+        this.motionQueue.push({dir: this.direction.clone()});
+    },
+
+    dequeueMotion: function() {
+        if (this.motionQueue.length > 0) {
+            this.motionInProess = true;
+            var direction = this.motionQueue.splice(0,1);
+            if (direction.x !== 0 || direction.z !== 0) {
+                // Rotate the character
+                var rotateTween = this.rotate();
+                // And, only if we're not colliding with an obstacle or a wall ...
+                if (this.collide()) {
+                    return false;
+                }
+                // ... we move the character
+                var oldX = this.mesh.position.x;
+                var newX = this.mesh.position.x + this.direction.x * 40;
+
+                var oldZ = this.mesh.position.z;
+                var newZ = this.mesh.position.z + this.direction.z * 40;
+
+                // var easing = TWEEN.Easing.Elastic.InOut;
+                // var easing = TWEEN.Easing.Linear.None;
+                var easing = TWEEN.Easing.Quadratic.Out;
+                // var easing = TWEEN.Easing.Exponential.EaseOut;
+                var tween = new TWEEN.Tween({x: oldX, z: oldZ}).to({x: newX, z: newZ}, 450).easing(easing);
+
+                var myMesh = this.mesh;
+                var onUpdate = function() {
+                    var xCoord = this.x;
+                    var zCoord = this.z;
+                    myMesh.position.x = xCoord;
+                    myMesh.position.z = zCoord;
+                };
+
+                tween.onUpdate(onUpdate);
+
+                var moveTween = tween;
+                this.direction.set(0, 0, 0);
+
+                var blankTween = new TWEEN.Tween({}).to({}, 100);
+
+                rotateTween.chain(blankTween);
+                rotateTween.chain(moveTween);
+                rotateTween.start();
+
+                return true;
             }
-            // ... we move the character
-            var moveTween = this.move();
-            this.direction.set(0, 0, 0);
-
-            var blankTween = new TWEEN.Tween({}).to({}, 100);
-
-            rotateTween.chain(blankTween);
-            rotateTween.chain(moveTween);
-            rotateTween.start();
-
-            return true;
+            return false;
         }
     },
 
@@ -95,36 +126,7 @@ var Character = Class.extend({
         // tween.start();
         return tween;
     },
-    move: function () {
-        'use strict';
-        // We update our Object3D's position from our "direction"
-        console.log("called once \n");
 
-        var oldX = this.mesh.position.x;
-        var newX = this.mesh.position.x + this.direction.x * 40;
-
-        var oldZ = this.mesh.position.z;
-        var newZ = this.mesh.position.z + this.direction.z * 40;
-
-        // var easing = TWEEN.Easing.Elastic.InOut;
-        // var easing = TWEEN.Easing.Linear.None;
-        var easing = TWEEN.Easing.Quadratic.Out;
-        // var easing = TWEEN.Easing.Exponential.EaseOut;
-        var tween = new TWEEN.Tween({x: oldX, z: oldZ}).to({x: newX, z: newZ}, 450).easing(easing);
-
-        var myMesh = this.mesh;
-        var onUpdate = function() {
-            var xCoord = this.x;
-            var zCoord = this.z;
-            myMesh.position.x = xCoord;
-            myMesh.position.z = zCoord;
-        }
-
-        tween.onUpdate(onUpdate);
-
-        // tween.start();
-        return tween;
-    },
     collide: function () {
         'use strict';
         // INSERT SOME MAGIC HERE

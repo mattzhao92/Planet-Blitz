@@ -9,32 +9,30 @@
             // Set the "world" modelisation object
             this.cubes = new THREE.Object3D();
             this.characters = new THREE.Object3D();
-
             this.planeGeometry = new THREE.PlaneGeometry(width, length);
-
-            this.numOfCharacters = 1;
-            this.currentlySelectedUsers = [];
-
+            this.numOfCharacters = 3;
+            this.charactersOnMap = [];
+            this.characterMeshes = [];
             this.squareSize = squareSize;
 
-            for (var i = 0; i < this.numOfCharacters; i++) {
-                this.currentlySelectedUser = new Character({
-                     color: 0x7A43B6
-                });
-                this.currentlySelectedUsers.push(this.currentlySelectedUser);
-                this.characters = this.currentlySelectedUser.mesh;
-            }
+            this.scene = scene;
+            this.camera = camera;
 
-            //console.log("000 characters length "+this.characters.children.length);
+            for (var i = 0; i < this.numOfCharacters; i++) {
+                var character = new Character({
+                     color: 0x7A43B6,
+                     position : {x : -((this.planeGeometry.width)/2)+2+((i+3)*this.squareSize), y : 5}
+                });
+                this.charactersOnMap.push(character);
+                this.characterMeshes.push(character.mesh);
+                console.log("remove me " + character.mesh);
+                this.scene.add(character.mesh);
+            }
 
             this.drawGridSquares(this.squareSize);
             this.setControls();
             this.setupMouseMoveListener();
-
-            this.scene = scene;
-            this.camera = camera;
             this.scene.add(this.cubes);
-            this.scene.add(this.characters);
         },
 
         setupMouseMoveListener: function() {
@@ -88,7 +86,7 @@
                     cube.position.z =- ((this.planeGeometry.height)/2)+2+(j*size);
                     cube.rotation.x = -0.5 * Math.PI;
 
-                    console.log("cube x : " + cube.position.x + " cube z : " + cube.position.z);
+                    //console.log("cube x : " + cube.position.x + " cube z : " + cube.position.z);
 
                     this.cubes.add(cube);
                 }
@@ -117,20 +115,17 @@
         },
 
         motion: function(args) {
-            // move the selected character to new location
-            // if (this.selectedCharacter) {
-            //     this.selectedCharacter = null;
-            //     this.selectedCharacter.motion();
-            //     this.selectedCharacter = null;
-            // }
-            this.currentlySelectedUser.motion();
+            for (var i = 0; i < this.charactersOnMap.length; i++) {
+                var character = this.charactersOnMap[i];
+                character.dequeueMotion();
+            }
         },
 
          // Event handlers
         setControls: function () {
             'use strict';
             // Within jQuery's methods, we won't be able to access "this"
-            var user = this.currentlySelectedUser;
+            var user = this.characterBeingSelected;
             var controls = {
                     left: false,
                     up: false,
@@ -165,6 +160,7 @@
                 }
                 // Update the character's direction
                 if (user) {
+                    user.enqueueMotion();
                     user.setDirection(controls);
                 }
             });
@@ -207,7 +203,7 @@
 
             var scope = this;
             window.addEventListener( 'mousedown', 
-                                    function(event) {
+                function(event) {
 
                     var projector = new THREE.Projector();
                     var mouseVector = new THREE.Vector3();
@@ -216,9 +212,14 @@
                     mouseVector.y = 1 - 2 * ( event.clientY / window.innerHeight );
 
                     var raycaster = projector.pickingRay( mouseVector.clone(), scope.camera ),
-                         intersects = raycaster.intersectObjects(scope.characters.children );
+                         intersects = raycaster.intersectObjects(scope.scene.children);
 
-                    console.log("number of intersects " + intersects.length);
+                    console.log("intersect length is!!!!  "+ intersects.length+ "  "+ scope.characterMeshes);
+                    if (intersects.length > 0) {
+                        console.log("MEEEEE "+scope.characterMeshes[0].children[0].material);
+                        scope.characterMeshes[0].children[0].material.color.setRGB( 1.0, 0, 0 );
+                    }
+
                     scope.characters.children.forEach(function (character) {
                             console.log(character);
                             //character.material.color.setRGB(10,0,0);
