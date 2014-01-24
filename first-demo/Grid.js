@@ -28,7 +28,7 @@
                 console.log("added character " + character.mesh);
                 this.scene.add(character.mesh);
             }
-
+            this.characterBeingSelected = null;
             this.drawGridSquares(this.squareSize);
             this.setControls();
             this.setupMouseMoveListener();
@@ -125,6 +125,7 @@
         setControls: function () {
             'use strict';
             // Within jQuery's methods, we won't be able to access "this"
+            var scope = this;
             var user = this.characterBeingSelected;
             var controls = {
                     left: false,
@@ -159,9 +160,12 @@
                     return;
                 }
                 // Update the character's direction
-                if (user) {
-                    user.enqueueMotion();
-                    user.setDirection(controls);
+                if (scope.characterBeingSelected) {
+                    console.log("enqueueMotion ---------- ");
+                    scope.characterBeingSelected.enqueueMotion();
+                    scope.characterBeingSelected.setDirection(controls);
+                } else {
+                    console.log("BAD BAD BAD ");
                 }
             });
             // When the user releases a key
@@ -218,10 +222,28 @@
 
                     console.log("intersect length is  "+ intersects.length+ "  "+ scope.characterMeshes);
                     if (intersects.length > 0) {
-                        // only care about first intersection
-                        var firstIntersect = intersects[0];
-                        console.log("Character selected");
-                        firstIntersect.object.material.color.setRGB(1.0, 0, 0);
+                        intersects[0].object.material.color.setRGB(1.0, 0, 0);
+                        console.log("position : "+intersects[0].point.x);
+                        var cellX = Math.floor(intersects[0].point.x / 40);
+                        var cellY = Math.floor(intersects[0].point.y / 40);
+                        for (var i = 0; i < scope.charactersOnMap.length; i++) {
+                            if (cellX == scope.charactersOnMap[i].atCell.x && 
+                                cellY == scope.charactersOnMap[i].atCell.y) {
+                                if (scope.characterBeingSelected != null && 
+                                    scope.characterBeingSelected != scope.charactersOnMap[i]) {
+                                    console.log("to differnt color")
+                                    //scope.characterBeingSelected.mesh.material.color.setRGB(0, 0, 1);
+                                }
+                                scope.characterBeingSelected = scope.charactersOnMap[i];
+                                if (scope.characterBeingSelected) {
+                                    console.log("scope.characterBeingSelected isnt null \n");
+
+                                } else {
+                                    console.log("null \n");
+                                }
+                                break;
+                            }
+                        }
                     }
 
                     // scope.characters.children.forEach(function (character) {

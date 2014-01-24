@@ -23,7 +23,7 @@ var Character = Class.extend({
         this.motionQueue = [];
         this.loader = new THREE.JSONLoader();
         this.loadFile("headcombinedtextured.js");
-
+        this.atCell = {x: Math.floor(args.position.x / 40), y: Math.floor(args.position.y / 40)};
     },
 
 
