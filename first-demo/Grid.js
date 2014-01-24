@@ -7,11 +7,14 @@
         init: function (width, length, squareSize, scene, camera) {
             'use strict';
 
+            this.gridWidth = width;
+            this.gridLength = length;
+
             this.scene = scene;
             this.camera = camera;
 
             // Set the "world" modelisation object
-            this.cubes = new THREE.Object3D();
+            this.tiles = new THREE.Object3D();
             this.drawGridSquares(width, length, squareSize);
 
             this.characters = new THREE.Object3D();
@@ -48,9 +51,9 @@
                     mouseVector.y = 1 - 2 * ( event.clientY / window.innerHeight );
 
                     var raycaster = projector.pickingRay( mouseVector.clone(), scope.camera ),
-                        intersects = raycaster.intersectObjects( scope.cubes.children );
+                        intersects = raycaster.intersectObjects( scope.tiles.children );
 
-                    scope.cubes.children.forEach(function( cube ) {
+                    scope.tiles.children.forEach(function( cube ) {
                         cube.material.color.setRGB( cube.grayness, cube.grayness, cube.grayness );
                     });
                     
@@ -58,43 +61,57 @@
                         var intersection = intersects[ i ],
                             obj = intersection.object;
 
-                        obj.material.color.setRGB( 1.0 - i / intersects.length, 0, 0 );
+                        obj.onSelect();
                     }
                 }, false );
         },
 
-        drawGridSquares: function(width, length, size) {
-            var planeGeometry = new THREE.PlaneGeometry(width, length);
+        getWorldPosition: function() {
+            // get world position of a grid
 
+        },
+
+        drawGridSquares: function(width, length, size) {
             var geom = new THREE.PlaneGeometry(size, size);
 
             var planeMaterial = new THREE.MeshLambertMaterial({color: 0xffffff});
 
-            this.numberSquaresOnXAxis = planeGeometry.width/size;
-            this.numberSquaresOnZAxis = planeGeometry.height/size;
+            this.numberSquaresOnXAxis = width/size;
+            this.numberSquaresOnZAxis = length/size;
 
             for (var j = 0 ; j < this.numberSquaresOnZAxis; j++) {
                 for (var i = 0 ; i < this.numberSquaresOnXAxis; i++) {
 
-                    var grayness = Math.random() * 0.5 + 0.25;
-                    var mat = new THREE.MeshBasicMaterial({overdraw: true});
-                    var cube = new THREE.Mesh( geom, mat );
-                            
-                    mat.color.setRGB( grayness, grayness, grayness );
-                    cube.grayness = grayness;
+                    var tile = this.createTile(geom);
 
-                    cube.position.x =- ((planeGeometry.width)/2) + (i * size);
-                    cube.position.y = 0;
-                    cube.position.z =- ((planeGeometry.height)/2) + (j * size);
-                    cube.rotation.x = -0.5 * Math.PI;
+                    tile.position.x =- ((width)/2) + (i * size);
+                    tile.position.y = 0;
+                    tile.position.z =- ((length)/2) + (j * size);
+                    tile.rotation.x = -0.5 * Math.PI;
 
-                    //console.log("cube x : " + cube.position.x + " cube z : " + cube.position.z);
-
-                    this.cubes.add(cube);
+                    this.tiles.add(tile);
                 }
             }
 
-            this.scene.add(this.cubes);
+            this.scene.add(this.tiles);
+        },
+
+        createTile: function(geom) {
+
+            var grayness = Math.random() * 0.5 + 0.25;
+            var mat = new THREE.MeshBasicMaterial({overdraw: true});
+            mat.color.setRGB( grayness, grayness, grayness );
+            var tile = new THREE.Mesh(geom, mat);
+            tile.grayness = grayness;
+
+            var scope = tile;
+            tile.onSelect = function() {
+                // console.log("I was selected");
+                // console.log("tile x : " + tile.position.x + " tile z : " + tile.position.z);
+                tile.material.color.setRGB( 1.0 , 0, 0 );
+            }
+
+            return tile;
         },
 
         getNumberSquaresOnXAxis: function () {
@@ -225,7 +242,9 @@
                         // only care about first intersection
                         var firstIntersect = intersects[0];
                         console.log("Character selected");
-                        firstIntersect.object.material.color.setRGB(1.0, 0, 0);
+                        // firstIntersect.object.material.color.setRGB(1.0, 0, 0);
+                        firstIntersect.object.material.emissive.setHex(0xff0000);
+                        
                     }
 
                     // scope.characters.children.forEach(function (character) {
