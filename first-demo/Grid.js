@@ -53,8 +53,8 @@
                     var raycaster = projector.pickingRay( mouseVector.clone(), scope.camera ),
                         intersects = raycaster.intersectObjects( scope.tiles.children );
 
-                    scope.tiles.children.forEach(function( cube ) {
-                        cube.material.color.setRGB( cube.grayness, cube.grayness, cube.grayness );
+                    scope.tiles.children.forEach(function( tile ) {
+                        tile.material.color.setRGB( tile.grayness, tile.grayness, tile.grayness );
                     });
                     
                     for( var i = 0; i < intersects.length; i++ ) {
