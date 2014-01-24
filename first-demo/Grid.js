@@ -81,9 +81,9 @@
                     mat.color.setRGB( grayness, grayness, grayness );
                     cube.grayness = grayness;
 
-                    cube.position.x =- ((this.planeGeometry.width)/2)+2+(i*size);
-                    cube.position.y = 1;
-                    cube.position.z =- ((this.planeGeometry.height)/2)+2+(j*size);
+                    cube.position.x =- ((this.planeGeometry.width)/2) + (i * size);
+                    cube.position.y = 0;
+                    cube.position.z =- ((this.planeGeometry.height)/2) + (j * size);
                     cube.rotation.x = -0.5 * Math.PI;
 
                     //console.log("cube x : " + cube.position.x + " cube z : " + cube.position.z);
