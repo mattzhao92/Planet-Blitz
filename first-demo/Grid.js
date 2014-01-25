@@ -231,7 +231,7 @@
                         console.log("intersect length is  "+ intersects.length+ "  "+ scope.characterMeshes);
                         if (intersects.length > 0) {
                             var firstIntersect = intersects[0];
-                            firstIntersect.object.material.color.setRGB(1.0, 0, 0);
+                            firstIntersect.object.onSelect();
 
                             // alternate graphical effect on selection
                             // firstIntersect.object.material.emissive.setHex(0xff0000);

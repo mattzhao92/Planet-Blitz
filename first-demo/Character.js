@@ -40,19 +40,21 @@ var Character = Class.extend({
     },
 
     onSelect: function() {
-        this.mesh.material.color.setRGB(1.0, 0, 0);
+        this.mesh.children[0].material.color.setRGB(1.0, 0, 0);
     },
 
     loadFile: function(filename) {
         var scope = this;
 
+
         this.loader.load(filename, function(geometry) {
-            mesh = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial());
-            mesh.scale.set(24, 24, 24);
-            mesh.position.y = 0;
-            mesh.position.x = 0;
-            mesh.position.z = 10;
-                    scope.mesh.add(mesh);
+                mesh = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial());
+                mesh.scale.set(24, 24, 24);
+                mesh.position.y = 0;
+                mesh.position.x = 0;
+                mesh.position.z = 10;
+                 _.extend(mesh, scope);
+                 scope.mesh.add(mesh);
                 })
     },
 
