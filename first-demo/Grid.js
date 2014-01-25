@@ -46,6 +46,10 @@
             this.setControls();
             this.setupMouseMoveListener();
         },
+        
+        markCharacterAsSelected: function(character) {
+            this.characterBeingSelected = character;
+        },
 
         deselectAll: function() {
             this.charactersOnMap.forEach(function (character) {

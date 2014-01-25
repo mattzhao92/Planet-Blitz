@@ -43,6 +43,7 @@ var Character = Class.extend({
     onSelect: function(world) {
         world.deselectAll();
         this.mesh.children[0].material.color.setRGB(1.0, 0, 0);
+        world.markCharacterAsSelected(this);
     },
 
     deselect: function() {
