@@ -20,24 +20,41 @@
             this.characters = new THREE.Object3D();
             this.numOfCharacters = 3;
             this.charactersOnMap = [];
-            this.characterMeshes = [];
+            
             this.squareSize = squareSize;
 
+            this.characterFactory = new CharacterFactory();
+
+            var scope = this;
             for (var i = 0; i < this.numOfCharacters; i++) {
-                var character = new Character({
-                     color: 0x7A43B6,
-                     position : {x : -((width)/2)+2+((i+3)*this.squareSize), y : 5}
-                });
+
+                var charArgs = {
+                    color: 0x7A43B6, 
+                    position : {x : -((width)/2)+2+((i+3)*this.squareSize), 
+                    y : 5, 
+                    world: scope}};
+
+                var character = this.characterFactory.createCharacter(charArgs);
                 this.charactersOnMap.push(character);
-                this.characterMeshes.push(character.mesh);
-                console.log("added character " + character.mesh);
-                this.scene.add(character.mesh);
+                
+                // console.log("added character " + character.mesh);
+                this.scene.add(character);
             }
 
             this.characterBeingSelected = null;
 
             this.setControls();
             this.setupMouseMoveListener();
+        },
+        
+        markCharacterAsSelected: function(character) {
+            this.characterBeingSelected = character;
+        },
+
+        deselectAll: function() {
+            this.charactersOnMap.forEach(function (character) {
+                character.deselect();
+            });
         },
 
         setupMouseMoveListener: function() {
@@ -63,7 +80,7 @@
                         var intersection = intersects[ i ],
                             obj = intersection.object;
 
-                        obj.onSelect();
+                        obj.onMouseOver();
                     }
                 }, false );
         },
@@ -74,9 +91,7 @@
         },
 
         drawGridSquares: function(width, length, size) {
-            var geom = new THREE.PlaneGeometry(size, size);
-
-            var planeMaterial = new THREE.MeshLambertMaterial({color: 0xffffff});
+            this.tileFactory = new TileFactory(size);
 
             this.numberSquaresOnXAxis = width/size;
             this.numberSquaresOnZAxis = length/size;
@@ -84,7 +99,7 @@
             for (var j = 0 ; j < this.numberSquaresOnZAxis; j++) {
                 for (var i = 0 ; i < this.numberSquaresOnXAxis; i++) {
 
-                    var tile = this.createTile(geom);
+                    var tile = this.tileFactory.createTile();
 
                     tile.position.x =- ((width)/2) + (i * size);
                     tile.position.y = 0;
@@ -96,24 +111,6 @@
             }
 
             this.scene.add(this.tiles);
-        },
-
-        createTile: function(geom) {
-
-            var grayness = Math.random() * 0.5 + 0.25;
-            var mat = new THREE.MeshBasicMaterial({overdraw: true});
-            mat.color.setRGB( grayness, grayness, grayness );
-            var tile = new THREE.Mesh(geom, mat);
-            tile.grayness = grayness;
-
-            var scope = tile;
-            tile.onSelect = function() {
-                // console.log("I was selected");
-                // console.log("tile x : " + tile.position.x + " tile z : " + tile.position.z);
-                tile.material.color.setRGB( 1.0 , 0, 0 );
-            }
-
-            return tile;
         },
 
         getNumberSquaresOnXAxis: function () {
@@ -228,58 +225,29 @@
                 //basicScene.setAspect();
             });
 
-            var scope = this;
-            window.addEventListener( 'mousedown', 
-                function(event) {
+               var scope = this;
+                window.addEventListener( 'mousedown', 
+                    function(event) {
 
-                    var projector = new THREE.Projector();
-                    var mouseVector = new THREE.Vector3();
-        
-                    mouseVector.x = 2 * (event.clientX / window.innerWidth) - 1;
-                    mouseVector.y = 1 - 2 * ( event.clientY / window.innerHeight );
+                        var projector = new THREE.Projector();
+                        var mouseVector = new THREE.Vector3();
+            
+                        mouseVector.x = 2 * (event.clientX / window.innerWidth) - 1;
+                        mouseVector.y = 1 - 2 * ( event.clientY / window.innerHeight );
 
-                    var raycaster = projector.pickingRay( mouseVector.clone(), scope.camera );
+                        var raycaster = projector.pickingRay( mouseVector.clone(), scope.camera );
 
-                    // recursively call intersects
-                    var intersects = raycaster.intersectObjects(scope.characterMeshes, true);
+                        // recursively call intersects
+                        var intersects = raycaster.intersectObjects(scope.charactersOnMap, true);
 
-                    console.log("intersect length is  "+ intersects.length+ "  "+ scope.characterMeshes);
-                    if (intersects.length > 0) {
-                        var firstIntersect = intersects[0];
-                        firstIntersect.object.material.color.setRGB(1.0, 0, 0);
-
-                        // alternate graphical effect on selection
-                        // firstIntersect.object.material.emissive.setHex(0xff0000);
-
-                        console.log("position : "+firstIntersect.point.x);
-                        var cellX = Math.floor(firstIntersect.point.x / 40);
-                        var cellY = Math.floor(firstIntersect.point.y / 40);
-                        for (var i = 0; i < scope.charactersOnMap.length; i++) {
-                            if (cellX == scope.charactersOnMap[i].atCell.x && 
-                                cellY == scope.charactersOnMap[i].atCell.y) {
-                                if (scope.characterBeingSelected != null && 
-                                    scope.characterBeingSelected != scope.charactersOnMap[i]) {
-                                    console.log("to differnt color")
-                                    scope.characterBeingSelected.mesh.children[0].material.color.setRGB(1, 1, 1);
-                                }
-                                scope.characterBeingSelected = scope.charactersOnMap[i];
-                                if (scope.characterBeingSelected) {
-                                    console.log("scope.characterBeingSelected isnt null \n");
-
-                                } else {
-                                    console.log("null \n");
-                                }
-                                break;
-                            }
+                        console.log("intersect length is  "+ intersects.length+ "  "+ scope.charactersOnMap);
+                        if (intersects.length > 0) {
+                            var firstIntersect = intersects[0];
+                            firstIntersect.object.onSelect(scope);
                         }
-                    }
 
-                    // scope.characters.children.forEach(function (character) {
-                    //         console.log(character);
-                    //         //character.material.color.setRGB(10,0,0);
-                    // });
+                    }, false );
+            },
 
-                }, false );
-        },
 
     });

@@ -1,3 +1,16 @@
+var CharacterFactory = Class.extend({
+    init: function() {
+
+    },
+
+    createCharacter: function(charArgs) {
+        var character = new Character(charArgs);
+        _.extend(character.mesh, character);
+
+        return character.mesh;
+    }
+})
+
 var Character = Class.extend({
 // Class constructor
     init: function (args) {
@@ -26,17 +39,30 @@ var Character = Class.extend({
         this.atCell = {x: Math.floor(args.position.x / 40), y: Math.floor(args.position.y / 40)};
     },
 
+    // callback - called when unit is selected. Gets a reference to the game state ("world")
+    onSelect: function(world) {
+        world.deselectAll();
+        this.mesh.children[0].material.color.setRGB(1.0, 0, 0);
+        world.markCharacterAsSelected(this);
+    },
+
+    deselect: function() {
+        // return to original color
+        this.mesh.children[0].material.color.setRGB(1.0, 1.0, 1.0);
+    },
 
     loadFile: function(filename) {
         var scope = this;
 
+
         this.loader.load(filename, function(geometry) {
-            mesh = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial());
-            mesh.scale.set(24, 24, 24);
-            mesh.position.y = 0;
-            mesh.position.x = 0;
-            mesh.position.z = 10;
-                    scope.mesh.add(mesh);
+                mesh = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial());
+                mesh.scale.set(24, 24, 24);
+                mesh.position.y = 0;
+                mesh.position.x = 0;
+                mesh.position.z = 10;
+                 _.extend(mesh, scope);
+                 scope.mesh.add(mesh);
                 })
     },
 
