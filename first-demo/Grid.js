@@ -23,19 +23,20 @@
             this.characterMeshes = [];
             this.squareSize = squareSize;
 
-            for (var i = 0; i < this.numOfCharacters; i++) {
-                var character = new Character({
-                     color: 0x7A43B6,
-                     position : {x : -((width)/2)+2+((i+3)*this.squareSize), y : 5}
-                });
-                this.charactersOnMap.push(character);
-                this.characterMeshes.push(character.mesh);
-                // console.log("added character " + character.mesh);
-                this.scene.add(character.mesh);
+            this.characterFactory = new CharacterFactory();
 
-                // character.mesh.material.onCharacterSelect = function() {
-                //     consnole.log("Character selected");
-                // }
+            for (var i = 0; i < this.numOfCharacters; i++) {
+
+                var charArgs = {
+                    color: 0x7A43B6, 
+                    position : {x : -((width)/2)+2+((i+3)*this.squareSize), 
+                    y : 5}};
+
+                var character = this.characterFactory.createCharacter(charArgs);
+                this.charactersOnMap.push(character);
+                this.characterMeshes.push(character);
+                // console.log("added character " + character.mesh);
+                this.scene.add(character);
             }
 
             this.characterBeingSelected = null;
@@ -235,27 +236,27 @@
                             // alternate graphical effect on selection
                             // firstIntersect.object.material.emissive.setHex(0xff0000);
 
-                            console.log("position : "+firstIntersect.point.x);
-                            var cellX = Math.floor(firstIntersect.point.x / 40);
-                            var cellY = Math.floor(firstIntersect.point.y / 40);
-                            for (var i = 0; i < scope.charactersOnMap.length; i++) {
-                                if (cellX == scope.charactersOnMap[i].atCell.x && 
-                                    cellY == scope.charactersOnMap[i].atCell.y) {
-                                    if (scope.characterBeingSelected != null && 
-                                        scope.characterBeingSelected != scope.charactersOnMap[i]) {
-                                        console.log("to differnt color")
-                                        scope.characterBeingSelected.mesh.children[0].material.color.setRGB(1, 1, 1);
-                                    }
-                                    scope.characterBeingSelected = scope.charactersOnMap[i];
-                                    if (scope.characterBeingSelected) {
-                                        console.log("scope.characterBeingSelected isnt null \n");
+                            // console.log("position : "+firstIntersect.point.x);
+                            // var cellX = Math.floor(firstIntersect.point.x / 40);
+                            // var cellY = Math.floor(firstIntersect.point.y / 40);
+                            // for (var i = 0; i < scope.charactersOnMap.length; i++) {
+                            //     if (cellX == scope.charactersOnMap[i].atCell.x && 
+                            //         cellY == scope.charactersOnMap[i].atCell.y) {
+                            //         if (scope.characterBeingSelected != null && 
+                            //             scope.characterBeingSelected != scope.charactersOnMap[i]) {
+                            //             console.log("to differnt color")
+                            //             scope.characterBeingSelected.mesh.children[0].material.color.setRGB(1, 1, 1);
+                            //         }
+                            //         scope.characterBeingSelected = scope.charactersOnMap[i];
+                            //         if (scope.characterBeingSelected) {
+                            //             console.log("scope.characterBeingSelected isnt null \n");
 
-                                    } else {
-                                        console.log("null \n");
-                                    }
-                                    break;
-                                }
-                            }
+                            //         } else {
+                            //             console.log("null \n");
+                            //         }
+                            //         break;
+                            //     }
+                            // }
                         }
 
                         // scope.characters.children.forEach(function (character) {
