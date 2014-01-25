@@ -8,7 +8,7 @@ var GridCell = Class.extend({
     	return 3.0;
     },
 
-    onMouseOver: function() {
+    onMouseOver: function(scope) {
     	// console.log("mouse over");
     	this.mesh.material.color.setRGB(1.0, 0, 0);
     }
