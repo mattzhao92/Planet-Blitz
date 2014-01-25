@@ -37,10 +37,19 @@ var Character = Class.extend({
         this.loader = new THREE.JSONLoader();
         this.loadFile("headcombinedtextured.js");
         this.atCell = {x: Math.floor(args.position.x / 40), y: Math.floor(args.position.y / 40)};
+        
+        // store reference to game world
+        this.world = args.world;
     },
 
     onSelect: function() {
+        // this.world.deselectAll();
         this.mesh.children[0].material.color.setRGB(1.0, 0, 0);
+    },
+
+    deselect: function() {
+        // return to original color
+        this.mesh.children[0].material.color.setRGB(1.0, 1.0, 1.0);
     },
 
     loadFile: function(filename) {

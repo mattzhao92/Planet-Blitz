@@ -20,21 +20,23 @@
             this.characters = new THREE.Object3D();
             this.numOfCharacters = 3;
             this.charactersOnMap = [];
-            this.characterMeshes = [];
+            
             this.squareSize = squareSize;
 
             this.characterFactory = new CharacterFactory();
 
+            var scope = this;
             for (var i = 0; i < this.numOfCharacters; i++) {
 
                 var charArgs = {
                     color: 0x7A43B6, 
                     position : {x : -((width)/2)+2+((i+3)*this.squareSize), 
-                    y : 5}};
+                    y : 5, 
+                    world: scope}};
 
                 var character = this.characterFactory.createCharacter(charArgs);
                 this.charactersOnMap.push(character);
-                this.characterMeshes.push(character);
+                
                 // console.log("added character " + character.mesh);
                 this.scene.add(character);
             }
@@ -43,6 +45,12 @@
 
             this.setControls();
             this.setupMouseMoveListener();
+        },
+
+        deselectAll: function() {
+            this.charactersOnMap.forEach(function (character) {
+                character.deselect();
+            });
         },
 
         setupMouseMoveListener: function() {
@@ -226,9 +234,9 @@
                         var raycaster = projector.pickingRay( mouseVector.clone(), scope.camera );
 
                         // recursively call intersects
-                        var intersects = raycaster.intersectObjects(scope.characterMeshes, true);
+                        var intersects = raycaster.intersectObjects(scope.charactersOnMap, true);
 
-                        console.log("intersect length is  "+ intersects.length+ "  "+ scope.characterMeshes);
+                        console.log("intersect length is  "+ intersects.length+ "  "+ scope.charactersOnMap);
                         if (intersects.length > 0) {
                             var firstIntersect = intersects[0];
                             firstIntersect.object.onSelect();
@@ -236,9 +244,6 @@
                             // alternate graphical effect on selection
                             // firstIntersect.object.material.emissive.setHex(0xff0000);
 
-                            // console.log("position : "+firstIntersect.point.x);
-                            // var cellX = Math.floor(firstIntersect.point.x / 40);
-                            // var cellY = Math.floor(firstIntersect.point.y / 40);
                             // for (var i = 0; i < scope.charactersOnMap.length; i++) {
                             //     if (cellX == scope.charactersOnMap[i].atCell.x && 
                             //         cellY == scope.charactersOnMap[i].atCell.y) {
@@ -258,11 +263,6 @@
                             //     }
                             // }
                         }
-
-                        // scope.characters.children.forEach(function (character) {
-                        //         console.log(character);
-                        //         //character.material.color.setRGB(10,0,0);
-                        // });
 
                     }, false );
             },
