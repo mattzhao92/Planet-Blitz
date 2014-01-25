@@ -67,7 +67,7 @@
                         var intersection = intersects[ i ],
                             obj = intersection.object;
 
-                        obj.onSelect();
+                        obj.onMouseOver();
                     }
                 }, false );
         },
@@ -78,9 +78,7 @@
         },
 
         drawGridSquares: function(width, length, size) {
-            var geom = new THREE.PlaneGeometry(size, size);
-
-            var planeMaterial = new THREE.MeshLambertMaterial({color: 0xffffff});
+            this.tileFactory = new TileFactory(size);
 
             this.numberSquaresOnXAxis = width/size;
             this.numberSquaresOnZAxis = length/size;
@@ -88,7 +86,7 @@
             for (var j = 0 ; j < this.numberSquaresOnZAxis; j++) {
                 for (var i = 0 ; i < this.numberSquaresOnXAxis; i++) {
 
-                    var tile = this.createTile(geom);
+                    var tile = this.tileFactory.createTile();
 
                     tile.position.x =- ((width)/2) + (i * size);
                     tile.position.y = 0;
@@ -100,28 +98,6 @@
             }
 
             this.scene.add(this.tiles);
-        },
-
-        createTile: function(geom) {
-
-            var grayness = Math.random() * 0.5 + 0.25;
-            var mat = new THREE.MeshBasicMaterial({overdraw: true});
-            mat.color.setRGB( grayness, grayness, grayness );
-            var tile = new THREE.Mesh(geom, mat);
-            tile.grayness = grayness;
-
-            var scope = tile;
-            tile.onSelect = function() {
-                // console.log("I was selected");
-                // console.log("tile x : " + tile.position.x + " tile z : " + tile.position.z);
-                tile.material.color.setRGB( 1.0 , 0, 0 );
-            }
-
-            var gridCell = new GridCell();
-
-            // _.extend(tile, gridCell);
-
-            return tile;
         },
 
         getNumberSquaresOnXAxis: function () {
