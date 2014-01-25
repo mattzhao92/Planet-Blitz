@@ -30,8 +30,12 @@
                 });
                 this.charactersOnMap.push(character);
                 this.characterMeshes.push(character.mesh);
-                console.log("added character " + character.mesh);
+                // console.log("added character " + character.mesh);
                 this.scene.add(character.mesh);
+
+                // character.mesh.material.onCharacterSelect = function() {
+                //     consnole.log("Character selected");
+                // }
             }
 
             this.characterBeingSelected = null;
@@ -112,6 +116,10 @@
                 // console.log("tile x : " + tile.position.x + " tile z : " + tile.position.z);
                 tile.material.color.setRGB( 1.0 , 0, 0 );
             }
+
+            var gridCell = new GridCell();
+
+            // _.extend(tile, gridCell);
 
             return tile;
         },
@@ -241,37 +249,41 @@
                     var raycaster = projector.pickingRay( mouseVector.clone(), scope.camera );
 
                     // recursively call intersects
-                    var intersects = raycaster.intersectObjects(scope.characterMeshes, true);
+                    var intersects = raycaster.intersectObjects(scope.characterMeshes.children, true);
 
                     console.log("intersect length is  "+ intersects.length+ "  "+ scope.characterMeshes);
                     if (intersects.length > 0) {
-                        var firstIntersect = intersects[0];
-                        firstIntersect.object.material.color.setRGB(1.0, 0, 0);
+                        var firstIntersect = intersects[0].object;
+                        
+                        // firstIntersect.object.material.onCharacterSelect();
+                        // firstIntersect.object.material.color.setRGB(1.0, 0, 0);
 
-                        // alternate graphical effect on selection
-                        // firstIntersect.object.material.emissive.setHex(0xff0000);
+                        // // alternate graphical effect on selection
+                        // // firstIntersect.object.material.emissive.setHex(0xff0000);
 
-                        console.log("position : "+firstIntersect.point.x);
-                        var cellX = Math.floor(firstIntersect.point.x / 40);
-                        var cellY = Math.floor(firstIntersect.point.y / 40);
-                        for (var i = 0; i < scope.charactersOnMap.length; i++) {
-                            if (cellX == scope.charactersOnMap[i].atCell.x && 
-                                cellY == scope.charactersOnMap[i].atCell.y) {
-                                if (scope.characterBeingSelected != null && 
-                                    scope.characterBeingSelected != scope.charactersOnMap[i]) {
-                                    console.log("to differnt color")
-                                    scope.characterBeingSelected.mesh.children[0].material.color.setRGB(1, 1, 1);
-                                }
-                                scope.characterBeingSelected = scope.charactersOnMap[i];
-                                if (scope.characterBeingSelected) {
-                                    console.log("scope.characterBeingSelected isnt null \n");
+                        // console.log("position : "+firstIntersect.point.x);
+                        // var cellX = Math.floor(firstIntersect.point.x / 40);
+                        // var cellY = Math.floor(firstIntersect.point.y / 40);
+                        // for (var i = 0; i < scope.charactersOnMap.length; i++) {
+                        //     if (cellX == scope.charactersOnMap[i].atCell.x && 
+                        //         cellY == scope.charactersOnMap[i].atCell.y) {
+                        //         if (scope.characterBeingSelected != null && 
+                        //             scope.characterBeingSelected != scope.charactersOnMap[i]) {
+                        //             console.log("to differnt color")
+                        //             scope.characterBeingSelected.mesh.children[0].material.color.setRGB(1, 1, 1);
+                        //         }
+                        //         scope.characterBeingSelected = scope.charactersOnMap[i];
+                        //         if (scope.characterBeingSelected) {
+                        //             console.log("scope.characterBeingSelected isnt null \n");
 
-                                } else {
-                                    console.log("null \n");
-                                }
-                                break;
-                            }
-                        }
+                        //         } else {
+                        //             console.log("null \n");
+                        //         }
+                        //         break;
+                        //     }
+                        // }
+
+
                     }
 
                     // scope.characters.children.forEach(function (character) {
