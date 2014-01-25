@@ -213,61 +213,58 @@
             });
 
             var scope = this;
-            window.addEventListener( 'mousedown', 
-                function(event) {
+                window.addEventListener( 'mousedown', 
+                    function(event) {
 
-                    var projector = new THREE.Projector();
-                    var mouseVector = new THREE.Vector3();
-        
-                    mouseVector.x = 2 * (event.clientX / window.innerWidth) - 1;
-                    mouseVector.y = 1 - 2 * ( event.clientY / window.innerHeight );
+                        var projector = new THREE.Projector();
+                        var mouseVector = new THREE.Vector3();
+            
+                        mouseVector.x = 2 * (event.clientX / window.innerWidth) - 1;
+                        mouseVector.y = 1 - 2 * ( event.clientY / window.innerHeight );
 
-                    var raycaster = projector.pickingRay( mouseVector.clone(), scope.camera );
+                        var raycaster = projector.pickingRay( mouseVector.clone(), scope.camera );
 
-                    // recursively call intersects
-                    var intersects = raycaster.intersectObjects(scope.characterMeshes.children, true);
+                        // recursively call intersects
+                        var intersects = raycaster.intersectObjects(scope.characterMeshes, true);
 
-                    console.log("intersect length is  "+ intersects.length+ "  "+ scope.characterMeshes);
-                    if (intersects.length > 0) {
-                        var firstIntersect = intersects[0].object;
-                        
-                        // firstIntersect.object.material.onCharacterSelect();
-                        // firstIntersect.object.material.color.setRGB(1.0, 0, 0);
+                        console.log("intersect length is  "+ intersects.length+ "  "+ scope.characterMeshes);
+                        if (intersects.length > 0) {
+                            var firstIntersect = intersects[0];
+                            firstIntersect.object.material.color.setRGB(1.0, 0, 0);
 
-                        // // alternate graphical effect on selection
-                        // // firstIntersect.object.material.emissive.setHex(0xff0000);
+                            // alternate graphical effect on selection
+                            // firstIntersect.object.material.emissive.setHex(0xff0000);
 
-                        // console.log("position : "+firstIntersect.point.x);
-                        // var cellX = Math.floor(firstIntersect.point.x / 40);
-                        // var cellY = Math.floor(firstIntersect.point.y / 40);
-                        // for (var i = 0; i < scope.charactersOnMap.length; i++) {
-                        //     if (cellX == scope.charactersOnMap[i].atCell.x && 
-                        //         cellY == scope.charactersOnMap[i].atCell.y) {
-                        //         if (scope.characterBeingSelected != null && 
-                        //             scope.characterBeingSelected != scope.charactersOnMap[i]) {
-                        //             console.log("to differnt color")
-                        //             scope.characterBeingSelected.mesh.children[0].material.color.setRGB(1, 1, 1);
-                        //         }
-                        //         scope.characterBeingSelected = scope.charactersOnMap[i];
-                        //         if (scope.characterBeingSelected) {
-                        //             console.log("scope.characterBeingSelected isnt null \n");
+                            console.log("position : "+firstIntersect.point.x);
+                            var cellX = Math.floor(firstIntersect.point.x / 40);
+                            var cellY = Math.floor(firstIntersect.point.y / 40);
+                            for (var i = 0; i < scope.charactersOnMap.length; i++) {
+                                if (cellX == scope.charactersOnMap[i].atCell.x && 
+                                    cellY == scope.charactersOnMap[i].atCell.y) {
+                                    if (scope.characterBeingSelected != null && 
+                                        scope.characterBeingSelected != scope.charactersOnMap[i]) {
+                                        console.log("to differnt color")
+                                        scope.characterBeingSelected.mesh.children[0].material.color.setRGB(1, 1, 1);
+                                    }
+                                    scope.characterBeingSelected = scope.charactersOnMap[i];
+                                    if (scope.characterBeingSelected) {
+                                        console.log("scope.characterBeingSelected isnt null \n");
 
-                        //         } else {
-                        //             console.log("null \n");
-                        //         }
-                        //         break;
-                        //     }
-                        // }
+                                    } else {
+                                        console.log("null \n");
+                                    }
+                                    break;
+                                }
+                            }
+                        }
 
+                        // scope.characters.children.forEach(function (character) {
+                        //         console.log(character);
+                        //         //character.material.color.setRGB(10,0,0);
+                        // });
 
-                    }
+                    }, false );
+            },
 
-                    // scope.characters.children.forEach(function (character) {
-                    //         console.log(character);
-                    //         //character.material.color.setRGB(10,0,0);
-                    // });
-
-                }, false );
-        },
 
     });
