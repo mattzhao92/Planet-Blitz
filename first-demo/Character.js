@@ -37,13 +37,11 @@ var Character = Class.extend({
         this.loader = new THREE.JSONLoader();
         this.loadFile("headcombinedtextured.js");
         this.atCell = {x: Math.floor(args.position.x / 40), y: Math.floor(args.position.y / 40)};
-        
-        // store reference to game world
-        this.world = args.world;
     },
 
-    onSelect: function() {
-        // this.world.deselectAll();
+    // callback - called when unit is selected. Gets a reference to the game state ("world")
+    onSelect: function(world) {
+        world.deselectAll();
         this.mesh.children[0].material.color.setRGB(1.0, 0, 0);
     },
 

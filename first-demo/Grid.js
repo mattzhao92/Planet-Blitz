@@ -221,7 +221,7 @@
                 //basicScene.setAspect();
             });
 
-            var scope = this;
+               var scope = this;
                 window.addEventListener( 'mousedown', 
                     function(event) {
 
@@ -239,29 +239,7 @@
                         console.log("intersect length is  "+ intersects.length+ "  "+ scope.charactersOnMap);
                         if (intersects.length > 0) {
                             var firstIntersect = intersects[0];
-                            firstIntersect.object.onSelect();
-
-                            // alternate graphical effect on selection
-                            // firstIntersect.object.material.emissive.setHex(0xff0000);
-
-                            // for (var i = 0; i < scope.charactersOnMap.length; i++) {
-                            //     if (cellX == scope.charactersOnMap[i].atCell.x && 
-                            //         cellY == scope.charactersOnMap[i].atCell.y) {
-                            //         if (scope.characterBeingSelected != null && 
-                            //             scope.characterBeingSelected != scope.charactersOnMap[i]) {
-                            //             console.log("to differnt color")
-                            //             scope.characterBeingSelected.mesh.children[0].material.color.setRGB(1, 1, 1);
-                            //         }
-                            //         scope.characterBeingSelected = scope.charactersOnMap[i];
-                            //         if (scope.characterBeingSelected) {
-                            //             console.log("scope.characterBeingSelected isnt null \n");
-
-                            //         } else {
-                            //             console.log("null \n");
-                            //         }
-                            //         break;
-                            //     }
-                            // }
+                            firstIntersect.object.onSelect(scope);
                         }
 
                     }, false );
