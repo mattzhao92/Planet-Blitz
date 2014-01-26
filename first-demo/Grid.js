@@ -13,14 +13,16 @@ var Grid = Class.extend({
         this.scene = scene;
         this.camera = camera;
 
-        // Set the "world" modelisation object
+        // create grid tiles
         this.tiles = new THREE.Object3D();
+        this.tilesArray = null;
+        
         this.drawGridSquares(width, length, tileSize);
 
+        // initialize characters
         this.characters = new THREE.Object3D();
         this.numOfCharacters = 3;
         this.charactersOnMap = [];
-
 
         this.characterFactory = new CharacterFactory();
 
@@ -35,7 +37,6 @@ var Grid = Class.extend({
             character.placeAtGridPos(i + 3, 4);
             this.charactersOnMap.push(character);
 
-            // console.log("added character " + character.mesh);
             this.scene.add(character);
         }
 
@@ -98,9 +99,8 @@ var Grid = Class.extend({
             }, false);
     },
 
-    getWorldPosition: function() {
-        // get world position of a grid
-
+    getTileAtTilePos: function(xPos, zPos) {
+        return this.tilesArray[xPos][zPos];
     },
 
     drawGridSquares: function(width, length, size) {
@@ -109,14 +109,21 @@ var Grid = Class.extend({
         this.numberSquaresOnXAxis = width / size;
         this.numberSquaresOnZAxis = length / size;
 
-        for (var j = 0; j < this.numberSquaresOnXAxis; j++) {
-            for (var i = 0; i < this.numberSquaresOnZAxis; i++) {
+        this.tilesArray = new Array(this.numberSquaresOnXAxis);
+        for (var i = 0; i < this.numberSquaresOnXAxis; i++) {
+            this.tilesArray[i] = new Array(this.numberSquaresOnZAxis);
+        }
+
+        for (var i = 0; i < this.numberSquaresOnXAxis; i++) {
+            for (var j = 0; j < this.numberSquaresOnZAxis; j++) {
                 var tile = this.tileFactory.createTile(i, j);
 
                 tile.position.x = this.convertXPosToWorldX(i);
                 tile.position.y = 0;
                 tile.position.z = this.convertZPosToWorldZ(j);
                 tile.rotation.x = -0.5 * Math.PI;
+
+                this.tilesArray[i][j] = tile;
 
                 this.tiles.add(tile);
             }
