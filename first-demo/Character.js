@@ -41,6 +41,14 @@ var Character = Class.extend({
         this.mesh.position.z = this.world.convertZPosToWorldZ(zPos);
     },
 
+    getTileXPos: function() {
+        return this.xPos;
+    },
+
+    getTileZPos: function() {
+        return this.zPos;
+    },
+
     getMovementRange: function() {
         return 3;
     },

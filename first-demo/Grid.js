@@ -63,6 +63,25 @@ var Grid = Class.extend({
         this.characterBeingSelected = character;
 
         // show character movement speed
+        this.displayMovementArea(character);
+    },
+
+    displayMovementArea: function(character) {
+        var characterMovementRange = character.getMovementRange();
+
+        // highlight adjacent squares - collect all tiles from radius
+        var tilesToHighlight = this.getTilesInArea(character.getTileXPos(), character.getTileZPos(), characterMovementRange);
+
+        tilesToHighlight.forEach(function(tile) {
+            tile.markAsMovable();
+        });
+    },
+
+    getTilesInArea: function(originTileXPos, originTileZPos, radius) {
+
+        // return some collection of tiles
+        var tiles = [this.getTileAtTilePos(0, 1), this.getTileAtTilePos(0, 2), this.getTileAtTilePos(0, 3)];
+        return tiles;
     },
 
     deselectAll: function() {
@@ -100,6 +119,14 @@ var Grid = Class.extend({
     },
 
     getTileAtTilePos: function(xPos, zPos) {
+        // TODO: better error handling here?
+        if (xPos < 0 || zPos < 0) {
+            return null;
+        }
+        if (xPos >= this.numberSquaresOnXAxis || zPos >= this.numberSquaresOnZAxis) {
+            return null;
+        }
+
         return this.tilesArray[xPos][zPos];
     },
 

@@ -16,7 +16,7 @@ var GridCell = Class.extend({
     	console.log(this.xPos + " " + this.zPos);
     },
 
-    markAsMovable: function(scope) {
+    markAsMovable: function() {
     	this.mesh.material.color.setRGB(0, 1.0, 0);
     }
 });
