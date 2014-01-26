@@ -28,14 +28,11 @@ var Grid = Class.extend({
         for (var i = 0; i < this.numOfCharacters; i++) {
 
             var charArgs = {
-                position: {
-                    x: -((width) / 2) + 2 + ((i + 3) * this.tileSize),
-                    y: 5,
-                },
                 world: scope
             };
 
             var character = this.characterFactory.createCharacter(charArgs);
+            character.placeAtGridPos(i + 3, 4);
             this.charactersOnMap.push(character);
 
             // console.log("added character " + character.mesh);

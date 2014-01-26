@@ -18,9 +18,8 @@ var Character = Class.extend({
         // Set the character modelisation object
         this.mesh = new THREE.Object3D();
 
-        // TODO: replace this with some type of grid position
-        this.mesh.position.x = args.position.x;
-        this.mesh.position.z = args.position.y;
+        this.xPos = 0;
+        this.zPos = 0;
 
         // Set the vector of the current motion
         this.direction = new THREE.Vector3(0, 0, 0);
@@ -38,6 +37,8 @@ var Character = Class.extend({
     placeAtGridPos: function(xPos, zPos) {
         this.xPos = xPos;
         this.zPos = zPos;
+        this.mesh.position.x = this.world.convertXPosToWorldX(xPos);
+        this.mesh.position.z = this.world.convertZPosToWorldZ(zPos);
     },
 
     getMovementRange: function() {
