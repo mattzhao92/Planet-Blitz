@@ -41,7 +41,7 @@ var Character = Class.extend({
 
     // callback - called when unit is selected. Gets a reference to the game state ("world")
     onSelect: function(world) {
-        world.deselectAll();
+        // world.deselectAll();
         this.mesh.children[0].material.color.setRGB(1.0, 0, 0);
         world.markCharacterAsSelected(this);
     },

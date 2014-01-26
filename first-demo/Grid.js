@@ -48,6 +48,10 @@
         },
         
         markCharacterAsSelected: function(character) {
+            // deselect previous character if there was one
+            if (this.characterBeingSelected) {
+                this.characterBeingSelected.deselect();
+            }
             this.characterBeingSelected = character;
         },
 
