@@ -4,16 +4,23 @@ var GridCell = Class.extend({
     	this.mesh = mesh;
     	this.xPos = xPos;
     	this.zPos = zPos;
+    	this.isSelectable = false;
     },
 
     getGrayness: function() {
     	return 3.0;
     },
 
+    setSelectable: function(isSelectable) {
+    	this.isSelectable = isSelectable;
+    },
+
     onMouseOver: function(scope) {
-    	// console.log("mouse over");
-    	this.mesh.material.color.setRGB(1.0, 0, 0);
-    	console.log(this.xPos + " " + this.zPos);
+    	if (this.isSelectable) {
+	    	// console.log("mouse over");
+	    	this.mesh.material.color.setRGB(1.0, 0, 0);
+	    	console.log(this.xPos + " " + this.zPos);
+    	}
     },
 
     markAsMovable: function() {

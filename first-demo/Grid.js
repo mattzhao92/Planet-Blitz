@@ -75,7 +75,10 @@ var Grid = Class.extend({
 
         tilesToHighlight.forEach(function(tile) {
             tile.markAsMovable();
+            tile.setSelectable(true);
         });
+
+        // turn on mouse listener
     },
 
     getTilesInArea: function(originTileXPos, originTileZPos, radius) {
