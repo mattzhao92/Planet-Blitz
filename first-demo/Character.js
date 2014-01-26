@@ -32,6 +32,7 @@ var Character = Class.extend({
         this.loadFile("headcombinedtextured.js");
     
         this.world = args.world;
+        this.isActive = false;
     },
 
     placeAtGridPos: function(xPos, zPos) {
@@ -55,14 +56,20 @@ var Character = Class.extend({
 
     // callback - called when unit is selected. Gets a reference to the game state ("world")
     onSelect: function(world) {
+        // don't do anything if this unit was already selected
+        if (this.isActive) {
+            return;
+        }
         // world.deselectAll();
         this.mesh.children[0].material.color.setRGB(1.0, 0, 0);
         world.markCharacterAsSelected(this);
+        this.isActive = true;
     },
 
     deselect: function() {
         // return to original color
         this.mesh.children[0].material.color.setRGB(1.0, 1.0, 1.0);
+        this.isActive = false;
     },
 
     loadFile: function(filename) {

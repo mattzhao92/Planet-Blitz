@@ -44,6 +44,7 @@ var Grid = Class.extend({
 
         this.setControls();
         this.setupMouseMoveListener();
+        this.setupMouseDownListener();
     },
 
     convertXPosToWorldX: function(tileXPos) {
@@ -93,29 +94,41 @@ var Grid = Class.extend({
     setupMouseMoveListener: function() {
         var scope = this;
 
-        window.addEventListener('mousemove',
-            function(event) {
+        window.addEventListener('mousemove', function(event) {
+            scope.onMouseMove(event);
+        }, false);
+    },
 
-                var projector = new THREE.Projector();
-                var mouseVector = new THREE.Vector3();
+    setupMouseDownListener: function() {
+        var scope = this;
 
-                mouseVector.x = 2 * (event.clientX / window.innerWidth) - 1;
-                mouseVector.y = 1 - 2 * (event.clientY / window.innerHeight);
+        window.addEventListener('mousedown', function(event) {
+            scope.onMouseDown(event);
+        }, false);
+    },
 
-                var raycaster = projector.pickingRay(mouseVector.clone(), scope.camera),
-                    intersects = raycaster.intersectObjects(scope.tiles.children);
+    onMouseMove: function(event) {
+        var scope = this;
 
-                scope.tiles.children.forEach(function(tile) {
-                    tile.material.color.setRGB(tile.grayness, tile.grayness, tile.grayness);
-                });
+        var projector = new THREE.Projector();
+        var mouseVector = new THREE.Vector3();
 
-                for (var i = 0; i < intersects.length; i++) {
-                    var intersection = intersects[i],
-                        obj = intersection.object;
+        mouseVector.x = 2 * (event.clientX / window.innerWidth) - 1;
+        mouseVector.y = 1 - 2 * (event.clientY / window.innerHeight);
 
-                    obj.onMouseOver();
-                }
-            }, false);
+        var raycaster = projector.pickingRay(mouseVector.clone(), scope.camera),
+            intersects = raycaster.intersectObjects(scope.tiles.children);
+
+        scope.tiles.children.forEach(function(tile) {
+            tile.material.color.setRGB(tile.grayness, tile.grayness, tile.grayness);
+        });
+
+        for (var i = 0; i < intersects.length; i++) {
+            var intersection = intersects[i],
+                obj = intersection.object;
+
+            obj.onMouseOver();
+        }
     },
 
     getTileAtTilePos: function(xPos, zPos) {
@@ -187,6 +200,27 @@ var Grid = Class.extend({
         }
     },
 
+    onMouseDown: function(event) {
+        var scope = this;
+
+        var projector = new THREE.Projector();
+        var mouseVector = new THREE.Vector3();
+
+        mouseVector.x = 2 * (event.clientX / window.innerWidth) - 1;
+        mouseVector.y = 1 - 2 * (event.clientY / window.innerHeight);
+
+        var raycaster = projector.pickingRay(mouseVector.clone(), scope.camera);
+
+        // recursively call intersects
+        var intersects = raycaster.intersectObjects(scope.charactersOnMap, true);
+
+        console.log("intersect length is  " + intersects.length + "  " + scope.charactersOnMap);
+        if (intersects.length > 0) {
+            var firstIntersect = intersects[0];
+            firstIntersect.object.onSelect(scope);
+        }
+    },
+
     // Event handlers
     setControls: function() {
         'use strict';
@@ -230,8 +264,6 @@ var Grid = Class.extend({
                 console.log("enqueueMotion ---------- ");
                 scope.characterBeingSelected.enqueueMotion();
                 scope.characterBeingSelected.setDirection(controls);
-            } else {
-                console.log("BAD BAD BAD ");
             }
         });
         // When the user releases a key
@@ -243,8 +275,8 @@ var Grid = Class.extend({
                     controls.right = false;
                     break;
                 case 38:
-                    controls.down = false;
-                    break;
+                controls.down = false;
+                break;
                 case 39:
                     controls.left = false;
                     break;
@@ -265,35 +297,13 @@ var Grid = Class.extend({
                 user.setDirection(controls);
             }
         });
-        // On resize
-        jQuery(window).resize(function() {
-            // Redefine the size of the renderer
-            //basicScene.setAspect();
-        });
+    // On resize
+    jQuery(window).resize(function() {
+        // Redefine the size of the renderer
+        //basicScene.setAspect();
+    });
 
-        var scope = this;
-        window.addEventListener('mousedown',
-            function(event) {
-
-                var projector = new THREE.Projector();
-                var mouseVector = new THREE.Vector3();
-
-                mouseVector.x = 2 * (event.clientX / window.innerWidth) - 1;
-                mouseVector.y = 1 - 2 * (event.clientY / window.innerHeight);
-
-                var raycaster = projector.pickingRay(mouseVector.clone(), scope.camera);
-
-                // recursively call intersects
-                var intersects = raycaster.intersectObjects(scope.charactersOnMap, true);
-
-                console.log("intersect length is  " + intersects.length + "  " + scope.charactersOnMap);
-                if (intersects.length > 0) {
-                    var firstIntersect = intersects[0];
-                    firstIntersect.object.onSelect(scope);
-                }
-
-            }, false);
-    },
+},
 
 
 });
