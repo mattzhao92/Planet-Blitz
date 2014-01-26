@@ -31,6 +31,13 @@ var Character = Class.extend({
         this.motionQueue = [];
         this.loader = new THREE.JSONLoader();
         this.loadFile("headcombinedtextured.js");
+    
+        this.world = args.world;
+    },
+
+    placeAtGridPos: function(xPos, zPos) {
+        this.xPos = xPos;
+        this.zPos = zPos;
     },
 
     getMovementRange: function() {

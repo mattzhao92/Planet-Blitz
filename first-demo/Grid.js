@@ -4,24 +4,23 @@
  */
 var Grid = Class.extend({
     // Class constructor
-    init: function(width, length, squareSize, scene, camera) {
+    init: function(width, length, tileSize, scene, camera) {
         'use strict';
 
         this.gridWidth = width;
         this.gridLength = length;
-
+        this.tileSize = tileSize;
         this.scene = scene;
         this.camera = camera;
 
         // Set the "world" modelisation object
         this.tiles = new THREE.Object3D();
-        this.drawGridSquares(width, length, squareSize);
+        this.drawGridSquares(width, length, tileSize);
 
         this.characters = new THREE.Object3D();
         this.numOfCharacters = 3;
         this.charactersOnMap = [];
 
-        this.squareSize = squareSize;
 
         this.characterFactory = new CharacterFactory();
 
@@ -30,7 +29,7 @@ var Grid = Class.extend({
 
             var charArgs = {
                 position: {
-                    x: -((width) / 2) + 2 + ((i + 3) * this.squareSize),
+                    x: -((width) / 2) + 2 + ((i + 3) * this.tileSize),
                     y: 5,
                 },
                 world: scope
@@ -47,6 +46,14 @@ var Grid = Class.extend({
 
         this.setControls();
         this.setupMouseMoveListener();
+    },
+
+    convertXPosToWorldX: function(tileXPos) {
+        return -((this.gridWidth)/2) + (tileXPos * this.tileSize);
+    },
+
+    convertZPosToWorldZ: function(tileZPos) {
+        return -((this.gridLength/2)) + (tileZPos * this.tileSize);
     },
 
     markCharacterAsSelected: function(character) {
@@ -109,9 +116,9 @@ var Grid = Class.extend({
             for (var i = 0; i < this.numberSquaresOnZAxis; i++) {
                 var tile = this.tileFactory.createTile(i, j);
 
-                tile.position.x = -((width) / 2) + (i * size);
+                tile.position.x = this.convertXPosToWorldX(i);
                 tile.position.y = 0;
-                tile.position.z = -((length) / 2) + (j * size);
+                tile.position.z = this.convertZPosToWorldZ(j);
                 tile.rotation.x = -0.5 * Math.PI;
 
                 this.tiles.add(tile);
