@@ -1,14 +1,22 @@
 var GridCell = Class.extend({
 	// Class constructor
-    init: function (mesh, xPos, zPos) {
+    init: function (mesh, grayness, xPos, zPos) {
     	this.mesh = mesh;
     	this.xPos = xPos;
     	this.zPos = zPos;
+    	this.grayness = grayness;
     	this.isSelectable = false;
     },
 
     getGrayness: function() {
     	return 3.0;
+    },
+
+    reset: function() {
+    	// reset color
+    	// this.mesh.material.color.setRGB(1, 1, 1);
+    	this.mesh.material.color.setRGB(this.grayness, this.grayness, this.grayness);
+  		this.isSelectable = false;
     },
 
     setSelectable: function(isSelectable) {
@@ -19,7 +27,6 @@ var GridCell = Class.extend({
     	if (this.isSelectable) {
 	    	// console.log("mouse over");
 	    	this.mesh.material.color.setRGB(1.0, 0, 0);
-	    	console.log(this.xPos + " " + this.zPos);
     	}
     },
 
@@ -41,9 +48,8 @@ var TileFactory = Class.extend({
 		mat.color.setRGB( grayness, grayness, grayness );
 
 		var tile = new THREE.Mesh(this.tileGeom, mat);
-		tile.grayness = grayness;
 
-		var gridCell = new GridCell(tile, xPos, zPos);
+		var gridCell = new GridCell(tile, grayness, xPos, zPos);
 		_.extend(tile, gridCell);
 
 		return tile;

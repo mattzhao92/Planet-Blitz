@@ -18,9 +18,6 @@ var Character = Class.extend({
         // Set the character modelisation object
         this.mesh = new THREE.Object3D();
 
-        this.xPos = 0;
-        this.zPos = 0;
-
         // Set the vector of the current motion
         this.direction = new THREE.Vector3(0, 0, 0);
 
@@ -31,23 +28,33 @@ var Character = Class.extend({
         this.loader = new THREE.JSONLoader();
         this.loadFile("headcombinedtextured.js");
     
+        // need to declare all attributes in constructor because of the copying of attributes in (_.extend)
+        // TODO: problem, since attributes will not be properly referenced (setter/getter)
+        this.xPos = 0;
+        this.zPos = 0;
+
         this.world = args.world;
         this.isActive = false;
     },
 
     placeAtGridPos: function(xPos, zPos) {
-        this.xPos = xPos;
-        this.zPos = zPos;
+        // TODO: not happy about this, but this is needed because of the way the character.mesh gets extended with the character's properties
+        this.mesh.xPos = xPos;
+        this.mesh.zPos = zPos;
         this.mesh.position.x = this.world.convertXPosToWorldX(xPos);
         this.mesh.position.z = this.world.convertZPosToWorldZ(zPos);
+
+        console.log("placeAtGridPos called");
+        console.log("getTileXPos: " + this.getTileXPos());
+        console.log("getTileZPos: " + this.getTileZPos());
     },
 
     getTileXPos: function() {
-        return this.xPos;
+        return this.mesh.xPos;
     },
 
     getTileZPos: function() {
-        return this.zPos;
+        return this.mesh.zPos;
     },
 
     getMovementRange: function() {

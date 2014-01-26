@@ -13,6 +13,8 @@ var Grid = Class.extend({
         this.scene = scene;
         this.camera = camera;
 
+        this.highlightedTiles = null;
+
         // create grid tiles
         this.tiles = new THREE.Object3D();
         this.tilesArray = null;
@@ -35,6 +37,7 @@ var Grid = Class.extend({
 
             var character = this.characterFactory.createCharacter(charArgs);
             character.placeAtGridPos(i + 3, 4);
+            console.log(character.getTileZPos());
             this.charactersOnMap.push(character);
 
             this.scene.add(character);
@@ -69,22 +72,40 @@ var Grid = Class.extend({
 
     displayMovementArea: function(character) {
         var characterMovementRange = character.getMovementRange();
+        console.log("character movement range " + characterMovementRange);
+
+        // console.log(character.getTileXPos() + " " + character.getTileZPos());
+        console.log(character.xPos + " " + character.zPos);
 
         // highlight adjacent squares - collect all tiles from radius
         var tilesToHighlight = this.getTilesInArea(character.getTileXPos(), character.getTileZPos(), characterMovementRange);
+
+        if (this.highlightedTiles) {
+            this.highlightedTiles.forEach(function(tile) {
+                tile.reset();
+            });
+        }
 
         tilesToHighlight.forEach(function(tile) {
             tile.markAsMovable();
             tile.setSelectable(true);
         });
 
-        // turn on mouse listener
+        this.highlightedTiles = tilesToHighlight;
     },
 
     getTilesInArea: function(originTileXPos, originTileZPos, radius) {
 
+        var tiles = [];
+        for (var i = -radius; i <= radius; i++) {
+            // console.log("Highlight pos " + (originTileXPos + i));
+            // console.log("Highlight pos " + (originTileZPos + i));
+            
+            tiles.push(this.getTileAtTilePos(originTileXPos + i, originTileZPos));
+            tiles.push(this.getTileAtTilePos(originTileXPos, originTileZPos + i));
+        }
         // return some collection of tiles
-        var tiles = [this.getTileAtTilePos(0, 1), this.getTileAtTilePos(0, 2), this.getTileAtTilePos(0, 3), this.getTileAtTilePos(100, 100)];
+        // var tiles = [this.getTileAtTilePos(0, 1), this.getTileAtTilePos(0, 2), this.getTileAtTilePos(0, 3), this.getTileAtTilePos(100, 100)];
         // filter out nulls
         tiles = _.filter(tiles, function(tile) {
             return (tile != null);
@@ -107,14 +128,6 @@ var Grid = Class.extend({
         }, false);
     },
 
-    setupMouseDownListener: function() {
-        var scope = this;
-
-        window.addEventListener('mousedown', function(event) {
-            scope.onMouseDown(event);
-        }, false);
-    },
-
     onMouseMove: function(event) {
         var scope = this;
 
@@ -132,6 +145,35 @@ var Grid = Class.extend({
                 obj = intersection.object;
 
             obj.onMouseOver();
+        }
+    },
+
+    setupMouseDownListener: function() {
+        var scope = this;
+
+        window.addEventListener('mousedown', function(event) {
+            scope.onMouseDown(event);
+        }, false);
+    },
+
+    onMouseDown: function(event) {
+        var scope = this;
+
+        var projector = new THREE.Projector();
+        var mouseVector = new THREE.Vector3();
+
+        mouseVector.x = 2 * (event.clientX / window.innerWidth) - 1;
+        mouseVector.y = 1 - 2 * (event.clientY / window.innerHeight);
+
+        var raycaster = projector.pickingRay(mouseVector.clone(), scope.camera);
+
+        // recursively call intersects
+        var intersects = raycaster.intersectObjects(scope.charactersOnMap, true);
+
+        console.log("intersect length is  " + intersects.length + "  " + scope.charactersOnMap);
+        if (intersects.length > 0) {
+            var firstIntersect = intersects[0];
+            firstIntersect.object.onSelect(scope);
         }
     },
 
@@ -201,27 +243,6 @@ var Grid = Class.extend({
         for (var i = 0; i < this.charactersOnMap.length; i++) {
             var character = this.charactersOnMap[i];
             character.dequeueMotion();
-        }
-    },
-
-    onMouseDown: function(event) {
-        var scope = this;
-
-        var projector = new THREE.Projector();
-        var mouseVector = new THREE.Vector3();
-
-        mouseVector.x = 2 * (event.clientX / window.innerWidth) - 1;
-        mouseVector.y = 1 - 2 * (event.clientY / window.innerHeight);
-
-        var raycaster = projector.pickingRay(mouseVector.clone(), scope.camera);
-
-        // recursively call intersects
-        var intersects = raycaster.intersectObjects(scope.charactersOnMap, true);
-
-        console.log("intersect length is  " + intersects.length + "  " + scope.charactersOnMap);
-        if (intersects.length > 0) {
-            var firstIntersect = intersects[0];
-            firstIntersect.object.onSelect(scope);
         }
     },
 
