@@ -81,7 +81,12 @@ var Grid = Class.extend({
     getTilesInArea: function(originTileXPos, originTileZPos, radius) {
 
         // return some collection of tiles
-        var tiles = [this.getTileAtTilePos(0, 1), this.getTileAtTilePos(0, 2), this.getTileAtTilePos(0, 3)];
+        var tiles = [this.getTileAtTilePos(0, 1), this.getTileAtTilePos(0, 2), this.getTileAtTilePos(0, 3), this.getTileAtTilePos(100, 100)];
+        // filter out nulls
+        tiles = _.filter(tiles, function(tile) {
+            return (tile != null);
+        });
+
         return tiles;
     },
 
@@ -118,10 +123,6 @@ var Grid = Class.extend({
 
         var raycaster = projector.pickingRay(mouseVector.clone(), scope.camera),
             intersects = raycaster.intersectObjects(scope.tiles.children);
-
-        scope.tiles.children.forEach(function(tile) {
-            tile.material.color.setRGB(tile.grayness, tile.grayness, tile.grayness);
-        });
 
         for (var i = 0; i < intersects.length; i++) {
             var intersection = intersects[i],
