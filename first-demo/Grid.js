@@ -100,10 +100,9 @@
             this.numberSquaresOnXAxis = width/size;
             this.numberSquaresOnZAxis = length/size;
 
-            for (var j = 0 ; j < this.numberSquaresOnZAxis; j++) {
-                for (var i = 0 ; i < this.numberSquaresOnXAxis; i++) {
-
-                    var tile = this.tileFactory.createTile();
+            for (var j = 0 ; j < this.numberSquaresOnXAxis; j++) {
+              for (var i = 0 ; i < this.numberSquaresOnZAxis; i++) {
+                    var tile = this.tileFactory.createTile(i, j);
 
                     tile.position.x =- ((width)/2) + (i * size);
                     tile.position.y = 0;
@@ -111,7 +110,7 @@
                     tile.rotation.x = -0.5 * Math.PI;
 
                     this.tiles.add(tile);
-                }
+              }
             }
 
             this.scene.add(this.tiles);

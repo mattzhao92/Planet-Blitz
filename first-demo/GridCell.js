@@ -1,7 +1,9 @@
 var GridCell = Class.extend({
 	// Class constructor
-    init: function (mesh) {
+    init: function (mesh, xPos, zPos) {
     	this.mesh = mesh;
+    	this.xPos = xPos;
+    	this.zPos = zPos;
     },
 
     getGrayness: function() {
@@ -11,6 +13,11 @@ var GridCell = Class.extend({
     onMouseOver: function(scope) {
     	// console.log("mouse over");
     	this.mesh.material.color.setRGB(1.0, 0, 0);
+    	console.log(this.xPos + " " + this.zPos);
+    },
+
+    markAsMovable: function(scope) {
+    	this.mesh.material.color.setRGB(0, 1.0, 0);
     }
 });
 
@@ -19,14 +26,17 @@ var TileFactory = Class.extend({
 		this.tileGeom = new THREE.PlaneGeometry(tileSize, tileSize);
 	}, 
 
-	createTile: function() {
-		var grayness = Math.random() * 0.5 + 0.25;
+	createTile: function(xPos, zPos) {
+
 		var mat = new THREE.MeshBasicMaterial({overdraw: true});
+
+		var grayness = Math.random() * 0.5 + 0.25;
 		mat.color.setRGB( grayness, grayness, grayness );
+
 		var tile = new THREE.Mesh(this.tileGeom, mat);
 		tile.grayness = grayness;
 
-		var gridCell = new GridCell(tile);
+		var gridCell = new GridCell(tile, xPos, zPos);
 		_.extend(tile, gridCell);
 
 		return tile;
