@@ -15,6 +15,8 @@ var Grid = Class.extend({
 
         this.highlightedTiles = null;
 
+        this.currentMouseOverTile = null;
+
         // create grid tiles
         this.tiles = new THREE.Object3D();
         this.tilesArray = null;
@@ -70,6 +72,18 @@ var Grid = Class.extend({
         this.displayMovementArea(character);
     },
 
+    markTileAsSelected: function(tile) {
+        if (tile == this.currentMouseOverTile) {
+            return;
+        }
+        
+        if (this.currentMouseOverTile) {
+            this.currentMouseOverTile.markAsNotSelected();
+        }
+
+        this.currentMouseOverTile = tile;
+    },
+
     displayMovementArea: function(character) {
         var characterMovementRange = character.getMovementRange();
         console.log("character movement range " + characterMovementRange);
@@ -82,7 +96,7 @@ var Grid = Class.extend({
 
         if (this.highlightedTiles) {
             this.highlightedTiles.forEach(function(tile) {
-                tile.reset();
+                tile.deselect();
             });
         }
 
@@ -190,7 +204,7 @@ var Grid = Class.extend({
     },
 
     drawGridSquares: function(width, length, size) {
-        this.tileFactory = new TileFactory(size);
+        this.tileFactory = new TileFactory(this, size);
 
         this.numberSquaresOnXAxis = width / size;
         this.numberSquaresOnZAxis = length / size;
