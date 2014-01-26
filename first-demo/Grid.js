@@ -76,7 +76,7 @@ var Grid = Class.extend({
         if (tile == this.currentMouseOverTile) {
             return;
         }
-        
+
         if (this.currentMouseOverTile) {
             this.currentMouseOverTile.markAsNotSelected();
         }
@@ -96,7 +96,7 @@ var Grid = Class.extend({
 
         if (this.highlightedTiles) {
             this.highlightedTiles.forEach(function(tile) {
-                tile.deselect();
+                tile.reset();
             });
         }
 

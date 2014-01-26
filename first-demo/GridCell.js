@@ -13,7 +13,7 @@ var GridCell = Class.extend({
     	return this.grayness;
     },
 
-    deselect: function() {
+    reset: function() {
     	// reset color
     	// this.mesh.material.color.setRGB(1, 1, 1);
     	this.mesh.material.color.setRGB(this.grayness, this.grayness, this.grayness);
