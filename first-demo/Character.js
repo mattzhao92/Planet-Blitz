@@ -15,14 +15,8 @@ var Character = Class.extend({
 // Class constructor
     init: function (args) {
         'use strict';
-        // Set the different geometries composing the humanoid
-        var head = new THREE.SphereGeometry(32, 8, 8),
-            // Set the material, the "skin"
-            nose = new THREE.SphereGeometry(4, 4, 4),
-        	material = new THREE.MeshLambertMaterial({color : args.color});
         // Set the character modelisation object
         this.mesh = new THREE.Object3D();
-        //this.mesh.position.y = -10;
 
         // TODO: replace this with some type of grid position
         this.mesh.position.x = args.position.x;
@@ -30,13 +24,17 @@ var Character = Class.extend({
 
         // Set the vector of the current motion
         this.direction = new THREE.Vector3(0, 0, 0);
+
         // Set the current animation step
         this.step = 0;
-        this.motionInProess = false;
+        this.motionInProcess = false;
         this.motionQueue = [];
         this.loader = new THREE.JSONLoader();
         this.loadFile("headcombinedtextured.js");
-        this.atCell = {x: Math.floor(args.position.x / 40), y: Math.floor(args.position.y / 40)};
+    },
+
+    getMovementRange: function() {
+        return 3;
     },
 
     // callback - called when unit is selected. Gets a reference to the game state ("world")
@@ -53,7 +51,6 @@ var Character = Class.extend({
 
     loadFile: function(filename) {
         var scope = this;
-
 
         this.loader.load(filename, function(geometry) {
                 mesh = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial());
@@ -76,14 +73,13 @@ var Character = Class.extend({
         this.direction.set(x, y, z);
     },
 
-
     enqueueMotion: function() {
         this.motionQueue.push({dir: this.direction.clone()});
     },
 
     dequeueMotion: function() {
         if (this.motionQueue.length > 0) {
-            this.motionInProess = true;
+            this.motionInProcess = true;
             var direction = this.motionQueue.splice(0,1);
             if (direction.x !== 0 || direction.z !== 0) {
                 // Rotate the character

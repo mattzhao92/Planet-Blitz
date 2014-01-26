@@ -52,7 +52,10 @@
             if (this.characterBeingSelected) {
                 this.characterBeingSelected.deselect();
             }
+
             this.characterBeingSelected = character;
+
+            // show character movement speed
         },
 
         deselectAll: function() {
