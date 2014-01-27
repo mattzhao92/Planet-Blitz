@@ -69,7 +69,7 @@
                 this.setupMouseMoveListener();
 
                 this.loader = new THREE.JSONLoader();
-                this.loadFile("blendermodels/cubetexturetest.js");
+                this.loadFile("blendermodels/uvmappedandbaked.js");
                  // this.loadFile("blendermodels/fresnelandphong.js");
 
                  // begin animation
@@ -78,9 +78,16 @@
             }, 
 
             addGeometryToScene: function(geometry, materials) {
-                var texture = new THREE.ImageUtils.loadTexture("blendertextures/Kerkstra_20131109-_MG_6382.jpg");
-                var material = new THREE.MeshBasicMaterial({map: texture});
-                mesh = new THREE.Mesh(geometry, material);
+                // var texture = new THREE.ImageUtils.loadTexture("blendertextures/Kerkstra_20131109-_MG_6382.jpg");
+                var texture = new THREE.ImageUtils.loadTexture("blendertextures/pattern-camo.jpg")
+                // var material = new THREE.MeshBasicMaterial({map: texture});
+                materials[2] = new THREE.MeshBasicMaterial({map: texture});
+
+                var faceTexture = new THREE.ImageUtils.loadTexture("blendertextures/Kerkstra_20131109-_MG_6382.jpg");
+                materials[3] = new THREE.MeshBasicMaterial({map: faceTexture});
+
+                var combinedMaterials = new THREE.MeshFaceMaterial(materials);
+                mesh = new THREE.Mesh(geometry, combinedMaterials);
                 // mesh = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
                 // mesh = new THREE.Mesh(geometry, new THREE.MeshNormalMaterial());
                 mesh.scale.set(100, 100, 100);
