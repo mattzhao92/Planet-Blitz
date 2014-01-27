@@ -90,7 +90,7 @@
                 mesh = new THREE.Mesh(geometry, combinedMaterials);
                 // mesh = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
                 // mesh = new THREE.Mesh(geometry, new THREE.MeshNormalMaterial());
-                mesh.scale.set(100, 100, 100);
+                mesh.scale.set(60, 60, 60);
                 mesh.position.y = 0;
                 mesh.position.x = 0;
                 this.scene.add(mesh);
@@ -194,11 +194,6 @@
             setupControls: function() {
                 var controls = new THREE.MapControls(this.camera);
                 controls.panSpeed = .31;
-
-                // ensure that camera can't rotate too far down or up
-                controls.minPolarAngle = 0.3;
-                controls.maxPolarAngle = 1.26;
-
                 this.controls = controls;
             },
 
