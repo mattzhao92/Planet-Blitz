@@ -65,18 +65,23 @@
 
                 this.addChaseCube();
 
-                // begin animation
-                this.animate();
 
                 this.setupMouseMoveListener();
 
                 this.loader = new THREE.JSONLoader();
-                this.loadFile("blendermodels/uvmapped.js");
+                this.loadFile("blendermodels/cubetexturetest.js");
                  // this.loadFile("blendermodels/fresnelandphong.js");
+
+                 // begin animation
+                 this.animate();
+
             }, 
 
             addGeometryToScene: function(geometry, materials) {
-                mesh = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
+                var texture = new THREE.ImageUtils.loadTexture("electricity.jpg");
+                var material = new THREE.MeshBasicMaterial({map: texture});
+                mesh = new THREE.Mesh(geometry, material);
+                // mesh = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
                 // mesh = new THREE.Mesh(geometry, new THREE.MeshNormalMaterial());
                 mesh.scale.set(100, 100, 100);
                 mesh.position.y = 0;
