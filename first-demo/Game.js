@@ -128,6 +128,8 @@ $(function () {
 
             this.renderer.setSize( window.innerWidth, window.innerHeight );
 
+            // adjust camera controls
+            this.controls.handleResize();
         }
 
     };
