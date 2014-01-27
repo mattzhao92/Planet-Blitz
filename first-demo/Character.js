@@ -15,45 +15,72 @@ var Character = Class.extend({
 // Class constructor
     init: function (args) {
         'use strict';
-        // Set the different geometries composing the humanoid
-        var head = new THREE.SphereGeometry(32, 8, 8),
-            // Set the material, the "skin"
-            nose = new THREE.SphereGeometry(4, 4, 4),
-        	material = new THREE.MeshLambertMaterial({color : args.color});
         // Set the character modelisation object
         this.mesh = new THREE.Object3D();
-        //this.mesh.position.y = -10;
-
-        // TODO: replace this with some type of grid position
-        this.mesh.position.x = args.position.x;
-        this.mesh.position.z = args.position.y;
 
         // Set the vector of the current motion
         this.direction = new THREE.Vector3(0, 0, 0);
+
         // Set the current animation step
         this.step = 0;
-        this.motionInProess = false;
+        this.motionInProcess = false;
         this.motionQueue = [];
         this.loader = new THREE.JSONLoader();
         this.loadFile("headcombinedtextured.js");
-        this.atCell = {x: Math.floor(args.position.x / 40), y: Math.floor(args.position.y / 40)};
+    
+        // need to declare all attributes in constructor because of the copying of attributes in (_.extend)
+        // TODO: problem, since attributes will not be properly referenced (setter/getter)
+        this.xPos = 0;
+        this.zPos = 0;
+
+        this.world = args.world;
+        this.isActive = false;
+    },
+
+    placeAtGridPos: function(xPos, zPos) {
+        // TODO: not happy about this, but this is needed because of the way the character.mesh gets extended with the character's properties
+        this.mesh.xPos = xPos;
+        this.mesh.zPos = zPos;
+        this.mesh.position.x = this.world.convertXPosToWorldX(xPos);
+        this.mesh.position.z = this.world.convertZPosToWorldZ(zPos);
+
+        console.log("placeAtGridPos called");
+        console.log("getTileXPos: " + this.getTileXPos());
+        console.log("getTileZPos: " + this.getTileZPos());
+    },
+
+    getTileXPos: function() {
+        return this.mesh.xPos;
+    },
+
+    getTileZPos: function() {
+        return this.mesh.zPos;
+    },
+
+    getMovementRange: function() {
+        return 3;
     },
 
     // callback - called when unit is selected. Gets a reference to the game state ("world")
     onSelect: function(world) {
-        world.deselectAll();
+        // don't do anything if this unit was already selected
+        if (this.isActive) {
+            return;
+        }
+        // world.deselectAll();
         this.mesh.children[0].material.color.setRGB(1.0, 0, 0);
         world.markCharacterAsSelected(this);
+        this.isActive = true;
     },
 
     deselect: function() {
         // return to original color
         this.mesh.children[0].material.color.setRGB(1.0, 1.0, 1.0);
+        this.isActive = false;
     },
 
     loadFile: function(filename) {
         var scope = this;
-
 
         this.loader.load(filename, function(geometry) {
                 mesh = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial());
@@ -76,14 +103,13 @@ var Character = Class.extend({
         this.direction.set(x, y, z);
     },
 
-
     enqueueMotion: function() {
         this.motionQueue.push({dir: this.direction.clone()});
     },
 
     dequeueMotion: function() {
         if (this.motionQueue.length > 0) {
-            this.motionInProess = true;
+            this.motionInProcess = true;
             var direction = this.motionQueue.splice(0,1);
             if (direction.x !== 0 || direction.z !== 0) {
                 // Rotate the character
