@@ -34,9 +34,19 @@
 	},
 
 	{
-		"DbgColor" : 15658734,
-		"DbgIndex" : 0,
-		"DbgName" : "default",
+		"DbgColor" : 15597568,
+		"DbgIndex" : 1,
+		"DbgName" : "Material.001",
+		"blending" : "NormalBlending",
+		"colorAmbient" : [0.4109375476837158, 0.027356717735528946, 0.032589104026556015],
+		"colorDiffuse" : [0.4109375476837158, 0.027356717735528946, 0.032589104026556015],
+		"colorSpecular" : [1.0, 0.10309172421693802, 0.17958742380142212],
+		"depthTest" : true,
+		"depthWrite" : true,
+		"shading" : "Phong",
+		"specularCoef" : 50,
+		"transparency" : 1.0,
+		"transparent" : true,
 		"vertexColors" : false
 	},
 
@@ -48,9 +58,19 @@
 	},
 
 	{
-		"DbgColor" : 15658734,
-		"DbgIndex" : 0,
-		"DbgName" : "default",
+		"DbgColor" : 15597568,
+		"DbgIndex" : 1,
+		"DbgName" : "Material.008",
+		"blending" : "NormalBlending",
+		"colorAmbient" : [0.800000011920929, 0.800000011920929, 0.800000011920929],
+		"colorDiffuse" : [0.800000011920929, 0.800000011920929, 0.800000011920929],
+		"colorSpecular" : [1.0, 1.0, 1.0],
+		"depthTest" : true,
+		"depthWrite" : true,
+		"shading" : "Lambert",
+		"specularCoef" : 50,
+		"transparency" : 1.0,
+		"transparent" : false,
 		"vertexColors" : false
 	}],
 
