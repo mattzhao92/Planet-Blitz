@@ -83,7 +83,7 @@ THREE.MapControls = function ( object, domElement ) {
     var _panEnd = new THREE.Vector2();
 
     this.handleResize = function () {
-
+        console.log("handle resize called");
         if ( this.domElement === document ) {
 
             this.screen.left = 0;
@@ -94,6 +94,17 @@ THREE.MapControls = function ( object, domElement ) {
         } else {
 
             this.screen = this.domElement.getBoundingClientRect();
+
+        }
+
+    };
+
+
+    this.handleEvent = function ( event ) {
+
+        if ( typeof this[ event.type ] == 'function' ) {
+
+            this[ event.type ]( event );
 
         }
 
@@ -494,6 +505,7 @@ THREE.MapControls = function ( object, domElement ) {
     this.domElement.addEventListener( 'DOMMouseScroll', onMouseWheel, false ); // firefox
     this.domElement.addEventListener( 'keydown', onKeyDown, false );
 
+    this.handleResize();
 };
 
 THREE.MapControls.prototype = Object.create( THREE.EventDispatcher.prototype );
