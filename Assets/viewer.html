@@ -71,22 +71,26 @@
                 this.setupMouseMoveListener();
 
                 this.loader = new THREE.JSONLoader();
-                this.loadFile("blendermodels/headtexturednonUV.js");
+                this.loadFile("blendermodels/uvmapped.js");
                  // this.loadFile("blendermodels/fresnelandphong.js");
             }, 
+
+            addGeometryToScene: function(geometry, materials) {
+                mesh = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
+                // mesh = new THREE.Mesh(geometry, new THREE.MeshNormalMaterial());
+                mesh.scale.set(100, 100, 100);
+                mesh.position.y = 0;
+                mesh.position.x = 0;
+                this.scene.add(mesh);
+
+            },
 
             loadFile: function(filename) {
                 var scope = this;
 
                 this.loader.load(filename, function(geometry, materials) {
-                    mesh = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
-                    // mesh = new THREE.Mesh(geometry, new THREE.MeshNormalMaterial());
-                    mesh.scale.set(100, 100, 100);
-                    mesh.position.y = 0;
-                    mesh.position.x = 0;
-                    scope.scene.add(mesh);
-                    
-                })
+                    scope.addGeometryToScene(geometry, materials);
+                });
             },
 
             setupMouseMoveListener: function() {
