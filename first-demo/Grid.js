@@ -185,11 +185,6 @@ var Grid = Class.extend({
         var intersects = raycaster.intersectObjects(scope.charactersOnMap, true);
         var intersectsWithTiles = raycaster.intersectObjects(scope.tiles.children);
 
-        if (intersects.length > 0) {
-            var firstIntersect = intersects[0];
-            firstIntersect.object.onSelect(scope);
-        }
-
         if (intersectsWithTiles.length > 0) {
             var obj = intersectsWithTiles[0].object;
             var coordinate = obj.onMouseOver();
@@ -204,6 +199,11 @@ var Grid = Class.extend({
                             " Z: "+ this.characterBeingSelected.getTileZPos());
                 console.log("des X: "+coordinate.x +" Z: "+coordinate.z);
             }
+        }
+
+        if (intersects.length > 0) {
+            var firstIntersect = intersects[0];
+            firstIntersect.object.onSelect(scope);
         }
     },
 
@@ -317,8 +317,8 @@ var Grid = Class.extend({
             // Update the character's direction
             if (scope.characterBeingSelected) {
                 console.log("enqueueMotion ---------- ");
-                scope.characterBeingSelected.enqueueMotion();
                 scope.characterBeingSelected.setDirectionWithControl(controls);
+                scope.characterBeingSelected.enqueueMotion();
             }
         });
         // When the user releases a key

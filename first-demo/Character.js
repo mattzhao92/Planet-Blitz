@@ -120,7 +120,7 @@ var Character = Class.extend({
             console.log("dequeueMotion: direction, [x "+direction.x +"] [z "+direction.z +" ] \n");
             if (direction.x !== 0 || direction.z !== 0) {
                 // Rotate the character
-                var rotateTween = this.rotate();
+                var rotateTween = this.rotate(direction);
                 // And, only if we're not colliding with an obstacle or a wall ...
                 if (this.collide()) {
                     return false;
@@ -135,10 +135,10 @@ var Character = Class.extend({
                 this.mesh.xPos += direction.x;
                 this.mesh.zPos += direction.z;
 
-                // var easing = TWEEN.Easing.Elastic.InOut;
-                // var easing = TWEEN.Easing.Linear.None;
+                //var easing = TWEEN.Easing.Elastic.InOut;
+                //var easing = TWEEN.Easing.Linear.None;
                 var easing = TWEEN.Easing.Quadratic.Out;
-                // var easing = TWEEN.Easing.Exponential.EaseOut;
+                //var easing = TWEEN.Easing.Exponential.EaseOut;
                 var tween = new TWEEN.Tween({x: oldX, z: oldZ}).to({x: newX, z: newZ}, 450).easing(easing);
 
                 var myMesh = this.mesh;
@@ -146,15 +146,15 @@ var Character = Class.extend({
                     var xCoord = this.x;
                     var zCoord = this.z;
                     myMesh.position.x = xCoord;
-                    myMesh.position.z = zCoord;
+                     myMesh.position.z = zCoord;
                 };
 
                 tween.onUpdate(onUpdate);
 
-                var moveTween = tween;
-                this.direction.set(0, 0, 0);
+                 var moveTween = tween;
+                 this.direction.set(0, 0, 0);
 
-                var blankTween = new TWEEN.Tween({}).to({}, 100);
+                 var blankTween = new TWEEN.Tween({}).to({}, 100);
 
                 rotateTween.chain(blankTween);
                 rotateTween.chain(moveTween);
@@ -167,11 +167,11 @@ var Character = Class.extend({
     },
 
     // Rotate the character
-    rotate: function () {
+    rotate: function (direction) {
         'use strict';
         // Set the direction's angle, and the difference between it and our Object3D's current rotation
         console.log("rotation \n");
-        var angle = Math.atan2(this.direction.x, this.direction.z);
+        var angle = Math.atan2(direction.x, direction.z);
 
         // transition from current rotation (mesh.rotation.y) to desired angle 'angle'
 
