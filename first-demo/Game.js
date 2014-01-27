@@ -31,6 +31,10 @@ $(function () {
 
             // begin animation loop
             this.animate();
+
+            var scope = this;
+            window.addEventListener( 'resize', function() {
+                scope.onWindowResize() }, false );
         }, 
 
         setupCamera: function() {
@@ -115,6 +119,15 @@ $(function () {
             $("#Stats-output").append( stats.domElement );
 
             return stats;
+        }, 
+
+        onWindowResize: function() {
+
+            this.camera.aspect = window.innerWidth / window.innerHeight;
+            this.camera.updateProjectionMatrix();
+
+            this.renderer.setSize( window.innerWidth, window.innerHeight );
+
         }
 
     };
