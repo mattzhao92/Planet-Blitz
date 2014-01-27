@@ -183,11 +183,27 @@ var Grid = Class.extend({
 
         // recursively call intersects
         var intersects = raycaster.intersectObjects(scope.charactersOnMap, true);
+        var intersectsWithTiles = raycaster.intersectObjects(scope.tiles.children);
 
-        console.log("intersect length is  " + intersects.length + "  " + scope.charactersOnMap);
         if (intersects.length > 0) {
             var firstIntersect = intersects[0];
             firstIntersect.object.onSelect(scope);
+        }
+
+        if (intersectsWithTiles.length > 0) {
+            var obj = intersectsWithTiles[0].object;
+            var coordinate = obj.onMouseOver();
+            if (this.characterBeingSelected && coordinate) {
+                this.characterBeingSelected.setDirection(
+                    new THREE.Vector3(coordinate.x - this.characterBeingSelected.getTileXPos(),
+                                      0,
+                                      coordinate.z - this.characterBeingSelected.getTileZPos()));
+                this.characterBeingSelected.enqueueMotion();
+                console.log("character is being moved to a new coordinate position \n");
+                console.log("src X: "+this.characterBeingSelected.getTileXPos() +
+                            " Z: "+ this.characterBeingSelected.getTileZPos());
+                console.log("des X: "+coordinate.x +" Z: "+coordinate.z);
+            }
         }
     },
 
@@ -302,7 +318,7 @@ var Grid = Class.extend({
             if (scope.characterBeingSelected) {
                 console.log("enqueueMotion ---------- ");
                 scope.characterBeingSelected.enqueueMotion();
-                scope.characterBeingSelected.setDirection(controls);
+                scope.characterBeingSelected.setDirectionWithControl(controls);
             }
         });
         // When the user releases a key
@@ -333,7 +349,7 @@ var Grid = Class.extend({
             }
             // Update the character's direction
             if (user) {
-                user.setDirection(controls);
+                user.setDirectionWithControl(controls);
             }
         });
     // On resize

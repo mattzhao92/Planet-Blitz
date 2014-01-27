@@ -29,11 +29,13 @@ var GridCell = Class.extend({
     },
 
     onMouseOver: function(scope) {
-    	if (this.isSelectable) {
-	    	// console.log("mouse over");
-	    	this.mesh.material.color.setRGB(1.0, 0, 0);
-    		this.world.markTileAsSelected(this);
-    	}
+        if (this.isSelectable) {
+                // console.log("mouse over");
+                this.mesh.material.color.setRGB(1.0, 0, 0);
+                this.world.markTileAsSelected(this);
+                return {x: this.xPos, z:this.zPos};
+        }
+        return null;
     },
 
     markAsMovable: function() {

@@ -94,7 +94,7 @@ var Character = Class.extend({
     },
 
     // Update the direction of the current motion
-    setDirection: function (controls) {
+    setDirectionWithControl: function (controls) {
         'use strict';
         // Either left or right, and either up or down (no jump or dive (on the Y axis), so far ...)
         var x = controls.left ? 1 : controls.right ? -1 : 0,
@@ -103,14 +103,21 @@ var Character = Class.extend({
         this.direction.set(x, y, z);
     },
 
+    setDirection: function (direction) {
+        this.direction = direction;
+    },
+
     enqueueMotion: function() {
-        this.motionQueue.push({dir: this.direction.clone()});
+        console.log("enqueueMotion \n");
+        this.motionQueue.push(this.direction.clone());
+        console.log("x: "+this.direction.x + " z: "+this.direction.z);
     },
 
     dequeueMotion: function() {
         if (this.motionQueue.length > 0) {
             this.motionInProcess = true;
-            var direction = this.motionQueue.splice(0,1);
+            var direction = this.motionQueue.splice(0,1)[0];
+            console.log("dequeueMotion: direction, [x "+direction.x +"] [z "+direction.z +" ] \n");
             if (direction.x !== 0 || direction.z !== 0) {
                 // Rotate the character
                 var rotateTween = this.rotate();
@@ -120,10 +127,13 @@ var Character = Class.extend({
                 }
                 // ... we move the character
                 var oldX = this.mesh.position.x;
-                var newX = this.mesh.position.x + this.direction.x * 40;
+                var newX = this.mesh.position.x + direction.x * 40;
 
                 var oldZ = this.mesh.position.z;
-                var newZ = this.mesh.position.z + this.direction.z * 40;
+                var newZ = this.mesh.position.z + direction.z * 40;
+
+                this.mesh.xPos += direction.x;
+                this.mesh.zPos += direction.z;
 
                 // var easing = TWEEN.Easing.Elastic.InOut;
                 // var easing = TWEEN.Easing.Linear.None;
