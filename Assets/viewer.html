@@ -58,12 +58,12 @@
                 this.clock = new THREE.Clock();
 
                 this.drawGamePlane();
-                // this.addLighting();
+                this.addLighting();
 
                 this.setupControls();
                 this.addControlGUI();
 
-                // this.addChaseCube();
+                this.addChaseCube();
 
                 // begin animation
                 this.animate();
@@ -71,18 +71,21 @@
                 this.setupMouseMoveListener();
 
                 this.loader = new THREE.JSONLoader();
-                this.loadFile("headcombinedtextured.js");
+                this.loadFile("blendermodels/headtexturednonUV.js");
+                 // this.loadFile("blendermodels/fresnelandphong.js");
             }, 
 
             loadFile: function(filename) {
                 var scope = this;
 
-                this.loader.load(filename, function(geometry) {
-                    mesh = new THREE.Mesh(geometry, new THREE.MeshNormalMaterial());
+                this.loader.load(filename, function(geometry, materials) {
+                    mesh = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
+                    // mesh = new THREE.Mesh(geometry, new THREE.MeshNormalMaterial());
                     mesh.scale.set(100, 100, 100);
                     mesh.position.y = 0;
                     mesh.position.x = 0;
                     scope.scene.add(mesh);
+                    
                 })
             },
 
@@ -119,6 +122,9 @@
                 var cubeGeometry = new THREE.CubeGeometry(5, 5, 5);
                 var cubeMaterial = new THREE.MeshLambertMaterial({color: 0xFF0000});
                 this.chaseCamCube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+                // this.chaseCamCube.position.x = 300;
+                // this.chaseCamCube.position.z = 300;
+                // this.chaseCamCube.position.y = 300;
                 this.scene.add(this.chaseCamCube);
             },
 
@@ -154,10 +160,11 @@
                 this.scene.add( ambientLight );
 
                 var directionalLight = new THREE.DirectionalLight( 0xffffff );
-                directionalLight.position.x = 1;
-                directionalLight.position.y = 1;
+                directionalLight.position.x = 300;
+                directionalLight.position.y = 400;
+                directionalLight.position.z = 300;
                 directionalLight.position.z = 0.75;
-                directionalLight.position.normalize();
+                // directionalLight.position.normalize();
                 this.scene.add( directionalLight );
 
                 var directionalLight = new THREE.DirectionalLight( 0x808080 );
