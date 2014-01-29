@@ -39,6 +39,7 @@ var Grid = Class.extend({
 
             var character = this.characterFactory.createCharacter(charArgs);
             character.placeAtGridPos(i + 3, 4);
+            this.markTileOccupiedByCharacter(i + 3, 4);
             console.log(character.getTileZPos());
             this.charactersOnMap.push(character);
 
@@ -60,10 +61,13 @@ var Grid = Class.extend({
         return -((this.gridLength/2)) + (tileZPos * this.tileSize);
     },
 
+
     markCharacterAsSelected: function(character) {
         // deselect previous character if there was one
         if (this.characterBeingSelected) {
-            this.characterBeingSelected.deselect();
+            if (this.characterBeingSelected != character) {
+                this.characterBeingSelected.deselect();
+            }
         }
 
         this.characterBeingSelected = character;
@@ -84,6 +88,24 @@ var Grid = Class.extend({
         this.currentMouseOverTile = tile;
     },
 
+    markTileOccupiedByCharacter: function(xPos, zPos) {
+        var tile = this.getTileAtTilePos(xPos, zPos);
+        if (tile) {
+            tile.hasCharacter = true;
+        }
+    },
+
+    markTileNotOccupiedByCharacter: function(xPos, zPos) {
+        var tile = this.getTileAtTilePos(xPos, zPos);
+        if (tile) {
+            tile.hasCharacter = false;
+        }
+    },
+
+    markTileOccupiedByObstacle: function() {
+
+    },
+
     displayMovementArea: function(character) {
         var characterMovementRange = character.getMovementRange();
         console.log("character movement range " + characterMovementRange);
@@ -92,7 +114,7 @@ var Grid = Class.extend({
         console.log(character.xPos + " " + character.zPos);
 
         // highlight adjacent squares - collect all tiles from radius
-        var tilesToHighlight = this.getTilesInArea(character.getTileXPos(), character.getTileZPos(), characterMovementRange);
+        var tilesToHighlight = this.getTilesInArea(character, characterMovementRange);
 
         if (this.highlightedTiles) {
             this.highlightedTiles.forEach(function(tile) {
@@ -108,22 +130,62 @@ var Grid = Class.extend({
         this.highlightedTiles = tilesToHighlight;
     },
 
-    getTilesInArea: function(originTileXPos, originTileZPos, radius) {
 
-        var tiles = [];
-        for (var i = -radius; i <= radius; i++) {
-            // console.log("Highlight pos " + (originTileXPos + i));
-            // console.log("Highlight pos " + (originTileZPos + i));
-            
-            tiles.push(this.getTileAtTilePos(originTileXPos + i, originTileZPos));
-            tiles.push(this.getTileAtTilePos(originTileXPos, originTileZPos + i));
+
+    getTilesInArea: function(character, radius) {
+        // DO A BFS here
+        var tilesToHighlight = [];
+        var startTile = this.getTileAtTilePos(character.getTileXPos(), character.getTileZPos());
+        if (!startTile) return tilesToHighlight;
+        
+        startTile.isObstacle();
+        var visited = new Array();
+        var nodesInCurrentLevel = new Array();
+        var nodesInNextLevel = new Array();
+        tilesToHighlight.push(startTile);
+        nodesInCurrentLevel.push(startTile);
+
+        while (nodesInCurrentLevel.length > 0 && radius > 0) {
+            var currentTile = nodesInCurrentLevel.pop();
+            console.log("currentTile x:"+currentTile.xPos + " z:"+currentTile.zPos);
+           
+            var validNeighbors = this.getNeighborTiles(currentTile.xPos, currentTile.zPos);
+            for (var i = 0; i < validNeighbors.length; i++) {
+                var neighbor = validNeighbors[i];
+                if (_.indexOf(visited, neighbor) == -1 && _.indexOf(nodesInNextLevel, neighbor)) {
+                    console.log("print here 111 \n");
+                    tilesToHighlight.push(neighbor);
+                    nodesInNextLevel.push(neighbor);
+                } else {
+                    console.log("print here 222 \n");
+                }
+            }
+       
+            if (nodesInCurrentLevel.length == 0) {
+                console.log("--------------------nodesInNextLevel   "+nodesInNextLevel);
+                nodesInCurrentLevel = nodesInNextLevel;
+                nodesInNextLevel = new Array();
+                radius = radius - 1;
+            }
+            visited.push(currentTile);
         }
-        // return some collection of tiles
-        // var tiles = [this.getTileAtTilePos(0, 1), this.getTileAtTilePos(0, 2), this.getTileAtTilePos(0, 3), this.getTileAtTilePos(100, 100)];
-        // filter out nulls
+
+        return tilesToHighlight;
+    },
+
+    getNeighborTiles: function(originTileXPos, originTileZPos) {
+        var tiles = [];
+
+        tiles.push(this.getTileAtTilePos(originTileXPos-1,originTileZPos));
+        tiles.push(this.getTileAtTilePos(originTileXPos+1,originTileZPos));
+        tiles.push(this.getTileAtTilePos(originTileXPos,originTileZPos-1));
+        tiles.push(this.getTileAtTilePos(originTileXPos,originTileZPos+1));
+
         tiles = _.filter(tiles, function(tile) {
-            return (tile != null);
+            return (tile != null && !tile.isObstacle() && !tile.isCharacter());
         });
+
+        console.log("length of neighbors 222 " + tiles.length);
 
         return tiles;
     },
@@ -194,10 +256,10 @@ var Grid = Class.extend({
                                       0,
                                       coordinate.z - this.characterBeingSelected.getTileZPos()));
                 this.characterBeingSelected.enqueueMotion();
-                console.log("character is being moved to a new coordinate position \n");
-                console.log("src X: "+this.characterBeingSelected.getTileXPos() +
-                            " Z: "+ this.characterBeingSelected.getTileZPos());
-                console.log("des X: "+coordinate.x +" Z: "+coordinate.z);
+                // console.log("character is being moved to a new coordinate position \n");
+                // console.log("src X: "+this.characterBeingSelected.getTileXPos() +
+                //             " Z: "+ this.characterBeingSelected.getTileZPos());
+                // console.log("des X: "+coordinate.x +" Z: "+coordinate.z);
             }
         }
 
@@ -272,7 +334,7 @@ var Grid = Class.extend({
     motion: function(args) {
         for (var i = 0; i < this.charactersOnMap.length; i++) {
             var character = this.charactersOnMap[i];
-            character.dequeueMotion();
+            character.dequeueMotion(this);
         }
     },
 

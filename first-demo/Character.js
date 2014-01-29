@@ -24,7 +24,7 @@ var Character = Class.extend({
         // Set the current animation step
         this.step = 0;
         this.motionInProcess = false;
-        this.motionQueue = [];
+        this.motionQueue = new Array();
         this.loader = new THREE.JSONLoader();
         this.loadFile("headcombinedtextured.js");
     
@@ -113,10 +113,10 @@ var Character = Class.extend({
         console.log("x: "+this.direction.x + " z: "+this.direction.z);
     },
 
-    dequeueMotion: function() {
+    dequeueMotion: function(world) {
         if (this.motionQueue.length > 0) {
             this.motionInProcess = true;
-            var direction = this.motionQueue.splice(0,1)[0];
+            var direction = this.motionQueue.pop();
             console.log("dequeueMotion: direction, [x "+direction.x +"] [z "+direction.z +" ] \n");
             if (direction.x !== 0 || direction.z !== 0) {
                 // Rotate the character
@@ -126,6 +126,7 @@ var Character = Class.extend({
                     return false;
                 }
                 // ... we move the character
+                world.markTileNotOccupiedByCharacter(this.getTileXPos(), this.getTileZPos());
                 var oldX = this.mesh.position.x;
                 var newX = this.mesh.position.x + direction.x * 40;
 
@@ -141,12 +142,17 @@ var Character = Class.extend({
                 //var easing = TWEEN.Easing.Exponential.EaseOut;
                 var tween = new TWEEN.Tween({x: oldX, z: oldZ}).to({x: newX, z: newZ}, 450).easing(easing);
 
-                var myMesh = this.mesh;
+                //var myMesh = this.mesh;
+                var scope = this;
                 var onUpdate = function() {
                     var xCoord = this.x;
                     var zCoord = this.z;
-                    myMesh.position.x = xCoord;
-                     myMesh.position.z = zCoord;
+                    scope.mesh.position.x = xCoord;
+                    scope.mesh.position.z = zCoord;
+                    if (scope.mesh.position.x == newX && scope.mesh.position.z == newZ) {
+                        world.markTileOccupiedByCharacter(scope.getTileXPos(), scope.getTileZPos());
+                        world.displayMovementArea(scope);
+                    }
                 };
 
                 tween.onUpdate(onUpdate);

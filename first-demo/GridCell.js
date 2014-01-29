@@ -7,6 +7,16 @@ var GridCell = Class.extend({
     	this.zPos = zPos;
     	this.grayness = grayness;
     	this.isSelectable = false;
+        this.hasObstacle = false;
+        this.hasCharacter = false;
+    },
+
+    isObstacle: function() {
+        return this.hasObstacle;
+    },
+
+    isCharacter: function() {
+        return this.hasCharacter;
     },
 
     getGrayness: function() {
