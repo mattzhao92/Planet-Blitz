@@ -69,7 +69,8 @@
                 this.setupMouseMoveListener();
 
                 this.loader = new THREE.JSONLoader();
-                this.loadFile("blendermodels/uvmappedandbaked.js");
+                // this.loadFile("blendermodels/uvmappedandbaked.js");
+                this.loadFile("blendermodels/testcube2.js");
                  // this.loadFile("blendermodels/fresnelandphong.js");
 
                  // begin animation
@@ -78,13 +79,22 @@
             }, 
 
             addGeometryToScene: function(geometry, materials) {
-                // var texture = new THREE.ImageUtils.loadTexture("blendertextures/Kerkstra_20131109-_MG_6382.jpg");
-                var texture = new THREE.ImageUtils.loadTexture("blendertextures/pattern-camo.jpg")
-                // var material = new THREE.MeshBasicMaterial({map: texture});
-                materials[2] = new THREE.MeshBasicMaterial({map: texture});
 
-                var faceTexture = new THREE.ImageUtils.loadTexture("blendertextures/Kerkstra_20131109-_MG_6382.jpg");
-                materials[3] = new THREE.MeshBasicMaterial({map: faceTexture});
+                // dynamic path modification
+                materials.forEach (function (material) {
+                    console.log(material);
+                    // console.log("material loaded");
+                    if (material.map != null) {
+                        if (material.map.sourceFile != null) {
+                            material.map.sourceFile = "../../blendertextures/" + material.map.sourceFile;
+                            // console.log(material.map.sourceFile);
+                            material['mapDiffuse'] = "../../blendertextures/" + material.map.sourceFile;
+                        }
+                    }
+                    
+                });
+
+                console.log(materials[0].map.sourceFile);
 
                 var combinedMaterials = new THREE.MeshFaceMaterial(materials);
                 mesh = new THREE.Mesh(geometry, combinedMaterials);
