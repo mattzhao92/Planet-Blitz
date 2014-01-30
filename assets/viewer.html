@@ -57,7 +57,7 @@
                 this.stats = this.initStats();
                 this.clock = new THREE.Clock();
 
-                this.drawGamePlane();
+                // this.drawGamePlane();
                 this.addLighting();
 
                 this.setupControls();
@@ -70,7 +70,7 @@
 
                 this.loader = new THREE.JSONLoader();
                 // this.loadFile("blendermodels/uvmappedandbaked.js");
-                this.loadFile("blendermodels/testcube2.js");
+                this.loadFile("blendermodels/forreal.js");
                  // this.loadFile("blendermodels/fresnelandphong.js");
 
                  // begin animation
@@ -80,31 +80,13 @@
 
             addGeometryToScene: function(geometry, materials) {
 
-                // dynamic path modification
-                materials.forEach (function (material) {
-                    console.log(material);
-                    // console.log("material loaded");
-                    if (material.map != null) {
-                        if (material.map.sourceFile != null) {
-                            material.map.sourceFile = "../../blendertextures/" + material.map.sourceFile;
-                            // console.log(material.map.sourceFile);
-                            material['mapDiffuse'] = "../../blendertextures/" + material.map.sourceFile;
-                        }
-                    }
-                    
-                });
-
-                console.log(materials[0].map.sourceFile);
-
                 var combinedMaterials = new THREE.MeshFaceMaterial(materials);
                 mesh = new THREE.Mesh(geometry, combinedMaterials);
-                // mesh = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
-                // mesh = new THREE.Mesh(geometry, new THREE.MeshNormalMaterial());
+
                 mesh.scale.set(60, 60, 60);
                 mesh.position.y = 0;
                 mesh.position.x = 0;
                 this.scene.add(mesh);
-
             },
 
             loadFile: function(filename) {
