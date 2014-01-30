@@ -63,18 +63,24 @@
                 this.setupControls();
                 this.addControlGUI();
 
-                this.addChaseCube();
-
+                // this.addChaseCube();
 
                 this.setupMouseMoveListener();
 
                 this.loader = new THREE.JSONLoader();
-                this.loadFile("blendermodels/testcube-baked.js");
+
+                this.objectBeingViewed = null;
 
                  // begin animation
                  this.animate();
 
             }, 
+
+            clearPreviousView: function() {
+                if (this.objectBeingViewed != null) {
+                    this.scene.remove(this.objectBeingViewed);
+                }
+            },
 
             addGeometryToScene: function(geometry, materials) {
 
@@ -85,6 +91,7 @@
                 mesh.position.y = 0;
                 mesh.position.x = 0;
                 this.scene.add(mesh);
+                this.objectBeingViewed = mesh;
             },
 
             loadFile: function(filename) {
@@ -188,24 +195,13 @@
             },
 
             addControlGUI: function() {
+                var scope = this;
                 this.datGuiControls = new function() {
-                    this.modelName = "Perspective";
+                    this.modelName = "testcube-baked.js";
                     this.loadModel = function() {
-                        if (app.camera instanceof THREE.PerspectiveCamera) {
-                            app.camera = new THREE.OrthographicCamera( window.innerWidth / - 16, window.innerWidth / 16, window.innerHeight / 16, window.innerHeight / - 16, -200, 500 );
-                            app.camera.position.x = 3;
-                            app.camera.position.y = 1;
-                            app.camera.position.z = 3;
-
-                            this.modelName = "Orthographic";
-                        } else {
-                            app.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-                            app.camera.position.x = 120;
-                            app.camera.position.y = 60;
-                            app.camera.position.z = 180;
-
-                            this.modelName = "Perspective";
-                        }
+                        // if object was being viewed previously, then clear it out
+                        scope.clearPreviousView();
+                        scope.loadFile("blendermodels/" + this.modelName)
                     };
                 }
 
