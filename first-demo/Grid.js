@@ -27,6 +27,7 @@ var Grid = Class.extend({
         this.characters = new THREE.Object3D();
         this.numOfCharacters = 3;
         this.charactersOnMap = [];
+        this.characterMeshes = [];
 
         this.characterFactory = new CharacterFactory();
 
@@ -40,9 +41,11 @@ var Grid = Class.extend({
             var character = this.characterFactory.createCharacter(charArgs);
             character.placeAtGridPos(i + 3, 4);
             this.markTileOccupiedByCharacter(i + 3, 4);
-            this.charactersOnMap.push(character);
 
-            this.scene.add(character);
+            this.charactersOnMap.push(character);
+            this.characterMeshes.push(character.mesh);
+            
+            this.scene.add(character.mesh);
         }
 
         this.characterBeingSelected = null;
@@ -242,10 +245,8 @@ var Grid = Class.extend({
 
         var raycaster = projector.pickingRay(mouseVector.clone(), scope.camera);
 
-        // var characterIntersects = raycaster.intersectObjects(scope.characters)
-
         // recursively call intersects
-        var intersects = raycaster.intersectObjects(scope.charactersOnMap, true);
+        var intersects = raycaster.intersectObjects(scope.characterMeshes, true);
         var intersectsWithTiles = raycaster.intersectObjects(scope.tiles.children);
 
         // care about characters first, then tile intersects
@@ -255,8 +256,8 @@ var Grid = Class.extend({
         var continueHandlingIntersects = false;
 
         if (intersects.length > 0) {
-            var firstIntersect = intersects[0];
-            firstIntersect.object.onSelect(scope);
+            var clickedObject = intersects[0].object.owner;
+            clickedObject.onSelect(scope);
         } else {
             continueHandlingIntersects = true;
         }

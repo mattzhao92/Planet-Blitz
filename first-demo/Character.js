@@ -5,9 +5,7 @@ var CharacterFactory = Class.extend({
 
     createCharacter: function(charArgs) {
         var character = new Character(charArgs);
-        _.extend(character.mesh, character);
-
-        return character.mesh;
+        return character;
     }
 })
 
@@ -28,8 +26,6 @@ var Character = Class.extend({
         this.loader = new THREE.JSONLoader();
         this.loadFile("headcombinedtextured.js");
 
-        // need to declare all attributes in constructor because of the copying of attributes in (_.extend)
-        // TODO: problem, since attributes will not be properly referenced (setter/getter)
         this.xPos = 0;
         this.zPos = 0;
 
@@ -39,18 +35,18 @@ var Character = Class.extend({
 
     placeAtGridPos: function(xPos, zPos) {
         // TODO: not happy about this, but this is needed because of the way the character.mesh gets extended with the character's properties
-        this.mesh.xPos = xPos;
-        this.mesh.zPos = zPos;
+        this.xPos = xPos;
+        this.zPos = zPos;
         this.mesh.position.x = this.world.convertXPosToWorldX(xPos);
         this.mesh.position.z = this.world.convertZPosToWorldZ(zPos);
     },
 
     getTileXPos: function() {
-        return this.mesh.xPos;
+        return this.xPos;
     },
 
     getTileZPos: function() {
-        return this.mesh.zPos;
+        return this.zPos;
     },
 
     getMovementRange: function() {
@@ -85,7 +81,7 @@ var Character = Class.extend({
             mesh.position.y = -10;
             mesh.position.x = 0;
             mesh.position.z = 10;
-            _.extend(mesh, scope);
+            this.mesh.owner = scope;
             scope.mesh.add(mesh);
         })
     },
@@ -130,8 +126,8 @@ var Character = Class.extend({
                 var oldZ = this.mesh.position.z;
                 var newZ = this.mesh.position.z + direction.z * 40;
 
-                this.mesh.xPos += direction.x;
-                this.mesh.zPos += direction.z;
+                this.xPos += direction.x;
+                this.zPos += direction.z;
 
                 //var easing = TWEEN.Easing.Elastic.InOut;
                 //var easing = TWEEN.Easing.Linear.None;
