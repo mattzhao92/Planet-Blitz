@@ -220,7 +220,7 @@ var Grid = Class.extend({
 
         for (var i = 0; i < intersects.length; i++) {
             var intersection = intersects[i],
-                obj = intersection.object;
+                obj = intersection.object.owner;
 
             obj.onMouseOver();
         }
@@ -264,8 +264,8 @@ var Grid = Class.extend({
 
         if (continueHandlingIntersects) {
             if (intersectsWithTiles.length > 0) {
-                var obj = intersectsWithTiles[0].object;
-                var coordinate = obj.onMouseOver();
+                var tileSelected = intersectsWithTiles[0].object.owner;
+                var coordinate = tileSelected.onMouseOver();
                 if (this.characterBeingSelected && coordinate) {
                     this.characterBeingSelected.setDirection(
                         new THREE.Vector3(coordinate.x - this.characterBeingSelected.getTileXPos(),
@@ -309,14 +309,16 @@ var Grid = Class.extend({
             for (var j = 0; j < this.numberSquaresOnZAxis; j++) {
                 var tile = this.tileFactory.createTile(i, j);
 
-                tile.position.x = this.convertXPosToWorldX(i);
-                tile.position.y = 0;
-                tile.position.z = this.convertZPosToWorldZ(j);
-                tile.rotation.x = -0.5 * Math.PI;
+                var tileMesh = tile.mesh;
+
+                tileMesh.position.x = this.convertXPosToWorldX(i);
+                tileMesh.position.y = 0;
+                tileMesh.position.z = this.convertZPosToWorldZ(j);
+                tileMesh.rotation.x = -0.5 * Math.PI;
 
                 this.tilesArray[i][j] = tile;
 
-                this.tiles.add(tile);
+                this.tiles.add(tileMesh);
             }
         }
 

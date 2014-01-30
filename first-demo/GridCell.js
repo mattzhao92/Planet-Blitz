@@ -69,9 +69,9 @@ var TileFactory = Class.extend({
 		var tile = new THREE.Mesh(this.tileGeom, mat);
 
 		var gridCell = new GridCell(this.world, tile, grayness, xPos, zPos);
-		_.extend(tile, gridCell);
+        tile.owner = gridCell;
 
-		return tile;
+		return gridCell;
 	}
 
 });
