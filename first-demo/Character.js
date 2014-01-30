@@ -12,8 +12,8 @@ var CharacterFactory = Class.extend({
 })
 
 var Character = Class.extend({
-// Class constructor
-    init: function (args) {
+    // Class constructor
+    init: function(args) {
         'use strict';
         // Set the character modelisation object
         this.mesh = new THREE.Object3D();
@@ -27,7 +27,7 @@ var Character = Class.extend({
         this.motionQueue = new Array();
         this.loader = new THREE.JSONLoader();
         this.loadFile("headcombinedtextured.js");
-    
+
         // need to declare all attributes in constructor because of the copying of attributes in (_.extend)
         // TODO: problem, since attributes will not be properly referenced (setter/getter)
         this.xPos = 0;
@@ -79,19 +79,19 @@ var Character = Class.extend({
         var scope = this;
 
         this.loader.load(filename, function(geometry) {
-                mesh = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial());
-                mesh.scale.set(24, 24, 24);
-                // this is very temporary
-                mesh.position.y = -10;
-                mesh.position.x = 0;
-                mesh.position.z = 10;
-                 _.extend(mesh, scope);
-                 scope.mesh.add(mesh);
-                })
+            mesh = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial());
+            mesh.scale.set(24, 24, 24);
+            // this is very temporary
+            mesh.position.y = -10;
+            mesh.position.x = 0;
+            mesh.position.z = 10;
+            _.extend(mesh, scope);
+            scope.mesh.add(mesh);
+        })
     },
 
     // Update the direction of the current motion
-    setDirectionWithControl: function (controls) {
+    setDirectionWithControl: function(controls) {
         'use strict';
         // Either left or right, and either up or down (no jump or dive (on the Y axis), so far ...)
         var x = controls.left ? 1 : controls.right ? -1 : 0,
@@ -100,21 +100,21 @@ var Character = Class.extend({
         this.direction.set(x, y, z);
     },
 
-    setDirection: function (direction) {
+    setDirection: function(direction) {
         this.direction = direction;
     },
 
     enqueueMotion: function() {
         console.log("enqueueMotion \n");
         this.motionQueue.push(this.direction.clone());
-        console.log("x: "+this.direction.x + " z: "+this.direction.z);
+        console.log("x: " + this.direction.x + " z: " + this.direction.z);
     },
 
     dequeueMotion: function(world) {
         if (this.motionQueue.length > 0) {
             this.motionInProcess = true;
             var direction = this.motionQueue.pop();
-            console.log("dequeueMotion: direction, [x "+direction.x +"] [z "+direction.z +" ] \n");
+            console.log("dequeueMotion: direction, [x " + direction.x + "] [z " + direction.z + " ] \n");
             if (direction.x !== 0 || direction.z !== 0) {
                 // Rotate the character
                 var rotateTween = this.rotate(direction);
@@ -137,7 +137,13 @@ var Character = Class.extend({
                 //var easing = TWEEN.Easing.Linear.None;
                 var easing = TWEEN.Easing.Quadratic.Out;
                 //var easing = TWEEN.Easing.Exponential.EaseOut;
-                var tween = new TWEEN.Tween({x: oldX, z: oldZ}).to({x: newX, z: newZ}, 450).easing(easing);
+                var tween = new TWEEN.Tween({
+                    x: oldX,
+                    z: oldZ
+                }).to({
+                    x: newX,
+                    z: newZ
+                }, 450).easing(easing);
 
                 //var myMesh = this.mesh;
                 var scope = this;
@@ -154,10 +160,10 @@ var Character = Class.extend({
 
                 tween.onUpdate(onUpdate);
 
-                 var moveTween = tween;
-                 this.direction.set(0, 0, 0);
+                var moveTween = tween;
+                this.direction.set(0, 0, 0);
 
-                 var blankTween = new TWEEN.Tween({}).to({}, 100);
+                var blankTween = new TWEEN.Tween({}).to({}, 100);
 
                 rotateTween.chain(blankTween);
                 rotateTween.chain(moveTween);
@@ -170,7 +176,7 @@ var Character = Class.extend({
     },
 
     // Rotate the character
-    rotate: function (direction) {
+    rotate: function(direction) {
         'use strict';
         // Set the direction's angle, and the difference between it and our Object3D's current rotation
         console.log("rotation \n");
@@ -180,7 +186,11 @@ var Character = Class.extend({
 
         var easing = TWEEN.Easing.Quadratic.Out;
         var oldRotationY = this.mesh.rotation.y;
-        var tween = new TWEEN.Tween({rotationY: oldRotationY}).to({rotationY: angle}, 200).easing(easing);
+        var tween = new TWEEN.Tween({
+            rotationY: oldRotationY
+        }).to({
+            rotationY: angle
+        }, 200).easing(easing);
 
         var myMesh = this.mesh;
         var onUpdate = function() {
@@ -192,10 +202,9 @@ var Character = Class.extend({
         return tween;
     },
 
-    collide: function () {
+    collide: function() {
         'use strict';
         // INSERT SOME MAGIC HERE
         return false;
     }
 });
-

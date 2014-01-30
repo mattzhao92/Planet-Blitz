@@ -20,7 +20,7 @@ var Grid = Class.extend({
         // create grid tiles
         this.tiles = new THREE.Object3D();
         this.tilesArray = null;
-        
+
         this.drawGridSquares(width, length, tileSize);
 
         // initialize characters
@@ -53,11 +53,11 @@ var Grid = Class.extend({
     },
 
     convertXPosToWorldX: function(tileXPos) {
-        return -((this.gridWidth)/2) + (tileXPos * this.tileSize);
+        return -((this.gridWidth) / 2) + (tileXPos * this.tileSize);
     },
 
     convertZPosToWorldZ: function(tileZPos) {
-        return -((this.gridLength/2)) + (tileZPos * this.tileSize);
+        return -((this.gridLength / 2)) + (tileZPos * this.tileSize);
     },
 
 
@@ -136,7 +136,7 @@ var Grid = Class.extend({
         var tilesToHighlight = [];
         var startTile = this.getTileAtTilePos(character.getTileXPos(), character.getTileZPos());
         if (!startTile) return tilesToHighlight;
-        
+
         startTile.isObstacle();
         var visited = new Array();
         var nodesInCurrentLevel = new Array();
@@ -146,8 +146,8 @@ var Grid = Class.extend({
 
         while (nodesInCurrentLevel.length > 0 && radius > 0) {
             var currentTile = nodesInCurrentLevel.pop();
-            console.log("currentTile x:"+currentTile.xPos + " z:"+currentTile.zPos);
-           
+            console.log("currentTile x:" + currentTile.xPos + " z:" + currentTile.zPos);
+
             var validNeighbors = this.getNeighborTiles(currentTile.xPos, currentTile.zPos);
             for (var i = 0; i < validNeighbors.length; i++) {
                 var neighbor = validNeighbors[i];
@@ -159,9 +159,9 @@ var Grid = Class.extend({
                     console.log("print here 222 \n");
                 }
             }
-       
+
             if (nodesInCurrentLevel.length == 0) {
-                console.log("--------------------nodesInNextLevel   "+nodesInNextLevel);
+                console.log("--------------------nodesInNextLevel   " + nodesInNextLevel);
                 nodesInCurrentLevel = nodesInNextLevel;
                 nodesInNextLevel = new Array();
                 radius = radius - 1;
@@ -175,10 +175,10 @@ var Grid = Class.extend({
     getNeighborTiles: function(originTileXPos, originTileZPos) {
         var tiles = [];
 
-        tiles.push(this.getTileAtTilePos(originTileXPos-1,originTileZPos));
-        tiles.push(this.getTileAtTilePos(originTileXPos+1,originTileZPos));
-        tiles.push(this.getTileAtTilePos(originTileXPos,originTileZPos-1));
-        tiles.push(this.getTileAtTilePos(originTileXPos,originTileZPos+1));
+        tiles.push(this.getTileAtTilePos(originTileXPos - 1, originTileZPos));
+        tiles.push(this.getTileAtTilePos(originTileXPos + 1, originTileZPos));
+        tiles.push(this.getTileAtTilePos(originTileXPos, originTileZPos - 1));
+        tiles.push(this.getTileAtTilePos(originTileXPos, originTileZPos + 1));
 
         tiles = _.filter(tiles, function(tile) {
             return (tile != null && !tile.isObstacle() && !tile.isCharacter());
@@ -249,7 +249,7 @@ var Grid = Class.extend({
         var intersectsWithTiles = raycaster.intersectObjects(scope.tiles.children);
 
         // care about characters first, then tile intersects
-        
+
         // needed so that you can't click on a character and have that result in an immediate movement
         // is there a better pattern for this - chain of event handlers?
         var continueHandlingIntersects = false;
@@ -268,8 +268,8 @@ var Grid = Class.extend({
                 if (this.characterBeingSelected && coordinate) {
                     this.characterBeingSelected.setDirection(
                         new THREE.Vector3(coordinate.x - this.characterBeingSelected.getTileXPos(),
-                                          0,
-                                          coordinate.z - this.characterBeingSelected.getTileZPos()));
+                            0,
+                            coordinate.z - this.characterBeingSelected.getTileZPos()));
                     this.characterBeingSelected.enqueueMotion();
                     // console.log("character is being moved to a new coordinate position \n");
                     // console.log("src X: "+this.characterBeingSelected.getTileXPos() +
@@ -404,8 +404,8 @@ var Grid = Class.extend({
                     controls.right = false;
                     break;
                 case 38:
-                controls.down = false;
-                break;
+                    controls.down = false;
+                    break;
                 case 39:
                     controls.left = false;
                     break;
@@ -426,7 +426,7 @@ var Grid = Class.extend({
                 user.setDirectionWithControl(controls);
             }
         });
-},
+    },
 
 
 });
