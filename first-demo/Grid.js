@@ -13,9 +13,10 @@ var Grid = Class.extend({
         this.scene = scene;
         this.camera = camera;
 
+        // information about what's being selected
         this.highlightedTiles = null;
-
         this.currentMouseOverTile = null;
+        this.characterBeingSelected = null;
 
         // create grid tiles
         this.tiles = new THREE.Object3D();
@@ -48,11 +49,17 @@ var Grid = Class.extend({
             this.scene.add(character.mesh);
         }
 
-        this.characterBeingSelected = null;
-
         this.setControls();
         this.setupMouseMoveListener();
         this.setupMouseDownListener();
+    },
+
+    disableMouseMoveListener: function() {
+        this.mouseMoveListenerActive = false;
+    },
+
+    enableMouseMoveListener: function() {
+        this.mouseMoveListenerActive = true;
     },
 
     convertXPosToWorldX: function(tileXPos) {
@@ -109,6 +116,11 @@ var Grid = Class.extend({
     },
 
     displayMovementArea: function(character) {
+        // deselect any previously highlighted tiles
+        if (this.currentMouseOverTile) {
+            this.currentMouseOverTile.reset();
+        }
+
         var characterMovementRange = character.getMovementRange();
         console.log("character movement range " + characterMovementRange);
 
@@ -131,8 +143,6 @@ var Grid = Class.extend({
 
         this.highlightedTiles = tilesToHighlight;
     },
-
-
 
     getTilesInArea: function(character, radius) {
         // DO A BFS here
@@ -207,6 +217,10 @@ var Grid = Class.extend({
     },
 
     onMouseMove: function(event) {
+        if (this.mouseMoveListenerActive == false) {
+            return;
+        }
+
         var scope = this;
 
         var projector = new THREE.Projector();
@@ -271,7 +285,12 @@ var Grid = Class.extend({
                         new THREE.Vector3(coordinate.x - this.characterBeingSelected.getTileXPos(),
                             0,
                             coordinate.z - this.characterBeingSelected.getTileZPos()));
-                    this.characterBeingSelected.enqueueMotion();
+                    this.disableMouseMoveListener();
+
+                    this.characterBeingSelected.enqueueMotion(function() {
+                        console.log("Motion finished");
+                        scope.enableMouseMoveListener();
+                    });
                     // console.log("character is being moved to a new coordinate position \n");
                     // console.log("src X: "+this.characterBeingSelected.getTileXPos() +
                     //             " Z: "+ this.characterBeingSelected.getTileZPos());

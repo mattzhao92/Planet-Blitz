@@ -34,7 +34,6 @@ var Character = Class.extend({
     },
 
     placeAtGridPos: function(xPos, zPos) {
-        // TODO: not happy about this, but this is needed because of the way the character.mesh gets extended with the character's properties
         this.xPos = xPos;
         this.zPos = zPos;
         this.mesh.position.x = this.world.convertXPosToWorldX(xPos);
@@ -100,10 +99,15 @@ var Character = Class.extend({
         this.direction = direction;
     },
 
-    enqueueMotion: function() {
+    enqueueMotion: function(onMotionFinish) {
         console.log("enqueueMotion \n");
         this.motionQueue.push(this.direction.clone());
         console.log("x: " + this.direction.x + " z: " + this.direction.z);
+
+        // TODO: define actual tween timeout
+        if (onMotionFinish) {
+            setTimeout(onMotionFinish, 800);
+        }
     },
 
     dequeueMotion: function(world) {
