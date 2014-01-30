@@ -147,10 +147,9 @@ var Grid = Class.extend({
             this.highlightedTiles.forEach(function(tile) {
                 tile.reset();
             });
-            // wait an indistinguishable amount for render to catch up
         }
 
-        setTimeout(this.highlightTiles(tilesToHighlight), 30);
+        this.highlightTiles(tilesToHighlight);
     },
 
     highlightTiles: function(tilesToHighlight) {
