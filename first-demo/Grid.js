@@ -40,7 +40,6 @@ var Grid = Class.extend({
             var character = this.characterFactory.createCharacter(charArgs);
             character.placeAtGridPos(i + 3, 4);
             this.markTileOccupiedByCharacter(i + 3, 4);
-            console.log(character.getTileZPos());
             this.charactersOnMap.push(character);
 
             this.scene.add(character);

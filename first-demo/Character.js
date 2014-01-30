@@ -43,11 +43,6 @@ var Character = Class.extend({
         this.mesh.zPos = zPos;
         this.mesh.position.x = this.world.convertXPosToWorldX(xPos);
         this.mesh.position.z = this.world.convertZPosToWorldZ(zPos);
-        this.mesh.position.y = -10;
-
-        console.log("placeAtGridPos called");
-        console.log("getTileXPos: " + this.getTileXPos());
-        console.log("getTileZPos: " + this.getTileZPos());
     },
 
     getTileXPos: function() {
@@ -86,7 +81,8 @@ var Character = Class.extend({
         this.loader.load(filename, function(geometry) {
                 mesh = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial());
                 mesh.scale.set(24, 24, 24);
-                mesh.position.y = 0;
+                // this is very temporary
+                mesh.position.y = -10;
                 mesh.position.x = 0;
                 mesh.position.z = 10;
                  _.extend(mesh, scope);
