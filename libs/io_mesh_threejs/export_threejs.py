@@ -37,6 +37,11 @@ import random
 # Configuration
 # #####################################################
 
+TEXTURE_PATH = "../../blendertextures/"
+# attributes which must have the path pre-pended to them
+PATH_MOD_ATTRS = ['mapDiffuse', 'mapLight', 'mapSpecular', 'mapNormal', 'mapBump']
+
+
 DEFAULTS = {
 "bgcolor" : [0, 0, 0],
 "bgalpha" : 1.0,
@@ -87,14 +92,14 @@ TEMPLATE_SCENE_ASCII = """\
 
 "metadata" :
 {
-	"formatVersion" : 3.2,
-	"type"          : "scene",
-	"sourceFile"    : "%(fname)s",
-	"generatedBy"   : "Blender 2.65 Exporter",
-	"objects"       : %(nobjects)s,
-	"geometries"    : %(ngeometries)s,
-	"materials"     : %(nmaterials)s,
-	"textures"      : %(ntextures)s
+    "formatVersion" : 3.2,
+    "type"          : "scene",
+    "sourceFile"    : "%(fname)s",
+    "generatedBy"   : "Blender 2.65 Exporter",
+    "objects"       : %(nobjects)s,
+    "geometries"    : %(ngeometries)s,
+    "materials"     : %(nmaterials)s,
+    "textures"      : %(ntextures)s
 },
 
 "urlBaseType" : %(basetype)s,
@@ -103,16 +108,16 @@ TEMPLATE_SCENE_ASCII = """\
 
 "transform" :
 {
-	"position"  : %(position)s,
-	"rotation"  : %(rotation)s,
-	"scale"     : %(scale)s
+    "position"  : %(position)s,
+    "rotation"  : %(rotation)s,
+    "scale"     : %(scale)s
 },
 
 "defaults" :
 {
-	"bgcolor" : %(bgcolor)s,
-	"bgalpha" : %(bgalpha)f,
-	"camera"  : %(defcamera)s
+    "bgcolor" : %(bgcolor)s,
+    "bgalpha" : %(bgalpha)f,
+    "camera"  : %(defcamera)s
 }
 
 }
@@ -126,131 +131,131 @@ TEMPLATE_SECTION = """
 """
 
 TEMPLATE_OBJECT = """\
-	%(object_id)s : {
-		"geometry"  : %(geometry_id)s,
-		"groups"    : [ %(group_id)s ],
-		"material"  : %(material_id)s,
-		"position"  : %(position)s,
-		"rotation"  : %(rotation)s,
-		"quaternion": %(quaternion)s,
-		"scale"     : %(scale)s,
-		"visible"       : %(visible)s,
-		"castShadow"    : %(castShadow)s,
-		"receiveShadow" : %(receiveShadow)s,
-		"doubleSided"   : %(doubleSided)s
-	}"""
+    %(object_id)s : {
+        "geometry"  : %(geometry_id)s,
+        "groups"    : [ %(group_id)s ],
+        "material"  : %(material_id)s,
+        "position"  : %(position)s,
+        "rotation"  : %(rotation)s,
+        "quaternion": %(quaternion)s,
+        "scale"     : %(scale)s,
+        "visible"       : %(visible)s,
+        "castShadow"    : %(castShadow)s,
+        "receiveShadow" : %(receiveShadow)s,
+        "doubleSided"   : %(doubleSided)s
+    }"""
 
 TEMPLATE_EMPTY = """\
-	%(object_id)s : {
-		"groups"    : [ %(group_id)s ],
-		"position"  : %(position)s,
-		"rotation"  : %(rotation)s,
-		"quaternion": %(quaternion)s,
-		"scale"     : %(scale)s
-	}"""
+    %(object_id)s : {
+        "groups"    : [ %(group_id)s ],
+        "position"  : %(position)s,
+        "rotation"  : %(rotation)s,
+        "quaternion": %(quaternion)s,
+        "scale"     : %(scale)s
+    }"""
 
 TEMPLATE_GEOMETRY_LINK = """\
-	%(geometry_id)s : {
-		"type" : "ascii",
-		"url"  : %(model_file)s
-	}"""
+    %(geometry_id)s : {
+        "type" : "ascii",
+        "url"  : %(model_file)s
+    }"""
 
 TEMPLATE_GEOMETRY_EMBED = """\
-	%(geometry_id)s : {
-		"type" : "embedded",
-		"id"  : %(embed_id)s
-	}"""
+    %(geometry_id)s : {
+        "type" : "embedded",
+        "id"  : %(embed_id)s
+    }"""
 
 TEMPLATE_TEXTURE = """\
-	%(texture_id)s : {
-		"url": %(texture_file)s%(extras)s
-	}"""
+    %(texture_id)s : {
+        "url": %(texture_file)s%(extras)s
+    }"""
 
 TEMPLATE_MATERIAL_SCENE = """\
-	%(material_id)s : {
-		"type": %(type)s,
-		"parameters": { %(parameters)s }
-	}"""
+    %(material_id)s : {
+        "type": %(type)s,
+        "parameters": { %(parameters)s }
+    }"""
 
 TEMPLATE_CAMERA_PERSPECTIVE = """\
-	%(camera_id)s : {
-		"type"  : "PerspectiveCamera",
-		"fov"   : %(fov)f,
-		"aspect": %(aspect)f,
-		"near"  : %(near)f,
-		"far"   : %(far)f,
-		"position": %(position)s,
-		"target"  : %(target)s
-	}"""
+    %(camera_id)s : {
+        "type"  : "PerspectiveCamera",
+        "fov"   : %(fov)f,
+        "aspect": %(aspect)f,
+        "near"  : %(near)f,
+        "far"   : %(far)f,
+        "position": %(position)s,
+        "target"  : %(target)s
+    }"""
 
 TEMPLATE_CAMERA_ORTHO = """\
-	%(camera_id)s : {
-		"type"  : "OrthographicCamera",
-		"left"  : %(left)f,
-		"right" : %(right)f,
-		"top"   : %(top)f,
-		"bottom": %(bottom)f,
-		"near"  : %(near)f,
-		"far"   : %(far)f,
-		"position": %(position)s,
-		"target"  : %(target)s
-	}"""
+    %(camera_id)s : {
+        "type"  : "OrthographicCamera",
+        "left"  : %(left)f,
+        "right" : %(right)f,
+        "top"   : %(top)f,
+        "bottom": %(bottom)f,
+        "near"  : %(near)f,
+        "far"   : %(far)f,
+        "position": %(position)s,
+        "target"  : %(target)s
+    }"""
 
 TEMPLATE_LIGHT_POINT = """\
-	%(light_id)s : {
-		"type"       : "PointLight",
-		"position"   : %(position)s,
-		"rotation"   : %(rotation)s,
-		"color"      : %(color)d,
-		"distance"   : %(distance).3f,
-		"intensity"  : %(intensity).3f
-	}"""
+    %(light_id)s : {
+        "type"       : "PointLight",
+        "position"   : %(position)s,
+        "rotation"   : %(rotation)s,
+        "color"      : %(color)d,
+        "distance"   : %(distance).3f,
+        "intensity"  : %(intensity).3f
+    }"""
 
 TEMPLATE_LIGHT_SUN = """\
-	%(light_id)s : {
-		"type"       : "AmbientLight",
-		"position"   : %(position)s,
-		"rotation"   : %(rotation)s,
-		"color"      : %(color)d,
-		"distance"   : %(distance).3f,
-		"intensity"  : %(intensity).3f
-	}"""
+    %(light_id)s : {
+        "type"       : "AmbientLight",
+        "position"   : %(position)s,
+        "rotation"   : %(rotation)s,
+        "color"      : %(color)d,
+        "distance"   : %(distance).3f,
+        "intensity"  : %(intensity).3f
+    }"""
 
 TEMPLATE_LIGHT_SPOT = """\
-	%(light_id)s : {
-		"type"       : "SpotLight",
-		"position"   : %(position)s,
-		"rotation"   : %(rotation)s,
-		"color"      : %(color)d,
-		"distance"   : %(distance).3f,
-		"intensity"  : %(intensity).3f,
-		"use_shadow" : %(use_shadow)d,
-		"angle"      : %(angle).3f
-	}"""
+    %(light_id)s : {
+        "type"       : "SpotLight",
+        "position"   : %(position)s,
+        "rotation"   : %(rotation)s,
+        "color"      : %(color)d,
+        "distance"   : %(distance).3f,
+        "intensity"  : %(intensity).3f,
+        "use_shadow" : %(use_shadow)d,
+        "angle"      : %(angle).3f
+    }"""
 
 TEMPLATE_LIGHT_HEMI = """\
-	%(light_id)s : {
-		"type"       : "HemisphereLight",
-		"position"   : %(position)s,
-		"rotation"   : %(rotation)s,
-		"color"      : %(color)d,
-		"distance"   : %(distance).3f,
-		"intensity"  : %(intensity).3f
-	}"""
+    %(light_id)s : {
+        "type"       : "HemisphereLight",
+        "position"   : %(position)s,
+        "rotation"   : %(rotation)s,
+        "color"      : %(color)d,
+        "distance"   : %(distance).3f,
+        "intensity"  : %(intensity).3f
+    }"""
 
 TEMPLATE_LIGHT_AREA = """\
-	%(light_id)s : {
-		"type"       : "AreaLight",
-		"position"   : %(position)s,
-		"rotation"   : %(rotation)s,
-		"color"      : %(color)d,
-		"distance"   : %(distance).3f,
-		"intensity"  : %(intensity).3f,
-		"gamma"      : %(gamma).3f,
-		"shape"      : "%(shape)s",
-		"size"       : %(size).3f,
-		"size_y"     : %(size_y).3f
-	}"""
+    %(light_id)s : {
+        "type"       : "AreaLight",
+        "position"   : %(position)s,
+        "rotation"   : %(rotation)s,
+        "color"      : %(color)d,
+        "distance"   : %(distance).3f,
+        "intensity"  : %(intensity).3f,
+        "gamma"      : %(gamma).3f,
+        "shape"      : "%(shape)s",
+        "size"       : %(size).3f,
+        "size_y"     : %(size_y).3f
+    }"""
 
 
 TEMPLATE_VEC4 = '[ %g, %g, %g, %g ]'
@@ -266,19 +271,19 @@ TEMPLATE_HEX = "0x%06x"
 TEMPLATE_FILE_ASCII = """\
 {
 
-	"metadata" :
-	{
-		"formatVersion" : 3.1,
-		"generatedBy"   : "Blender 2.65 Exporter",
-		"vertices"      : %(nvertex)d,
-		"faces"         : %(nface)d,
-		"normals"       : %(nnormal)d,
-		"colors"        : %(ncolor)d,
-		"uvs"           : [%(nuvs)s],
-		"materials"     : %(nmaterial)d,
-		"morphTargets"  : %(nmorphTarget)d,
-		"bones"         : %(nbone)d
-	},
+    "metadata" :
+    {
+        "formatVersion" : 3.1,
+        "generatedBy"   : "Blender 2.65 Exporter",
+        "vertices"      : %(nvertex)d,
+        "faces"         : %(nface)d,
+        "normals"       : %(nnormal)d,
+        "colors"        : %(ncolor)d,
+        "uvs"           : [%(nuvs)s],
+        "materials"     : %(nmaterial)d,
+        "morphTargets"  : %(nmorphTarget)d,
+        "bones"         : %(nbone)d
+    },
 
 %(model)s
 
@@ -286,29 +291,29 @@ TEMPLATE_FILE_ASCII = """\
 """
 
 TEMPLATE_MODEL_ASCII = """\
-	"scale" : %(scale)f,
+    "scale" : %(scale)f,
 
-	"materials" : [%(materials)s],
+    "materials" : [%(materials)s],
 
-	"vertices" : [%(vertices)s],
+    "vertices" : [%(vertices)s],
 
-	"morphTargets" : [%(morphTargets)s],
+    "morphTargets" : [%(morphTargets)s],
 
-	"normals" : [%(normals)s],
+    "normals" : [%(normals)s],
 
-	"colors" : [%(colors)s],
+    "colors" : [%(colors)s],
 
-	"uvs" : [%(uvs)s],
+    "uvs" : [%(uvs)s],
 
-	"faces" : [%(faces)s],
+    "faces" : [%(faces)s],
 
-	"bones" : [%(bones)s],
+    "bones" : [%(bones)s],
 
-	"skinIndices" : [%(indices)s],
+    "skinIndices" : [%(indices)s],
 
-	"skinWeights" : [%(weights)s],
+    "skinWeights" : [%(weights)s],
 
-	"animations" : [%(animations)s]
+    "animations" : [%(animations)s]
 """
 
 TEMPLATE_VERTEX = "%g,%g,%g"
@@ -1188,6 +1193,12 @@ def generate_materials(mtl, materials, draw_type):
         if draw_type in [ "BOUNDS", "WIRE" ]:
             mtl[m]['wireframe'] = True
             mtl[m]['DbgColor'] = 0xff0000
+
+        material_to_mod = mtl[m]
+
+        for attr in PATH_MOD_ATTRS:
+            if attr in material_to_mod:
+                material_to_mod[attr] = TEXTURE_PATH + material_to_mod[attr]
 
         mtl_raw = ",\n".join(['\t\t"%s" : %s' % (n, value2string(v)) for n,v in sorted(mtl[m].items())])
         mtl_string = "\t{\n%s\n\t}" % mtl_raw
