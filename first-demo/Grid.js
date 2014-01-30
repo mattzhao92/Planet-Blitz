@@ -18,6 +18,11 @@ var Grid = Class.extend({
         this.currentMouseOverTile = null;
         this.characterBeingSelected = null;
 
+        // listeners and state
+        this.mouseDownListenerActive = true;
+        this.mouseOverListenerActive = true;
+
+
         // create grid tiles
         this.tiles = new THREE.Object3D();
         this.tilesArray = null;
@@ -52,6 +57,14 @@ var Grid = Class.extend({
         this.setControls();
         this.setupMouseMoveListener();
         this.setupMouseDownListener();
+    },
+
+    disableMouseDownListener: function() {
+        this.mouseDownListenerActive = false;
+    },
+
+    enableMouseDownListener: function() {
+        this.mouseDownListenerActive = true;
     },
 
     disableMouseMoveListener: function() {
@@ -134,11 +147,18 @@ var Grid = Class.extend({
             this.highlightedTiles.forEach(function(tile) {
                 tile.reset();
             });
+            // wait an indistinguishable amount for render to catch up
         }
 
+        setTimeout(this.highlightTiles(tilesToHighlight), 30);
+    },
+
+    highlightTiles: function(tilesToHighlight) {
         tilesToHighlight.forEach(function(tile) {
-            tile.markAsMovable();
             tile.setSelectable(true);
+            tile.setMovable(true);
+            tile.markAsMovable();
+
         });
 
         this.highlightedTiles = tilesToHighlight;
@@ -244,7 +264,9 @@ var Grid = Class.extend({
         var scope = this;
 
         window.addEventListener('mousedown', function(event) {
-            scope.onMouseDown(event);
+            if (scope.mouseDownListenerActive) {
+                scope.onMouseDown(event);
+            }
         }, false);
     },
 
@@ -285,11 +307,14 @@ var Grid = Class.extend({
                         new THREE.Vector3(coordinate.x - this.characterBeingSelected.getTileXPos(),
                             0,
                             coordinate.z - this.characterBeingSelected.getTileZPos()));
+
                     this.disableMouseMoveListener();
+                    this.disableMouseDownListener();
 
                     this.characterBeingSelected.enqueueMotion(function() {
                         console.log("Motion finished");
                         scope.enableMouseMoveListener();
+                        scope.enableMouseDownListener();
                     });
                     // console.log("character is being moved to a new coordinate position \n");
                     // console.log("src X: "+this.characterBeingSelected.getTileXPos() +

@@ -6,7 +6,10 @@ var GridCell = Class.extend({
     	this.xPos = xPos;
     	this.zPos = zPos;
     	this.grayness = grayness;
+
     	this.isSelectable = false;
+        this.isMovable = false;
+
         this.hasObstacle = false;
         this.hasCharacter = false;
     },
@@ -28,14 +31,21 @@ var GridCell = Class.extend({
     	// this.mesh.material.color.setRGB(1, 1, 1);
     	this.mesh.material.color.setRGB(this.grayness, this.grayness, this.grayness);
   		this.isSelectable = false;
+        this.isMovable = false;
     },
 
     markAsNotSelected: function() {
-    	this.mesh.material.color.setRGB(0, 1.0, 0);
+        if (this.isMovable) {
+    	   this.mesh.material.color.setRGB(0, 1.0, 0);
+        }
     },
 
     setSelectable: function(isSelectable) {
     	this.isSelectable = isSelectable;
+    },
+
+    setMovable: function(isMovable) {
+        this.isMovable = isMovable;
     },
 
     onMouseOver: function(scope) {
@@ -49,7 +59,9 @@ var GridCell = Class.extend({
     },
 
     markAsMovable: function() {
-    	this.mesh.material.color.setRGB(0, 1.0, 0);
+    	if (this.isMovable) {
+            this.mesh.material.color.setRGB(0, 1.0, 0);
+        }
     }
 });
 
