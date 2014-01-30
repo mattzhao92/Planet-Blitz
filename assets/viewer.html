@@ -7,7 +7,7 @@
     <script type="text/javascript" src="../libs/three.js"></script>
     <script type="text/javascript" src="../libs/jquery-1.9.0.js"></script>
     <script type="text/javascript" src="../libs/stats.js"></script>
-    <script type="text/javascript" src="../libs/dat.gui.js"></script>
+    <script type="text/javascript" src="../libs/dat.gui.min.js"></script>
     <script type="text/javascript" src="../libs/MapControls.js"></script>
 
     <style>
@@ -69,9 +69,7 @@
                 this.setupMouseMoveListener();
 
                 this.loader = new THREE.JSONLoader();
-                // this.loadFile("blendermodels/uvmappedandbaked.js");
-                this.loadFile("blendermodels/forreal.js");
-                 // this.loadFile("blendermodels/fresnelandphong.js");
+                this.loadFile("blendermodels/testcube-baked.js");
 
                  // begin animation
                  this.animate();
@@ -184,39 +182,37 @@
             },
 
             setupControls: function() {
-                var controls = new THREE.MapControls(this.camera);
+                var controls = new THREE.MapControls(this.camera, document.getElementById("WebGL-output"));
                 controls.panSpeed = .31;
                 this.controls = controls;
             },
 
             addControlGUI: function() {
                 this.datGuiControls = new function() {
-                    this.perspective = "Perspective";
-                    this.switchCamera = function() {
+                    this.modelName = "Perspective";
+                    this.loadModel = function() {
                         if (app.camera instanceof THREE.PerspectiveCamera) {
                             app.camera = new THREE.OrthographicCamera( window.innerWidth / - 16, window.innerWidth / 16, window.innerHeight / 16, window.innerHeight / - 16, -200, 500 );
                             app.camera.position.x = 3;
                             app.camera.position.y = 1;
                             app.camera.position.z = 3;
 
-                            // app.camera.lookAt(app.scene.position);
-                            app.perspective = "Orthographic";
+                            this.modelName = "Orthographic";
                         } else {
                             app.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
                             app.camera.position.x = 120;
                             app.camera.position.y = 60;
                             app.camera.position.z = 180;
 
-                            // app.camera.lookAt(app.scene.position);
-                            app.perspective = "Perspective";
+                            this.modelName = "Perspective";
                         }
                     };
                 }
 
                 var gui = new dat.GUI();
 
-                gui.add(this.datGuiControls, 'switchCamera');
-                gui.add(this.datGuiControls, 'perspective').listen();
+                gui.add(this.datGuiControls, 'modelName');
+                gui.add(this.datGuiControls, 'loadModel').listen();
             },
 
             drawGamePlane: function() {
