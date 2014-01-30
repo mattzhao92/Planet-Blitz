@@ -69,7 +69,7 @@ $(function () {
 
         setupCameraControls: function() {
             this.clock = new THREE.Clock();
-            var controls = new THREE.MapControls(this.camera);
+            var controls = new THREE.MapControls(this.camera, document.getElementById("WebGL-output"));
             controls.panSpeed = .31;
 
             // ensure that camera can't rotate too far down or up
