@@ -43,6 +43,7 @@ var Character = Class.extend({
         this.mesh.zPos = zPos;
         this.mesh.position.x = this.world.convertXPosToWorldX(xPos);
         this.mesh.position.z = this.world.convertZPosToWorldZ(zPos);
+        this.mesh.position.y = -10;
 
         console.log("placeAtGridPos called");
         console.log("getTileXPos: " + this.getTileXPos());

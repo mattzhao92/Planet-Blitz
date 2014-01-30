@@ -243,30 +243,43 @@ var Grid = Class.extend({
 
         var raycaster = projector.pickingRay(mouseVector.clone(), scope.camera);
 
+        // var characterIntersects = raycaster.intersectObjects(scope.characters)
+
         // recursively call intersects
         var intersects = raycaster.intersectObjects(scope.charactersOnMap, true);
         var intersectsWithTiles = raycaster.intersectObjects(scope.tiles.children);
 
-        if (intersectsWithTiles.length > 0) {
-            var obj = intersectsWithTiles[0].object;
-            var coordinate = obj.onMouseOver();
-            if (this.characterBeingSelected && coordinate) {
-                this.characterBeingSelected.setDirection(
-                    new THREE.Vector3(coordinate.x - this.characterBeingSelected.getTileXPos(),
-                                      0,
-                                      coordinate.z - this.characterBeingSelected.getTileZPos()));
-                this.characterBeingSelected.enqueueMotion();
-                // console.log("character is being moved to a new coordinate position \n");
-                // console.log("src X: "+this.characterBeingSelected.getTileXPos() +
-                //             " Z: "+ this.characterBeingSelected.getTileZPos());
-                // console.log("des X: "+coordinate.x +" Z: "+coordinate.z);
-            }
-        }
+        // care about characters first, then tile intersects
+        
+        // needed so that you can't click on a character and have that result in an immediate movement
+        // is there a better pattern for this - chain of event handlers?
+        var continueHandlingIntersects = false;
 
         if (intersects.length > 0) {
             var firstIntersect = intersects[0];
             firstIntersect.object.onSelect(scope);
+        } else {
+            continueHandlingIntersects = true;
         }
+
+        if (continueHandlingIntersects) {
+            if (intersectsWithTiles.length > 0) {
+                var obj = intersectsWithTiles[0].object;
+                var coordinate = obj.onMouseOver();
+                if (this.characterBeingSelected && coordinate) {
+                    this.characterBeingSelected.setDirection(
+                        new THREE.Vector3(coordinate.x - this.characterBeingSelected.getTileXPos(),
+                                          0,
+                                          coordinate.z - this.characterBeingSelected.getTileZPos()));
+                    this.characterBeingSelected.enqueueMotion();
+                    // console.log("character is being moved to a new coordinate position \n");
+                    // console.log("src X: "+this.characterBeingSelected.getTileXPos() +
+                    //             " Z: "+ this.characterBeingSelected.getTileZPos());
+                    // console.log("des X: "+coordinate.x +" Z: "+coordinate.z);
+                }
+            }
+        }
+
     },
 
     getTileAtTilePos: function(xPos, zPos) {
@@ -414,12 +427,6 @@ var Grid = Class.extend({
                 user.setDirectionWithControl(controls);
             }
         });
-    // On resize
-    jQuery(window).resize(function() {
-        // Redefine the size of the renderer
-        //basicScene.setAspect();
-    });
-
 },
 
 
