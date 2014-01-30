@@ -10,6 +10,11 @@
     <script type="text/javascript" src="../libs/dat.gui.min.js"></script>
     <script type="text/javascript" src="../libs/MapControls.js"></script>
 
+    <script type="text/javascript" src="../libs/class.js"></script>
+    <script type="text/javascript" src="../libs/underscore-min.js"></script>
+
+    <script type="text/javascript" src="../libs/BlitzLoader.js"></script>
+
     <style>
         body{
             /* set margin to 0 and overflow to hidden, to go fullscreen */
@@ -67,7 +72,7 @@
 
                 this.setupMouseMoveListener();
 
-                this.loader = new THREE.JSONLoader();
+                this.loader = new BlitzLoader();
 
                 this.objectBeingViewed = null;
 
@@ -82,24 +87,13 @@
                 }
             },
 
-            addGeometryToScene: function(geometry, materials) {
-
-                var combinedMaterials = new THREE.MeshFaceMaterial(materials);
-                mesh = new THREE.Mesh(geometry, combinedMaterials);
+            setMeshToView: function(mesh) {
 
                 mesh.scale.set(60, 60, 60);
                 mesh.position.y = 0;
                 mesh.position.x = 0;
                 this.scene.add(mesh);
                 this.objectBeingViewed = mesh;
-            },
-
-            loadFile: function(filename) {
-                var scope = this;
-
-                this.loader.load(filename, function(geometry, materials) {
-                    scope.addGeometryToScene(geometry, materials);
-                });
             },
 
             setupMouseMoveListener: function() {
@@ -135,9 +129,6 @@
                 var cubeGeometry = new THREE.CubeGeometry(5, 5, 5);
                 var cubeMaterial = new THREE.MeshLambertMaterial({color: 0xFF0000});
                 this.chaseCamCube = new THREE.Mesh(cubeGeometry, cubeMaterial);
-                // this.chaseCamCube.position.x = 300;
-                // this.chaseCamCube.position.z = 300;
-                // this.chaseCamCube.position.y = 300;
                 this.scene.add(this.chaseCamCube);
             },
 
@@ -201,7 +192,9 @@
                     this.loadModel = function() {
                         // if object was being viewed previously, then clear it out
                         scope.clearPreviousView();
-                        scope.loadFile("blendermodels/" + this.modelName)
+                        scope.loader.loadFile(this.modelName, function(mesh) {
+                            scope.setMeshToView(mesh);
+                        });
                     };
                 }
 

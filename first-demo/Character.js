@@ -7,7 +7,7 @@ var CharacterFactory = Class.extend({
         var character = new Character(charArgs);
         return character;
     }
-})
+});
 
 var Character = Class.extend({
     // Class constructor
