@@ -79,6 +79,11 @@
                  // begin animation
                  this.animate();
 
+                 var scope = this;
+                 window.addEventListener( 'resize', function() {
+                     scope.onWindowResize() }, false );
+
+
             }, 
 
             clearPreviousView: function() {
@@ -321,6 +326,18 @@
                 $("#Stats-output").append( stats.domElement );
 
                 return stats;
+            }, 
+
+
+            onWindowResize: function() {
+
+                this.camera.aspect = window.innerWidth / window.innerHeight;
+                this.camera.updateProjectionMatrix();
+
+                this.renderer.setSize( window.innerWidth, window.innerHeight );
+
+                // adjust camera controls
+                this.controls.handleResize();
             }
 
         };
