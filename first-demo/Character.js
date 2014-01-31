@@ -31,6 +31,13 @@ var Character = Class.extend({
         this.motionInProcess = false;
         this.motionQueue = new Array();
 
+        this.addUnitSelector();
+
+        this.loader = new THREE.JSONLoader();
+        this.loadFile("headcombinedtextured.js");
+    },
+
+    addUnitSelector: function() {
         // setup unit selector mesh
         // have to supply the radius
         var geometry = new THREE.TorusGeometry(this.world.getTileSize() / 2, 1, 5, 35);
@@ -41,9 +48,6 @@ var Character = Class.extend({
 
         this.mesh.add(torus);
         this.unitSelectorMesh = torus;
-
-        this.loader = new THREE.JSONLoader();
-        this.loadFile("headcombinedtextured.js");
     },
 
     placeAtGridPos: function(xPos, zPos) {
