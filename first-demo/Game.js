@@ -94,6 +94,8 @@ $(function () {
 
             var delta = this.clock.getDelta();
             this.controls.update(delta);
+            
+            // main game render loop
             this.grid.motion();
 
             // standard: render using requestAnimationFrame

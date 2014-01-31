@@ -1,7 +1,4 @@
-/* 
- * Grid
- * constructor input args : {d_x, d_y, square_size}
- */
+/* Game world */
 var Grid = Class.extend({
     // Class constructor
     init: function(width, length, tileSize, scene, camera) {
@@ -41,7 +38,8 @@ var Grid = Class.extend({
         for (var i = 0; i < this.numOfCharacters; i++) {
 
             var charArgs = {
-                world: scope
+                world: scope,
+                onDead: scope.removeCharacter
             };
 
             var character = this.characterFactory.createCharacter(charArgs);
@@ -56,6 +54,12 @@ var Grid = Class.extend({
 
         this.setupMouseMoveListener();
         this.setupMouseDownListener();
+    },
+
+    removeCharacter: function(character) {
+        console.log("Character died");
+        // TODO: remove character from meshes list 
+        character.mesh.visible = false;
     },
 
     disableMouseDownListener: function() {
@@ -134,10 +138,6 @@ var Grid = Class.extend({
         }
 
         var characterMovementRange = character.getMovementRange();
-        console.log("character movement range " + characterMovementRange);
-
-        // console.log(character.getTileXPos() + " " + character.getTileZPos());
-        console.log(character.xPos + " " + character.zPos);
 
         // highlight adjacent squares - collect all tiles from radius
         var tilesToHighlight = this.getTilesInArea(character, characterMovementRange);
@@ -177,22 +177,17 @@ var Grid = Class.extend({
 
         while (nodesInCurrentLevel.length > 0 && radius > 0) {
             var currentTile = nodesInCurrentLevel.pop();
-            console.log("currentTile x:" + currentTile.xPos + " z:" + currentTile.zPos);
 
             var validNeighbors = this.getNeighborTiles(currentTile.xPos, currentTile.zPos);
             for (var i = 0; i < validNeighbors.length; i++) {
                 var neighbor = validNeighbors[i];
                 if (_.indexOf(visited, neighbor) == -1 && _.indexOf(nodesInNextLevel, neighbor)) {
-                    console.log("print here 111 \n");
                     tilesToHighlight.push(neighbor);
                     nodesInNextLevel.push(neighbor);
-                } else {
-                    console.log("print here 222 \n");
                 }
             }
 
             if (nodesInCurrentLevel.length == 0) {
-                console.log("--------------------nodesInNextLevel   " + nodesInNextLevel);
                 nodesInCurrentLevel = nodesInNextLevel;
                 nodesInNextLevel = new Array();
                 radius = radius - 1;
@@ -214,8 +209,6 @@ var Grid = Class.extend({
         tiles = _.filter(tiles, function(tile) {
             return (tile != null && !tile.isObstacle() && !tile.isCharacter());
         });
-
-        console.log("length of neighbors 222 " + tiles.length);
 
         return tiles;
     },
@@ -269,6 +262,13 @@ var Grid = Class.extend({
     },
 
     onMouseDown: function(event) {
+
+        // very temporary
+        if (this.characterBeingSelected) {
+            this.characterBeingSelected.applyDamage(60);
+            console.log(this.characterBeingSelected.health);
+        }
+
         var scope = this;
 
         var projector = new THREE.Projector();

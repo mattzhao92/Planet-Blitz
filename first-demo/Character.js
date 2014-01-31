@@ -15,6 +15,8 @@ var Character = Class.extend({
         'use strict';
 
         this.world = args.world;
+        this.onDead = args.onDead;
+
         this.isActive = false;
 
         this.xPos = 0;
@@ -35,6 +37,20 @@ var Character = Class.extend({
 
         this.loader = new THREE.JSONLoader();
         this.loadFile("headcombinedtextured.js");
+
+        this.health = 100;
+    },
+
+    getHealth: function() {
+        return this.health;
+    },
+
+    applyDamage: function(attack) {
+        this.health -= attack;
+
+        if (this.health < 0) {
+            this.onDead(this);
+        }
     },
 
     addUnitSelector: function() {
@@ -120,9 +136,7 @@ var Character = Class.extend({
     },
 
     enqueueMotion: function(onMotionFinish) {
-        console.log("enqueueMotion \n");
         this.motionQueue.push(this.direction.clone());
-        console.log("x: " + this.direction.x + " z: " + this.direction.z);
 
         // TODO: define actual tween timeout
         if (onMotionFinish) {
@@ -134,7 +148,6 @@ var Character = Class.extend({
         if (this.motionQueue.length > 0) {
             this.motionInProcess = true;
             var direction = this.motionQueue.pop();
-            console.log("dequeueMotion: direction, [x " + direction.x + "] [z " + direction.z + " ] \n");
             if (direction.x !== 0 || direction.z !== 0) {
                 // Rotate the character
                 var rotateTween = this.rotate(direction);
@@ -199,7 +212,6 @@ var Character = Class.extend({
     rotate: function(direction) {
         'use strict';
         // Set the direction's angle, and the difference between it and our Object3D's current rotation
-        console.log("rotation \n");
         var angle = Math.atan2(direction.x, direction.z);
 
         // transition from current rotation (mesh.rotation.y) to desired angle 'angle'
