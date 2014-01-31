@@ -368,6 +368,10 @@ var Grid = Class.extend({
         this.scene.add(this.tiles);
     },
 
+    getTileSize: function() {
+        return this.tileSize;
+    },
+
     getNumberSquaresOnXAxis: function() {
         return this.numberSquaresOnXAxis;
     },

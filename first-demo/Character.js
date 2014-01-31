@@ -13,6 +13,13 @@ var Character = Class.extend({
     // Class constructor
     init: function(args) {
         'use strict';
+
+        this.world = args.world;
+        this.isActive = false;
+
+        this.xPos = 0;
+        this.zPos = 0;
+
         // Set the character modelisation object
         this.mesh = new THREE.Object3D();
 
@@ -23,14 +30,20 @@ var Character = Class.extend({
         this.step = 0;
         this.motionInProcess = false;
         this.motionQueue = new Array();
+
+        // setup unit selector mesh
+        // have to supply the radius
+        var geometry = new THREE.TorusGeometry(this.world.getTileSize() / 2, 1, 5, 35);
+        var material = new THREE.MeshLambertMaterial({color: 0xFF0000});
+        var torus = new THREE.Mesh(geometry, material);
+        torus.rotation.x = -0.5 * Math.PI;
+        torus.visible = false;
+
+        this.mesh.add(torus);
+        this.unitSelectorMesh = torus;
+
         this.loader = new THREE.JSONLoader();
         this.loadFile("headcombinedtextured.js");
-
-        this.xPos = 0;
-        this.zPos = 0;
-
-        this.world = args.world;
-        this.isActive = false;
     },
 
     placeAtGridPos: function(xPos, zPos) {
@@ -59,14 +72,15 @@ var Character = Class.extend({
             return;
         }
         // world.deselectAll();
-        this.mesh.children[0].material.color.setRGB(1.0, 0, 0);
+        this.unitSelectorMesh.material.color.setRGB(1.0, 0, 0);
+        this.unitSelectorMesh.visible = true;
         world.markCharacterAsSelected(this);
         this.isActive = true;
     },
 
     deselect: function() {
         // return to original color
-        this.mesh.children[0].material.color.setRGB(1.0, 1.0, 1.0);
+        this.unitSelectorMesh.visible = false;
         this.isActive = false;
     },
 
@@ -81,7 +95,9 @@ var Character = Class.extend({
             mesh.position.x = 0;
             mesh.position.z = 10;
             this.mesh.owner = scope;
+
             scope.mesh.add(mesh);
+            scope.characterMesh = mesh;
         })
     },
 
