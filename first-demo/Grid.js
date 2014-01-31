@@ -54,7 +54,6 @@ var Grid = Class.extend({
             this.scene.add(character.mesh);
         }
 
-        this.setControls();
         this.setupMouseMoveListener();
         this.setupMouseDownListener();
     },
@@ -399,84 +398,5 @@ var Grid = Class.extend({
             character.dequeueMotion(this);
         }
     },
-
-    // Event handlers
-    setControls: function() {
-        'use strict';
-        // Within jQuery's methods, we won't be able to access "this"
-        var scope = this;
-        var user = this.characterBeingSelected;
-        var controls = {
-            left: false,
-            up: false,
-            right: false,
-            down: false
-        };
-        // When the user presses a key 
-        jQuery(document).keydown(function(e) {
-            var prevent = true;
-            // Update the state of the attached control to "true"
-            switch (e.keyCode) {
-                case 37:
-                    controls.right = true;
-                    break;
-                case 38:
-                    controls.down = true;
-                    break;
-                case 39:
-                    controls.left = true;
-                    break;
-                case 40:
-                    controls.up = true;
-                    break;
-                default:
-                    prevent = false;
-            }
-            // Avoid the browser to react unexpectedly
-            if (prevent) {
-                e.preventDefault();
-            } else {
-                return;
-            }
-            // Update the character's direction
-            if (scope.characterBeingSelected) {
-                console.log("enqueueMotion ---------- ");
-                scope.characterBeingSelected.setDirectionWithControl(controls);
-                scope.characterBeingSelected.enqueueMotion();
-            }
-        });
-        // When the user releases a key
-        jQuery(document).keyup(function(e) {
-            var prevent = true;
-            // Update the state of the attached control to "false"
-            switch (e.keyCode) {
-                case 37:
-                    controls.right = false;
-                    break;
-                case 38:
-                    controls.down = false;
-                    break;
-                case 39:
-                    controls.left = false;
-                    break;
-                case 40:
-                    controls.up = false;
-                    break;
-                default:
-                    prevent = false;
-            }
-            // Avoid the browser to react unexpectedly
-            if (prevent) {
-                e.preventDefault();
-            } else {
-                return;
-            }
-            // Update the character's direction
-            if (user) {
-                user.setDirectionWithControl(controls);
-            }
-        });
-    },
-
 
 });

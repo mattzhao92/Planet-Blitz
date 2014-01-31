@@ -83,7 +83,6 @@ THREE.MapControls = function ( object, domElement ) {
     var _panEnd = new THREE.Vector2();
 
     this.handleResize = function () {
-        console.log("handle resize called");
         if ( this.domElement === document ) {
 
             this.screen.left = 0;
@@ -484,26 +483,35 @@ THREE.MapControls = function ( object, domElement ) {
         switch ( event.keyCode ) {
 
             case scope.keys.UP:
-                scope.pan( new THREE.Vector3( 0, 0, -1 ) );
+                _panEnd = _panStart.clone().add(new THREE.Vector3(0, 0.04, 0));
                 break;
             case scope.keys.BOTTOM:
-                scope.pan( new THREE.Vector3( 0, 0, 1 ) );
+                _panEnd = _panStart.clone().add(new THREE.Vector3(0, -0.04, 0));
                 break;
             case scope.keys.LEFT:
-                scope.pan( new THREE.Vector3( - 1, 0, 0 ) );
+                _panEnd = _panStart.clone().add(new THREE.Vector3(0.04, 0, 0));
                 break;
             case scope.keys.RIGHT:
-                scope.pan( new THREE.Vector3( 1, 0, 0 ) );
+                _panEnd = _panStart.clone().add(new THREE.Vector3(-0.04, 0, 0));
                 break;
         }
+    }
+
+
+    function onKeyUp( event ) {
+
 
     }
+
 
     this.domElement.addEventListener( 'contextmenu', function ( event ) { event.preventDefault(); }, false );
     this.domElement.addEventListener( 'mousedown', onMouseDown, false );
     this.domElement.addEventListener( 'mousewheel', onMouseWheel, false );
     this.domElement.addEventListener( 'DOMMouseScroll', onMouseWheel, false ); // firefox
-    this.domElement.addEventListener( 'keydown', onKeyDown, false );
+    // this.domElement.addEventListener( 'keydown', onKeyDown, false );
+
+    window.addEventListener('keydown', onKeyDown, false);
+    // window.addEventListener('keydown', onKeyUp, false);
 
     this.handleResize();
 };
