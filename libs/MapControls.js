@@ -476,7 +476,6 @@ THREE.MapControls = function ( object, domElement ) {
     }
 
     function onKeyDown( event ) {
-        console.log("onKeyDown");
 
         if ( scope.enabled === false ) return;
         if ( scope.userPan === false ) return;
