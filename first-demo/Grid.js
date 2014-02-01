@@ -412,8 +412,8 @@ var Grid = Class.extend({
         // update character movements
         for (var i = 0; i < this.characterMeshes.length; i++) {
             var character = this.characterMeshes[i].owner;
-            character.dequeueMotion(this);
-            character.update(delta);
+            //character.dequeueMotion(this);
+            character.update(this, delta);
         }
 
         // update bullet movements

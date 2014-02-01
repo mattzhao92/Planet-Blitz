@@ -42,10 +42,6 @@ var Character = Class.extend({
         this.health = 100;
     },
 
-    update: function(delta) {
-
-    },
-
     getHealth: function() {
         return this.health;
     },
@@ -152,65 +148,88 @@ var Character = Class.extend({
         }
     },
 
-    dequeueMotion: function(world) {
+    update: function(world, delta) {
+                             
+        // check for left animation
+        console.log("update !");
+
+        if (this.rotationInProgress) {
+            if (this.mesh.rotation.y > Math.PI) {
+                this.mesh.rotation.y -= - 2 * Math.PI;
+            }
+            if (this.mesh.rotation.y < -Math.PI) {
+                this.mesh.rotation.y += 2 * Math.PI;
+            }
+
+            var newAngle = this.mesh.rotation.y + this.angularVelocity * delta;
+                        console.log("rotation in progress ");
+                        console.log("newAngle " + newAngle);
+                        console.log("rotation.y "+this.mesh.rotation.y);
+                        console.log("angularVelocity "+this.angularVelocity);
+                        console.log("goalAngle "+this.goalAngle+" \n\n\n");
+
+            if (newAngle / this.mesh.rotation.y >= 1) {
+                this.mesh.rotation.y = this.goalAngle;
+                console.log("rotation finishes");
+                this.rotationInProgress = false;
+            } else {
+                this.mesh.rotation.y = newAngle;
+            }
+            return;
+        }
+                  
+        if (this.motionInProgress) {
+  
+            var newMeshX = this.mesh.position.x + this.velocityX * delta;
+            var newMeshZ = this.mesh.position.z + this.velocityZ * delta;
+
+            console.log("motion in progress X " + this.mesh.position.x + " "+this.goalMeshX + " "+this.velocityX);
+            console.log("motion in progress Z " + this.mesh.position.z + " "+this.goalMeshZ + " "+this.velocityZ);
+            if (newMeshX / this.goalMeshX > 1 ) {
+                this.mesh.position.x = this.goalMeshX;
+                //console.log("motion in progress finishes "+newMeshX / this.goalMeshX);
+                this.motionInProgress = false;
+                this.xPos = this.goalXPos;
+                world.displayMovementArea(this);
+            } else {
+                this.mesh.position.x = newMeshX;
+            }
+
+            if (newMeshZ / this.goalMeshZ > 1) {
+                this.mesh.position.z = this.goalMeshZ;
+                //console.log("motion in progress finishes");
+                this.motionInProgress = false;
+                this.zPos = this.goalZPos;
+                world.displayMovementArea(this);
+            } else {
+                this.mesh.position.z = newMeshZ;
+            }
+
+            return;                     
+        } 
+
         if (this.motionQueue.length > 0) {
             this.motionInProcess = true;
             var direction = this.motionQueue.pop();
             if (direction.x !== 0 || direction.z !== 0) {
-                // Rotate the character
-                var rotateTween = this.rotate(direction);
+                this.rotate(direction);
                 // And, only if we're not colliding with an obstacle or a wall ...
                 if (this.collide()) {
+                    console.log("dequeueMotion Exits \n");
                     return false;
                 }
+
+                this.motionInProgress = true;
                 // ... we move the character
-                world.markTileNotOccupiedByCharacter(this.getTileXPos(), this.getTileZPos());
-                var oldX = this.mesh.position.x;
-                var newX = this.mesh.position.x + direction.x * 40;
+                // world.markTileNotOccupiedByCharacter(this.getTileXPos(), this.getTileZPos());
+                this.goalMeshX = this.mesh.position.x + direction.x * 40;
+                this.goalMeshZ = this.mesh.position.z + direction.z * 40;
+                this.velocityX = direction.x?direction.x<0?-50:50:0;
+                this.velocityZ = direction.z?direction.z<0?-10:10:0;
+                this.goalXPos = this.xPos + direction.x;
+                this.goalZPos = this.zPos + direction.z;
+                //world.markTileOccupiedByCharacter(this.getTileXPos(), this.getTileZPos());
 
-                var oldZ = this.mesh.position.z;
-                var newZ = this.mesh.position.z + direction.z * 40;
-
-                this.xPos += direction.x;
-                this.zPos += direction.z;
-
-                //var easing = TWEEN.Easing.Elastic.InOut;
-                //var easing = TWEEN.Easing.Linear.None;
-                var easing = TWEEN.Easing.Quadratic.Out;
-                //var easing = TWEEN.Easing.Exponential.EaseOut;
-                var tween = new TWEEN.Tween({
-                    x: oldX,
-                    z: oldZ
-                }).to({
-                    x: newX,
-                    z: newZ
-                }, 450).easing(easing);
-
-                //var myMesh = this.mesh;
-                var scope = this;
-                var onUpdate = function() {
-                    var xCoord = this.x;
-                    var zCoord = this.z;
-                    scope.mesh.position.x = xCoord;
-                    scope.mesh.position.z = zCoord;
-                    if (scope.mesh.position.x == newX && scope.mesh.position.z == newZ) {
-                        world.markTileOccupiedByCharacter(scope.getTileXPos(), scope.getTileZPos());
-                        world.displayMovementArea(scope);
-                    }
-                };
-
-                tween.onUpdate(onUpdate);
-
-                var moveTween = tween;
-                this.direction.set(0, 0, 0);
-
-                var blankTween = new TWEEN.Tween({}).to({}, 100);
-
-                rotateTween.chain(blankTween);
-                rotateTween.chain(moveTween);
-                rotateTween.start();
-
-                return true;
             }
             return false;
         }
@@ -220,26 +239,18 @@ var Character = Class.extend({
     rotate: function(direction) {
         'use strict';
         // Set the direction's angle, and the difference between it and our Object3D's current rotation
-        var angle = Math.atan2(direction.x, direction.z);
-
-        // transition from current rotation (mesh.rotation.y) to desired angle 'angle'
-
-        var easing = TWEEN.Easing.Quadratic.Out;
-        var oldRotationY = this.mesh.rotation.y;
-        var tween = new TWEEN.Tween({
-            rotationY: oldRotationY
-        }).to({
-            rotationY: angle
-        }, 200).easing(easing);
-
-        var myMesh = this.mesh;
-        var onUpdate = function() {
-            myMesh.rotation.y = this.rotationY;
+        this.goalAngle = Math.atan2(direction.x, direction.z);
+        if (this.goalAngle > Math.PI) {
+            this.goalAngle -= - 2 * Math.PI;
+        }
+        if (this.goalAngle < -Math.PI) {
+            this.goalAngle += 2 * Math.PI;
         }
 
-        tween.onUpdate(onUpdate);
-        // tween.start();
-        return tween;
+        if (this.goalAngle != this.mesh.rotation.y) {
+            this.angularVelocity = (this.mesh.rotation.y - this.goalAngle) / 100.0;
+            this.rotationInProgress = true;
+        }
     },
 
     collide: function() {
