@@ -136,12 +136,11 @@ var Character = Class.extend({
         this.direction = direction;
     },
 
-    enqueueMotion: function(onMotionFinish) {
+    enqueueMotion: function(world, onMotionFinish) {
         console.log("enqueueMotion \n");
+
 		// sendMoveMsg(this.direction.x, this.direction.y, this.direction.z);
-
         this.motionQueue.push(this.direction.clone());
-
         // TODO: define actual tween timeout
         if (onMotionFinish) {
             setTimeout(onMotionFinish, 800);
@@ -221,6 +220,7 @@ var Character = Class.extend({
 
                 this.motionInProgress = true;
                 // ... we move the character
+
                 // world.markTileNotOccupiedByCharacter(this.getTileXPos(), this.getTileZPos());
                 this.goalMeshX = this.mesh.position.x + direction.x * 40;
                 this.goalMeshZ = this.mesh.position.z + direction.z * 40;
@@ -230,6 +230,70 @@ var Character = Class.extend({
                 this.goalZPos = this.zPos + direction.z;
                 //world.markTileOccupiedByCharacter(this.getTileXPos(), this.getTileZPos());
 
+
+                // world.markTileNotOccupiedByCharacter(this.getTileXPos(), this.getTileZPos());
+                // var oldMeshX = this.mesh.position.x;
+                // this.mesh.position.x = this.mesh.position.x + direction.x * 40;
+
+                // var oldMeshZ = this.mesh.position.z;
+                // this.mesh.position.z = this.mesh.position.z + direction.z * 40;
+
+                // var oldX = this.xPos;
+                // var oldZ = this.zPos;
+
+                // this.xPos += direction.x;
+                // this.zPos += direction.z;
+
+                // world.markTileOccupiedByCharacter(this.getTileXPos(), this.getTileZPos());
+                // world.displayMovementArea(this);
+
+                // world.markTileNotOccupiedByCharacter(this.getTileXPos(), this.getTileZPos());
+                // var oldMeshX = current_pos.x;
+                // var newMeshX = this.mesh.position.x + direction.x * 40;
+
+                // var oldMeshZ = current_pos.z;
+                // var newMeshZ = this.mesh.position.z + direction.z * 40;
+
+                // this.xPos += direction.x;
+                // this.zPos += direction.z;
+
+                // var easing = TWEEN.Easing.Elastic.InOut;
+                // var easing = TWEEN.Easing.Linear.None;
+                // var easing = TWEEN.Easing.Quadratic.Out;
+                // //var easing = TWEEN.Easing.Exponential.EaseOut;
+                // var tween = new TWEEN.Tween({
+                //     x: oldMeshX,
+                //     z: oldMeshZ
+                // }).to({
+                //     x: newMeshX,
+                //     z: newMeshZ
+                // }, 20).easing(easing);
+
+                // var myMesh = this.mesh;
+                // var scope = this;
+                // var onUpdate = function() {
+                //     var xCoord = this.x;
+                //     var zCoord = this.z;
+                //     scope.mesh.position.x = xCoord;
+                //     scope.mesh.position.z = zCoord;
+                //     if (scope.mesh.position.x == newMeshX && scope.mesh.position.z == newMeshZ) {
+                //         world.markTileOccupiedByCharacter(scope.getTileXPos(), scope.getTileZPos());
+                //         world.displayMovementArea(scope);
+                //     }
+                // };
+
+                // tween.onUpdate(onUpdate);
+
+                // var moveTween = tween;
+                // this.direction.set(0, 0, 0);
+
+                // var blankTween = new TWEEN.Tween({}).to({}, 10);
+
+                // rotateTween.chain(blankTween);
+                // rotateTween.chain(moveTween);
+                // rotateTween.start();
+                //         console.log("dequeueMotion Exits \n");
+                return true;
             }
             return false;
         }

@@ -133,19 +133,27 @@ var Grid = Class.extend({
     markTileOccupiedByCharacter: function(xPos, zPos) {
         var tile = this.getTileAtTilePos(xPos, zPos);
         if (tile) {
-            tile.hasCharacter = true;
+            tile.setHasCharacter(true);
+            this.setPFGridCellAccessibility(xPos, zPos, false);
         }
     },
 
     markTileNotOccupiedByCharacter: function(xPos, zPos) {
         var tile = this.getTileAtTilePos(xPos, zPos);
         if (tile) {
-            tile.hasCharacter = false;
+            tile.setHasCharacter(false);
+            this.setPFGridCellAccessibility(xPos, zPos, true);
         }
     },
 
     markTileOccupiedByObstacle: function() {
 
+    },
+
+
+    findPath: function(oldXPos, oldZPos, newXPos, newZPos) {
+        console.log("findPath oldXPos: "+oldXPos+" oldZPos: "+oldZPos +" newXPos: "+newXPos+" newZPos: "+ newZPos);
+        return this.pathFinder.findPath(oldXPos, oldZPos, newXPos, newZPos, this.PFGrid.clone());
     },
 
     displayMovementArea: function(character) {
@@ -177,6 +185,10 @@ var Grid = Class.extend({
         });
 
         this.highlightedTiles = tilesToHighlight;
+    },
+
+    setPFGridCellAccessibility: function(x, z, hasObstacleOnCell) {
+        this.PFGrid.setWalkableAt(x, z, hasObstacleOnCell);
     },
 
     getTilesInArea: function(character, radius) {
@@ -226,7 +238,6 @@ var Grid = Class.extend({
         tiles = _.filter(tiles, function(tile) {
             return (tile != null && !tile.isObstacle() && !tile.isCharacter());
         });
-
         return tiles;
     },
 
@@ -380,6 +391,8 @@ var Grid = Class.extend({
                 this.tiles.add(tileMesh);
             }
         }
+        this.PFGrid = new PF.Grid(this.numberSquaresOnXAxis, this.numberSquaresOnZAxis);
+        this.pathFinder = new PF.AStarFinder();
 
         this.scene.add(this.tiles);
     },
