@@ -33,9 +33,8 @@ io.sockets.on('connection', function(socket) {
 	socket.set('pseudo', 'player' + numPlayers);
 	numPlayers++;
 	console.log('Player connection, #' + numPlayers);
-	console.log('hahaha');
 
-	socket.on('message', function(message) {
+	socket.on('move', function(message) {
 		socket.get('pseudo', function(error, name) {
 			var data = {'message' : message, pseudo : name, 
 					'ip' : socket.handshake.address.address};
@@ -43,4 +42,6 @@ io.sockets.on('connection', function(socket) {
 			console.log('user ' + name + ' send this : ' + message);
 		});
 	});
+
+
 });
