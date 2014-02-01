@@ -408,7 +408,7 @@ var Grid = Class.extend({
 
     },
 
-    motion: function(args) {
+    update: function(delta) {
         for (var i = 0; i < this.characterMeshes.length; i++) {
             var character = this.characterMeshes[i].owner;
             character.dequeueMotion(this);

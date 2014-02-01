@@ -86,9 +86,9 @@ $(function () {
         setupGameWorld: function() {
             var squareSize = 40;
             this.world = new Grid(400, 400, squareSize, this.scene, this.camera);
-        }, 
+        },
 
-        animate: function() {
+        update: function() {
             TWEEN.update();
             this.stats.update();
 
@@ -96,7 +96,11 @@ $(function () {
             this.controls.update(delta);
             
             // main game render loop
-            this.world.motion();
+            this.world.update(delta);
+        },
+
+        animate: function() {
+            this.update();
 
             // standard: render using requestAnimationFrame
             var me = this;
