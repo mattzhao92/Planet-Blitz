@@ -15,6 +15,8 @@ var Character = Class.extend({
         'use strict';
 
         this.world = args.world;
+        this.onDead = args.onDead;
+
         this.isActive = false;
 
         this.xPos = 0;
@@ -22,6 +24,7 @@ var Character = Class.extend({
 
         // Set the character modelisation object
         this.mesh = new THREE.Object3D();
+        this.mesh.owner = this;
 
         // Set the vector of the current motion
         this.direction = new THREE.Vector3(0, 0, 0);
@@ -35,6 +38,24 @@ var Character = Class.extend({
 
         this.loader = new THREE.JSONLoader();
         this.loadFile("headcombinedtextured.js");
+
+        this.health = 100;
+    },
+
+    update: function(delta) {
+
+    },
+
+    getHealth: function() {
+        return this.health;
+    },
+
+    applyDamage: function(attack) {
+         this.health -= attack;
+
+        // if (this.health < 0) {
+        //     this.world.onCharacterDead(this);
+        // }
     },
 
     addUnitSelector: function() {
@@ -102,7 +123,7 @@ var Character = Class.extend({
 
             scope.mesh.add(mesh);
             scope.characterMesh = mesh;
-        })
+        });
     },
 
     // Update the direction of the current motion
@@ -121,9 +142,9 @@ var Character = Class.extend({
 
     enqueueMotion: function(onMotionFinish) {
         console.log("enqueueMotion \n");
-				sendMoveMsg(this.direction.x, this.direction.y, this.direction.z);
+		// sendMoveMsg(this.direction.x, this.direction.y, this.direction.z);
+
         this.motionQueue.push(this.direction.clone());
-        console.log("x: " + this.direction.x + " z: " + this.direction.z);
 
         // TODO: define actual tween timeout
         if (onMotionFinish) {
@@ -135,7 +156,6 @@ var Character = Class.extend({
         if (this.motionQueue.length > 0) {
             this.motionInProcess = true;
             var direction = this.motionQueue.pop();
-            console.log("dequeueMotion: direction, [x " + direction.x + "] [z " + direction.z + " ] \n");
             if (direction.x !== 0 || direction.z !== 0) {
                 // Rotate the character
                 var rotateTween = this.rotate(direction);
@@ -200,7 +220,6 @@ var Character = Class.extend({
     rotate: function(direction) {
         'use strict';
         // Set the direction's angle, and the difference between it and our Object3D's current rotation
-        console.log("rotation \n");
         var angle = Math.atan2(direction.x, direction.z);
 
         // transition from current rotation (mesh.rotation.y) to desired angle 'angle'
@@ -227,5 +246,9 @@ var Character = Class.extend({
         'use strict';
         // INSERT SOME MAGIC HERE
         return false;
+    },
+
+    getMesh: function() {
+        return this.mesh;
     }
 });

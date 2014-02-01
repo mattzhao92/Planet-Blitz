@@ -1,7 +1,4 @@
-/* 
- * Grid
- * constructor input args : {d_x, d_y, square_size}
- */
+/* Game world */
 var Grid = Class.extend({
     // Class constructor
     init: function(width, length, tileSize, scene, camera) {
@@ -16,12 +13,11 @@ var Grid = Class.extend({
         // information about what's being selected
         this.highlightedTiles = null;
         this.currentMouseOverTile = null;
-        this.characterBeingSelected = null;
+        this.currentCharacterSelected = null;
 
         // listeners and state
         this.mouseDownListenerActive = true;
         this.mouseOverListenerActive = true;
-
 
         // create grid tiles
         this.tiles = new THREE.Object3D();
@@ -32,7 +28,6 @@ var Grid = Class.extend({
         // initialize characters
         this.characters = new THREE.Object3D();
         this.numOfCharacters = 3;
-        this.charactersOnMap = [];
         this.characterMeshes = [];
 
         this.characterFactory = new CharacterFactory();
@@ -41,14 +36,14 @@ var Grid = Class.extend({
         for (var i = 0; i < this.numOfCharacters; i++) {
 
             var charArgs = {
-                world: scope
+                world: scope,
+                onDead: scope.removeCharacter
             };
 
             var character = this.characterFactory.createCharacter(charArgs);
             character.placeAtGridPos(i + 3, 4);
             this.markTileOccupiedByCharacter(i + 3, 4);
 
-            this.charactersOnMap.push(character);
             this.characterMeshes.push(character.mesh);
             
             this.scene.add(character.mesh);
@@ -56,6 +51,32 @@ var Grid = Class.extend({
 
         this.setupMouseMoveListener();
         this.setupMouseDownListener();
+    },
+
+    onCharacterDead: function(character) {
+        // if the character was the currently selected unit, then reset tile state
+        if (this.currentCharacterSelected == character) {
+            // deselect character
+            character.deselect();
+
+            // deselect tiles
+            this.highlightedTiles.forEach(function(tile) {
+                tile.reset();
+            });
+
+            // mark tile position as available
+            var xPos = character.getTileXPos();
+            var zPos = character.getTileZPos();
+            this.getTileAtTilePos(xPos, zPos).hasCharacter = false;
+        }
+
+        // remove character mesh from list of active meshes
+        var index = this.characterMeshes.indexOf(character.mesh);
+        if (index > -1) {
+            this.characterMeshes.splice(index, 1);
+            // remove object form scene
+            this.scene.remove(character.mesh);
+        }
     },
 
     disableMouseDownListener: function() {
@@ -85,13 +106,13 @@ var Grid = Class.extend({
 
     markCharacterAsSelected: function(character) {
         // deselect previous character if there was one
-        if (this.characterBeingSelected) {
-            if (this.characterBeingSelected != character) {
-                this.characterBeingSelected.deselect();
+        if (this.currentCharacterSelected) {
+            if (this.currentCharacterSelected != character) {
+                this.currentCharacterSelected.deselect();
             }
         }
 
-        this.characterBeingSelected = character;
+        this.currentCharacterSelected = character;
 
         // show character movement speed
         this.displayMovementArea(character);
@@ -134,10 +155,6 @@ var Grid = Class.extend({
         }
 
         var characterMovementRange = character.getMovementRange();
-        console.log("character movement range " + characterMovementRange);
-
-        // console.log(character.getTileXPos() + " " + character.getTileZPos());
-        console.log(character.xPos + " " + character.zPos);
 
         // highlight adjacent squares - collect all tiles from radius
         var tilesToHighlight = this.getTilesInArea(character, characterMovementRange);
@@ -177,22 +194,17 @@ var Grid = Class.extend({
 
         while (nodesInCurrentLevel.length > 0 && radius > 0) {
             var currentTile = nodesInCurrentLevel.pop();
-            console.log("currentTile x:" + currentTile.xPos + " z:" + currentTile.zPos);
 
             var validNeighbors = this.getNeighborTiles(currentTile.xPos, currentTile.zPos);
             for (var i = 0; i < validNeighbors.length; i++) {
                 var neighbor = validNeighbors[i];
                 if (_.indexOf(visited, neighbor) == -1 && _.indexOf(nodesInNextLevel, neighbor)) {
-                    console.log("print here 111 \n");
                     tilesToHighlight.push(neighbor);
                     nodesInNextLevel.push(neighbor);
-                } else {
-                    console.log("print here 222 \n");
                 }
             }
 
             if (nodesInCurrentLevel.length == 0) {
-                console.log("--------------------nodesInNextLevel   " + nodesInNextLevel);
                 nodesInCurrentLevel = nodesInNextLevel;
                 nodesInNextLevel = new Array();
                 radius = radius - 1;
@@ -215,14 +227,12 @@ var Grid = Class.extend({
             return (tile != null && !tile.isObstacle() && !tile.isCharacter());
         });
 
-        console.log("length of neighbors 222 " + tiles.length);
-
         return tiles;
     },
 
     deselectAll: function() {
-        this.charactersOnMap.forEach(function(character) {
-            character.deselect();
+        this.characterMeshes.forEach(function(characterMesh) {
+            characterMesh.owner.deselect();
         });
     },
 
@@ -269,6 +279,13 @@ var Grid = Class.extend({
     },
 
     onMouseDown: function(event) {
+
+        // very temporary
+        if (this.currentCharacterSelected) {
+            this.currentCharacterSelected.applyDamage(60);
+            console.log(this.currentCharacterSelected.health);
+        }
+
         var scope = this;
 
         var projector = new THREE.Projector();
@@ -300,23 +317,23 @@ var Grid = Class.extend({
             if (intersectsWithTiles.length > 0) {
                 var tileSelected = intersectsWithTiles[0].object.owner;
                 var coordinate = tileSelected.onMouseOver();
-                if (this.characterBeingSelected && coordinate) {
-                    this.characterBeingSelected.setDirection(
-                        new THREE.Vector3(coordinate.x - this.characterBeingSelected.getTileXPos(),
+                if (this.currentCharacterSelected && coordinate) {
+                    this.currentCharacterSelected.setDirection(
+                        new THREE.Vector3(coordinate.x - this.currentCharacterSelected.getTileXPos(),
                             0,
-                            coordinate.z - this.characterBeingSelected.getTileZPos()));
+                            coordinate.z - this.currentCharacterSelected.getTileZPos()));
 
                     this.disableMouseMoveListener();
                     this.disableMouseDownListener();
 
-                    this.characterBeingSelected.enqueueMotion(function() {
+                    this.currentCharacterSelected.enqueueMotion(function() {
                         console.log("Motion finished");
                         scope.enableMouseMoveListener();
                         scope.enableMouseDownListener();
                     });
                     // console.log("character is being moved to a new coordinate position \n");
-                    // console.log("src X: "+this.characterBeingSelected.getTileXPos() +
-                    //             " Z: "+ this.characterBeingSelected.getTileZPos());
+                    // console.log("src X: "+this.currentCharacterSelected.getTileXPos() +
+                    //             " Z: "+ this.currentCharacterSelected.getTileZPos());
                     // console.log("des X: "+coordinate.x +" Z: "+coordinate.z);
                 }
             }
@@ -379,7 +396,6 @@ var Grid = Class.extend({
         return this.numberSquaresOnZAxis;
     },
 
-
     hasObstacleAtCell: function(args) {
 
     },
@@ -392,11 +408,18 @@ var Grid = Class.extend({
 
     },
 
-    motion: function(args) {
-        for (var i = 0; i < this.charactersOnMap.length; i++) {
-            var character = this.charactersOnMap[i];
+    update: function(delta) {
+        // update character movements
+        for (var i = 0; i < this.characterMeshes.length; i++) {
+            var character = this.characterMeshes[i].owner;
             character.dequeueMotion(this);
+            character.update(delta);
         }
+
+        // update bullet movements
+        this.handleBullets();
     },
 
+    handleBullets: function() {
+    },
 });
