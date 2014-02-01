@@ -10,6 +10,12 @@ Point your browser to http://0.0.0.0:8000/first-demo/simple-grid.html.
 
 Chrome is preferred, other browsers are untested.
 
+To run the node js server, with the game portol, use:
+
+	node gameserver.js
+
+Then navigate to http://localhost:8080
+
 ## Story
 
 A long time ago - on a planet quite far from here there was a race of alien species. They lived quite happily for much longer than we humans have been around. They were a kind, technology-driven people. But when they tried to harness the power of a star in a neighboring solar system they caused it to go supernova. 

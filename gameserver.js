@@ -14,6 +14,8 @@ app.set('view engine', 'jade');
 app.set('view options', {layout : false});
 app.configure(function() {
 	app.use(express.static(__dirname + '/server/public'));
+	app.use(express.static(__dirname + '/server/views'));
+	app.use(express.static(__dirname + '/first-demo'));
 	app.use(express.static(__dirname + '/libs'));
 	app.use(express.static(__dirname + '/css'));
 	app.use(express.static(__dirname + '/Assets'));
