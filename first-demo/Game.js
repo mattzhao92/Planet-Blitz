@@ -24,7 +24,7 @@ $(function () {
             this.setupCamera();
             this.setupCameraControls();
 
-            this.setupGameGrid();
+            this.setupGameWorld();
             this.addLighting();
 
             this.addControlGUI();
@@ -83,18 +83,24 @@ $(function () {
             var gui = new dat.GUI();
         },
 
-        setupGameGrid: function() {
+        setupGameWorld: function() {
             var squareSize = 40;
-            this.grid = new Grid(400, 400, squareSize, this.scene, this.camera);
-        }, 
+            this.world = new Grid(400, 400, squareSize, this.scene, this.camera);
+        },
 
-        animate: function() {
+        update: function() {
             TWEEN.update();
             this.stats.update();
 
             var delta = this.clock.getDelta();
             this.controls.update(delta);
-            this.grid.motion();
+            
+            // main game render loop
+            this.world.update(delta);
+        },
+
+        animate: function() {
+            this.update();
 
             // standard: render using requestAnimationFrame
             var me = this;
@@ -102,7 +108,7 @@ $(function () {
                 me.animate();
             });
 
-
+            // render function - can optionally add shaders later
             this.renderer.render(this.scene, this.camera);
         }, 
 

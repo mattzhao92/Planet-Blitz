@@ -15,6 +15,8 @@ var Character = Class.extend({
         'use strict';
 
         this.world = args.world;
+        this.onDead = args.onDead;
+
         this.isActive = false;
 
         this.xPos = 0;
@@ -22,6 +24,7 @@ var Character = Class.extend({
 
         // Set the character modelisation object
         this.mesh = new THREE.Object3D();
+        this.mesh.owner = this;
 
         // Set the vector of the current motion
         this.direction = new THREE.Vector3(0, 0, 0);
@@ -35,7 +38,24 @@ var Character = Class.extend({
 
         this.loader = new THREE.JSONLoader();
         this.loadFile("headcombinedtextured.js");
-        this.executing = false;
+
+        this.health = 100;
+    },
+
+    update: function(delta) {
+
+    },
+
+    getHealth: function() {
+        return this.health;
+    },
+
+    applyDamage: function(attack) {
+         this.health -= attack;
+
+        // if (this.health < 0) {
+        //     this.world.onCharacterDead(this);
+        // }
     },
 
     addUnitSelector: function() {
@@ -103,7 +123,7 @@ var Character = Class.extend({
 
             scope.mesh.add(mesh);
             scope.characterMesh = mesh;
-        })
+        });
     },
 
     // Update the direction of the current motion
@@ -122,28 +142,9 @@ var Character = Class.extend({
 
     enqueueMotion: function(world, onMotionFinish) {
         console.log("enqueueMotion \n");
-        //this.motionQueue.push(this.direction.clone());
-        console.log("x: " + this.direction.x + " z: " + this.direction.z);
-        // figure out the actual path, and push each path segment onto the queue
-        var path = world.findPath(this.xPos, this.zPos, this.xPos + this.direction.x, this.zPos + this.direction.z);
-        var currentDirection;
-        var curr_pos, prev_pos;
-        var currentPos = new THREE.Vector3(this.mesh.position.x, 0, this.mesh.position.z);
-        for (var i = 1; i < path.length; i++) {
-            curr_pos = path[i];
-            prev_pos = path[i-1]; 
-            // if (i > 2) {
-            //     if ((prev_pos[1] - path[i-2][1])/(prev_pos[0] - path[i-2][0]) == 
-            //         (curr_pos[1] - prev_pos[1] )/(curr_pos[0] - prev_pos[1])) {
-            //         var lastMotion = this.motionQueue[this.motionQueue.length-1];
-            //         lastMotion.x += curr_pos[0]-prev_pos[0];
-            //         lastMotion.z += curr_pos[1]-prev_pos[1];
-            //     }
-            // } else {
-                currentDirection = new THREE.Vector3(curr_pos[0]-prev_pos[0],0,curr_pos[1]-prev_pos[1]);
-                this.motionQueue.push(currentDirection);
-        }
 
+		// sendMoveMsg(this.direction.x, this.direction.y, this.direction.z);
+        this.motionQueue.push(this.direction.clone());
         // TODO: define actual tween timeout
         if (onMotionFinish) {
             setTimeout(onMotionFinish, 800);
@@ -154,7 +155,6 @@ var Character = Class.extend({
         if (this.motionQueue.length > 0) {
             this.motionInProcess = true;
             var direction = this.motionQueue.pop();
-            console.log("dequeueMotion: direction, [x " + direction.x + "] [z " + direction.z + " ] \n");
             if (direction.x !== 0 || direction.z !== 0) {
                 // Rotate the character
                 var rotateTween = this.rotate(direction);
@@ -236,7 +236,6 @@ var Character = Class.extend({
     rotate: function(direction) {
         'use strict';
         // Set the direction's angle, and the difference between it and our Object3D's current rotation
-        console.log("rotation \n");
         var angle = Math.atan2(direction.x, direction.z);
 
         // transition from current rotation (mesh.rotation.y) to desired angle 'angle'
@@ -263,5 +262,9 @@ var Character = Class.extend({
         'use strict';
         // INSERT SOME MAGIC HERE
         return false;
+    },
+
+    getMesh: function() {
+        return this.mesh;
     }
 });
