@@ -121,6 +121,7 @@ var Character = Class.extend({
 
     enqueueMotion: function(onMotionFinish) {
         console.log("enqueueMotion \n");
+				sendMoveMsg(this.direction.x, this.direction.y, this.direction.z);
         this.motionQueue.push(this.direction.clone());
         console.log("x: " + this.direction.x + " z: " + this.direction.z);
 

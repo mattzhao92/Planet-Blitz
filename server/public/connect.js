@@ -7,6 +7,10 @@ function connectServer() {
 	socket = io.connect();
 }
 
-function sendMoveMsg() {
-	socket.emit(Message.MOVE, 'haha');
+function sendMoveMsg(x, y, z) {
+	var data = {};
+	data[Direction.X] = x;
+	data[Direction.Y] = y;
+	data[Direction.Z] = z;
+	socket.emit(Message.MOVE, data);
 }

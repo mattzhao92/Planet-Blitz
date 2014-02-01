@@ -30,7 +30,9 @@ server.listen(8080);
 
 
 var numPlayers = 0;
-var gameStart = false;
+var gameStart = true;
+var Message = netconst.Message;
+var Direction = netconst.Direction;
 // IO communication.
 io.sockets.on('connection', function(socket) {
 	socket.set('pseudo', 'player' + numPlayers);
@@ -42,14 +44,11 @@ io.sockets.on('connection', function(socket) {
 	}
 
 	if (gameStart) {
-		socket.on(netconst.Message.MOVE, function(message) {
+		socket.on(Message.MOVE, function(message) {
 			console.log('move');
 
 			socket.get('pseudo', function(error, name) {
-				var data = {'message' : message, pseudo : name, 
-						'ip' : socket.handshake.address.address};
-				socket.broadcast.emit('message', data);
-				console.log('user ' + name + ' send this : ' + message);
+				console.log('user ' + name + ' send this : ' + message[Direction.X]);
 			});
 		});
 	}

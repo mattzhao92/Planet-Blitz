@@ -13,3 +13,4 @@ var Direction = {
 };
 
 exports.Message = Message;
+exports.Direction = Direction;
