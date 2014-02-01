@@ -5,16 +5,21 @@ var gameFiles = ['three.js', 'stats.js', 'dat.gui.min.js', 'MapControls.js',
 $(document).ready(function() {
 
 	$('#playBtn').click(function() {
+		connectServer();
+		$('#playBtn').hide();
+		$('#helpBtn').hide();
+		$('#Stats-output').css('visibility', 'visible');
+		$('#WebGL-output').css('visibility', 'visible');
+		$('body').css('background-image', 'none');
+
+		/**
 		document.location.href = 'game.html';
-//		recursiveLoad(0, gameFiles.length);
-		/*
+		recursiveLoad(0, gameFiles.length);
 		for (i = 0; i < gameFiles.length; i++) {
 			$.getScript(gameFiles[i], function() {
 				console.log(i);
 			});
 		}
-		$('#playBtn').hide();
-		$('#helpBtn').hide();
 		*/
 	});
 });
