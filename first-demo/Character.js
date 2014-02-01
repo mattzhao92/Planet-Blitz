@@ -35,6 +35,7 @@ var Character = Class.extend({
 
         this.loader = new THREE.JSONLoader();
         this.loadFile("headcombinedtextured.js");
+        this.executing = false;
     },
 
     addUnitSelector: function() {
@@ -119,10 +120,29 @@ var Character = Class.extend({
         this.direction = direction;
     },
 
-    enqueueMotion: function(onMotionFinish) {
+    enqueueMotion: function(world, onMotionFinish) {
         console.log("enqueueMotion \n");
-        this.motionQueue.push(this.direction.clone());
+        //this.motionQueue.push(this.direction.clone());
         console.log("x: " + this.direction.x + " z: " + this.direction.z);
+        // figure out the actual path, and push each path segment onto the queue
+        var path = world.findPath(this.xPos, this.zPos, this.xPos + this.direction.x, this.zPos + this.direction.z);
+        var currentDirection;
+        var curr_pos, prev_pos;
+        var currentPos = new THREE.Vector3(this.mesh.position.x, 0, this.mesh.position.z);
+        for (var i = 1; i < path.length; i++) {
+            curr_pos = path[i];
+            prev_pos = path[i-1]; 
+            // if (i > 2) {
+            //     if ((prev_pos[1] - path[i-2][1])/(prev_pos[0] - path[i-2][0]) == 
+            //         (curr_pos[1] - prev_pos[1] )/(curr_pos[0] - prev_pos[1])) {
+            //         var lastMotion = this.motionQueue[this.motionQueue.length-1];
+            //         lastMotion.x += curr_pos[0]-prev_pos[0];
+            //         lastMotion.z += curr_pos[1]-prev_pos[1];
+            //     }
+            // } else {
+                currentDirection = new THREE.Vector3(curr_pos[0]-prev_pos[0],0,curr_pos[1]-prev_pos[1]);
+                this.motionQueue.push(currentDirection);
+        }
 
         // TODO: define actual tween timeout
         if (onMotionFinish) {
@@ -140,55 +160,72 @@ var Character = Class.extend({
                 var rotateTween = this.rotate(direction);
                 // And, only if we're not colliding with an obstacle or a wall ...
                 if (this.collide()) {
+                    console.log("dequeueMotion Exits \n");
                     return false;
                 }
                 // ... we move the character
                 world.markTileNotOccupiedByCharacter(this.getTileXPos(), this.getTileZPos());
-                var oldX = this.mesh.position.x;
-                var newX = this.mesh.position.x + direction.x * 40;
+                var oldMeshX = this.mesh.position.x;
+                this.mesh.position.x = this.mesh.position.x + direction.x * 40;
 
-                var oldZ = this.mesh.position.z;
-                var newZ = this.mesh.position.z + direction.z * 40;
+                var oldMeshZ = this.mesh.position.z;
+                this.mesh.position.z = this.mesh.position.z + direction.z * 40;
+
+                var oldX = this.xPos;
+                var oldZ = this.zPos;
 
                 this.xPos += direction.x;
                 this.zPos += direction.z;
 
-                //var easing = TWEEN.Easing.Elastic.InOut;
-                //var easing = TWEEN.Easing.Linear.None;
-                var easing = TWEEN.Easing.Quadratic.Out;
-                //var easing = TWEEN.Easing.Exponential.EaseOut;
-                var tween = new TWEEN.Tween({
-                    x: oldX,
-                    z: oldZ
-                }).to({
-                    x: newX,
-                    z: newZ
-                }, 450).easing(easing);
+                world.markTileOccupiedByCharacter(this.getTileXPos(), this.getTileZPos());
+                world.displayMovementArea(this);
 
-                //var myMesh = this.mesh;
-                var scope = this;
-                var onUpdate = function() {
-                    var xCoord = this.x;
-                    var zCoord = this.z;
-                    scope.mesh.position.x = xCoord;
-                    scope.mesh.position.z = zCoord;
-                    if (scope.mesh.position.x == newX && scope.mesh.position.z == newZ) {
-                        world.markTileOccupiedByCharacter(scope.getTileXPos(), scope.getTileZPos());
-                        world.displayMovementArea(scope);
-                    }
-                };
+                // world.markTileNotOccupiedByCharacter(this.getTileXPos(), this.getTileZPos());
+                // var oldMeshX = current_pos.x;
+                // var newMeshX = this.mesh.position.x + direction.x * 40;
 
-                tween.onUpdate(onUpdate);
+                // var oldMeshZ = current_pos.z;
+                // var newMeshZ = this.mesh.position.z + direction.z * 40;
 
-                var moveTween = tween;
-                this.direction.set(0, 0, 0);
+                // this.xPos += direction.x;
+                // this.zPos += direction.z;
 
-                var blankTween = new TWEEN.Tween({}).to({}, 100);
+                // var easing = TWEEN.Easing.Elastic.InOut;
+                // var easing = TWEEN.Easing.Linear.None;
+                // var easing = TWEEN.Easing.Quadratic.Out;
+                // //var easing = TWEEN.Easing.Exponential.EaseOut;
+                // var tween = new TWEEN.Tween({
+                //     x: oldMeshX,
+                //     z: oldMeshZ
+                // }).to({
+                //     x: newMeshX,
+                //     z: newMeshZ
+                // }, 20).easing(easing);
 
-                rotateTween.chain(blankTween);
-                rotateTween.chain(moveTween);
-                rotateTween.start();
+                // var myMesh = this.mesh;
+                // var scope = this;
+                // var onUpdate = function() {
+                //     var xCoord = this.x;
+                //     var zCoord = this.z;
+                //     scope.mesh.position.x = xCoord;
+                //     scope.mesh.position.z = zCoord;
+                //     if (scope.mesh.position.x == newMeshX && scope.mesh.position.z == newMeshZ) {
+                //         world.markTileOccupiedByCharacter(scope.getTileXPos(), scope.getTileZPos());
+                //         world.displayMovementArea(scope);
+                //     }
+                // };
 
+                // tween.onUpdate(onUpdate);
+
+                // var moveTween = tween;
+                // this.direction.set(0, 0, 0);
+
+                // var blankTween = new TWEEN.Tween({}).to({}, 10);
+
+                // rotateTween.chain(blankTween);
+                // rotateTween.chain(moveTween);
+                // rotateTween.start();
+                //         console.log("dequeueMotion Exits \n");
                 return true;
             }
             return false;
