@@ -18,7 +18,7 @@ app.configure(function() {
 
 // Server index page.
 app.get('/', function(req, res) {
-	res.render('home.jade');
+	res.render('index.jade');
 });
 server.listen(8080);
 
