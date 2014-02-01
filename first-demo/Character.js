@@ -24,6 +24,7 @@ var Character = Class.extend({
 
         // Set the character modelisation object
         this.mesh = new THREE.Object3D();
+        this.mesh.owner = this;
 
         // Set the vector of the current motion
         this.direction = new THREE.Vector3(0, 0, 0);
@@ -49,7 +50,7 @@ var Character = Class.extend({
         this.health -= attack;
 
         if (this.health < 0) {
-            this.onDead(this);
+            this.world.onCharacterDead(this);
         }
     },
 
@@ -118,7 +119,7 @@ var Character = Class.extend({
 
             scope.mesh.add(mesh);
             scope.characterMesh = mesh;
-        })
+        });
     },
 
     // Update the direction of the current motion
@@ -238,5 +239,9 @@ var Character = Class.extend({
         'use strict';
         // INSERT SOME MAGIC HERE
         return false;
+    },
+
+    getMesh: function() {
+        return this.mesh;
     }
 });

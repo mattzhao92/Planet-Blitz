@@ -13,12 +13,11 @@ var Grid = Class.extend({
         // information about what's being selected
         this.highlightedTiles = null;
         this.currentMouseOverTile = null;
-        this.characterBeingSelected = null;
+        this.currentCharacterSelected = null;
 
         // listeners and state
         this.mouseDownListenerActive = true;
         this.mouseOverListenerActive = true;
-
 
         // create grid tiles
         this.tiles = new THREE.Object3D();
@@ -29,7 +28,6 @@ var Grid = Class.extend({
         // initialize characters
         this.characters = new THREE.Object3D();
         this.numOfCharacters = 3;
-        this.charactersOnMap = [];
         this.characterMeshes = [];
 
         this.characterFactory = new CharacterFactory();
@@ -46,7 +44,6 @@ var Grid = Class.extend({
             character.placeAtGridPos(i + 3, 4);
             this.markTileOccupiedByCharacter(i + 3, 4);
 
-            this.charactersOnMap.push(character);
             this.characterMeshes.push(character.mesh);
             
             this.scene.add(character.mesh);
@@ -56,10 +53,30 @@ var Grid = Class.extend({
         this.setupMouseDownListener();
     },
 
-    removeCharacter: function(character) {
-        console.log("Character died");
-        // TODO: remove character from meshes list 
-        character.mesh.visible = false;
+    onCharacterDead: function(character) {
+        // if the character was the currently selected unit, then reset tile state
+        if (this.currentCharacterSelected == character) {
+            // deselect character
+            character.deselect();
+
+            // deselect tiles
+            this.highlightedTiles.forEach(function(tile) {
+                tile.reset();
+            });
+
+            // mark tile position as available
+            var xPos = character.getTileXPos();
+            var zPos = character.getTileZPos();
+            this.getTileAtTilePos(xPos, zPos).hasCharacter = false;
+        }
+
+        // remove character mesh from list of active meshes
+        var index = this.characterMeshes.indexOf(character.mesh);
+        if (index > -1) {
+            this.characterMeshes.splice(index, 1);
+            // remove object form scene
+            this.scene.remove(character.mesh);
+        }
     },
 
     disableMouseDownListener: function() {
@@ -79,7 +96,7 @@ var Grid = Class.extend({
     },
 
     convertXPosToWorldX: function(tileXPos) {
-        return -((this.gridWidth) / 2) + (tileXPos * this.tileSize);
+        return -((this.gridWidth) / g) + (tileXPos * this.tileSize);
     },
 
     convertZPosToWorldZ: function(tileZPos) {
@@ -89,13 +106,13 @@ var Grid = Class.extend({
 
     markCharacterAsSelected: function(character) {
         // deselect previous character if there was one
-        if (this.characterBeingSelected) {
-            if (this.characterBeingSelected != character) {
-                this.characterBeingSelected.deselect();
+        if (this.currentCharacterSelected) {
+            if (this.currentCharacterSelected != character) {
+                this.currentCharacterSelected.deselect();
             }
         }
 
-        this.characterBeingSelected = character;
+        this.currentCharacterSelected = character;
 
         // show character movement speed
         this.displayMovementArea(character);
@@ -214,8 +231,8 @@ var Grid = Class.extend({
     },
 
     deselectAll: function() {
-        this.charactersOnMap.forEach(function(character) {
-            character.deselect();
+        this.characterMeshes.forEach(function(characterMesh) {
+            characterMesh.owner.deselect();
         });
     },
 
@@ -264,9 +281,9 @@ var Grid = Class.extend({
     onMouseDown: function(event) {
 
         // very temporary
-        if (this.characterBeingSelected) {
-            this.characterBeingSelected.applyDamage(60);
-            console.log(this.characterBeingSelected.health);
+        if (this.currentCharacterSelected) {
+            this.currentCharacterSelected.applyDamage(60);
+            console.log(this.currentCharacterSelected.health);
         }
 
         var scope = this;
@@ -300,23 +317,23 @@ var Grid = Class.extend({
             if (intersectsWithTiles.length > 0) {
                 var tileSelected = intersectsWithTiles[0].object.owner;
                 var coordinate = tileSelected.onMouseOver();
-                if (this.characterBeingSelected && coordinate) {
-                    this.characterBeingSelected.setDirection(
-                        new THREE.Vector3(coordinate.x - this.characterBeingSelected.getTileXPos(),
+                if (this.currentCharacterSelected && coordinate) {
+                    this.currentCharacterSelected.setDirection(
+                        new THREE.Vector3(coordinate.x - this.currentCharacterSelected.getTileXPos(),
                             0,
-                            coordinate.z - this.characterBeingSelected.getTileZPos()));
+                            coordinate.z - this.currentCharacterSelected.getTileZPos()));
 
                     this.disableMouseMoveListener();
                     this.disableMouseDownListener();
 
-                    this.characterBeingSelected.enqueueMotion(function() {
+                    this.currentCharacterSelected.enqueueMotion(function() {
                         console.log("Motion finished");
                         scope.enableMouseMoveListener();
                         scope.enableMouseDownListener();
                     });
                     // console.log("character is being moved to a new coordinate position \n");
-                    // console.log("src X: "+this.characterBeingSelected.getTileXPos() +
-                    //             " Z: "+ this.characterBeingSelected.getTileZPos());
+                    // console.log("src X: "+this.currentCharacterSelected.getTileXPos() +
+                    //             " Z: "+ this.currentCharacterSelected.getTileZPos());
                     // console.log("des X: "+coordinate.x +" Z: "+coordinate.z);
                 }
             }
@@ -379,7 +396,6 @@ var Grid = Class.extend({
         return this.numberSquaresOnZAxis;
     },
 
-
     hasObstacleAtCell: function(args) {
 
     },
@@ -393,8 +409,8 @@ var Grid = Class.extend({
     },
 
     motion: function(args) {
-        for (var i = 0; i < this.charactersOnMap.length; i++) {
-            var character = this.charactersOnMap[i];
+        for (var i = 0; i < this.characterMeshes.length; i++) {
+            var character = this.characterMeshes[i].owner;
             character.dequeueMotion(this);
         }
     },
