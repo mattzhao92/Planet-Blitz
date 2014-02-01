@@ -1,0 +1,29 @@
+body {
+	background-image:url('PlanetBlitz.jpg');
+	background-size: 100% 100%;
+	background-repeat: no-repeat;
+}
+
+.btn {
+	position: absolute;
+	left: 300px;
+	width: 200px;
+	height: 50px;
+}
+
+#playBtn {
+	top: 250px;
+}
+
+#helpBtn {
+	top: 350px;
+}
+
+#Stats-output {
+	visibility: hidden;
+}
+
+
+#WebGL-output {
+	visibility: hidden;
+}

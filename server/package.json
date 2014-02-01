@@ -1,0 +1,16 @@
+{
+  "name": "cwxjithelkm",
+  "subdomain": "jtkmcwx",
+  "scripts": {
+    "start": "gameserver.js"
+  },
+  "version": "0.0.0-6",
+  "engines": {
+    "node": "0.10.x"
+  },
+  "dependencies": {
+    "socket.io": "*",
+    "express": "*",
+    "jade": "*"
+  }
+}
