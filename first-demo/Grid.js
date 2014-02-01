@@ -409,10 +409,17 @@ var Grid = Class.extend({
     },
 
     update: function(delta) {
+        // update character movements
         for (var i = 0; i < this.characterMeshes.length; i++) {
             var character = this.characterMeshes[i].owner;
             character.dequeueMotion(this);
+            character.update(delta);
         }
+
+        // update bullet movements
+        this.handleBullets();
     },
 
+    handleBullets: function() {
+    },
 });

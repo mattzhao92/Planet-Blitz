@@ -42,16 +42,20 @@ var Character = Class.extend({
         this.health = 100;
     },
 
+    update: function(delta) {
+
+    },
+
     getHealth: function() {
         return this.health;
     },
 
     applyDamage: function(attack) {
-        this.health -= attack;
+         this.health -= attack;
 
-        if (this.health < 0) {
-            this.world.onCharacterDead(this);
-        }
+        // if (this.health < 0) {
+        //     this.world.onCharacterDead(this);
+        // }
     },
 
     addUnitSelector: function() {
