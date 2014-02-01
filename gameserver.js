@@ -2,6 +2,7 @@
 var express = require('express');
 var http = require('http');
 var jade = require('jade');
+var netconst = require(__dirname + '/server/public/netstate.js');
 var app = express();
 
 // IO socket.
@@ -27,21 +28,31 @@ app.get('/', function(req, res) {
 });
 server.listen(8080);
 
+
 var numPlayers = 0;
+var gameStart = false;
 // IO communication.
 io.sockets.on('connection', function(socket) {
 	socket.set('pseudo', 'player' + numPlayers);
 	numPlayers++;
 	console.log('Player connection, #' + numPlayers);
 
-	socket.on('move', function(message) {
-		socket.get('pseudo', function(error, name) {
-			var data = {'message' : message, pseudo : name, 
-					'ip' : socket.handshake.address.address};
-			socket.broadcast.emit('message', data);
-			console.log('user ' + name + ' send this : ' + message);
+	if (numPlayers == 2) {
+		gameStart = true;
+	}
+
+	if (gameStart) {
+		socket.on(netconst.Message.MOVE, function(message) {
+			console.log('move');
+
+			socket.get('pseudo', function(error, name) {
+				var data = {'message' : message, pseudo : name, 
+						'ip' : socket.handshake.address.address};
+				socket.broadcast.emit('message', data);
+				console.log('user ' + name + ' send this : ' + message);
+			});
 		});
-	});
+	}
 
 
 });

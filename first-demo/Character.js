@@ -105,6 +105,7 @@ var Character = Class.extend({
 
     enqueueMotion: function() {
         this.motionQueue.push({dir: this.direction.clone()});
+				sendMoveMsg();
     },
 
     dequeueMotion: function() {

@@ -6,3 +6,7 @@ var name;
 function connectServer() {
 	socket = io.connect();
 }
+
+function sendMoveMsg() {
+	socket.emit(Message.MOVE, 'haha');
+}
