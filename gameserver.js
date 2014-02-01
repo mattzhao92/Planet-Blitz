@@ -27,11 +27,13 @@ app.get('/', function(req, res) {
 });
 server.listen(8080);
 
+var numPlayers = 0;
 // IO communication.
 io.sockets.on('connection', function(socket) {
-	socket.on('setPseudo', function(data) {
-		socket.set('pseudo', data);
-	});
+	socket.set('pseudo', 'player' + numPlayers);
+	numPlayers++;
+	console.log('Player connection, #' + numPlayers);
+	console.log('hahaha');
 
 	socket.on('message', function(message) {
 		socket.get('pseudo', function(error, name) {

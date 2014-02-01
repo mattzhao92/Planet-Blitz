@@ -18,3 +18,12 @@ body {
 #helpBtn {
 	top: 350px;
 }
+
+#Stats-output {
+	visibility: hidden;
+}
+
+
+#WebGL-output {
+	visibility: hidden;
+}
