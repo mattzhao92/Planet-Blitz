@@ -96,7 +96,7 @@ var Grid = Class.extend({
     },
 
     convertXPosToWorldX: function(tileXPos) {
-        return -((this.gridWidth) / g) + (tileXPos * this.tileSize);
+        return -((this.gridWidth) / 2) + (tileXPos * this.tileSize);
     },
 
     convertZPosToWorldZ: function(tileZPos) {
