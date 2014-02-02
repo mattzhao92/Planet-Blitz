@@ -50,11 +50,11 @@ var Character = Class.extend({
         return this.health;
     },
 
-    applyDamage: function(attack) {
-         this.health -= attack;
+    applyDamage: function(damage) {
+         this.health -= damage;
 
         // if (this.health < 0) {
-        //     this.world.onCharacterDead(this);
+        //     this.world.handleCharacterDead(this);
         // }
     },
 

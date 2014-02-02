@@ -56,7 +56,7 @@ var Grid = Class.extend({
         this.setupMouseDownListener();
     },
 
-    onCharacterDead: function(character) {
+    handleCharacterDead: function(character) {
         // if the character was the currently selected unit, then reset tile state
         if (this.currentCharacterSelected == character) {
             // deselect character
@@ -82,7 +82,7 @@ var Grid = Class.extend({
         }
     },
 
-    removeBullet: function(bullet) {
+    handleBulletDestroy: function(bullet) {
         // todo: remove bullet from scene
         var index = this.bullets.indexOf(bullet);
         if (index > -1) {
@@ -455,10 +455,10 @@ var Grid = Class.extend({
         }
 
         // update bullet movements
-        this.handleBullets(delta);
+        this.updateBullets(delta);
     },
 
-    handleBullets: function(delta) {
+    updateBullets: function(delta) {
         for (var i = 0; i < this.bullets.length; i++) {
             var bullet = this.bullets[i];
             bullet.update(delta);
@@ -467,6 +467,14 @@ var Grid = Class.extend({
     },
 
     checkBulletCollision: function(bullet, bulletIndex) {
-        
+        for (var i = 0; i < this.characterMeshes.length; i++) {
+            var character = this.characterMeshes[i].owner;
+            // also need to check for bullet team here
+            // if (this.checkOverlap(bullet, character)) {
+                // this.removeBullet(bullet);
+                // character.applyDamage(30);
+                // break;
+            // }
+        }
     }
 });

@@ -29,7 +29,7 @@ var Bullet = Class.extend({
     this.mesh.position.add(scaledDirection);
 
     if (distance > this.maxDistance) {
-      this.world.removeBullet(this);
+      this.world.handleBulletDestroy(this);
     }
   }
 });
