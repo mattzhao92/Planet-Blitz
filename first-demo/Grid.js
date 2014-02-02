@@ -49,6 +49,9 @@ var Grid = Class.extend({
             this.scene.add(character.mesh);
         }
 
+        // bullet info
+        this.bullets = [];
+
         this.setupMouseMoveListener();
         this.setupMouseDownListener();
     },
@@ -278,6 +281,33 @@ var Grid = Class.extend({
         }, false);
     },
 
+    shootBullet: function() {
+        console.log("handleBullets");
+        // var negativeZ = new THREE.Vector(0, 0, -1);
+        var bullet = new Bullet();
+        // bullet.position.copy(from);
+        // var to = new THREE.Vector3(0, 0, 0);
+
+        // var toClone = to.clone();
+        // var cp = this.camera.position;
+        // var from = new THREE.Vector3(cp.x, cp.y, cp.z);
+
+        // var from = new THREE.Vector3(0, 5, 50);
+
+        // var to = new THREE.Vector3(1000, 5, 50);
+
+        var from = this.camera.position.clone();
+        var to = new THREE.Vector3(0, 0, 0);
+
+        bullet.position = from;
+        bullet.mesh.position = from.clone();
+
+        bullet.direction = to.clone().sub(from).normalize();
+
+        this.bullets.push(bullet);
+        this.scene.add(bullet.mesh);
+    },
+
     onMouseDown: function(event) {
 
         // very temporary
@@ -285,6 +315,9 @@ var Grid = Class.extend({
             this.currentCharacterSelected.applyDamage(60);
             console.log(this.currentCharacterSelected.health);
         }
+
+        // shoot a bullet because you can
+        this.shootBullet();
 
         var scope = this;
 
@@ -417,9 +450,13 @@ var Grid = Class.extend({
         }
 
         // update bullet movements
-        this.handleBullets();
+        this.handleBullets(delta);
     },
 
-    handleBullets: function() {
+    handleBullets: function(delta) {
+        for (var i = 0; i < this.bullets.length; i++) {
+            var bullet = this.bullets[i];
+            bullet.update(delta);
+        }
     },
 });
