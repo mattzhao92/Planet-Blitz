@@ -37,7 +37,8 @@ var Grid = Class.extend({
 
             var charArgs = {
                 world: scope,
-                onDead: scope.removeCharacter
+                onDead: scope.removeCharacter,
+                team: i
             };
 
             var character = this.characterFactory.createCharacter(charArgs);
@@ -51,6 +52,9 @@ var Grid = Class.extend({
             this.scene.add(character.mesh);
         }
 
+        // bullet info
+        this.bullets = [];
+
         this.setupMouseMoveListener();
         this.setupMouseDownListener();
     },
@@ -59,7 +63,7 @@ var Grid = Class.extend({
         return this.characterList[id];
     },
 
-    onCharacterDead: function(character) {
+    handleCharacterDead: function(character) {
         // if the character was the currently selected unit, then reset tile state
         if (this.currentCharacterSelected == character) {
             // deselect character
@@ -69,12 +73,13 @@ var Grid = Class.extend({
             this.highlightedTiles.forEach(function(tile) {
                 tile.reset();
             });
-
-            // mark tile position as available
-            var xPos = character.getTileXPos();
-            var zPos = character.getTileZPos();
-            this.getTileAtTilePos(xPos, zPos).hasCharacter = false;
         }
+
+        // mark tile position as available
+        var xPos = character.getTileXPos();
+        var zPos = character.getTileZPos();
+        this.getTileAtTilePos(xPos, zPos).hasCharacter = false;
+
 
         // remove character mesh from list of active meshes
         var index = this.characterMeshes.indexOf(character.mesh);
@@ -82,6 +87,15 @@ var Grid = Class.extend({
             this.characterMeshes.splice(index, 1);
             // remove object form scene
             this.scene.remove(character.mesh);
+        }
+    },
+
+    handleBulletDestroy: function(bullet) {
+        // todo: remove bullet from scene
+        var index = this.bullets.indexOf(bullet);
+        if (index > -1) {
+            this.bullets.splice(index, 1);
+            this.scene.remove(bullet.mesh);            
         }
     },
 
@@ -295,15 +309,14 @@ var Grid = Class.extend({
         }, false);
     },
 
+    shootBullet: function(owner, from, to) {
+        var bullet = new Bullet(this, owner, from, to);
+        this.bullets.push(bullet);
+        this.scene.add(bullet.mesh);
+    },
+
+
     onMouseDown: function(event) {
-
-        // very temporary
-        if (this.currentCharacterSelected) {
-            this.currentCharacterSelected.applyDamage(60);
-            console.log(this.currentCharacterSelected.health);
-        }
-
-        console.log("mouse down \n");
         var scope = this;
 
         var projector = new THREE.Projector();
@@ -317,6 +330,26 @@ var Grid = Class.extend({
         // recursively call intersects
         var intersects = raycaster.intersectObjects(scope.characterMeshes, true);
         var intersectsWithTiles = raycaster.intersectObjects(scope.tiles.children);
+
+        // should put this at the end of mouseDown
+        if (this.currentCharacterSelected) {
+            // fire on right click
+            if (event.which == 3) {
+                console.log("Firing bullet");
+
+                if (intersectsWithTiles.length > 0) {
+                    var tileSelected = intersectsWithTiles[0].object.owner;
+                    var from = this.currentCharacterSelected.mesh.position.clone();
+
+                    // keep bullets level
+                    from.y = 15;
+                    var to = new THREE.Vector3(this.convertXPosToWorldX(tileSelected.xPos), 15, this.convertZPosToWorldZ(tileSelected.zPos));
+
+                    // shoot a bullet because you can
+                    this.shootBullet(this.currentCharacterSelected, from, to);
+                }
+            }
+        }
 
         // care about characters first, then tile intersects
 
@@ -437,9 +470,31 @@ var Grid = Class.extend({
         }
 
         // update bullet movements
-        this.handleBullets();
+        this.updateBullets(delta);
     },
 
-    handleBullets: function() {
+    updateBullets: function(delta) {
+        for (var i = 0; i < this.bullets.length; i++) {
+            var bullet = this.bullets[i];
+            bullet.update(delta);
+            this.checkBulletCollision(bullet, i);   
+        }
     },
+
+    checkOverlap: function(obj1, obj2) {
+        var combinedRadius = obj1.getRadius() + obj2.getRadius();
+        return combinedRadius * combinedRadius >= obj1.position.distanceToSquared(obj2.position);
+    },
+
+    checkBulletCollision: function(bullet, bulletIndex) {
+        for (var i = 0; i < this.characterMeshes.length; i++) {
+            var character = this.characterMeshes[i].owner;
+            // also need to check for bullet team here
+            if (character.team != bullet.owner.team && this.checkOverlap(bullet, character)) {
+                this.handleBulletDestroy(bullet);
+                character.applyDamage(30);
+                break;
+            }
+        }
+    }
 });

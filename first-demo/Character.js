@@ -16,6 +16,7 @@ var Character = Class.extend({
 
         this.world = args.world;
         this.onDead = args.onDead;
+        this.team = args.team;
 
         this.isActive = false;
         this.id = 0;
@@ -25,6 +26,7 @@ var Character = Class.extend({
 
         // Set the character modelisation object
         this.mesh = new THREE.Object3D();
+        this.position = this.mesh.position;
         this.mesh.owner = this;
 
         // Set the vector of the current motion
@@ -47,23 +49,35 @@ var Character = Class.extend({
         this.id = id;
     },
 
+    getRadius: function() {
+        // TODO: remove this hardcoding
+        return 20;
+    },
+
+    update: function(delta) {
+
+    },
+
     getHealth: function() {
         return this.health;
     },
 
-    applyDamage: function(attack) {
-         this.health -= attack;
+    applyDamage: function(damage) {
 
-        // if (this.health < 0) {
-        //     this.world.onCharacterDead(this);
-        // }
+        this.health -= damage;
+        console.log("Health: " + this.getHealth());
+        if (this.health < 0) {
+            this.world.handleCharacterDead(this);
+        }
     },
 
     addUnitSelector: function() {
         // setup unit selector mesh
         // have to supply the radius
         var geometry = new THREE.TorusGeometry(this.world.getTileSize() / 2, 1, 5, 35);
-        var material = new THREE.MeshLambertMaterial({color: 0xFF0000});
+        var material = new THREE.MeshLambertMaterial({
+            color: 0xFF0000
+        });
         var torus = new THREE.Mesh(geometry, material);
         torus.rotation.x = -0.5 * Math.PI;
         torus.visible = false;
