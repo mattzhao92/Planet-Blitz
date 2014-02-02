@@ -303,6 +303,7 @@ var Grid = Class.extend({
             console.log(this.currentCharacterSelected.health);
         }
 
+        console.log("mouse down \n");
         var scope = this;
 
         var projector = new THREE.Projector();
@@ -343,7 +344,7 @@ var Grid = Class.extend({
                     this.disableMouseMoveListener();
                     this.disableMouseDownListener();
 
-                    this.currentCharacterSelected.enqueueMotion(function() {
+                    this.currentCharacterSelected.enqueueMotion(this,function() {
                         console.log("Motion finished");
                         scope.enableMouseMoveListener();
                         scope.enableMouseDownListener();

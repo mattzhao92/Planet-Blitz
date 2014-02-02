@@ -66,6 +66,12 @@ var GridCell = Class.extend({
     	if (this.isMovable) {
             this.mesh.material.color.setRGB(0, 1.0, 0);
         }
+    },
+
+    markAsRoadMap: function() {
+        if (this.isMovable) {
+            this.mesh.material.color.setRGB(3.0, 3.0, 0);
+        }
     }
 });
 
