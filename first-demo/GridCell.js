@@ -22,6 +22,10 @@ var GridCell = Class.extend({
         return this.hasCharacter;
     },
 
+    setHasCharacter: function(hasCharacterOnMe) {
+        this.hasCharacter = hasCharacterOnMe;
+    },
+
     getGrayness: function() {
     	return this.grayness;
     },
