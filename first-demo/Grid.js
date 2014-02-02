@@ -281,11 +281,11 @@ var Grid = Class.extend({
         }, false);
     },
 
-    shootBullet: function() {
+    shootBullet: function(from, to) {
         console.log("handleBullets");
 
-        var from = this.camera.position.clone();
-        var to = new THREE.Vector3(0, 0, 0);
+        // var from = this.camera.position.clone();
+        // var to = new THREE.Vector3(0, 0, 0);
 
         var bullet = new Bullet(from, to);
 
@@ -301,9 +301,6 @@ var Grid = Class.extend({
             console.log(this.currentCharacterSelected.health);
         }
 
-        // shoot a bullet because you can
-        this.shootBullet();
-
         var scope = this;
 
         var projector = new THREE.Projector();
@@ -317,6 +314,36 @@ var Grid = Class.extend({
         // recursively call intersects
         var intersects = raycaster.intersectObjects(scope.characterMeshes, true);
         var intersectsWithTiles = raycaster.intersectObjects(scope.tiles.children);
+
+        // should put this at the end of mouseDown
+        if (this.currentCharacterSelected) {
+            // fire on right click
+            if (event.which == 3) {
+                console.log("Firing bullet");
+                var from = this.currentCharacterSelected.mesh.position;
+                // var to = new THREE.Vector3(0, 0, 0);
+
+                var vector = new THREE.Vector3(
+                        (event.clientX / window.innerWidth) * 2 - 1,
+                        1 - 2 * (event.clientY / window.innerHeight),
+                        0.5
+                    );
+                projector.unprojectVector(vector, this.camera);
+                var dir = vector.sub(this.camera.position).normalize();
+                var distance = - this.camera.position.z / dir.z;
+                var pos = this.camera.position.clone().add(dir.multiplyScalar(distance));
+
+                var to = pos;
+
+                // try out the tiling technique - project based on tile
+
+
+                to.y = 5;
+
+                // shoot a bullet because you can
+                this.shootBullet(from, to);
+            }
+        }
 
         // care about characters first, then tile intersects
 

@@ -24,5 +24,7 @@ var Bullet = Class.extend({
     var scaledDirection = new THREE.Vector3();
     scaledDirection.copy(this.direction).multiplyScalar(this.speed * delta);
     this.mesh.position.add(scaledDirection);
+
+    // TODO: once bullet reaches end position, then remove it from game world
   }
 });
