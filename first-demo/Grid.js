@@ -326,8 +326,11 @@ var Grid = Class.extend({
 
                 if (intersectsWithTiles.length > 0) {
                     var tileSelected = intersectsWithTiles[0].object.owner;
-                    var from = this.currentCharacterSelected.mesh.position;
-                    var to = new THREE.Vector3(this.convertXPosToWorldX(tileSelected.xPos), 5, this.convertZPosToWorldZ(tileSelected.zPos));
+                    var from = this.currentCharacterSelected.mesh.position.clone();
+
+                    // keep bullets level
+                    from.y = 15;
+                    var to = new THREE.Vector3(this.convertXPosToWorldX(tileSelected.xPos), 15, this.convertZPosToWorldZ(tileSelected.zPos));
 
                     // shoot a bullet because you can
                     this.shootBullet(from, to);
@@ -459,6 +462,11 @@ var Grid = Class.extend({
         for (var i = 0; i < this.bullets.length; i++) {
             var bullet = this.bullets[i];
             bullet.update(delta);
+            this.checkBulletCollision(bullet[i], i);   
         }
     },
+
+    checkBulletCollision: function(bullet, bulletIndex) {
+        
+    }
 });
