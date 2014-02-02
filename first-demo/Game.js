@@ -26,6 +26,7 @@ $(function () {
 
             this.setupGameGrid();
             this.addLighting();
+            this.addSkybox();
 
             this.addControlGUI();
 
@@ -65,6 +66,30 @@ $(function () {
             directionalLight.position.z = - 0.75;
             directionalLight.position.normalize();
             this.scene.add( directionalLight );
+        },
+
+        addSkybox: function() {
+            var skyGeometry = new THREE.CubeGeometry( 5000, 5000, 5000 );
+            
+            // x +, x -, y + , y -, z +, z -
+            var filenames = [
+            '../assets/images/sky08_lf.jpg', 
+            '../assets/images/sky08_rt.jpg',
+            '../assets/images/sky08_up.jpg',
+            '../assets/images/sky08_dn.jpg',
+            '../assets/images/sky08_ft.jpg',
+            '../assets/images/sky08_bk.jpg'];
+
+            // imagePrefix + directions[i] + imageSuffix
+            var materialArray = [];
+            for (var i = 0; i < 6; i++)
+                materialArray.push( new THREE.MeshBasicMaterial({
+                    map: THREE.ImageUtils.loadTexture( filenames[i]),
+                    side: THREE.BackSide
+                }));
+            var skyMaterial = new THREE.MeshFaceMaterial( materialArray );
+            var skyBox = new THREE.Mesh( skyGeometry, skyMaterial );
+            this.scene.add( skyBox );
         },
 
         setupCameraControls: function() {
