@@ -282,13 +282,7 @@ var Grid = Class.extend({
     },
 
     shootBullet: function(from, to) {
-        console.log("handleBullets");
-
-        // var from = this.camera.position.clone();
-        // var to = new THREE.Vector3(0, 0, 0);
-
         var bullet = new Bullet(from, to);
-
         this.bullets.push(bullet);
         this.scene.add(bullet.mesh);
     },
@@ -320,28 +314,15 @@ var Grid = Class.extend({
             // fire on right click
             if (event.which == 3) {
                 console.log("Firing bullet");
-                var from = this.currentCharacterSelected.mesh.position;
-                // var to = new THREE.Vector3(0, 0, 0);
 
-                var vector = new THREE.Vector3(
-                        (event.clientX / window.innerWidth) * 2 - 1,
-                        1 - 2 * (event.clientY / window.innerHeight),
-                        0.5
-                    );
-                projector.unprojectVector(vector, this.camera);
-                var dir = vector.sub(this.camera.position).normalize();
-                var distance = - this.camera.position.z / dir.z;
-                var pos = this.camera.position.clone().add(dir.multiplyScalar(distance));
+                if (intersectsWithTiles.length > 0) {
+                    var tileSelected = intersectsWithTiles[0].object.owner;
+                    var from = this.currentCharacterSelected.mesh.position;
+                    var to = new THREE.Vector3(this.convertXPosToWorldX(tileSelected.xPos), 5, this.convertZPosToWorldZ(tileSelected.zPos));
 
-                var to = pos;
-
-                // try out the tiling technique - project based on tile
-
-
-                to.y = 5;
-
-                // shoot a bullet because you can
-                this.shootBullet(from, to);
+                    // shoot a bullet because you can
+                    this.shootBullet(from, to);
+                }
             }
         }
 
