@@ -77,23 +77,40 @@
             }, 
 
             addSkybox: function() {
-                var imagePrefix = "/assets/dawnmountain-";
-                var directions  = ["xpos", "xneg", "ypos", "yneg", "zpos", "zneg"];
-                var imageSuffix = ".png";
-                var skyGeometry = new THREE.CubeGeometry( 5000, 5000, 5000 );   
+                // var imagePrefix = "/assets/dawnmountain-";
+                // var directions  = ["xpos", "xneg", "ypos", "yneg", "zpos", "zneg"];
+                // var imageSuffix = ".png";
+                var skyGeometry = new THREE.CubeGeometry( 5000, 5000, 5000 );
                 
-                var filenames = ['../assets/conceptLandscapes/landscapeTextures/map1/electricity.jpg', 
-                '../assets/conceptLandscapes/landscapeTextures/map1/electricity.jpg',
-                '../assets/conceptLandscapes/landscapeTextures/map1/electricity.jpg',
-                '../assets/conceptLandscapes/landscapeTextures/map1/electricity.jpg',
-                '../assets/conceptLandscapes/landscapeTextures/map1/electricity.jpg',
-                '../assets/conceptLandscapes/landscapeTextures/map1/electricity.jpg'];
+                // x +, x -, y + , y -, z +, z -
+                var imagePrefix = "../assets/images/sky08_";
+                var directions  = ["lf", "rt", "up", "dn", "ft", "bk"];
+                var imageSuffix = ".jpg"
+
+                // var filenames = [
+                // '../assets/images/stars_left.jpg', 
+                // '../assets/images/stars_right.jpg',
+                // '../assets/images/stars_top.jpg',
+                // '../assets/images/stars_top.jpg',
+                // '../assets/images/stars_back.jpg',
+                // '../assets/images/stars_front.jpg'];
+
+                var filenames = [
+                '../assets/images/sky08_lf.jpg', 
+                '../assets/images/sky08_rt.jpg',
+                '../assets/images/sky08_up.jpg',
+                '../assets/images/sky08_dn.jpg',
+                '../assets/images/sky08_ft.jpg',
+                '../assets/images/sky08_bk.jpg'];
 
                 // imagePrefix + directions[i] + imageSuffix
                 var materialArray = [];
                 for (var i = 0; i < 6; i++)
+
+                    // var filename = imagePrefix + directions[i] + ".jpg"
+                     // console.log(filename);
                     materialArray.push( new THREE.MeshBasicMaterial({
-                        map: THREE.ImageUtils.loadTexture( filenames[i]  ),
+                        map: THREE.ImageUtils.loadTexture( filenames[i]),
                         side: THREE.BackSide
                     }));
                 var skyMaterial = new THREE.MeshFaceMaterial( materialArray );
