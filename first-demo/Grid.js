@@ -82,6 +82,15 @@ var Grid = Class.extend({
         }
     },
 
+    removeBullet: function(bullet) {
+        // todo: remove bullet from scene
+        var index = this.bullets.indexOf(bullet);
+        if (index > -1) {
+            this.bullets.splice(index, 1);
+            this.scene.remove(bullet.mesh);            
+        }
+    },
+
     disableMouseDownListener: function() {
         this.mouseDownListenerActive = false;
     },
@@ -282,7 +291,7 @@ var Grid = Class.extend({
     },
 
     shootBullet: function(from, to) {
-        var bullet = new Bullet(from, to);
+        var bullet = new Bullet(this, from, to);
         this.bullets.push(bullet);
         this.scene.add(bullet.mesh);
     },
