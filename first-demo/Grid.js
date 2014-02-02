@@ -37,7 +37,8 @@ var Grid = Class.extend({
 
             var charArgs = {
                 world: scope,
-                onDead: scope.removeCharacter
+                onDead: scope.removeCharacter,
+                team: i
             };
 
             var character = this.characterFactory.createCharacter(charArgs);
@@ -66,12 +67,13 @@ var Grid = Class.extend({
             this.highlightedTiles.forEach(function(tile) {
                 tile.reset();
             });
-
-            // mark tile position as available
-            var xPos = character.getTileXPos();
-            var zPos = character.getTileZPos();
-            this.getTileAtTilePos(xPos, zPos).hasCharacter = false;
         }
+
+        // mark tile position as available
+        var xPos = character.getTileXPos();
+        var zPos = character.getTileZPos();
+        this.getTileAtTilePos(xPos, zPos).hasCharacter = false;
+
 
         // remove character mesh from list of active meshes
         var index = this.characterMeshes.indexOf(character.mesh);
@@ -290,20 +292,13 @@ var Grid = Class.extend({
         }, false);
     },
 
-    shootBullet: function(from, to) {
-        var bullet = new Bullet(this, from, to);
+    shootBullet: function(owner, from, to) {
+        var bullet = new Bullet(this, owner, from, to);
         this.bullets.push(bullet);
         this.scene.add(bullet.mesh);
     },
 
     onMouseDown: function(event) {
-
-        // very temporary
-        if (this.currentCharacterSelected) {
-            this.currentCharacterSelected.applyDamage(60);
-            console.log(this.currentCharacterSelected.health);
-        }
-
         var scope = this;
 
         var projector = new THREE.Projector();
@@ -333,7 +328,7 @@ var Grid = Class.extend({
                     var to = new THREE.Vector3(this.convertXPosToWorldX(tileSelected.xPos), 15, this.convertZPosToWorldZ(tileSelected.zPos));
 
                     // shoot a bullet because you can
-                    this.shootBullet(from, to);
+                    this.shootBullet(this.currentCharacterSelected, from, to);
                 }
             }
         }
@@ -462,19 +457,24 @@ var Grid = Class.extend({
         for (var i = 0; i < this.bullets.length; i++) {
             var bullet = this.bullets[i];
             bullet.update(delta);
-            this.checkBulletCollision(bullet[i], i);   
+            this.checkBulletCollision(bullet, i);   
         }
+    },
+
+    checkOverlap: function(obj1, obj2) {
+        var combinedRadius = obj1.getRadius() + obj2.getRadius();
+        return combinedRadius * combinedRadius >= obj1.position.distanceToSquared(obj2.position);
     },
 
     checkBulletCollision: function(bullet, bulletIndex) {
         for (var i = 0; i < this.characterMeshes.length; i++) {
             var character = this.characterMeshes[i].owner;
             // also need to check for bullet team here
-            // if (this.checkOverlap(bullet, character)) {
-                // this.removeBullet(bullet);
-                // character.applyDamage(30);
-                // break;
-            // }
+            if (character.team != bullet.owner.team && this.checkOverlap(bullet, character)) {
+                this.handleBulletDestroy(bullet);
+                character.applyDamage(30);
+                break;
+            }
         }
     }
 });

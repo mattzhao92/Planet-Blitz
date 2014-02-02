@@ -1,8 +1,12 @@
+var BULLET_RADIUS = 3;
+
+
 var Bullet = Class.extend({
   // requires two Vector3 denoting start and end
-  init: function(world, from, to) {
+  init: function(world, owner, from, to) {
+
+    this.radius = BULLET_RADIUS;
     this.world = world;
-    var BULLET_RADIUS = 3;
 
     var sphereGeometry = new THREE.SphereGeometry(BULLET_RADIUS, 8, 6);
     var material = new THREE.MeshBasicMaterial({
@@ -17,8 +21,20 @@ var Bullet = Class.extend({
 
     this.maxDistance = 1000;
 
+    // alias to position
+    this.position = this.mesh.position;
     this.direction = to.clone().sub(from).normalize();
 
+    // store who shot the bullet
+    this.owner = owner;
+  },
+
+  getPosition: function() {
+    return this.position;
+  },
+
+  getRadius: function() {
+    return BULLET_RADIUS;
   },
 
   update: function(delta) {
