@@ -29,7 +29,7 @@ var Grid = Class.extend({
         this.characters = new THREE.Object3D();
         this.numOfCharacters = 3;
         this.characterMeshes = [];
-
+        this.characterList = new Array();
         this.characterFactory = new CharacterFactory();
 
         var scope = this;
@@ -42,6 +42,8 @@ var Grid = Class.extend({
 
             var character = this.characterFactory.createCharacter(charArgs);
             character.placeAtGridPos(i + 3, 4);
+            character.setID(i);
+            this.characterList.push(character);
             this.markTileOccupiedByCharacter(i + 3, 4);
 
             this.characterMeshes.push(character.mesh);
@@ -51,6 +53,10 @@ var Grid = Class.extend({
 
         this.setupMouseMoveListener();
         this.setupMouseDownListener();
+    },
+
+    getCharacterById: function(id) {
+        return this.characterList[id];
     },
 
     onCharacterDead: function(character) {
