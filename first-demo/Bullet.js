@@ -24,7 +24,6 @@ var Bullet = Class.extend({
   update: function(delta) {
     var distance = new THREE.Vector3().subVectors(this.mesh.position, this.startPosition).length();
 
-    // console.log("bullet update");
     var scaledDirection = new THREE.Vector3();
     scaledDirection.copy(this.direction).multiplyScalar(this.speed * delta);
     this.mesh.position.add(scaledDirection);
@@ -32,7 +31,20 @@ var Bullet = Class.extend({
     if (distance > this.maxDistance) {
       this.world.removeBullet(this);
     }
-
-    // TODO: once bullet reaches end position, then remove it from game world
   }
 });
+
+// var BulletFactory = Class.extend({
+//   init: function(world) {
+//     this.world = world;
+
+//     // this.BULLET_RADIUS = 3;
+//     var BULLET_RADIUS = 3;
+//     this.bulletGeometry = new THREE.SphereGeometry(BULLET_RADIUS, 8, 6);
+//   },
+
+//   createBullet: function(from, to) {
+//     return new Bullet(this.world, from, to);
+//   }
+
+// })
