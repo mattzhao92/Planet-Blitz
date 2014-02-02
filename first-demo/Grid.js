@@ -283,26 +283,11 @@ var Grid = Class.extend({
 
     shootBullet: function() {
         console.log("handleBullets");
-        // var negativeZ = new THREE.Vector(0, 0, -1);
-        var bullet = new Bullet();
-        // bullet.position.copy(from);
-        // var to = new THREE.Vector3(0, 0, 0);
-
-        // var toClone = to.clone();
-        // var cp = this.camera.position;
-        // var from = new THREE.Vector3(cp.x, cp.y, cp.z);
-
-        // var from = new THREE.Vector3(0, 5, 50);
-
-        // var to = new THREE.Vector3(1000, 5, 50);
 
         var from = this.camera.position.clone();
         var to = new THREE.Vector3(0, 0, 0);
 
-        bullet.position = from;
-        bullet.mesh.position = from.clone();
-
-        bullet.direction = to.clone().sub(from).normalize();
+        var bullet = new Bullet(from, to);
 
         this.bullets.push(bullet);
         this.scene.add(bullet.mesh);

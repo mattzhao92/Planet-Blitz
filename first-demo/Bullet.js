@@ -1,5 +1,6 @@
 var Bullet = Class.extend({
-  init: function() {
+  // requires two Vector3 denoting start and end
+  init: function(from, to) {
     var BULLET_RADIUS = 5;
 
     var sphereGeometry = new THREE.SphereGeometry(BULLET_RADIUS, 8, 6);
@@ -7,11 +8,14 @@ var Bullet = Class.extend({
       color: 0x000000
     });
     this.mesh = new THREE.Mesh(sphereGeometry, material);
+    this.mesh.position = from.clone();
 
     // this.direction = direction;
     this.direction = null;
     this.speed = 1000;
     this.damage = 20;
+
+    this.direction = to.clone().sub(from).normalize();
 
   },
 
@@ -19,7 +23,6 @@ var Bullet = Class.extend({
     // console.log("bullet update");
     var scaledDirection = new THREE.Vector3();
     scaledDirection.copy(this.direction).multiplyScalar(this.speed * delta);
-    this.position.add(scaledDirection);
     this.mesh.position.add(scaledDirection);
   }
 });
