@@ -18,6 +18,7 @@ var Character = Class.extend({
         this.onDead = args.onDead;
 
         this.isActive = false;
+        this.id = 0;
 
         this.xPos = 0;
         this.zPos = 0;
@@ -40,6 +41,10 @@ var Character = Class.extend({
         this.loadFile("headcombinedtextured.js");
 
         this.health = 100;
+    },
+
+    setID: function(id) {
+        this.id = id;
     },
 
     getHealth: function() {
