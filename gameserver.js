@@ -32,7 +32,7 @@ server.listen(8080);
 var numPlayers = 0;
 var gameStart = true;
 var Message = netconst.Message;
-var Direction = netconst.Direction;
+var Move = netconst.Move;
 // IO communication.
 io.sockets.on('connection', function(socket) {
 	socket.set('pseudo', 'player' + numPlayers);
@@ -45,13 +45,21 @@ io.sockets.on('connection', function(socket) {
 
 	if (gameStart) {
 		socket.on(Message.MOVE, function(message) {
-			console.log('move');
-
 			socket.get('pseudo', function(error, name) {
-				console.log('user ' + name + ' send this : ' + message[Direction.X]);
+				console.log('user ' + name + ' send this : ' + message);
+				// Forward it to other player.
+				socket.broadcast.emit(Message.MOVE, message);
 			});
 		});
+
+		socket.on(Message.SHOOT, function(message) {
+			socket.get('pseudo', function(error, name) {
+				console.log('shot msg');
+				console.log('user ' + name + ' send this : ' + message);
+				// Forward it to other player.
+				socket.broadcast.emit(Message.SHOOT, message);
+			});
+		});
+
 	}
-
-
 });

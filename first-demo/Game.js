@@ -136,12 +136,17 @@ $(function () {
 
             // adjust camera controls
             this.controls.handleResize();
-        }
+        },
+
+				getWorld: function() {
+						return this.world;
+				}
 
     };
 
     var app = new App("#WebGL-output");
     var MAPGAME = app;
+		game = app;
 
 });
 

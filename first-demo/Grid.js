@@ -346,6 +346,7 @@ var Grid = Class.extend({
                     var to = new THREE.Vector3(this.convertXPosToWorldX(tileSelected.xPos), 15, this.convertZPosToWorldZ(tileSelected.zPos));
 
                     // shoot a bullet because you can
+										sendShootMsg(this.currentCharacterSelected.id, from, to);
                     this.shootBullet(this.currentCharacterSelected, from, to);
                 }
             }
@@ -369,10 +370,15 @@ var Grid = Class.extend({
                 var tileSelected = intersectsWithTiles[0].object.owner;
                 var coordinate = tileSelected.onMouseOver();
                 if (this.currentCharacterSelected && coordinate) {
+									var deltaX = coordinate.x - this.currentCharacterSelected.getTileXPos();
+									var deltaY = 0;
+									var deltaZ = coordinate.z - this.currentCharacterSelected.getTileZPos();
                     this.currentCharacterSelected.setDirection(
-                        new THREE.Vector3(coordinate.x - this.currentCharacterSelected.getTileXPos(),
-                            0,
-                            coordinate.z - this.currentCharacterSelected.getTileZPos()));
+                        new THREE.Vector3(deltaX, deltaY, deltaZ));
+
+										// Put the network communication here.
+										sendMoveMsg(this.currentCharacterSelected.id, 
+												deltaX, deltaY, deltaZ);
 
                     this.disableMouseMoveListener();
                     this.disableMouseDownListener();
