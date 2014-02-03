@@ -144,8 +144,8 @@ $(function () {
 
             // Align top-left
             stats.domElement.style.position = 'absolute';
-            stats.domElement.style.left = '0px';
-            stats.domElement.style.top = '0px';
+            stats.domElement.style.left = '9px';
+            stats.domElement.style.top = '10px';
 
             $("#Stats-output").append( stats.domElement );
 
