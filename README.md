@@ -4,17 +4,11 @@
 
 After a clone, run the following in the top-level repository directory:
 
-    python -m SimpleHTTPServer &
-
-Point your browser to http://0.0.0.0:8000/first-demo/simple-grid.html. 
-
-Chrome is preferred, other browsers are untested.
-
-To run the node js server, with the game portol, use:
-
 	node gameserver.js
 
-Then navigate to http://localhost:8080
+Point your browser to http://localhost:8080. 
+
+Chrome is preferred, other browsers are untested.
 
 ## Story
 
