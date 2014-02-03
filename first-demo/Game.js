@@ -73,12 +73,12 @@ $(function () {
             
             // x +, x -, y + , y -, z +, z -
             var filenames = [
-            '../assets/images/sky08_lf.jpg', 
-            '../assets/images/sky08_rt.jpg',
-            '../assets/images/sky08_up.jpg',
-            '../assets/images/sky08_dn.jpg',
-            '../assets/images/sky08_ft.jpg',
-            '../assets/images/sky08_bk.jpg'];
+            'images/sky08_lf.jpg', 
+            'images/sky08_rt.jpg',
+            'images/sky08_up.jpg',
+            'images/sky08_dn.jpg',
+            'images/sky08_ft.jpg',
+            'images/sky08_bk.jpg'];
 
             // imagePrefix + directions[i] + imageSuffix
             var materialArray = [];

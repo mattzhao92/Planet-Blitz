@@ -40,7 +40,7 @@ var Character = Class.extend({
         this.addUnitSelector();
 
         this.loader = new THREE.JSONLoader();
-        this.loadFile("headcombinedtextured.js");
+        this.loadFile("blendermodels/headcombinedtextured.js");
 
         this.health = 100;
     },
