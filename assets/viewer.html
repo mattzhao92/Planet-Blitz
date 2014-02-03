@@ -46,6 +46,7 @@
             // create a render and set the size
             this.renderer = new THREE.WebGLRenderer();
             this.renderer.setSize(window.innerWidth, window.innerHeight);
+            this.renderer.setClearColor(0x000000);
 
             // add the output of the renderer to the html element
             $(containerName).append(this.renderer.domElement);
