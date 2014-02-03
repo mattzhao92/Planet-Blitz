@@ -193,10 +193,8 @@ var Character = Class.extend({
     },
 
     update: function(world, delta) {
-
         if (this.rotationInProgress) {
             var newAngle = this.mesh.rotation.y + this.angularVelocity * delta;
-
             if ((newAngle  - this.goalAngle) / (this.goalAngle - this.prevAngle) > 0) {
                 this.mesh.rotation.y = this.goalAngle;
                 this.rotationInProgress = false;
@@ -208,7 +206,6 @@ var Character = Class.extend({
         }
                   
         if (this.motionInProgress) {
-  
             var newMeshX = this.mesh.position.x + this.velocityX * delta;
             var newMeshZ = this.mesh.position.z + this.velocityZ * delta;
 
@@ -295,11 +292,11 @@ var Character = Class.extend({
         // Set the direction's angle, and the difference between it and our Object3D's current rotation
         this.goalAngle = Math.atan2(direction.x, direction.z);
 
-        if (this.goalAngle != this.mesh.rotation.y) {
-            if (this.goalAngle - this.mesh.rotation.y > Math.PI) {
-                this.goalAngle -= 2 * Math.PI;
-            }
-            this.angularVelocity = (this.goalAngle - this.mesh.rotation.y) * 2;
+        if (this.goalAngle - this.mesh.rotation.y > Math.PI) {
+            this.goalAngle -= 2 * Math.PI;
+        }
+        this.angularVelocity = (this.goalAngle - this.mesh.rotation.y) * 2;
+        if (this.angularVelocity != 0) {
             this.rotationInProgress = true;
             this.prevAngle = this.mesh.rotation.y;
         }

@@ -173,7 +173,7 @@ var Grid = Class.extend({
 
 
     findPath: function(oldXPos, oldZPos, newXPos, newZPos) {
-        console.log("findPath oldXPos: "+oldXPos+" oldZPos: "+oldZPos +" newXPos: "+newXPos+" newZPos: "+ newZPos);
+        //console.log("findPath oldXPos: "+oldXPos+" oldZPos: "+oldZPos +" newXPos: "+newXPos+" newZPos: "+ newZPos);
         return this.pathFinder.findPath(oldXPos, oldZPos, newXPos, newZPos, this.PFGrid.clone());
     },
 
