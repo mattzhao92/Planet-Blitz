@@ -186,13 +186,10 @@ var Character = Class.extend({
             addNewItem = true;
         }
 
-        var scope = this;
-        console.log("ADDING NUMBER OF "+ newMotions.length + " new motions into our queue \n");
-        newMotions.forEach(function(motion) {
-            console.log("new motion 22222 " + motion.x +" "+motion.z);
-            scope.motionQueue.push(motion);
-        });
-
+        for (var i = newMotions.length-1; i >= 0; i--) {
+            this.motionQueue.push(newMotions[i]);
+        }
+  
         // TODO: define actual tween timeout
         if (onMotionFinish) {
             setTimeout(onMotionFinish, 800);
