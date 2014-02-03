@@ -3,14 +3,29 @@ var Message = {
 	CONNECT : 'CONNECT',
 	START : 'START',
 	MOVE : 'MOVE',
-	SHOT : 'SHOT' 
+	SHOOT : 'SHOOT' 
 };
 
-var Direction = {
+var Move = {
+	index : 'index',
 	X : 'X',
 	Y : 'Y',
 	Z : 'Z'
 };
 
+var Shoot = {
+	// Index of the shooter.
+	index : 'index',
+	fromX : 'fromX',
+	fromY : 'fromY',
+	fromZ : 'fromZ',
+	toX : 'toX',
+	toY : 'toY',
+	toZ : 'toZ'
+};
+
+
+
 exports.Message = Message;
-exports.Direction = Direction;
+exports.Move = Move;
+exports.Shoot = Shoot;

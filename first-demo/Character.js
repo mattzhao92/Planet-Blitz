@@ -5,18 +5,29 @@ var CharacterFactory = Class.extend({
 
     createCharacter: function(charArgs) {
         var character = new Character(charArgs);
-        _.extend(character.mesh, character);
-
-        return character.mesh;
+        return character;
     }
-})
+});
 
 var Character = Class.extend({
-// Class constructor
-    init: function (args) {
+    // Class constructor
+    init: function(args) {
         'use strict';
+
+        this.world = args.world;
+        this.onDead = args.onDead;
+        this.team = args.team;
+
+        this.isActive = false;
+        this.id = 0;
+
+        this.xPos = 0;
+        this.zPos = 0;
+
         // Set the character modelisation object
         this.mesh = new THREE.Object3D();
+        this.position = this.mesh.position;
+        this.mesh.owner = this;
 
         // Set the vector of the current motion
         this.direction = new THREE.Vector3(0, 0, 0);
@@ -24,37 +35,70 @@ var Character = Class.extend({
         // Set the current animation step
         this.step = 0;
         this.motionInProcess = false;
-        this.motionQueue = [];
+        this.motionQueue = new Array();
+
+        this.addUnitSelector();
+
         this.loader = new THREE.JSONLoader();
         this.loadFile("headcombinedtextured.js");
-    
-        // need to declare all attributes in constructor because of the copying of attributes in (_.extend)
-        // TODO: problem, since attributes will not be properly referenced (setter/getter)
-        this.xPos = 0;
-        this.zPos = 0;
 
-        this.world = args.world;
-        this.isActive = false;
+        this.health = 100;
+    },
+
+    setID: function(id) {
+        this.id = id;
+    },
+
+    getRadius: function() {
+        // TODO: remove this hardcoding
+        return 20;
+    },
+
+    update: function(delta) {
+
+    },
+
+    getHealth: function() {
+        return this.health;
+    },
+
+    applyDamage: function(damage) {
+
+        this.health -= damage;
+        console.log("Health: " + this.getHealth());
+        if (this.health < 0) {
+            this.world.handleCharacterDead(this);
+        }
+    },
+
+    addUnitSelector: function() {
+        // setup unit selector mesh
+        // have to supply the radius
+        var geometry = new THREE.TorusGeometry(this.world.getTileSize() / 2, 1, 5, 35);
+        var material = new THREE.MeshLambertMaterial({
+            color: 0xFF0000
+        });
+        var torus = new THREE.Mesh(geometry, material);
+        torus.rotation.x = -0.5 * Math.PI;
+        torus.visible = false;
+
+        this.mesh.add(torus);
+        this.unitSelectorMesh = torus;
     },
 
     placeAtGridPos: function(xPos, zPos) {
-        // TODO: not happy about this, but this is needed because of the way the character.mesh gets extended with the character's properties
-        this.mesh.xPos = xPos;
-        this.mesh.zPos = zPos;
+        this.xPos = xPos;
+        this.zPos = zPos;
         this.mesh.position.x = this.world.convertXPosToWorldX(xPos);
         this.mesh.position.z = this.world.convertZPosToWorldZ(zPos);
-
-        console.log("placeAtGridPos called");
-        console.log("getTileXPos: " + this.getTileXPos());
-        console.log("getTileZPos: " + this.getTileZPos());
     },
 
     getTileXPos: function() {
-        return this.mesh.xPos;
+        return this.xPos;
     },
 
     getTileZPos: function() {
-        return this.mesh.zPos;
+        return this.zPos;
     },
 
     getMovementRange: function() {
@@ -68,14 +112,15 @@ var Character = Class.extend({
             return;
         }
         // world.deselectAll();
-        this.mesh.children[0].material.color.setRGB(1.0, 0, 0);
+        this.unitSelectorMesh.material.color.setRGB(1.0, 0, 0);
+        this.unitSelectorMesh.visible = true;
         world.markCharacterAsSelected(this);
         this.isActive = true;
     },
 
     deselect: function() {
         // return to original color
-        this.mesh.children[0].material.color.setRGB(1.0, 1.0, 1.0);
+        this.unitSelectorMesh.visible = false;
         this.isActive = false;
     },
 
@@ -83,18 +128,21 @@ var Character = Class.extend({
         var scope = this;
 
         this.loader.load(filename, function(geometry) {
-                mesh = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial());
-                mesh.scale.set(24, 24, 24);
-                mesh.position.y = 0;
-                mesh.position.x = 0;
-                mesh.position.z = 10;
-                 _.extend(mesh, scope);
-                 scope.mesh.add(mesh);
-                })
+            mesh = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial());
+            mesh.scale.set(24, 24, 24);
+            // this is very temporary
+            mesh.position.y = -10;
+            mesh.position.x = 0;
+            mesh.position.z = 10;
+            this.mesh.owner = scope;
+
+            scope.mesh.add(mesh);
+            scope.characterMesh = mesh;
+        });
     },
 
     // Update the direction of the current motion
-    setDirection: function (controls) {
+    setDirectionWithControl: function(controls) {
         'use strict';
         // Either left or right, and either up or down (no jump or dive (on the Y axis), so far ...)
         var x = controls.left ? 1 : controls.right ? -1 : 0,
@@ -103,54 +151,146 @@ var Character = Class.extend({
         this.direction.set(x, y, z);
     },
 
-    enqueueMotion: function() {
-        this.motionQueue.push({dir: this.direction.clone()});
-				sendMoveMsg();
+    setDirection: function(direction) {
+        this.direction = direction;
     },
 
-    dequeueMotion: function() {
+    enqueueMotion: function(world, onMotionFinish) {
+        console.log("enqueueMotion \n");
+
+		// sendMoveMsg(this.direction.x, this.direction.y, this.direction.z);
+
+        var path = world.findPath(this.getTileXPos(), this.getTileZPos(), this.getTileXPos() + this.direction.x, 
+                                  this.getTileZPos() + this.direction.z);
+        console.log(path);
+        var addNewItem = true;
+        var newMotions = new Array();
+        world.getTileAtTilePos(this.getTileXPos(), this.getTileZPos()).markAsRoadMap();
+        for (var i = 1; i < path.length; i++) {
+            world.getTileAtTilePos(path[i][0], path[i][1]).markAsRoadMap();
+            // checking if path[i], path[i-1], path[i-2] are on the same line
+            if (i > 1) {
+                if ( (path[i][0] == path[i-2][0] || path[i][1] == path[i-2][1]) &&
+                    (path[i][0] * (path[i-1][1] - path[i-2][1]) + path[i-1][0] * (path[i-2][1] - path[i][1]) + path[i-2][0] *
+                    (path[i][1] - path[i-1][1]) == 0)) {
+                    // if they are on the same, line, expand the last element in the motionQueue
+                    var lastMotion = newMotions[newMotions.length - 1];
+                    lastMotion.x += (path[i][0] - path[i-1][0]);
+                    lastMotion.z += (path[i][1] - path[i-1][1]);
+                    addNewItem = false;
+                }
+            } 
+            if (addNewItem) {
+                newMotions.push(new THREE.Vector3(path[i][0] - path[i-1][0], 0, path[i][1] - path[i-1][1]));
+            }
+            addNewItem = true;
+        }
+
+        var scope = this;
+        console.log("ADDING NUMBER OF "+ newMotions.length + " new motions into our queue \n");
+        newMotions.forEach(function(motion) {
+            console.log("new motion 22222 " + motion.x +" "+motion.z);
+            scope.motionQueue.push(motion);
+        });
+
+        // TODO: define actual tween timeout
+        if (onMotionFinish) {
+            setTimeout(onMotionFinish, 800);
+        }
+    },
+
+    update: function(world, delta) {
+
+        if (this.rotationInProgress) {
+            var newAngle = this.mesh.rotation.y + this.angularVelocity * delta;
+
+            if ((newAngle  - this.goalAngle) / (this.goalAngle - this.prevAngle) > 0) {
+                this.mesh.rotation.y = this.goalAngle;
+                console.log("rotation finishes");
+                this.rotationInProgress = false;
+            } else {
+                this.mesh.rotation.y = newAngle;
+                this.prevAngle = newAngle;
+            }
+            return;
+        }
+                  
+        if (this.motionInProgress) {
+  
+            var newMeshX = this.mesh.position.x + this.velocityX * delta;
+            var newMeshZ = this.mesh.position.z + this.velocityZ * delta;
+
+
+            if ((newMeshX - this.goalMeshX) / (this.goalMeshX - this.prevMeshX) > 0) {
+                this.mesh.position.x = this.goalMeshX;
+                //console.log("motion in progress finishes "+newMeshX / this.goalMeshX);
+                this.motionInProgress = false;
+                this.xPos = this.goalXPos;
+                world.displayMovementArea(this);
+            } else {
+                this.mesh.position.x = newMeshX;
+                this.velocityX *= 1.05;
+            }
+
+            if ((newMeshZ - this.goalMeshZ) / (this.goalMeshZ - this.prevMeshZ) > 0) {
+                this.mesh.position.z = this.goalMeshZ;
+                //console.log("motion in progress finishes");
+                this.motionInProgress = false;
+                this.zPos = this.goalZPos;
+                world.displayMovementArea(this);
+            } else {
+                this.mesh.position.z = newMeshZ;
+                this.velocityZ *= 1.05;
+            }
+
+            if (this.motionInProgress) {
+                this.prevMeshX = newMeshX;
+                this.prevMeshZ = newMeshZ;
+            }
+
+            return;                     
+        } 
+
         if (this.motionQueue.length > 0) {
             this.motionInProcess = true;
-            var direction = this.motionQueue.splice(0,1);
+            var direction = this.motionQueue.pop();
             if (direction.x !== 0 || direction.z !== 0) {
-                // Rotate the character
-                var rotateTween = this.rotate();
+                this.rotate(direction);
                 // And, only if we're not colliding with an obstacle or a wall ...
                 if (this.collide()) {
                     return false;
                 }
+
+
+                this.motionInProgress = true;
                 // ... we move the character
-                var oldX = this.mesh.position.x;
-                var newX = this.mesh.position.x + this.direction.x * 40;
+                this.prevMeshX = this.mesh.position.x;
+                this.prevMeshZ = this.mesh.position.z;
 
-                var oldZ = this.mesh.position.z;
-                var newZ = this.mesh.position.z + this.direction.z * 40;
+                // world.markTileNotOccupiedByCharacter(this.getTileXPos(), this.getTileZPos());
+                this.goalMeshX = this.mesh.position.x + direction.x * 40;
+                this.goalMeshZ = this.mesh.position.z + direction.z * 40;
+                
+                if (direction.x < 0) {
+                    this.velocityX = -100;
+                } else if(direction.x > 0) {
+                    this.velocityX = 100;
+                } else {
+                    this.velocityX = 0;
+                }
 
-                // var easing = TWEEN.Easing.Elastic.InOut;
-                // var easing = TWEEN.Easing.Linear.None;
-                var easing = TWEEN.Easing.Quadratic.Out;
-                // var easing = TWEEN.Easing.Exponential.EaseOut;
-                var tween = new TWEEN.Tween({x: oldX, z: oldZ}).to({x: newX, z: newZ}, 450).easing(easing);
+                if (direction.z < 0) {
+                    this.velocityZ = -100;
+                } else if (direction.z > 0) {
+                    this.velocityZ = 100;
+                } else {
+                    this.velocityZ = 0;
+                }
 
-                var myMesh = this.mesh;
-                var onUpdate = function() {
-                    var xCoord = this.x;
-                    var zCoord = this.z;
-                    myMesh.position.x = xCoord;
-                    myMesh.position.z = zCoord;
-                };
-
-                tween.onUpdate(onUpdate);
-
-                var moveTween = tween;
-                this.direction.set(0, 0, 0);
-
-                var blankTween = new TWEEN.Tween({}).to({}, 100);
-
-                rotateTween.chain(blankTween);
-                rotateTween.chain(moveTween);
-                rotateTween.start();
-
+                //this.velocityZ = direction.z?direction.z<0?-10:10:0;
+                this.goalXPos = this.xPos + direction.x;
+                this.goalZPos = this.zPos + direction.z;
+                //world.markTileOccupiedByCharacter(this.getTileXPos(), this.getTileZPos());
                 return true;
             }
             return false;
@@ -158,32 +298,28 @@ var Character = Class.extend({
     },
 
     // Rotate the character
-    rotate: function () {
+    rotate: function(direction) {
         'use strict';
         // Set the direction's angle, and the difference between it and our Object3D's current rotation
-        console.log("rotation \n");
-        var angle = Math.atan2(this.direction.x, this.direction.z);
+        this.goalAngle = Math.atan2(direction.x, direction.z);
 
-        // transition from current rotation (mesh.rotation.y) to desired angle 'angle'
-
-        var easing = TWEEN.Easing.Quadratic.Out;
-        var oldRotationY = this.mesh.rotation.y;
-        var tween = new TWEEN.Tween({rotationY: oldRotationY}).to({rotationY: angle}, 200).easing(easing);
-
-        var myMesh = this.mesh;
-        var onUpdate = function() {
-            myMesh.rotation.y = this.rotationY;
+        if (this.goalAngle != this.mesh.rotation.y) {
+            if (this.goalAngle - this.mesh.rotation.y > Math.PI) {
+                this.goalAngle -= 2 * Math.PI;
+            }
+            this.angularVelocity = (this.goalAngle - this.mesh.rotation.y) * 2;
+            this.rotationInProgress = true;
+            this.prevAngle = this.mesh.rotation.y;
         }
-
-        tween.onUpdate(onUpdate);
-        // tween.start();
-        return tween;
     },
 
-    collide: function () {
+    collide: function() {
         'use strict';
         // INSERT SOME MAGIC HERE
         return false;
+    },
+
+    getMesh: function() {
+        return this.mesh;
     }
 });
-
