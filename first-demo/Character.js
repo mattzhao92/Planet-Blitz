@@ -212,7 +212,6 @@ var Character = Class.extend({
 
             if ((newMeshX - this.goalMeshX) / (this.goalMeshX - this.prevMeshX) > 0) {
                 this.mesh.position.x = this.goalMeshX;
-                //console.log("motion in progress finishes "+newMeshX / this.goalMeshX);
                 this.motionInProgress = false;
                 this.xPos = this.goalXPos;
                 world.displayMovementArea(this);
@@ -223,7 +222,6 @@ var Character = Class.extend({
 
             if ((newMeshZ - this.goalMeshZ) / (this.goalMeshZ - this.prevMeshZ) > 0) {
                 this.mesh.position.z = this.goalMeshZ;
-                //console.log("motion in progress finishes");
                 this.motionInProgress = false;
                 this.zPos = this.goalZPos;
                 world.displayMovementArea(this);
