@@ -157,12 +157,8 @@ var Character = Class.extend({
 
     enqueueMotion: function(world, onMotionFinish) {
         console.log("enqueueMotion \n");
-
-		// sendMoveMsg(this.direction.x, this.direction.y, this.direction.z);
-
         var path = world.findPath(this.getTileXPos(), this.getTileZPos(), this.getTileXPos() + this.direction.x, 
                                   this.getTileZPos() + this.direction.z);
-        console.log(path);
         var addNewItem = true;
         var newMotions = new Array();
         world.getTileAtTilePos(this.getTileXPos(), this.getTileZPos()).markAsRoadMap();
@@ -203,7 +199,6 @@ var Character = Class.extend({
 
             if ((newAngle  - this.goalAngle) / (this.goalAngle - this.prevAngle) > 0) {
                 this.mesh.rotation.y = this.goalAngle;
-                console.log("rotation finishes");
                 this.rotationInProgress = false;
             } else {
                 this.mesh.rotation.y = newAngle;
@@ -264,7 +259,7 @@ var Character = Class.extend({
                 this.prevMeshX = this.mesh.position.x;
                 this.prevMeshZ = this.mesh.position.z;
 
-                // world.markTileNotOccupiedByCharacter(this.getTileXPos(), this.getTileZPos());
+                world.markTileNotOccupiedByCharacter(this.getTileXPos(), this.getTileZPos());
                 this.goalMeshX = this.mesh.position.x + direction.x * 40;
                 this.goalMeshZ = this.mesh.position.z + direction.z * 40;
                 
@@ -287,7 +282,7 @@ var Character = Class.extend({
                 //this.velocityZ = direction.z?direction.z<0?-10:10:0;
                 this.goalXPos = this.xPos + direction.x;
                 this.goalZPos = this.zPos + direction.z;
-                //world.markTileOccupiedByCharacter(this.getTileXPos(), this.getTileZPos());
+                world.markTileOccupiedByCharacter(this.goalXPos, this.goalZPos);
                 return true;
             }
             return false;

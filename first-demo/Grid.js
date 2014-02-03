@@ -48,7 +48,6 @@ var Grid = Class.extend({
             this.markTileOccupiedByCharacter(i + 3, 4);
 
             this.characterMeshes.push(character.mesh);
-            
             this.scene.add(character.mesh);
         }
 
@@ -151,9 +150,10 @@ var Grid = Class.extend({
     },
 
     markTileOccupiedByCharacter: function(xPos, zPos) {
+
         var tile = this.getTileAtTilePos(xPos, zPos);
         if (tile) {
-            tile.setHasCharacter(true);
+            tile.hasCharacter = true;
             this.setPFGridCellAccessibility(xPos, zPos, false);
         }
     },
@@ -161,6 +161,7 @@ var Grid = Class.extend({
     markTileNotOccupiedByCharacter: function(xPos, zPos) {
         var tile = this.getTileAtTilePos(xPos, zPos);
         if (tile) {
+            tile.hasCharacter = false;
             tile.setHasCharacter(false);
             this.setPFGridCellAccessibility(xPos, zPos, true);
         }
@@ -230,7 +231,7 @@ var Grid = Class.extend({
             var validNeighbors = this.getNeighborTiles(currentTile.xPos, currentTile.zPos);
             for (var i = 0; i < validNeighbors.length; i++) {
                 var neighbor = validNeighbors[i];
-                if (_.indexOf(visited, neighbor) == -1 && _.indexOf(nodesInNextLevel, neighbor)) {
+                if (_.indexOf(visited, neighbor) == -1 && _.indexOf(nodesInNextLevel, neighbor) == -1) {
                     tilesToHighlight.push(neighbor);
                     nodesInNextLevel.push(neighbor);
                 }
@@ -388,10 +389,6 @@ var Grid = Class.extend({
                         scope.enableMouseMoveListener();
                         scope.enableMouseDownListener();
                     });
-                    // console.log("character is being moved to a new coordinate position \n");
-                    // console.log("src X: "+this.currentCharacterSelected.getTileXPos() +
-                    //             " Z: "+ this.currentCharacterSelected.getTileZPos());
-                    // console.log("des X: "+coordinate.x +" Z: "+coordinate.z);
                 }
             }
         }
