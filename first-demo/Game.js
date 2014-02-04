@@ -65,7 +65,7 @@ $(function () {
             directionalLight.position.x = 1;
             directionalLight.position.y = 1;
             directionalLight.position.z = 0.75;
-            // directionalLight.position.normalize();
+            directionalLight.position.normalize();
 
             this.scene.add( directionalLight );
         },
