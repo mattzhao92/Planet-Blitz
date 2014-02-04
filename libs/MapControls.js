@@ -88,7 +88,7 @@ THREE.MapControls = function ( object, domElement ) {
     this.velocityX = 0.0;
     this.velocityZ = 0.0;
     this.DECELERATION = 5;
-    this.CAMERA_VELOCITY = 3.5;
+    this.CAMERA_VELOCITY = 3.75;
 
     // events
     var changeEvent = { type: 'change' };
@@ -359,6 +359,8 @@ THREE.MapControls = function ( object, domElement ) {
     };
 
     this.update = function (delta) {
+        // _this.updateCameraFromKeys();
+
         _eye.subVectors(_this.object.position, this.center);
         _this.updateCameraFromVelocity(delta);
         _this.pan();
@@ -561,44 +563,37 @@ THREE.MapControls = function ( object, domElement ) {
         }
     }
 
-    function onKeyDown( event ) {
-        if ( scope.enabled === false ) return;
-        if ( scope.userPan === false ) return;
-
-        switch ( event.keyCode ) {
-            // up
-            case scope.keys.UP:
+    this.handleKey = function(key) {
+        switch (key) {
+            case "w":
                 scope.velocityZ = scope.CAMERA_VELOCITY;
                 break;
-            // down
-            case scope.keys.DOWN:
+            case "s":
                 scope.velocityZ = -scope.CAMERA_VELOCITY;
                 break;
-            // left
-            case scope.keys.LEFT:
+            case "a":
                 scope.velocityX = scope.CAMERA_VELOCITY;
                 break;
-            // right
-            case scope.keys.RIGHT:
+            case "d":
                 scope.velocityX = -scope.CAMERA_VELOCITY;
                 break;
         }
     }
 
-    function onKeyUp( event ) {
-
-
-    }
-
+    // can optionally also specify a key-up callback, but that's not needed
+    KeyboardJS.on("w a s d", 
+        function(keyEvent, keysPressed, keyCombo) {
+            // console.log(keysPressed);
+            keysPressed.forEach(function(key) {
+                scope.handleKey(key);
+            });
+        });
+        
 
     this.domElement.addEventListener( 'contextmenu', function ( event ) { event.preventDefault(); }, false );
     this.domElement.addEventListener( 'mousedown', onMouseDown, false );
     this.domElement.addEventListener( 'mousewheel', onMouseWheel, false );
     this.domElement.addEventListener( 'DOMMouseScroll', onMouseWheel, false ); // firefox
-    // this.domElement.addEventListener( 'keydown', onKeyDown, false );
-
-    window.addEventListener('keydown', onKeyDown, false);
-    // window.addEventListener('keydown', onKeyUp, false);
 
     this.handleResize();
 };
