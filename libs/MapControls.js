@@ -87,8 +87,11 @@ THREE.MapControls = function ( object, domElement ) {
     // for smooth scrolling
     this.velocityX = 0.0;
     this.velocityZ = 0.0;
-    this.DECELERATION = 5;
-    this.CAMERA_VELOCITY = 3.75;
+
+    this.DECELERATION = 8;
+    this.INITIAL_CAMERA_VELOCITY = 1.2;
+    this.MAX_CAMERA_VELOCITY = 5.5;
+    this.ACCELERATION = 2.5;
 
     // events
     var changeEvent = { type: 'change' };
@@ -107,9 +110,7 @@ THREE.MapControls = function ( object, domElement ) {
         } else {
 
             this.screen = this.domElement.getBoundingClientRect();
-
         }
-
     };
 
 
@@ -283,31 +284,32 @@ THREE.MapControls = function ( object, domElement ) {
             // prevent camera from getting closer to grid
             distance.y = 0;
 
+            // experimental checking of camera boundaries while panning
             // enforce camera boundaries when panning
-            var newZ = distance.z + this.object.position.z;
-            var newX = distance.x + this.object.position.x;
+            // var newZ = distance.z + this.object.position.z;
+            // var newX = distance.x + this.object.position.x;
 
-            // console.log(newX + " " + newZ);
+            // // console.log(newX + " " + newZ);
 
-            var verticalFOV = this.object.fov * ( Math.PI / 180);
+            // var verticalFOV = this.object.fov * ( Math.PI / 180);
 
-            var fieldOfVisionHeight = 2 * Math.tan(verticalFOV / 2) * _eye.length();
+            // var fieldOfVisionHeight = 2 * Math.tan(verticalFOV / 2) * _eye.length();
 
-            var aspect = this.screen.width / this.screen.height;
-            var fieldOfVisionWidth = fieldOfVisionHeight * aspect;
+            // var aspect = this.screen.width / this.screen.height;
+            // var fieldOfVisionWidth = fieldOfVisionHeight * aspect;
 
-            var widthMargin = fieldOfVisionWidth / 4;
-            var heightMargin = fieldOfVisionHeight / 4;
+            // var widthMargin = fieldOfVisionWidth / 4;
+            // var heightMargin = fieldOfVisionHeight / 4;
 
-            // if (newZ - heightMargin > this.maxZ || newZ + heightMargin < this.minZ) {
-            //     distance.z = 0;
-            //     _panStart.z = _panEnd.z;
+            // // if (newZ - heightMargin > this.maxZ || newZ + heightMargin < this.minZ) {
+            // //     distance.z = 0;
+            // //     _panStart.z = _panEnd.z;
+            // // }
+
+            // if (newX - widthMargin > this.maxX || newX + widthMargin < this.minX) {
+            //     distance.x = 0;
+            //     _panStart.x = _panStart.x;
             // }
-
-            if (newX - widthMargin > this.maxX || newX + widthMargin < this.minX) {
-                distance.x = 0;
-                _panStart.x = _panStart.x;
-            }
 
             this.object.position.add( distance );
             this.center.add( distance );
@@ -321,6 +323,19 @@ THREE.MapControls = function ( object, domElement ) {
     };
 
     this.updateCameraFromVelocity = function(delta) {
+
+        // enforce velocity restrictions
+        if (scope.velocityX > 0) {
+            scope.velocityX = Math.min(scope.velocityX, this.MAX_CAMERA_VELOCITY);
+        } else {
+            scope.velocityX = Math.max(scope.velocityX, -this.MAX_CAMERA_VELOCITY);
+        }
+
+        if (scope.velocityZ > 0) {
+            scope.velocityZ = Math.min(scope.velocityZ, this.MAX_CAMERA_VELOCITY);
+        } else {
+            scope.velocityZ = Math.max(scope.velocityZ, -this.MAX_CAMERA_VELOCITY);
+        }
 
         // update camera position based on velocity
         var velocityX = scope.velocityX;
@@ -359,8 +374,6 @@ THREE.MapControls = function ( object, domElement ) {
     };
 
     this.update = function (delta) {
-        // _this.updateCameraFromKeys();
-
         _eye.subVectors(_this.object.position, this.center);
         _this.updateCameraFromVelocity(delta);
         _this.pan();
@@ -566,16 +579,24 @@ THREE.MapControls = function ( object, domElement ) {
     this.handleKey = function(key) {
         switch (key) {
             case "w":
-                scope.velocityZ = scope.CAMERA_VELOCITY;
+                // todo: set initial camera velocity if velocity was below initial camera velocity amount
+
+                // otherwise, keep on adding acceleration
+                // want "at least" initial camera velocity
+                scope.velocityZ = Math.max(scope.velocityZ, scope.INITIAL_CAMERA_VELOCITY);
+                scope.velocityZ *= scope.ACCELERATION;
                 break;
             case "s":
-                scope.velocityZ = -scope.CAMERA_VELOCITY;
+                scope.velocityZ = Math.min(scope.velocityZ, -scope.INITIAL_CAMERA_VELOCITY);
+                scope.velocityZ *= scope.ACCELERATION;
                 break;
             case "a":
-                scope.velocityX = scope.CAMERA_VELOCITY;
+                scope.velocityX = Math.max(scope.velocityX, scope.INITIAL_CAMERA_VELOCITY);
+                scope.velocityX *= scope.ACCELERATION;
                 break;
             case "d":
-                scope.velocityX = -scope.CAMERA_VELOCITY;
+                scope.velocityX = Math.min(scope.velocityX, -scope.INITIAL_CAMERA_VELOCITY);
+                scope.velocityX *= scope.ACCELERATION;
                 break;
         }
     }
@@ -584,12 +605,13 @@ THREE.MapControls = function ( object, domElement ) {
     KeyboardJS.on("w a s d", 
         function(keyEvent, keysPressed, keyCombo) {
             // console.log(keysPressed);
+
+            // need to handle case where two keys are pressed at a time - because diagonal will have a higher camera speed scroll
             keysPressed.forEach(function(key) {
                 scope.handleKey(key);
             });
         });
         
-
     this.domElement.addEventListener( 'contextmenu', function ( event ) { event.preventDefault(); }, false );
     this.domElement.addEventListener( 'mousedown', onMouseDown, false );
     this.domElement.addEventListener( 'mousewheel', onMouseWheel, false );
