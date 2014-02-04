@@ -319,6 +319,9 @@ var Grid = Class.extend({
 
 
     onMouseDown: function(event) {
+        var RIGHT_CLICK = 3;
+        var LEFT_CLICK = 1;
+
         var scope = this;
 
         var projector = new THREE.Projector();
@@ -335,8 +338,8 @@ var Grid = Class.extend({
 
         // should put this at the end of mouseDown
         if (this.currentCharacterSelected) {
-            // fire on right click
-            if (event.which == 3) {
+            // fire on click
+            if (event.which == RIGHT_CLICK) {
                 console.log("Firing bullet");
 
                 if (intersectsWithTiles.length > 0) {
@@ -354,8 +357,8 @@ var Grid = Class.extend({
             }
         }
 
-        // move on left click
-        if (event.which == 1) {
+        // move on click
+        if (event.which == LEFT_CLICK) {
             // care about characters first, then tile intersects
 
             // needed so that you can't click on a character and have that result in an immediate movement
