@@ -371,9 +371,9 @@ var Grid = Class.extend({
                 var tileSelected = intersectsWithTiles[0].object.owner;
                 var coordinate = tileSelected.onMouseOver();
                 if (this.currentCharacterSelected && coordinate) {
-									var deltaX = coordinate.x - this.currentCharacterSelected.getTileXPos();
-									var deltaY = 0;
-									var deltaZ = coordinate.z - this.currentCharacterSelected.getTileZPos();
+                  var deltaX = coordinate.x - this.currentCharacterSelected.getTileXPos();
+                  var deltaY = 0;
+                  var deltaZ = coordinate.z - this.currentCharacterSelected.getTileZPos();
                   this.currentCharacterSelected.setDirection(
                       new THREE.Vector3(deltaX, deltaY, deltaZ));
 
