@@ -30,7 +30,7 @@ server.listen(8080);
 
 
 var numPlayers = 0;
-var gameStart = true;
+var gameStart = false;
 var Message = netconst.Message;
 var Move = netconst.Move;
 // IO communication.
@@ -39,8 +39,14 @@ io.sockets.on('connection', function(socket) {
   numPlayers++;
   console.log('Player connection, #' + numPlayers);
 
-  if (numPlayers == 2) {
+  /** 
+   *  Now use a hack here...So can start net game with any 2 connections,
+   *  without needing to restart the server.
+   */
+  if (numPlayers %  2 == 0) {
+    console.log('start game..');
     gameStart = true;
+    io.sockets.emit(Message.START);
   }
 
   if (gameStart) {

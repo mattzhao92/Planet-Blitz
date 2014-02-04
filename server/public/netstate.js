@@ -24,8 +24,6 @@ var Shoot = {
   toZ : 'toZ'
 };
 
-
-
 exports.Message = Message;
 exports.Move = Move;
 exports.Shoot = Shoot;

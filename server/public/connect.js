@@ -3,9 +3,15 @@
 var socket;
 var name;
 var game;
+var netMode = true;
 
-function connectServer() {
+function connectServer(callback) {
   socket = io.connect();
+
+  /* Handle the start message */
+  socket.on(Message.START, function() {
+      callback();
+  });
 
   /* Handle the move message */
   socket.on(Message.MOVE, function(data) {
@@ -16,7 +22,6 @@ function connectServer() {
       var target = game.getWorld().getCharacterById(index);
       target.setDirection(new THREE.Vector3(deltaX, deltaY, deltaZ));
       target.enqueueMotion(game.getWorld(), null);
-
   });
 
   /* Handle the shot message */
@@ -37,22 +42,26 @@ function connectServer() {
 
 
 function sendMoveMsg(index, x, y, z) {
-  var data = {};
-  data[Move.index] = index;
-  data[Move.X] = x;
-  data[Move.Y] = y;
-  data[Move.Z] = z;
-  socket.emit(Message.MOVE, data);
+  if (netMode) {
+    var data = {};
+    data[Move.index] = index;
+    data[Move.X] = x;
+    data[Move.Y] = y;
+    data[Move.Z] = z;
+    socket.emit(Message.MOVE, data);
+  }
 }
 
 function sendShootMsg(index, from, to) {
-  var shoot = {};
-  shoot[Shoot.index] = index;
-  shoot[Shoot.fromX] = from.x;
-  shoot[Shoot.fromY] = from.y;
-  shoot[Shoot.fromZ] = from.z;
-  shoot[Shoot.toX] = to.x;
-  shoot[Shoot.toY] = to.y;
-  shoot[Shoot.toZ] = to.z;
-  socket.emit(Message.SHOOT, shoot);
+  if (netMode) {
+    var shoot = {};
+    shoot[Shoot.index] = index;
+    shoot[Shoot.fromX] = from.x;
+    shoot[Shoot.fromY] = from.y;
+    shoot[Shoot.fromZ] = from.z;
+    shoot[Shoot.toX] = to.x;
+    shoot[Shoot.toY] = to.y;
+    shoot[Shoot.toZ] = to.z;
+    socket.emit(Message.SHOOT, shoot);
+  }
 }
