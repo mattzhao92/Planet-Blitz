@@ -364,7 +364,13 @@ var Grid = Class.extend({
 
             if (intersects.length > 0) {
                 var clickedObject = intersects[0].object.owner;
-                clickedObject.onSelect(scope);
+
+                // done so that you can click on a tile behind a character easily
+                if (clickedObject != this.currentCharacterSelected) {
+                    clickedObject.onSelect(scope);
+                } else {
+                    continueHandlingIntersects = true;
+                }
             } else {
                 continueHandlingIntersects = true;
             }
