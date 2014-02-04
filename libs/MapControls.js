@@ -84,14 +84,13 @@ THREE.MapControls = function ( object, domElement ) {
     this.minZ = -Infinity;
     this.maxZ = Infinity;
 
-    this.accelerationX = 0.0;
-    this.accelerationZ = 0.0;
+    // for smooth scrolling
     this.velocityX = 0.0;
     this.velocityZ = 0.0;
-    this.DECELERATION = 0.4;
+    this.DECELERATION = 5;
+    this.CAMERA_VELOCITY = 3.5;
 
     // events
-
     var changeEvent = { type: 'change' };
 
     var _panStart = new THREE.Vector2();
@@ -323,15 +322,9 @@ THREE.MapControls = function ( object, domElement ) {
 
     this.updateCameraFromVelocity = function(delta) {
 
-        // just want to add velocity update of camera code
-
-        // var mouseChange = _panEnd.clone().sub(_panStart );
+        // update camera position based on velocity
         var velocityX = scope.velocityX;
         var velocityZ = scope.velocityZ;
-
-        // if ( mouseChange.lengthSq() > 0.00000001) {
-            
-            // mouseChange.multiplyScalar(_this.panSpeed * _eye.length());
 
         var distance = _eye.clone();
         distance = distance.cross(this.object.up).setLength(velocityX);
@@ -345,9 +338,6 @@ THREE.MapControls = function ( object, domElement ) {
         this.object.position.add( distance );
         this.center.add( distance );
 
-        // scope.velocityX *= _this.dynamicDampingFactor;
-        // scope.velocityZ *= _this.dynamicDampingFactor;
-
         // don't apply deceleration if the velocity was about 0 to begin with
         if (Math.abs(scope.velocityX) < scope.DECELERATION * delta) {
             scope.velocityX = 0;
@@ -356,19 +346,19 @@ THREE.MapControls = function ( object, domElement ) {
         } else if (scope.velocityX < 0) {
             scope.velocityX += scope.DECELERATION * delta;
         }
-
-
+        
         if (Math.abs(scope.velocityZ) < scope.DECELERATION * delta) {
             scope.velocityZ = 0;
-        } else if (scope.velocityX > 0) {
+        } else if (scope.velocityZ > 0) {
+            // case: going farther up into map
             scope.velocityZ -= scope.DECELERATION * delta;
-        } else if (scope.velcoityX < 0) {
+        } else if (scope.velocityZ < 0) {
+            // case: camera coming towards user
             scope.velocityZ += scope.DECELERATION * delta;
         }
     };
 
     this.update = function (delta) {
-        // console.log(delta);
         _eye.subVectors(_this.object.position, this.center);
         _this.updateCameraFromVelocity(delta);
         _this.pan();
@@ -572,42 +562,28 @@ THREE.MapControls = function ( object, domElement ) {
     }
 
     function onKeyDown( event ) {
-
-        var ACCELERATION_INCREMENT = 0.04;
-        var CAMERA_INCREMENT = 0.15;
         if ( scope.enabled === false ) return;
         if ( scope.userPan === false ) return;
 
         switch ( event.keyCode ) {
             // up
             case scope.keys.UP:
-                // add camera velocity going up
-                scope.accelerationZ += ACCELERATION_INCREMENT;
-                // scope.velocityZ += 0.5;
-                scope.velocityZ += 0.5;
-                // _panEnd = _panStart.clone().add(new THREE.Vector3(0, CAMERA_INCREMENT, 0));
+                scope.velocityZ = scope.CAMERA_VELOCITY;
                 break;
             // down
             case scope.keys.DOWN:
-                scope.accelerationZ -= ACCELERATION_INCREMENT;
-                scope.velocityZ -= 0.5;
-                // _panEnd = _panStart.clone().add(new THREE.Vector3(0, -CAMERA_INCREMENT, 0));
+                scope.velocityZ = -scope.CAMERA_VELOCITY;
                 break;
             // left
             case scope.keys.LEFT:
-                scope.accelerationX += ACCELERATION_INCREMENT;
-                scope.velocityX += 0.5;
-                // _panEnd = _panStart.clone().add(new THREE.Vector3(CAMERA_INCREMENT, 0, 0));
+                scope.velocityX = scope.CAMERA_VELOCITY;
                 break;
             // right
             case scope.keys.RIGHT:
-                scope.accelerationX -= ACCELERATION_INCREMENT;
-                scope.velocityX -= 0.5;
-                // _panEnd = _panStart.clone().add(new THREE.Vector3(-CAMERA_INCREMENT, 0, 0));
+                scope.velocityX = -scope.CAMERA_VELOCITY;
                 break;
         }
     }
-
 
     function onKeyUp( event ) {
 
