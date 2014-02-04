@@ -18,6 +18,7 @@ var Grid = Class.extend({
         // listeners and state
         this.mouseDownListenerActive = true;
         this.mouseOverListenerActive = true;
+        this.allowCharacterMovement = true;
 
         // create grid tiles
         this.tiles = new THREE.Object3D();
@@ -373,24 +374,28 @@ var Grid = Class.extend({
                     var tileSelected = intersectsWithTiles[0].object.owner;
                     var coordinate = tileSelected.onMouseOver();
                     if (this.currentCharacterSelected && coordinate) {
-						var deltaX = coordinate.x - this.currentCharacterSelected.getTileXPos();
-						var deltaY = 0;
-						var deltaZ = coordinate.z - this.currentCharacterSelected.getTileZPos();
-                        this.currentCharacterSelected.setDirection(
-                            new THREE.Vector3(deltaX, deltaY, deltaZ));
+                        // allow only one character to move at a time
+                        if (this.allowCharacterMovement) {
+    						var deltaX = coordinate.x - this.currentCharacterSelected.getTileXPos();
+    						var deltaY = 0;
+    						var deltaZ = coordinate.z - this.currentCharacterSelected.getTileZPos();
+                            this.currentCharacterSelected.setDirection(
+                                new THREE.Vector3(deltaX, deltaY, deltaZ));
 
-						// Put the network communication here.
-						sendMoveMsg(this.currentCharacterSelected.id, 
-								deltaX, deltaY, deltaZ);
+    						// Put the network communication here.
+    						sendMoveMsg(this.currentCharacterSelected.id, 
+    								deltaX, deltaY, deltaZ);
 
-                        this.disableMouseMoveListener();
-                        this.disableMouseDownListener();
+                            // this.disableMouseMoveListener();
+                            // this.disableMouseDownListener();
 
-                        this.currentCharacterSelected.enqueueMotion(this,function() {
-                            console.log("Motion finished");
-                            scope.enableMouseMoveListener();
-                            scope.enableMouseDownListener();
-                        });
+                            this.currentCharacterSelected.enqueueMotion(this,function() {
+                                // console.log("Motion finished");
+                                this.allowCharacterMovement = true;
+                                // scope.enableMouseMoveListener();
+                                // scope.enableMouseDownListener();
+                            });
+                        }
                     }
                 }
             }
