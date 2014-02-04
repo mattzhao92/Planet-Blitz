@@ -35,7 +35,11 @@ THREE.MapControls = function ( object, domElement ) {
     this.minDistance = 0;
     this.maxDistance = Infinity;
 
-    this.keys = { LEFT: 37, UP: 38, RIGHT: 39, BOTTOM: 40 };
+    // arrow key mappings
+    // this.keys = { LEFT: 37, UP: 38, RIGHT: 39, DOWN: 40 };
+
+    // WASD mappings
+    this.keys = {LEFT: 65, UP: 87, RIGHT: 68, DOWN: 83};
 
     // internals
 
@@ -518,22 +522,27 @@ THREE.MapControls = function ( object, domElement ) {
 
     function onKeyDown( event ) {
 
+        var CAMERA_INCREMENT = 0.15;
         if ( scope.enabled === false ) return;
         if ( scope.userPan === false ) return;
 
         switch ( event.keyCode ) {
 
+            // up
             case scope.keys.UP:
-                _panEnd = _panStart.clone().add(new THREE.Vector3(0, 0.04, 0));
+                _panEnd = _panStart.clone().add(new THREE.Vector3(0, CAMERA_INCREMENT, 0));
                 break;
-            case scope.keys.BOTTOM:
-                _panEnd = _panStart.clone().add(new THREE.Vector3(0, -0.04, 0));
+            // down
+            case scope.keys.DOWN:
+                _panEnd = _panStart.clone().add(new THREE.Vector3(0, -CAMERA_INCREMENT, 0));
                 break;
+            // left
             case scope.keys.LEFT:
-                _panEnd = _panStart.clone().add(new THREE.Vector3(0.04, 0, 0));
+                _panEnd = _panStart.clone().add(new THREE.Vector3(CAMERA_INCREMENT, 0, 0));
                 break;
+            // right
             case scope.keys.RIGHT:
-                _panEnd = _panStart.clone().add(new THREE.Vector3(-0.04, 0, 0));
+                _panEnd = _panStart.clone().add(new THREE.Vector3(-CAMERA_INCREMENT, 0, 0));
                 break;
         }
     }
