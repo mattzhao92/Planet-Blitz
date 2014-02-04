@@ -90,8 +90,11 @@ THREE.MapControls = function ( object, domElement ) {
 
     this.DECELERATION = 8;
     this.INITIAL_CAMERA_VELOCITY = 1.2;
-    this.MAX_CAMERA_VELOCITY = 5.5;
+
+    this.CAMERA_INITIAL_STEP = this.INITIAL_CAMERA_VELOCITY * 3;
     this.ACCELERATION = 2.5;
+    this.MAX_CAMERA_VELOCITY = this.ACCELERATION * 2.2;
+    this.enableMouseControl = false;
 
     // events
     var changeEvent = { type: 'change' };
@@ -483,9 +486,10 @@ THREE.MapControls = function ( object, domElement ) {
 
         }
 
-        document.addEventListener( 'mousemove', onMouseMove, false );
-        document.addEventListener( 'mouseup', onMouseUp, false );
-
+        if (scope.enableMouseControl) {
+            document.addEventListener( 'mousemove', onMouseMove, false );
+            document.addEventListener( 'mouseup', onMouseUp, false );
+        }
     }
 
     function onMouseMove( event ) {
@@ -541,8 +545,10 @@ THREE.MapControls = function ( object, domElement ) {
         if ( scope.enabled === false ) return;
         if ( scope.userRotate === false ) return;
 
-        document.removeEventListener( 'mousemove', onMouseMove, false );
-        document.removeEventListener( 'mouseup', onMouseUp, false );
+        if (scope.enableMouseControl) {
+            document.removeEventListener( 'mousemove', onMouseMove, false );
+            document.removeEventListener( 'mouseup', onMouseUp, false );
+        }
 
         state = STATE.NONE;
 
@@ -576,42 +582,76 @@ THREE.MapControls = function ( object, domElement ) {
         }
     }
 
-    this.handleKey = function(key) {
-        switch (key) {
-            case "w":
-                // todo: set initial camera velocity if velocity was below initial camera velocity amount
+    this.handleKey = function(keyEvent, key) {
 
-                // otherwise, keep on adding acceleration
-                // want "at least" initial camera velocity
-                scope.velocityZ = Math.max(scope.velocityZ, scope.INITIAL_CAMERA_VELOCITY);
-                scope.velocityZ *= scope.ACCELERATION;
-                break;
-            case "s":
-                scope.velocityZ = Math.min(scope.velocityZ, -scope.INITIAL_CAMERA_VELOCITY);
-                scope.velocityZ *= scope.ACCELERATION;
-                break;
-            case "a":
-                scope.velocityX = Math.max(scope.velocityX, scope.INITIAL_CAMERA_VELOCITY);
-                scope.velocityX *= scope.ACCELERATION;
-                break;
-            case "d":
-                scope.velocityX = Math.min(scope.velocityX, -scope.INITIAL_CAMERA_VELOCITY);
-                scope.velocityX *= scope.ACCELERATION;
-                break;
+        if (keyEvent.isRepeat) {
+            switch (key) {
+                case "w":
+                    // otherwise, keep on adding acceleration
+                    // want "at least" initial camera velocity
+                    scope.velocityZ = Math.max(scope.velocityZ, scope.INITIAL_CAMERA_VELOCITY);
+                    scope.velocityZ *= scope.ACCELERATION;
+                    break;
+                case "s":
+                    scope.velocityZ = Math.min(scope.velocityZ, -scope.INITIAL_CAMERA_VELOCITY);
+                    scope.velocityZ *= scope.ACCELERATION;
+                    break;
+                case "a":
+                    scope.velocityX = Math.max(scope.velocityX, scope.INITIAL_CAMERA_VELOCITY);
+                    scope.velocityX *= scope.ACCELERATION;
+                    break;
+                case "d":
+                    scope.velocityX = Math.min(scope.velocityX, -scope.INITIAL_CAMERA_VELOCITY);
+                    scope.velocityX *= scope.ACCELERATION;
+                    break;
+            }
+        } else {
+            switch (key) {
+                case "w":
+                    // otherwise, keep on adding acceleration
+                    // want "at least" initial camera velocity
+                    scope.velocityZ = Math.max(scope.velocityZ, scope.CAMERA_INITIAL_STEP);
+                    break;
+                case "s":
+                    scope.velocityZ = Math.min(scope.velocityZ, -scope.CAMERA_INITIAL_STEP);
+                    break;
+                case "a":
+                    scope.velocityX = Math.max(scope.velocityX, scope.CAMERA_INITIAL_STEP);
+                    break;
+                case "d":
+                    scope.velocityX = Math.min(scope.velocityX, -scope.CAMERA_INITIAL_STEP);
+                    break;
+            }
         }
     }
 
     // can optionally also specify a key-up callback, but that's not needed
     KeyboardJS.on("w a s d", 
         function(keyEvent, keysPressed, keyCombo) {
-            // console.log(keysPressed);
 
             // need to handle case where two keys are pressed at a time - because diagonal will have a higher camera speed scroll
             keysPressed.forEach(function(key) {
-                scope.handleKey(key);
+                scope.handleKey(keyEvent, key);
             });
         });
-        
+
+    // allow mouse pan and rotation only when command key is pressed
+    KeyboardJS.on("command, windows, win, super, leftcommand, leftwindows, leftwin, leftsuper",
+        function(keyEvent, keysPressed, keyCombo) {
+            scope.enableMouseControl = true;
+        },
+        function(keyEvent, keysPressed, keyCombo) {
+            scope.enableMouseControl = false;
+        });
+    
+    // experimental: toggle mouse control in ALT
+    KeyboardJS.on("alt",
+        function(keyEvent, keysPressed, keyCombo) {
+            scope.enableMouseControl = !scope.enableMouseControl;
+            console.log("Mouse control toggled: " + scope.enableMouseControl);
+        }
+    );
+
     this.domElement.addEventListener( 'contextmenu', function ( event ) { event.preventDefault(); }, false );
     this.domElement.addEventListener( 'mousedown', onMouseDown, false );
     this.domElement.addEventListener( 'mousewheel', onMouseWheel, false );
