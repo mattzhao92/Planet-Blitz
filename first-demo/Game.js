@@ -52,21 +52,21 @@ $(function () {
         },
 
         addLighting: function() {
-            var ambientLight = new THREE.AmbientLight( 0x404040 );
+            // really subtle ambient lighting
+            var ambientLight = new THREE.AmbientLight( 0x191919 );
             this.scene.add( ambientLight );
 
+            // sky color, ground color, intensity
+            // var hemiLight = new THREE.HemisphereLight( 0x0000ff, 0x00ff00, 0.6 ); 
+            // this.scene.add(hemiLight);
+
+            // a really bright light
             var directionalLight = new THREE.DirectionalLight( 0xffffff );
             directionalLight.position.x = 1;
             directionalLight.position.y = 1;
             directionalLight.position.z = 0.75;
-            directionalLight.position.normalize();
-            this.scene.add( directionalLight );
+            // directionalLight.position.normalize();
 
-            var directionalLight = new THREE.DirectionalLight( 0x808080 );
-            directionalLight.position.x = - 1;
-            directionalLight.position.y = 1;
-            directionalLight.position.z = - 0.75;
-            directionalLight.position.normalize();
             this.scene.add( directionalLight );
         },
 
