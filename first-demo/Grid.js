@@ -347,48 +347,51 @@ var Grid = Class.extend({
                     var to = new THREE.Vector3(this.convertXPosToWorldX(tileSelected.xPos), 15, this.convertZPosToWorldZ(tileSelected.zPos));
 
                     // shoot a bullet because you can
-										sendShootMsg(this.currentCharacterSelected.id, from, to);
+					sendShootMsg(this.currentCharacterSelected.id, from, to);
                     this.shootBullet(this.currentCharacterSelected, from, to);
                 }
             }
         }
 
-        // care about characters first, then tile intersects
+        // move on left click
+        if (event.which == 1) {
+            // care about characters first, then tile intersects
 
-        // needed so that you can't click on a character and have that result in an immediate movement
-        // is there a better pattern for this - chain of event handlers?
-        var continueHandlingIntersects = false;
+            // needed so that you can't click on a character and have that result in an immediate movement
+            // is there a better pattern for this - chain of event handlers?
+            var continueHandlingIntersects = false;
 
-        if (intersects.length > 0) {
-            var clickedObject = intersects[0].object.owner;
-            clickedObject.onSelect(scope);
-        } else {
-            continueHandlingIntersects = true;
-        }
+            if (intersects.length > 0) {
+                var clickedObject = intersects[0].object.owner;
+                clickedObject.onSelect(scope);
+            } else {
+                continueHandlingIntersects = true;
+            }
 
-        if (continueHandlingIntersects) {
-            if (intersectsWithTiles.length > 0) {
-                var tileSelected = intersectsWithTiles[0].object.owner;
-                var coordinate = tileSelected.onMouseOver();
-                if (this.currentCharacterSelected && coordinate) {
-									var deltaX = coordinate.x - this.currentCharacterSelected.getTileXPos();
-									var deltaY = 0;
-									var deltaZ = coordinate.z - this.currentCharacterSelected.getTileZPos();
-                    this.currentCharacterSelected.setDirection(
-                        new THREE.Vector3(deltaX, deltaY, deltaZ));
+            if (continueHandlingIntersects) {
+                if (intersectsWithTiles.length > 0) {
+                    var tileSelected = intersectsWithTiles[0].object.owner;
+                    var coordinate = tileSelected.onMouseOver();
+                    if (this.currentCharacterSelected && coordinate) {
+						var deltaX = coordinate.x - this.currentCharacterSelected.getTileXPos();
+						var deltaY = 0;
+						var deltaZ = coordinate.z - this.currentCharacterSelected.getTileZPos();
+                        this.currentCharacterSelected.setDirection(
+                            new THREE.Vector3(deltaX, deltaY, deltaZ));
 
-										// Put the network communication here.
-										sendMoveMsg(this.currentCharacterSelected.id, 
-												deltaX, deltaY, deltaZ);
+						// Put the network communication here.
+						sendMoveMsg(this.currentCharacterSelected.id, 
+								deltaX, deltaY, deltaZ);
 
-                    this.disableMouseMoveListener();
-                    this.disableMouseDownListener();
+                        this.disableMouseMoveListener();
+                        this.disableMouseDownListener();
 
-                    this.currentCharacterSelected.enqueueMotion(this,function() {
-                        console.log("Motion finished");
-                        scope.enableMouseMoveListener();
-                        scope.enableMouseDownListener();
-                    });
+                        this.currentCharacterSelected.enqueueMotion(this,function() {
+                            console.log("Motion finished");
+                            scope.enableMouseMoveListener();
+                            scope.enableMouseDownListener();
+                        });
+                    }
                 }
             }
         }
