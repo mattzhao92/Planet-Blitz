@@ -84,6 +84,11 @@ THREE.MapControls = function ( object, domElement ) {
     this.minZ = -Infinity;
     this.maxZ = Infinity;
 
+    this.accelerationX = 0.0;
+    this.accelerationZ = 0.0;
+    this.velocityX = 0.0;
+    this.velocityZ = 0.0;
+
     // events
 
     var changeEvent = { type: 'change' };
@@ -309,16 +314,45 @@ THREE.MapControls = function ( object, domElement ) {
 
             _panStart.add(mouseChange.subVectors(_panEnd, _panStart).multiplyScalar(_this.dynamicDampingFactor));
 
-
-
             // console.log("viewable width " + width);
 
             // otherwise, end the pan
         }
     };
 
+    this.updateCameraFromVelocity = function() {
+
+        // just want to add velocity update of camera code
+
+        // var mouseChange = _panEnd.clone().sub(_panStart );
+        var velocityX = scope.velocityX;
+        var velocityZ = scope.velocityZ;
+
+        // if ( mouseChange.lengthSq() > 0.00000001) {
+            
+            // mouseChange.multiplyScalar(_this.panSpeed * _eye.length());
+
+            var distance = _eye.clone();
+            // distance = distance.cross(this.object.up).setLength(mouseChange.x);
+            distance = distance.cross(this.object.up).setLength(velocityX);
+
+            var unitZVector = new THREE.Vector3(0, 0, -1);
+            // transform the unit z vector into camera's local space
+            // distance.add(unitZVector.transformDirection(this.object.matrix).setLength(mouseChange.y));
+            distance.add(unitZVector.transformDirection(this.object.matrix).setLength(velocityZ));
+            // prevent camera from getting closer to grid
+            distance.y = 0;
+
+            this.object.position.add( distance );
+            this.center.add( distance );
+
+            // _panStart.add(mouseChange.subVectors(_panEnd, _panStart).multiplyScalar(_this.dynamicDampingFactor));
+        // }
+    };
+
     this.update = function () {
         _eye.subVectors(_this.object.position, this.center);
+        _this.updateCameraFromVelocity();
         _this.pan();
 
         var position = this.object.position;
@@ -517,31 +551,36 @@ THREE.MapControls = function ( object, domElement ) {
             scope.zoomIn();
 
         }
-
     }
 
     function onKeyDown( event ) {
 
+        var ACCELERATION_INCREMENT = 0.04;
         var CAMERA_INCREMENT = 0.15;
         if ( scope.enabled === false ) return;
         if ( scope.userPan === false ) return;
 
         switch ( event.keyCode ) {
-
             // up
             case scope.keys.UP:
-                _panEnd = _panStart.clone().add(new THREE.Vector3(0, CAMERA_INCREMENT, 0));
+                // add camera velocity going up
+                scope.accelerationZ += ACCELERATION_INCREMENT;
+                scope.velocityZ += 0.5;
+                // _panEnd = _panStart.clone().add(new THREE.Vector3(0, CAMERA_INCREMENT, 0));
                 break;
             // down
             case scope.keys.DOWN:
+                scope.accelerationZ -= ACCELERATION_INCREMENT;
                 _panEnd = _panStart.clone().add(new THREE.Vector3(0, -CAMERA_INCREMENT, 0));
                 break;
             // left
             case scope.keys.LEFT:
+                scope.accelerationX += ACCELERATION_INCREMENT;
                 _panEnd = _panStart.clone().add(new THREE.Vector3(CAMERA_INCREMENT, 0, 0));
                 break;
             // right
             case scope.keys.RIGHT:
+                scope.accelerationX -= ACCELERATION_INCREMENT;
                 _panEnd = _panStart.clone().add(new THREE.Vector3(-CAMERA_INCREMENT, 0, 0));
                 break;
         }
