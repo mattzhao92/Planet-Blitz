@@ -374,15 +374,15 @@ var Grid = Class.extend({
 									var deltaX = coordinate.x - this.currentCharacterSelected.getTileXPos();
 									var deltaY = 0;
 									var deltaZ = coordinate.z - this.currentCharacterSelected.getTileZPos();
-                    this.currentCharacterSelected.setDirection(
-                        new THREE.Vector3(deltaX, deltaY, deltaZ));
+                  this.currentCharacterSelected.setDirection(
+                      new THREE.Vector3(deltaX, deltaY, deltaZ));
 
-										// Put the network communication here.
-										sendMoveMsg(this.currentCharacterSelected.id, 
-												deltaX, deltaY, deltaZ);
+                  // Put the network communication here.
+                  sendMoveMsg(this.currentCharacterSelected.id, 
+                      deltaX, deltaY, deltaZ);
 
-                    this.disableMouseMoveListener();
-                    this.disableMouseDownListener();
+                  this.disableMouseMoveListener();
+                  this.disableMouseDownListener();
 
                     this.currentCharacterSelected.enqueueMotion(this,function() {
                         console.log("Motion finished");
