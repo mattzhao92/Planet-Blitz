@@ -347,7 +347,7 @@ var Grid = Class.extend({
                     var to = new THREE.Vector3(this.convertXPosToWorldX(tileSelected.xPos), 15, this.convertZPosToWorldZ(tileSelected.zPos));
 
                     // shoot a bullet because you can
-										sendShootMsg(this.currentCharacterSelected.id, from, to);
+                    sendShootMsg(this.currentCharacterSelected.id, from, to);
                     this.shootBullet(this.currentCharacterSelected, from, to);
                 }
             }
