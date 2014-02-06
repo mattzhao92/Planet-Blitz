@@ -657,6 +657,33 @@ THREE.MapControls = function ( object, domElement ) {
     this.domElement.addEventListener( 'mousewheel', onMouseWheel, false );
     this.domElement.addEventListener( 'DOMMouseScroll', onMouseWheel, false ); // firefox
 
+    // pointerlock code
+    // register the callback when a pointerlock event occurs
+    this.domElement.addEventListener('pointerlockchange', changeCallback, false);
+    this.domElement.addEventListener('mozpointerlockchange', changeCallback, false);
+    this.domElement.addEventListener('webkitpointerlockchange', changeCallback, false);      
+
+    // called when the pointer lock has changed. Here we check whether the
+    // pointerlock was initiated on the element we want.
+    function changeCallback(e) {
+           // var canvas = $("#pointerLock").get()[0];
+           // if (document.pointerLockElement === canvas ||
+           //         document.mozPointerLockElement === canvas ||
+           //         document.webkitPointerLockElement === canvas) {
+    
+           //     // we've got a pointerlock for our element, add a mouselistener
+           //     document.addEventListener("mousemove", moveCallback, false);
+           // } else {
+    
+           //     // pointer lock is no longer active, remove the callback
+           //     document.removeEventListener("mousemove", moveCallback, false);
+    
+           //     // and reset the entry coordinates
+           //     entryCoordinates = {x:-1, y:-1};
+           // }
+       };
+
+
     this.handleResize();
 };
 

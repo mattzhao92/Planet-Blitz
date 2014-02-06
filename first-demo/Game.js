@@ -10,6 +10,16 @@ $(function () {
         this.renderer = new THREE.WebGLRenderer();
         this.renderer.setSize(window.innerWidth, window.innerHeight);
 
+        $(containerName).click(function () {
+                   var canvas = $(containerName).get()[0];
+                   canvas.requestPointerLock = canvas.requestPointerLock ||
+                           canvas.mozRequestPointerLock ||
+                           canvas.webkitRequestPointerLock;
+        
+                   // Ask the browser to lock the pointer)
+                   canvas.requestPointerLock();
+               });
+
         // add the output of the renderer to the html element
         $(containerName).append(this.renderer.domElement);
 
