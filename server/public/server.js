@@ -15,7 +15,8 @@ function loading() {
 }
 
 $(document).ready(function() {
-
+  $('#WebGL-output').hide();
+  $('#Stats-output').hide();
   $('#playBtn').click(function() {
     loading();
     connectServer(startGame);

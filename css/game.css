@@ -25,12 +25,10 @@ body {
 }
 
 #Stats-output {
-  display: none;
 }
 
 
 #WebGL-output {
-  display: none;
 }
 
 .span, .span_large{
