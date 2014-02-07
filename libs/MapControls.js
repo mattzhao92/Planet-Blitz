@@ -73,6 +73,9 @@ THREE.MapControls = function ( object, scene, domElement ) {
     // merged in from trackball controls
     this.screen = { width: window.innerWidth, height: window.innerHeight, offsetLeft: 0, offsetTop: 0, top: 0, left: 0};
 
+    var SCREEN_MARGIN = 10;
+    this.mouseBounds = {minX: SCREEN_MARGIN, minY: SCREEN_MARGIN, maxX: $(containerName).width() - SCREEN_MARGIN, maxY: $(containerName).height() - SCREEN_MARGIN};
+
     // can put in resize logic later
     this.radius = ( this.screen.width + this.screen.height ) / 4;
 
@@ -92,13 +95,16 @@ THREE.MapControls = function ( object, scene, domElement ) {
     this.velocityX = 0.0;
     this.velocityZ = 0.0;
 
-    this.DECELERATION = 8;
-    this.INITIAL_CAMERA_VELOCITY = 1.2;
+    this.DECELERATION = 9;
+    // this.INITIAL_CAMERA_VELOCITY = 1.2;
 
     this.CAMERA_INITIAL_STEP = this.INITIAL_CAMERA_VELOCITY * 3;
     this.ACCELERATION = 2.5;
+    // used for when scrolling with mouse
+    this.INITIAL_CAMERA_VELOCITY = .6;
+    this.MAP_SCROLL_ACCELERATION = 2;
     this.MAX_CAMERA_VELOCITY = this.ACCELERATION * 2.2;
-    this.enableMouseControl = false;
+    this.enableMouseControl = true;
 
     // events
     var changeEvent = { type: 'change' };
@@ -335,7 +341,41 @@ THREE.MapControls = function ( object, scene, domElement ) {
         }
     };
 
+    this.scrollCameraLeft = function() {
+        scope.velocityX = Math.max(scope.velocityX, scope.INITIAL_CAMERA_VELOCITY);
+        scope.velocityX *= scope.MAP_SCROLL_ACCELERATION;
+    };
+
+    this.scrollCameraRight = function() {
+        scope.velocityX = Math.min(scope.velocityX, -scope.INITIAL_CAMERA_VELOCITY);
+        scope.velocityX *= scope.MAP_SCROLL_ACCELERATION;
+
+    };
+
+    this.scrollCameraUp = function() {
+        scope.velocityZ = Math.max(scope.velocityZ, scope.INITIAL_CAMERA_VELOCITY);
+        scope.velocityZ *= scope.MAP_SCROLL_ACCELERATION;
+    };
+
+    this.scrollCameraDown = function() {
+        scope.velocityZ = Math.min(scope.velocityZ, -scope.INITIAL_CAMERA_VELOCITY);
+        scope.velocityZ *= scope.MAP_SCROLL_ACCELERATION;
+    };
+
     this.updateCameraFromVelocity = function(delta) {
+
+        // keep on applying velocity if mouse is on edges of screen
+        if (scope.mousePosition.x == scope.mouseBounds.minX) {
+            scope.scrollCameraLeft();
+        } else if (scope.mousePosition.x == scope.mouseBounds.maxX) {
+            scope.scrollCameraRight();
+        }
+
+        if (scope.mousePosition.y == scope.mouseBounds.minY) {
+            scope.scrollCameraUp();
+        } else if (scope.mousePosition.y == scope.mouseBounds.maxY) {
+            scope.scrollCameraDown();
+        }
 
         // enforce velocity restrictions
         if (scope.velocityX > 0) {
@@ -476,13 +516,13 @@ THREE.MapControls = function ( object, scene, domElement ) {
         event.preventDefault();
 
         // quick hack
-        event.clientX = scope.mousePosition.x;
-        event.clientY = scope.mousePosition.y;
+        // event.clientX = scope.mousePosition.x;
+        // event.clientY = scope.mousePosition.y;
 
         // console.log(event.clientX);
         // console.log(event.clientY);
 
-        console.log(scope.mousePosition);
+        // console.log(scope.mousePosition);
 
         if ( event.button === 0 ) {
 
@@ -516,6 +556,10 @@ THREE.MapControls = function ( object, scene, domElement ) {
 
         event.preventDefault();
         event.stopPropagation();
+
+        // // quick hack
+        // event.clientX = scope.mousePosition.x;
+        // event.clientY = scope.mousePosition.y;
 
         if ( state === STATE.ROTATE ) {
 
@@ -651,21 +695,21 @@ THREE.MapControls = function ( object, scene, domElement ) {
         });
 
     // allow mouse pan and rotation only when command key is pressed
-    KeyboardJS.on("command, windows, win, super, leftcommand, leftwindows, leftwin, leftsuper",
-        function(keyEvent, keysPressed, keyCombo) {
-            scope.enableMouseControl = true;
-        },
-        function(keyEvent, keysPressed, keyCombo) {
-            scope.enableMouseControl = false;
-        });
+    // KeyboardJS.on("command, windows, win, super, leftcommand, leftwindows, leftwin, leftsuper",
+    //     function(keyEvent, keysPressed, keyCombo) {
+    //         scope.enableMouseControl = true;
+    //     },
+    //     function(keyEvent, keysPressed, keyCombo) {
+    //         scope.enableMouseControl = false;
+    //     });
     
     // experimental: toggle mouse control in ALT
-    KeyboardJS.on("alt",
-        function(keyEvent, keysPressed, keyCombo) {
-            scope.enableMouseControl = !scope.enableMouseControl;
-            console.log("Mouse control toggled: " + scope.enableMouseControl);
-        }
-    );
+    // KeyboardJS.on("alt",
+    //     function(keyEvent, keysPressed, keyCombo) {
+    //         scope.enableMouseControl = !scope.enableMouseControl;
+    //         console.log("Mouse control toggled: " + scope.enableMouseControl);
+    //     }
+    // );
 
     this.domElement.addEventListener( 'contextmenu', function ( event ) { event.preventDefault(); }, false );
     this.domElement.addEventListener( 'mousedown', onMouseDown, false );
@@ -736,19 +780,28 @@ THREE.MapControls = function ( object, scene, domElement ) {
         scope.mousePosition.y += event.movementY;
 
         // limit boundaries of mouse
-        var maxX = $(containerName).width();
-        var maxY = $(containerName).height();
 
-        if (scope.mousePosition.x < 0) {
-            scope.mousePosition.x = 0;
+        // TODO (replace with scope.mouseBounds)
+        var SCREEN_MARGIN = 10;
+        var minX = SCREEN_MARGIN;
+        var minY = SCREEN_MARGIN;
+        var maxX = $(containerName).width() - SCREEN_MARGIN;
+        var maxY = $(containerName).height() - SCREEN_MARGIN;
+
+        if (scope.mousePosition.x < minX) {
+            scope.mousePosition.x = minX;
+            scope.scrollCameraLeft();
         } else if (scope.mousePosition.x > maxX) {
             scope.mousePosition.x = maxX;
+            scope.scrollCameraRight();
         }
 
-        if (scope.mousePosition.y < 0) {
-            scope.mousePosition.y = 0;
+        if (scope.mousePosition.y < minY) {
+            scope.mousePosition.y = minY;
+            scope.scrollCameraUp();
         } else if (scope.mousePosition.y > maxY) {
             scope.mousePosition.y = maxY;
+            scope.scrollCameraDown();
         }
 
         // console.log(scope.mousePosition);
@@ -766,7 +819,7 @@ THREE.MapControls = function ( object, scene, domElement ) {
         //            alignment: THREE.SpriteAlignment.topLeft for cursor-pointer style icon
         var ballMaterial = new THREE.SpriteMaterial( { map: ballTexture, useScreenCoordinates: true, alignment: THREE.SpriteAlignment.center } );
         this.mouseSprite = new THREE.Sprite( ballMaterial );
-        this.mouseSprite.scale.set( 32, 32, 1.0 );
+        this.mouseSprite.scale.set( 16, 16, 1.0 );
         this.mouseSprite.position.set( 50, 50, 0 );
         this.scene.add( this.mouseSprite );    
     }
@@ -774,7 +827,6 @@ THREE.MapControls = function ( object, scene, domElement ) {
     this.getMousePosition = function() {
         return scope.mousePosition;
     }
-
 
     // set up mouse sprite for mouse cursor display
     this.mouseSprite = null;
