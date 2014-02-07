@@ -6,7 +6,7 @@
  * @author pc123 / http://github.com/pc123
  */
 
-THREE.MapControls = function ( object, domElement ) {
+THREE.ViewerControls = function ( object, domElement ) {
 
     this.object = object;
     this.domElement = ( domElement !== undefined ) ? domElement : document;
@@ -516,4 +516,4 @@ THREE.MapControls = function ( object, domElement ) {
     this.handleResize();
 };
 
-THREE.MapControls.prototype = Object.create( THREE.EventDispatcher.prototype );
+THREE.ViewerControls.prototype = Object.create( THREE.EventDispatcher.prototype );
