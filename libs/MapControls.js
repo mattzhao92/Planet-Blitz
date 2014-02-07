@@ -10,6 +10,7 @@ THREE.MapControls = function ( object, domElement ) {
 
     this.object = object;
     this.domElement = ( domElement !== undefined ) ? domElement : document;
+    console.log(this.domElement);
 
     // API
 
@@ -102,6 +103,8 @@ THREE.MapControls = function ( object, domElement ) {
     var _panStart = new THREE.Vector2();
     var _panEnd = new THREE.Vector2();
 
+    this.mousePosition = {x: -1, y: -1};
+
     this.handleResize = function () {
         if ( this.domElement === document ) {
 
@@ -115,6 +118,10 @@ THREE.MapControls = function ( object, domElement ) {
             this.screen = this.domElement.getBoundingClientRect();
         }
     };
+
+    this.resetMousePosition = function() {
+        scope.mousePosition = {x: -1, y: -1};
+    }
 
 
     this.handleEvent = function ( event ) {
@@ -531,9 +538,6 @@ THREE.MapControls = function ( object, domElement ) {
             var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
             var movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
 
-            // scope.pan( new THREE.Vector3( - movementX, 0, -movementY ) );
-
-            // _panEnd = _this.getMouseOnScreen(movementX, movementY);
             _panEnd = _this.getMouseOnScreen(event.clientX, event.clientY);
 
         }
@@ -657,31 +661,43 @@ THREE.MapControls = function ( object, domElement ) {
     this.domElement.addEventListener( 'mousewheel', onMouseWheel, false );
     this.domElement.addEventListener( 'DOMMouseScroll', onMouseWheel, false ); // firefox
 
-    // pointerlock code
-    // register the callback when a pointerlock event occurs
-    this.domElement.addEventListener('pointerlockchange', changeCallback, false);
-    this.domElement.addEventListener('mozpointerlockchange', changeCallback, false);
-    this.domElement.addEventListener('webkitpointerlockchange', changeCallback, false);      
+    // TODO: remove this hardcoding
+    var containerName = "#WebGL-output";
 
-    // called when the pointer lock has changed. Here we check whether the
-    // pointerlock was initiated on the element we want.
-    function changeCallback(e) {
-           // var canvas = $("#pointerLock").get()[0];
-           // if (document.pointerLockElement === canvas ||
-           //         document.mozPointerLockElement === canvas ||
-           //         document.webkitPointerLockElement === canvas) {
-    
-           //     // we've got a pointerlock for our element, add a mouselistener
-           //     document.addEventListener("mousemove", moveCallback, false);
-           // } else {
-    
-           //     // pointer lock is no longer active, remove the callback
-           //     document.removeEventListener("mousemove", moveCallback, false);
-    
-           //     // and reset the entry coordinates
-           //     entryCoordinates = {x:-1, y:-1};
-           // }
-       };
+    $(containerName).click(
+        function() {
+            PL.requestPointerLock(document.body,
+                function(event) {
+                    console.log("[Mouse controls] enable");
+                    scope.domElement.addEventListener("mousemove", moveCallback, false);
+                }, function(event) {
+                    console.log("[Mouse controls] exit");
+                    scope.domElement.removeEventListener("mousemove", moveCallback, false);
+                    scope.resetMousePosition();
+                }, function(event) {
+                    console.log("Error: could not obtain pointerlock");
+                });
+        }
+    );
+
+    function moveCallback(event) {
+        // event.movementX
+        // event.movementY
+
+        // get initial position of mouse if enter for first time
+        // if (scope.mousePosition.x == -1) {
+        //     scope.mousePosition = scope.getInitialMousePosition()
+        // }
+
+        var movementX = event.movementX;
+        var movementY = event.movementY;
+
+        // update mouse position
+        this.mousePosition.x += event.movementX;
+        this.mousePosition.y += event.movementY;
+
+
+    }
 
 
     this.handleResize();
