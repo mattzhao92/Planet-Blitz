@@ -6,11 +6,14 @@
  * @author pc123 / http://github.com/pc123
  */
 
-THREE.MapControls = function ( object, domElement ) {
+THREE.MapControls = function ( object, scene, domElement ) {
+
+    // needed to add mouse cursor to scene
+    this.scene = scene;
 
     this.object = object;
     this.domElement = ( domElement !== undefined ) ? domElement : document;
-    console.log(this.domElement);
+    // console.log(this.domElement);
 
     // API
 
@@ -472,12 +475,20 @@ THREE.MapControls = function ( object, domElement ) {
 
         event.preventDefault();
 
+        // quick hack
+        event.clientX = scope.mousePosition.x;
+        event.clientY = scope.mousePosition.y;
+
+        // console.log(event.clientX);
+        // console.log(event.clientY);
+
+        console.log(scope.mousePosition);
+
         if ( event.button === 0 ) {
 
             state = STATE.PAN;
 
             _panStart = _panEnd = _this.getMouseOnScreen(event.clientX, event.clientY);
-            // console.log("Set pan start and end (%d, %d)", _panStart, _panEnd);
 
         } else if ( event.button === 1 ) {
 
@@ -711,6 +722,8 @@ THREE.MapControls = function ( object, domElement ) {
 
         // calculate initial position
         var canvas = $(containerName).get()[0];
+        // var ctx = canvas.getContext("2d");
+
         if (scope.mousePosition.x == -1 && scope.mousePosition.y == -1) {
             scope.mousePosition = calculateInitialMousePosition(canvas, event);
         }
@@ -721,8 +734,6 @@ THREE.MapControls = function ( object, domElement ) {
         // update mouse position
         scope.mousePosition.x += event.movementX;
         scope.mousePosition.y += event.movementY;
-
-        // console.log(scope.mousePosition);
 
         // limit boundaries of mouse
         var maxX = $(containerName).width();
@@ -740,9 +751,34 @@ THREE.MapControls = function ( object, domElement ) {
             scope.mousePosition.y = maxY;
         }
 
-        console.log(scope.mousePosition);
+        // console.log(scope.mousePosition);
+        scope.drawMouseCursor();
     }
 
+    this.drawMouseCursor = function() {
+        this.mouseSprite.position.set( scope.mousePosition.x, scope.mousePosition.y, 0 );
+    }
+
+    this.setupMouseCursor = function() {
+        var ballTexture = THREE.ImageUtils.loadTexture( 'images/redball.png' );
+        
+        // suggested- alignment: THREE.SpriteAlignment.center  for targeting-style icon
+        //            alignment: THREE.SpriteAlignment.topLeft for cursor-pointer style icon
+        var ballMaterial = new THREE.SpriteMaterial( { map: ballTexture, useScreenCoordinates: true, alignment: THREE.SpriteAlignment.center } );
+        this.mouseSprite = new THREE.Sprite( ballMaterial );
+        this.mouseSprite.scale.set( 32, 32, 1.0 );
+        this.mouseSprite.position.set( 50, 50, 0 );
+        this.scene.add( this.mouseSprite );    
+    }
+
+    this.getMousePosition = function() {
+        return scope.mousePosition;
+    }
+
+
+    // set up mouse sprite for mouse cursor display
+    this.mouseSprite = null;
+    this.setupMouseCursor();
 
     this.handleResize();
 };

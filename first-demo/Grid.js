@@ -1,7 +1,7 @@
 /* Game world */
 var Grid = Class.extend({
     // Class constructor
-    init: function(width, length, tileSize, scene, camera) {
+    init: function(width, length, tileSize, scene, camera, controls) {
         'use strict';
 
         this.gridWidth = width;
@@ -9,6 +9,7 @@ var Grid = Class.extend({
         this.tileSize = tileSize;
         this.scene = scene;
         this.camera = camera;
+        this.controls = controls;
 
         // information about what's being selected
         this.highlightedTiles = null;
@@ -287,8 +288,10 @@ var Grid = Class.extend({
         var projector = new THREE.Projector();
         var mouseVector = new THREE.Vector3();
 
-        mouseVector.x = 2 * (event.clientX / window.innerWidth) - 1;
-        mouseVector.y = 1 - 2 * (event.clientY / window.innerHeight);
+        var mousePosition = this.controls.getMousePosition();
+
+        mouseVector.x = 2 * (mousePosition.x / window.innerWidth) - 1;
+        mouseVector.y = 1 - 2 * (mousePosition.y / window.innerHeight);
 
         var raycaster = projector.pickingRay(mouseVector.clone(), scope.camera),
             intersects = raycaster.intersectObjects(scope.tiles.children);
@@ -326,9 +329,11 @@ var Grid = Class.extend({
 
         var projector = new THREE.Projector();
         var mouseVector = new THREE.Vector3();
+        
+        var mousePosition = this.controls.getMousePosition();
 
-        mouseVector.x = 2 * (event.clientX / window.innerWidth) - 1;
-        mouseVector.y = 1 - 2 * (event.clientY / window.innerHeight);
+        mouseVector.x = 2 * (mousePosition.x / window.innerWidth) - 1;
+        mouseVector.y = 1 - 2 * (mousePosition.y / window.innerHeight);
 
         var raycaster = projector.pickingRay(mouseVector.clone(), scope.camera);
 

@@ -96,7 +96,7 @@ $(function () {
 
         setupCameraControls: function() {
             this.clock = new THREE.Clock();
-            var controls = new THREE.MapControls(this.camera, document.getElementById("WebGL-output"));
+            var controls = new THREE.MapControls(this.camera, this.scene, document.getElementById("WebGL-output"));
             controls.panSpeed = .31;
 
             // ensure that camera can't rotate too far down or up
@@ -119,7 +119,7 @@ $(function () {
 
         setupGameWorld: function() {
             var squareSize = 40;
-            this.world = new Grid(400, 400, squareSize, this.scene, this.camera);
+            this.world = new Grid(400, 400, squareSize, this.scene, this.camera, this.controls);
         },
 
         update: function() {
