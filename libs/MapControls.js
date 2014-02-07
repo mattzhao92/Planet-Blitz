@@ -103,7 +103,7 @@ THREE.MapControls = function ( object, scene, domElement ) {
     this.MAP_SCROLL_ACCELERATION = 13;
     this.DECELERATION = 10;
 
-    this.enableMouseControl = true;
+    this.enableTraditionalMouseDrag = false;
 
     // events
     var changeEvent = { type: 'change' };
@@ -543,7 +543,7 @@ THREE.MapControls = function ( object, scene, domElement ) {
 
         }
 
-        if (scope.enableMouseControl) {
+        if (scope.enableTraditionalMouseDrag) {
             document.addEventListener( 'mousemove', onMouseMove, false );
             document.addEventListener( 'mouseup', onMouseUp, false );
         }
@@ -603,7 +603,7 @@ THREE.MapControls = function ( object, scene, domElement ) {
         if ( scope.enabled === false ) return;
         if ( scope.userRotate === false ) return;
 
-        if (scope.enableMouseControl) {
+        if (scope.enableTraditionalMouseDrag) {
             document.removeEventListener( 'mousemove', onMouseMove, false );
             document.removeEventListener( 'mouseup', onMouseUp, false );
         }
