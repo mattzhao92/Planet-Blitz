@@ -6,10 +6,14 @@
  * @author pc123 / http://github.com/pc123
  */
 
-THREE.MapControls = function ( object, domElement ) {
+THREE.MapControls = function ( object, scene, domElement ) {
+
+    // needed to add mouse cursor to scene
+    this.scene = scene;
 
     this.object = object;
     this.domElement = ( domElement !== undefined ) ? domElement : document;
+    // console.log(this.domElement);
 
     // API
 
@@ -35,7 +39,11 @@ THREE.MapControls = function ( object, domElement ) {
     this.minDistance = 0;
     this.maxDistance = Infinity;
 
-    this.keys = { LEFT: 37, UP: 38, RIGHT: 39, BOTTOM: 40 };
+    // arrow key mappings
+    // this.keys = { LEFT: 37, UP: 38, RIGHT: 39, DOWN: 40 };
+
+    // WASD mappings
+    this.keys = {LEFT: 65, UP: 87, RIGHT: 68, DOWN: 83};
 
     // internals
 
@@ -65,6 +73,10 @@ THREE.MapControls = function ( object, domElement ) {
     // merged in from trackball controls
     this.screen = { width: window.innerWidth, height: window.innerHeight, offsetLeft: 0, offsetTop: 0, top: 0, left: 0};
 
+    var SCREEN_MARGIN = 10;
+
+    this.mouseBounds = {minX: SCREEN_MARGIN, minY: SCREEN_MARGIN, maxX: scope.screen.width - SCREEN_MARGIN, maxY: scope.screen.height - SCREEN_MARGIN};
+
     // can put in resize logic later
     this.radius = ( this.screen.width + this.screen.height ) / 4;
 
@@ -74,13 +86,32 @@ THREE.MapControls = function ( object, domElement ) {
     this.dynamicDampingFactor = 0.15;
     this.panSpeed = 0.35;
 
+    // camera boundary settings
+    this.minX = -Infinity;
+    this.maxX = Infinity;
+    this.minZ = -Infinity;
+    this.maxZ = Infinity;
+
+    // for smooth scrolling
+    this.velocityX = 0.0;
+    this.velocityZ = 0.0;
+
+    // used for when scrolling with mouse
+    this.INITIAL_CAMERA_VELOCITY = 2.3;
+    this.MAX_CAMERA_VELOCITY = 7.5;
+
+    this.MAP_SCROLL_ACCELERATION = 13;
+    this.DECELERATION = 10;
+
+    this.enableMouseControl = true;
 
     // events
-
     var changeEvent = { type: 'change' };
 
     var _panStart = new THREE.Vector2();
     var _panEnd = new THREE.Vector2();
+
+    this.mousePosition = {x: -1, y: -1};
 
     this.handleResize = function () {
         if ( this.domElement === document ) {
@@ -93,10 +124,12 @@ THREE.MapControls = function ( object, domElement ) {
         } else {
 
             this.screen = this.domElement.getBoundingClientRect();
-
         }
-
     };
+
+    this.resetMousePosition = function() {
+        scope.mousePosition = {x: -1, y: -1};
+    }
 
 
     this.handleEvent = function ( event ) {
@@ -186,10 +219,6 @@ THREE.MapControls = function ( object, domElement ) {
             ( clientX - _this.screen.left ) / _this.screen.width,
             ( clientY - _this.screen.top ) / _this.screen.height
         );
-        // console.log("getMouseOnScreen (%4f, %4f)", result.x, result.y);
-
-        // console.log("%d, %d", _this.screen.left, _this.screen.top);
-        // console.log("%d, %d", _this.screen.width, _this.screen.height);
 
         return result;
 
@@ -261,9 +290,7 @@ THREE.MapControls = function ( object, domElement ) {
         var mouseChange = _panEnd.clone().sub(_panStart );
 
         if ( mouseChange.lengthSq() > 0.00000001) {
-            // console.log("panStart %f, %f", _panStart.x, _panStart.y);
-            // console.log("panEnd %f, %f", _panEnd.x, _panEnd.y);
-
+            
             mouseChange.multiplyScalar(_this.panSpeed * _eye.length());
 
             var distance = _eye.clone();
@@ -275,15 +302,132 @@ THREE.MapControls = function ( object, domElement ) {
             // prevent camera from getting closer to grid
             distance.y = 0;
 
+            // experimental checking of camera boundaries while panning
+            // enforce camera boundaries when panning
+            // var newZ = distance.z + this.object.position.z;
+            // var newX = distance.x + this.object.position.x;
+
+            // // console.log(newX + " " + newZ);
+
+            // var verticalFOV = this.object.fov * ( Math.PI / 180);
+
+            // var fieldOfVisionHeight = 2 * Math.tan(verticalFOV / 2) * _eye.length();
+
+            // var aspect = this.screen.width / this.screen.height;
+            // var fieldOfVisionWidth = fieldOfVisionHeight * aspect;
+
+            // var widthMargin = fieldOfVisionWidth / 4;
+            // var heightMargin = fieldOfVisionHeight / 4;
+
+            // // if (newZ - heightMargin > this.maxZ || newZ + heightMargin < this.minZ) {
+            // //     distance.z = 0;
+            // //     _panStart.z = _panEnd.z;
+            // // }
+
+            // if (newX - widthMargin > this.maxX || newX + widthMargin < this.minX) {
+            //     distance.x = 0;
+            //     _panStart.x = _panStart.x;
+            // }
+
             this.object.position.add( distance );
             this.center.add( distance );
 
             _panStart.add(mouseChange.subVectors(_panEnd, _panStart).multiplyScalar(_this.dynamicDampingFactor));
+
+            // console.log("viewable width " + width);
+
+            // otherwise, end the pan
         }
     };
 
-    this.update = function () {
+    this.scrollCameraLeft = function(delta) {
+        scope.velocityX = Math.max(scope.velocityX, scope.INITIAL_CAMERA_VELOCITY);
+        scope.velocityX += scope.MAP_SCROLL_ACCELERATION * delta;
+    };
+
+    this.scrollCameraRight = function(delta) {
+        scope.velocityX = Math.min(scope.velocityX, -scope.INITIAL_CAMERA_VELOCITY);
+        scope.velocityX -= scope.MAP_SCROLL_ACCELERATION * delta;
+
+    };
+
+    this.scrollCameraUp = function(delta) {
+        scope.velocityZ = Math.max(scope.velocityZ, scope.INITIAL_CAMERA_VELOCITY);
+        scope.velocityZ += scope.MAP_SCROLL_ACCELERATION * delta;
+    };
+
+    this.scrollCameraDown = function(delta) {
+        scope.velocityZ = Math.min(scope.velocityZ, -scope.INITIAL_CAMERA_VELOCITY);
+        scope.velocityZ -= scope.MAP_SCROLL_ACCELERATION * delta;
+    };
+
+    this.updateCameraFromVelocity = function(delta) {
+
+        // keep on applying velocity if mouse is on edges of screen
+        if (scope.mousePosition.x == scope.mouseBounds.minX) {
+            scope.scrollCameraLeft(delta);
+        } else if (scope.mousePosition.x == scope.mouseBounds.maxX) {
+            scope.scrollCameraRight(delta);
+        }
+
+        if (scope.mousePosition.y == scope.mouseBounds.minY) {
+            scope.scrollCameraUp(delta);
+        } else if (scope.mousePosition.y == scope.mouseBounds.maxY) {
+            scope.scrollCameraDown(delta);
+        }
+
+        // enforce velocity restrictions
+        if (scope.velocityX > 0) {
+            scope.velocityX = Math.min(scope.velocityX, this.MAX_CAMERA_VELOCITY);
+        } else {
+            scope.velocityX = Math.max(scope.velocityX, -this.MAX_CAMERA_VELOCITY);
+        }
+
+        if (scope.velocityZ > 0) {
+            scope.velocityZ = Math.min(scope.velocityZ, this.MAX_CAMERA_VELOCITY);
+        } else {
+            scope.velocityZ = Math.max(scope.velocityZ, -this.MAX_CAMERA_VELOCITY);
+        }
+
+        // update camera position based on velocity
+        var velocityX = scope.velocityX;
+        var velocityZ = scope.velocityZ;
+
+        var distance = _eye.clone();
+        distance = distance.cross(this.object.up).setLength(velocityX);
+
+        var unitZVector = new THREE.Vector3(0, 0, -1);
+        // transform the unit z vector into camera's local space
+        distance.add(unitZVector.transformDirection(this.object.matrix).setLength(velocityZ));
+        // prevent camera from getting closer to grid
+        distance.y = 0;
+
+        this.object.position.add( distance );
+        this.center.add( distance );
+
+        // don't apply deceleration if the velocity was about 0 to begin with
+        if (Math.abs(scope.velocityX) < scope.DECELERATION * delta) {
+            scope.velocityX = 0;
+        } else if (scope.velocityX > 0) {
+            scope.velocityX -= scope.DECELERATION * delta;
+        } else if (scope.velocityX < 0) {
+            scope.velocityX += scope.DECELERATION * delta;
+        }
+        
+        if (Math.abs(scope.velocityZ) < scope.DECELERATION * delta) {
+            scope.velocityZ = 0;
+        } else if (scope.velocityZ > 0) {
+            // case: going farther up into map
+            scope.velocityZ -= scope.DECELERATION * delta;
+        } else if (scope.velocityZ < 0) {
+            // case: camera coming towards user
+            scope.velocityZ += scope.DECELERATION * delta;
+        }
+    };
+
+    this.update = function (delta) {
         _eye.subVectors(_this.object.position, this.center);
+        _this.updateCameraFromVelocity(delta);
         _this.pan();
 
         var position = this.object.position;
@@ -338,6 +482,16 @@ THREE.MapControls = function ( object, domElement ) {
 
         }
 
+        // calculating field of view - width and height
+        var verticalFOV = this.object.fov * ( Math.PI / 180);
+
+        var height = 2 * Math.tan(verticalFOV / 2) * _eye.length();
+
+        var aspect = this.screen.width / this.screen.height;
+        // calculated 
+        var width = height * aspect;
+
+        // console.log("viewable width " + width);
     };
 
 
@@ -360,12 +514,20 @@ THREE.MapControls = function ( object, domElement ) {
 
         event.preventDefault();
 
+        // quick hack
+        // event.clientX = scope.mousePosition.x;
+        // event.clientY = scope.mousePosition.y;
+
+        // console.log(event.clientX);
+        // console.log(event.clientY);
+
+        // console.log(scope.mousePosition);
+
         if ( event.button === 0 ) {
 
             state = STATE.PAN;
 
             _panStart = _panEnd = _this.getMouseOnScreen(event.clientX, event.clientY);
-            // console.log("Set pan start and end (%d, %d)", _panStart, _panEnd);
 
         } else if ( event.button === 1 ) {
 
@@ -381,9 +543,10 @@ THREE.MapControls = function ( object, domElement ) {
 
         }
 
-        document.addEventListener( 'mousemove', onMouseMove, false );
-        document.addEventListener( 'mouseup', onMouseUp, false );
-
+        if (scope.enableMouseControl) {
+            document.addEventListener( 'mousemove', onMouseMove, false );
+            document.addEventListener( 'mouseup', onMouseUp, false );
+        }
     }
 
     function onMouseMove( event ) {
@@ -392,6 +555,10 @@ THREE.MapControls = function ( object, domElement ) {
 
         event.preventDefault();
         event.stopPropagation();
+
+        // // quick hack
+        // event.clientX = scope.mousePosition.x;
+        // event.clientY = scope.mousePosition.y;
 
         if ( state === STATE.ROTATE ) {
 
@@ -425,9 +592,6 @@ THREE.MapControls = function ( object, domElement ) {
             var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
             var movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
 
-            // scope.pan( new THREE.Vector3( - movementX, 0, -movementY ) );
-
-            // _panEnd = _this.getMouseOnScreen(movementX, movementY);
             _panEnd = _this.getMouseOnScreen(event.clientX, event.clientY);
 
         }
@@ -439,8 +603,10 @@ THREE.MapControls = function ( object, domElement ) {
         if ( scope.enabled === false ) return;
         if ( scope.userRotate === false ) return;
 
-        document.removeEventListener( 'mousemove', onMouseMove, false );
-        document.removeEventListener( 'mouseup', onMouseUp, false );
+        if (scope.enableMouseControl) {
+            document.removeEventListener( 'mousemove', onMouseMove, false );
+            document.removeEventListener( 'mouseup', onMouseUp, false );
+        }
 
         state = STATE.NONE;
 
@@ -472,46 +638,127 @@ THREE.MapControls = function ( object, domElement ) {
             scope.zoomIn();
 
         }
-
     }
-
-    function onKeyDown( event ) {
-
-        if ( scope.enabled === false ) return;
-        if ( scope.userPan === false ) return;
-
-        switch ( event.keyCode ) {
-
-            case scope.keys.UP:
-                _panEnd = _panStart.clone().add(new THREE.Vector3(0, 0.04, 0));
-                break;
-            case scope.keys.BOTTOM:
-                _panEnd = _panStart.clone().add(new THREE.Vector3(0, -0.04, 0));
-                break;
-            case scope.keys.LEFT:
-                _panEnd = _panStart.clone().add(new THREE.Vector3(0.04, 0, 0));
-                break;
-            case scope.keys.RIGHT:
-                _panEnd = _panStart.clone().add(new THREE.Vector3(-0.04, 0, 0));
-                break;
-        }
-    }
-
-
-    function onKeyUp( event ) {
-
-
-    }
-
 
     this.domElement.addEventListener( 'contextmenu', function ( event ) { event.preventDefault(); }, false );
     this.domElement.addEventListener( 'mousedown', onMouseDown, false );
     this.domElement.addEventListener( 'mousewheel', onMouseWheel, false );
-    this.domElement.addEventListener( 'DOMMouseScroll', onMouseWheel, false ); // firefox
-    // this.domElement.addEventListener( 'keydown', onKeyDown, false );
+    // for firefox
+    this.domElement.addEventListener( 'DOMMouseScroll', onMouseWheel, false ); 
 
-    window.addEventListener('keydown', onKeyDown, false);
-    // window.addEventListener('keydown', onKeyUp, false);
+    // TODO: remove this hardcoding
+    var containerName = "#WebGL-output";
+
+    $(containerName).click(
+        function() {
+            PL.requestPointerLock(document.body,
+                function(event) {
+                    console.log("[Mouse controls] enable");
+
+                    document.addEventListener("mousemove", moveCallback, false);
+
+                }, function(event) {
+
+                    console.log("[Mouse controls] exit");
+
+                    document.removeEventListener("mousemove", moveCallback, false);
+
+                }, function(event) {
+                    console.log("Error: could not obtain pointerlock");
+                });
+        }
+    );
+
+    function calculateInitialMousePosition(canvas, event) {
+        var x = new Number();
+        var y = new Number();
+
+        if (event.x != undefined && event.y != undefined) {
+            x = event.x;
+            y = event.y;
+        } else {
+            // handle for firefox
+            x = event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+            y = event.clientY + document.body.scrollTop + document.documentElement.scrollTop;
+        }
+
+        x -= canvas.offsetLeft;
+        y -= canvas.offsetTop;
+
+        return {
+            x: x,
+            y: y
+        };
+    }
+
+    function moveCallback(event) {
+        // console.log("moveCallback");
+
+        // calculate initial position
+        var canvas = $(containerName).get()[0];
+        // var ctx = canvas.getContext("2d");
+
+        if (scope.mousePosition.x == -1 && scope.mousePosition.y == -1) {
+            scope.mousePosition = calculateInitialMousePosition(canvas, event);
+        }
+
+        var movementX = event.movementX;
+        var movementY = event.movementY;
+
+        // update mouse position
+        scope.mousePosition.x += event.movementX;
+        scope.mousePosition.y += event.movementY;
+
+        // limit boundaries of mouse
+
+        // TODO (replace with scope.mouseBounds)
+        var SCREEN_MARGIN = 10;
+        var minX = SCREEN_MARGIN;
+        var minY = SCREEN_MARGIN;
+        // var maxX = $(containerName).width() - SCREEN_MARGIN;
+        var maxX = scope.screen.width - SCREEN_MARGIN;
+        // var maxY = $(containerName).height() - SCREEN_MARGIN;
+        var maxY = scope.screen.height - SCREEN_MARGIN;
+
+        if (scope.mousePosition.x < minX) {
+            scope.mousePosition.x = minX;
+        } else if (scope.mousePosition.x > maxX) {
+            scope.mousePosition.x = maxX;
+        }
+
+        if (scope.mousePosition.y < minY) {
+            scope.mousePosition.y = minY;
+        } else if (scope.mousePosition.y > maxY) {
+            scope.mousePosition.y = maxY;
+        }
+
+        // console.log(scope.mousePosition);
+        scope.drawMouseCursor();
+    }
+
+    this.drawMouseCursor = function() {
+        this.mouseSprite.position.set( scope.mousePosition.x, scope.mousePosition.y, 0 );
+    }
+
+    this.setupMouseCursor = function() {
+        var ballTexture = THREE.ImageUtils.loadTexture( 'images/redball.png' );
+        
+        // suggested- alignment: THREE.SpriteAlignment.center  for targeting-style icon
+        //            alignment: THREE.SpriteAlignment.topLeft for cursor-pointer style icon
+        var ballMaterial = new THREE.SpriteMaterial( { map: ballTexture, useScreenCoordinates: true, alignment: THREE.SpriteAlignment.center } );
+        this.mouseSprite = new THREE.Sprite( ballMaterial );
+        this.mouseSprite.scale.set( 16, 16, 1.0 );
+        this.mouseSprite.position.set( 50, 50, 0 );
+        this.scene.add( this.mouseSprite );    
+    }
+
+    this.getMousePosition = function() {
+        return scope.mousePosition;
+    }
+
+    // set up mouse sprite for mouse cursor display
+    this.mouseSprite = null;
+    this.setupMouseCursor();
 
     this.handleResize();
 };

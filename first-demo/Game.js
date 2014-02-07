@@ -13,11 +13,13 @@ $(function () {
         // add the output of the renderer to the html element
         $(containerName).append(this.renderer.domElement);
 
-        this.init();
+        this.init(containerName);
     };
 
     App.prototype = {
-        init: function() {
+        init: function(containerName) {
+            this.GRID_WIDTH = 400;
+            this.GRID_LENGTH = 400;
 
             this.stats = this.initStats();
 
@@ -41,30 +43,30 @@ $(function () {
         setupCamera: function() {
             // create a camera, which defines where we're looking at
             this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 10000);
-            this.camera.position.x = 0;
-            this.camera.position.y = 150;
-            this.camera.position.z = 270;
+            this.camera.position.x = -1.5;
+            this.camera.position.y = 292;
+            this.camera.position.z = 446;
 
             var origin = new THREE.Vector3(0, 0, 0);
             this.camera.lookAt(origin);
         },
 
         addLighting: function() {
-            var ambientLight = new THREE.AmbientLight( 0x404040 );
+            // really subtle ambient lighting
+            var ambientLight = new THREE.AmbientLight( 0x191919 );
             this.scene.add( ambientLight );
 
+            // sky color, ground color, intensity
+            // var hemiLight = new THREE.HemisphereLight( 0x0000ff, 0x00ff00, 0.6 ); 
+            // this.scene.add(hemiLight);
+
+            // a really bright light
             var directionalLight = new THREE.DirectionalLight( 0xffffff );
             directionalLight.position.x = 1;
             directionalLight.position.y = 1;
             directionalLight.position.z = 0.75;
             directionalLight.position.normalize();
-            this.scene.add( directionalLight );
 
-            var directionalLight = new THREE.DirectionalLight( 0x808080 );
-            directionalLight.position.x = - 1;
-            directionalLight.position.y = 1;
-            directionalLight.position.z = - 0.75;
-            directionalLight.position.normalize();
             this.scene.add( directionalLight );
         },
 
@@ -94,12 +96,19 @@ $(function () {
 
         setupCameraControls: function() {
             this.clock = new THREE.Clock();
-            var controls = new THREE.MapControls(this.camera, document.getElementById("WebGL-output"));
+            var controls = new THREE.MapControls(this.camera, this.scene, document.getElementById("WebGL-output"));
             controls.panSpeed = .31;
 
             // ensure that camera can't rotate too far down or up
             controls.minPolarAngle = 0.3;
             controls.maxPolarAngle = 1.26;
+
+            // set up control boundaries
+            controls.minX = -this.GRID_WIDTH / 2;
+            controls.maxX = this.GRID_WIDTH / 2;
+
+            controls.minZ = -this.GRID_LENGTH / 2;
+            controls.maxZ = this.GRID_LENGTH / 2;
 
             this.controls = controls;
         },
@@ -110,7 +119,7 @@ $(function () {
 
         setupGameWorld: function() {
             var squareSize = 40;
-            this.world = new Grid(400, 400, squareSize, this.scene, this.camera);
+            this.world = new Grid(400, 400, squareSize, this.scene, this.camera, this.controls);
         },
 
         update: function() {

@@ -1,7 +1,7 @@
 /* Game world */
 var Grid = Class.extend({
     // Class constructor
-    init: function(width, length, tileSize, scene, camera) {
+    init: function(width, length, tileSize, scene, camera, controls) {
         'use strict';
 
         this.gridWidth = width;
@@ -9,6 +9,7 @@ var Grid = Class.extend({
         this.tileSize = tileSize;
         this.scene = scene;
         this.camera = camera;
+        this.controls = controls;
 
         // information about what's being selected
         this.highlightedTiles = null;
@@ -18,6 +19,7 @@ var Grid = Class.extend({
         // listeners and state
         this.mouseDownListenerActive = true;
         this.mouseOverListenerActive = true;
+        this.allowCharacterMovement = true;
 
         // create grid tiles
         this.tiles = new THREE.Object3D();
@@ -286,8 +288,10 @@ var Grid = Class.extend({
         var projector = new THREE.Projector();
         var mouseVector = new THREE.Vector3();
 
-        mouseVector.x = 2 * (event.clientX / window.innerWidth) - 1;
-        mouseVector.y = 1 - 2 * (event.clientY / window.innerHeight);
+        var mousePosition = this.controls.getMousePosition();
+
+        mouseVector.x = 2 * (mousePosition.x / window.innerWidth) - 1;
+        mouseVector.y = 1 - 2 * (mousePosition.y / window.innerHeight);
 
         var raycaster = projector.pickingRay(mouseVector.clone(), scope.camera),
             intersects = raycaster.intersectObjects(scope.tiles.children);
@@ -318,13 +322,18 @@ var Grid = Class.extend({
 
 
     onMouseDown: function(event) {
+        var RIGHT_CLICK = 3;
+        var LEFT_CLICK = 1;
+
         var scope = this;
 
         var projector = new THREE.Projector();
         var mouseVector = new THREE.Vector3();
+        
+        var mousePosition = this.controls.getMousePosition();
 
-        mouseVector.x = 2 * (event.clientX / window.innerWidth) - 1;
-        mouseVector.y = 1 - 2 * (event.clientY / window.innerHeight);
+        mouseVector.x = 2 * (mousePosition.x / window.innerWidth) - 1;
+        mouseVector.y = 1 - 2 * (mousePosition.y / window.innerHeight);
 
         var raycaster = projector.pickingRay(mouseVector.clone(), scope.camera);
 
@@ -334,8 +343,8 @@ var Grid = Class.extend({
 
         // should put this at the end of mouseDown
         if (this.currentCharacterSelected) {
-            // fire on right click
-            if (event.which == 3) {
+            // fire on click
+            if (event.which == RIGHT_CLICK) {
                 console.log("Firing bullet");
 
                 if (intersectsWithTiles.length > 0) {
@@ -348,47 +357,61 @@ var Grid = Class.extend({
 
                     // shoot a bullet because you can
                     sendShootMsg(this.currentCharacterSelected.id, from, to);
+                    
                     this.shootBullet(this.currentCharacterSelected, from, to);
                 }
             }
         }
 
-        // care about characters first, then tile intersects
+        // move on click
+        if (event.which == LEFT_CLICK) {
+            // care about characters first, then tile intersects
 
-        // needed so that you can't click on a character and have that result in an immediate movement
-        // is there a better pattern for this - chain of event handlers?
-        var continueHandlingIntersects = false;
+            // needed so that you can't click on a character and have that result in an immediate movement
+            // is there a better pattern for this - chain of event handlers?
+            var continueHandlingIntersects = false;
 
-        if (intersects.length > 0) {
-            var clickedObject = intersects[0].object.owner;
-            clickedObject.onSelect(scope);
-        } else {
-            continueHandlingIntersects = true;
-        }
+            if (intersects.length > 0) {
+                var clickedObject = intersects[0].object.owner;
 
-        if (continueHandlingIntersects) {
-            if (intersectsWithTiles.length > 0) {
-                var tileSelected = intersectsWithTiles[0].object.owner;
-                var coordinate = tileSelected.onMouseOver();
-                if (this.currentCharacterSelected && coordinate) {
-                  var deltaX = coordinate.x - this.currentCharacterSelected.getTileXPos();
-                  var deltaY = 0;
-                  var deltaZ = coordinate.z - this.currentCharacterSelected.getTileZPos();
-                  this.currentCharacterSelected.setDirection(
-                      new THREE.Vector3(deltaX, deltaY, deltaZ));
+                // done so that you can click on a tile behind a character easily
+                if (clickedObject != this.currentCharacterSelected) {
+                    clickedObject.onSelect(scope);
+                } else {
+                    continueHandlingIntersects = true;
+                }
+            } else {
+                continueHandlingIntersects = true;
+            }
 
-                  // Put the network communication here.
-                  sendMoveMsg(this.currentCharacterSelected.id, 
-                      deltaX, deltaY, deltaZ);
+            if (continueHandlingIntersects) {
+                if (intersectsWithTiles.length > 0) {
+                    var tileSelected = intersectsWithTiles[0].object.owner;
+                    var coordinate = tileSelected.onMouseOver();
+                    if (this.currentCharacterSelected && coordinate) {
+                        // allow only one character to move at a time
+                        if (this.allowCharacterMovement) {
+    						var deltaX = coordinate.x - this.currentCharacterSelected.getTileXPos();
+    						var deltaY = 0;
+    						var deltaZ = coordinate.z - this.currentCharacterSelected.getTileZPos();
+                            this.currentCharacterSelected.setDirection(
+                                new THREE.Vector3(deltaX, deltaY, deltaZ));
 
-                  this.disableMouseMoveListener();
-                  this.disableMouseDownListener();
+    						// Put the network communication here.
+    						sendMoveMsg(this.currentCharacterSelected.id, 
+    								deltaX, deltaY, deltaZ);
 
-                    this.currentCharacterSelected.enqueueMotion(this,function() {
-                        console.log("Motion finished");
-                        scope.enableMouseMoveListener();
-                        scope.enableMouseDownListener();
-                    });
+                            // this.disableMouseMoveListener();
+                            // this.disableMouseDownListener();
+
+                            this.currentCharacterSelected.enqueueMotion(this,function() {
+                                // console.log("Motion finished");
+                                this.allowCharacterMovement = true;
+                                // scope.enableMouseMoveListener();
+                                // scope.enableMouseDownListener();
+                            });
+                        }
+                    }
                 }
             }
         }

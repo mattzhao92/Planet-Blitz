@@ -86,7 +86,7 @@ var TileFactory = Class.extend({
 
     createTile: function(xPos, zPos) {
 
-        var mat = new THREE.MeshBasicMaterial({
+        var mat = new THREE.MeshLambertMaterial({
             overdraw: true
         });
 
