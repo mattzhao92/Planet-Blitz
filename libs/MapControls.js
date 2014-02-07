@@ -669,34 +669,78 @@ THREE.MapControls = function ( object, domElement ) {
             PL.requestPointerLock(document.body,
                 function(event) {
                     console.log("[Mouse controls] enable");
-                    scope.domElement.addEventListener("mousemove", moveCallback, false);
+
+                    document.addEventListener("mousemove", moveCallback, false);
+
                 }, function(event) {
+
                     console.log("[Mouse controls] exit");
-                    scope.domElement.removeEventListener("mousemove", moveCallback, false);
-                    scope.resetMousePosition();
+
+                    document.removeEventListener("mousemove", moveCallback, false);
+
                 }, function(event) {
                     console.log("Error: could not obtain pointerlock");
                 });
         }
     );
 
-    function moveCallback(event) {
-        // event.movementX
-        // event.movementY
+    function calculateInitialMousePosition(canvas, event) {
+        var x = new Number();
+        var y = new Number();
 
-        // get initial position of mouse if enter for first time
-        // if (scope.mousePosition.x == -1) {
-        //     scope.mousePosition = scope.getInitialMousePosition()
-        // }
+        if (event.x != undefined && event.y != undefined) {
+            x = event.x;
+            y = event.y;
+        } else {
+            // handle for firefox
+            x = event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+            y = event.clientY + document.body.scrollTop + document.documentElement.scrollTop;
+        }
+
+        x -= canvas.offsetLeft;
+        y -= canvas.offsetTop;
+
+        return {
+            x: x,
+            y: y
+        };
+    }
+
+    function moveCallback(event) {
+        // console.log("moveCallback");
+
+        // calculate initial position
+        var canvas = $(containerName).get()[0];
+        if (scope.mousePosition.x == -1 && scope.mousePosition.y == -1) {
+            scope.mousePosition = calculateInitialMousePosition(canvas, event);
+        }
 
         var movementX = event.movementX;
         var movementY = event.movementY;
 
         // update mouse position
-        this.mousePosition.x += event.movementX;
-        this.mousePosition.y += event.movementY;
+        scope.mousePosition.x += event.movementX;
+        scope.mousePosition.y += event.movementY;
 
+        // console.log(scope.mousePosition);
 
+        // limit boundaries of mouse
+        var maxX = $(containerName).width();
+        var maxY = $(containerName).height();
+
+        if (scope.mousePosition.x < 0) {
+            scope.mousePosition.x = 0;
+        } else if (scope.mousePosition.x > maxX) {
+            scope.mousePosition.x = maxX;
+        }
+
+        if (scope.mousePosition.y < 0) {
+            scope.mousePosition.y = 0;
+        } else if (scope.mousePosition.y > maxY) {
+            scope.mousePosition.y = maxY;
+        }
+
+        console.log(scope.mousePosition);
     }
 
 
