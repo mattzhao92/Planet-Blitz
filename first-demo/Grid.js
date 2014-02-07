@@ -315,6 +315,11 @@ var Grid = Class.extend({
     },
 
     shootBullet: function(owner, from, to) {
+        // don't shoot a bullet in-place
+        if (from.x == to.x && from.z == to.z) {
+            return;
+        }
+
         var bullet = new Bullet(this, owner, from, to);
         this.bullets.push(bullet);
         this.scene.add(bullet.mesh);
