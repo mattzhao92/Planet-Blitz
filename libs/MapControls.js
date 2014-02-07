@@ -74,7 +74,8 @@ THREE.MapControls = function ( object, scene, domElement ) {
     this.screen = { width: window.innerWidth, height: window.innerHeight, offsetLeft: 0, offsetTop: 0, top: 0, left: 0};
 
     var SCREEN_MARGIN = 10;
-    this.mouseBounds = {minX: SCREEN_MARGIN, minY: SCREEN_MARGIN, maxX: $(containerName).width() - SCREEN_MARGIN, maxY: $(containerName).height() - SCREEN_MARGIN};
+
+    this.mouseBounds = {minX: SCREEN_MARGIN, minY: SCREEN_MARGIN, maxX: scope.screen.width - SCREEN_MARGIN, maxY: scope.screen.height - SCREEN_MARGIN};
 
     // can put in resize logic later
     this.radius = ( this.screen.width + this.screen.height ) / 4;
@@ -95,15 +96,13 @@ THREE.MapControls = function ( object, scene, domElement ) {
     this.velocityX = 0.0;
     this.velocityZ = 0.0;
 
-    this.DECELERATION = 9;
-    // this.INITIAL_CAMERA_VELOCITY = 1.2;
-
-    this.CAMERA_INITIAL_STEP = this.INITIAL_CAMERA_VELOCITY * 3;
-    this.ACCELERATION = 2.5;
     // used for when scrolling with mouse
-    this.INITIAL_CAMERA_VELOCITY = .6;
-    this.MAP_SCROLL_ACCELERATION = 2;
-    this.MAX_CAMERA_VELOCITY = this.ACCELERATION * 2.2;
+    this.INITIAL_CAMERA_VELOCITY = 2.3;
+    this.MAX_CAMERA_VELOCITY = 7.5;
+
+    this.MAP_SCROLL_ACCELERATION = 13;
+    this.DECELERATION = 10;
+
     this.enableMouseControl = true;
 
     // events
@@ -341,40 +340,40 @@ THREE.MapControls = function ( object, scene, domElement ) {
         }
     };
 
-    this.scrollCameraLeft = function() {
+    this.scrollCameraLeft = function(delta) {
         scope.velocityX = Math.max(scope.velocityX, scope.INITIAL_CAMERA_VELOCITY);
-        scope.velocityX *= scope.MAP_SCROLL_ACCELERATION;
+        scope.velocityX += scope.MAP_SCROLL_ACCELERATION * delta;
     };
 
-    this.scrollCameraRight = function() {
+    this.scrollCameraRight = function(delta) {
         scope.velocityX = Math.min(scope.velocityX, -scope.INITIAL_CAMERA_VELOCITY);
-        scope.velocityX *= scope.MAP_SCROLL_ACCELERATION;
+        scope.velocityX -= scope.MAP_SCROLL_ACCELERATION * delta;
 
     };
 
-    this.scrollCameraUp = function() {
+    this.scrollCameraUp = function(delta) {
         scope.velocityZ = Math.max(scope.velocityZ, scope.INITIAL_CAMERA_VELOCITY);
-        scope.velocityZ *= scope.MAP_SCROLL_ACCELERATION;
+        scope.velocityZ += scope.MAP_SCROLL_ACCELERATION * delta;
     };
 
-    this.scrollCameraDown = function() {
+    this.scrollCameraDown = function(delta) {
         scope.velocityZ = Math.min(scope.velocityZ, -scope.INITIAL_CAMERA_VELOCITY);
-        scope.velocityZ *= scope.MAP_SCROLL_ACCELERATION;
+        scope.velocityZ -= scope.MAP_SCROLL_ACCELERATION * delta;
     };
 
     this.updateCameraFromVelocity = function(delta) {
 
         // keep on applying velocity if mouse is on edges of screen
         if (scope.mousePosition.x == scope.mouseBounds.minX) {
-            scope.scrollCameraLeft();
+            scope.scrollCameraLeft(delta);
         } else if (scope.mousePosition.x == scope.mouseBounds.maxX) {
-            scope.scrollCameraRight();
+            scope.scrollCameraRight(delta);
         }
 
         if (scope.mousePosition.y == scope.mouseBounds.minY) {
-            scope.scrollCameraUp();
+            scope.scrollCameraUp(delta);
         } else if (scope.mousePosition.y == scope.mouseBounds.maxY) {
-            scope.scrollCameraDown();
+            scope.scrollCameraDown(delta);
         }
 
         // enforce velocity restrictions
@@ -641,80 +640,11 @@ THREE.MapControls = function ( object, scene, domElement ) {
         }
     }
 
-    this.handleKey = function(keyEvent, key) {
-
-        if (keyEvent.isRepeat) {
-            switch (key) {
-                case "w":
-                    // otherwise, keep on adding acceleration
-                    // want "at least" initial camera velocity
-                    scope.velocityZ = Math.max(scope.velocityZ, scope.INITIAL_CAMERA_VELOCITY);
-                    scope.velocityZ *= scope.ACCELERATION;
-                    break;
-                case "s":
-                    scope.velocityZ = Math.min(scope.velocityZ, -scope.INITIAL_CAMERA_VELOCITY);
-                    scope.velocityZ *= scope.ACCELERATION;
-                    break;
-                case "a":
-                    scope.velocityX = Math.max(scope.velocityX, scope.INITIAL_CAMERA_VELOCITY);
-                    scope.velocityX *= scope.ACCELERATION;
-                    break;
-                case "d":
-                    scope.velocityX = Math.min(scope.velocityX, -scope.INITIAL_CAMERA_VELOCITY);
-                    scope.velocityX *= scope.ACCELERATION;
-                    break;
-            }
-        } else {
-            switch (key) {
-                case "w":
-                    // otherwise, keep on adding acceleration
-                    // want "at least" initial camera velocity
-                    scope.velocityZ = Math.max(scope.velocityZ, scope.CAMERA_INITIAL_STEP);
-                    break;
-                case "s":
-                    scope.velocityZ = Math.min(scope.velocityZ, -scope.CAMERA_INITIAL_STEP);
-                    break;
-                case "a":
-                    scope.velocityX = Math.max(scope.velocityX, scope.CAMERA_INITIAL_STEP);
-                    break;
-                case "d":
-                    scope.velocityX = Math.min(scope.velocityX, -scope.CAMERA_INITIAL_STEP);
-                    break;
-            }
-        }
-    }
-
-    // can optionally also specify a key-up callback, but that's not needed
-    KeyboardJS.on("w a s d", 
-        function(keyEvent, keysPressed, keyCombo) {
-
-            // need to handle case where two keys are pressed at a time - because diagonal will have a higher camera speed scroll
-            keysPressed.forEach(function(key) {
-                scope.handleKey(keyEvent, key);
-            });
-        });
-
-    // allow mouse pan and rotation only when command key is pressed
-    // KeyboardJS.on("command, windows, win, super, leftcommand, leftwindows, leftwin, leftsuper",
-    //     function(keyEvent, keysPressed, keyCombo) {
-    //         scope.enableMouseControl = true;
-    //     },
-    //     function(keyEvent, keysPressed, keyCombo) {
-    //         scope.enableMouseControl = false;
-    //     });
-    
-    // experimental: toggle mouse control in ALT
-    // KeyboardJS.on("alt",
-    //     function(keyEvent, keysPressed, keyCombo) {
-    //         scope.enableMouseControl = !scope.enableMouseControl;
-    //         console.log("Mouse control toggled: " + scope.enableMouseControl);
-    //     }
-    // );
-
     this.domElement.addEventListener( 'contextmenu', function ( event ) { event.preventDefault(); }, false );
     this.domElement.addEventListener( 'mousedown', onMouseDown, false );
     this.domElement.addEventListener( 'mousewheel', onMouseWheel, false );
-    this.domElement.addEventListener( 'DOMMouseScroll', onMouseWheel, false ); // firefox
+    // for firefox
+    this.domElement.addEventListener( 'DOMMouseScroll', onMouseWheel, false ); 
 
     // TODO: remove this hardcoding
     var containerName = "#WebGL-output";
@@ -785,23 +715,21 @@ THREE.MapControls = function ( object, scene, domElement ) {
         var SCREEN_MARGIN = 10;
         var minX = SCREEN_MARGIN;
         var minY = SCREEN_MARGIN;
-        var maxX = $(containerName).width() - SCREEN_MARGIN;
-        var maxY = $(containerName).height() - SCREEN_MARGIN;
+        // var maxX = $(containerName).width() - SCREEN_MARGIN;
+        var maxX = scope.screen.width - SCREEN_MARGIN;
+        // var maxY = $(containerName).height() - SCREEN_MARGIN;
+        var maxY = scope.screen.height - SCREEN_MARGIN;
 
         if (scope.mousePosition.x < minX) {
             scope.mousePosition.x = minX;
-            scope.scrollCameraLeft();
         } else if (scope.mousePosition.x > maxX) {
             scope.mousePosition.x = maxX;
-            scope.scrollCameraRight();
         }
 
         if (scope.mousePosition.y < minY) {
             scope.mousePosition.y = minY;
-            scope.scrollCameraUp();
         } else if (scope.mousePosition.y > maxY) {
             scope.mousePosition.y = maxY;
-            scope.scrollCameraDown();
         }
 
         // console.log(scope.mousePosition);
