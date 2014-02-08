@@ -3,14 +3,20 @@
 var socket;
 var name;
 var game;
+var myTeam;
 var netMode = true;
 
-function connectServer(callback) {
+function connectServer(gameStartCallback) {
   socket = io.connect();
+
+  /* Handle the team id message */
+  socket.on(Message.TEAM, function(data) {
+      myTeam = data;
+  });
 
   /* Handle the start message */
   socket.on(Message.START, function() {
-      callback();
+      gameStartCallback();
   });
 
   /* Handle the move message */

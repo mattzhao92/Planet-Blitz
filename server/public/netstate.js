@@ -2,6 +2,7 @@
 var Message = {
   CONNECT : 'CONNECT',
   START : 'START',
+  TEAM : 'TEAM',
   MOVE : 'MOVE',
   SHOOT : 'SHOOT' 
 };

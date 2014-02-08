@@ -30,29 +30,32 @@ var Grid = Class.extend({
         // initialize characters
         this.characters = new THREE.Object3D();
         this.numOfCharacters = 3;
+        // Limit the game to 1 vs 1 now.
+        this.numOfTeams = 2;
+        // The row position.
+        this.teamStartPos = [2, 8];
         this.characterMeshes = [];
         this.characterList = new Array();
         this.characterFactory = new CharacterFactory();
 
         var scope = this;
-        for (var i = 0; i < this.numOfCharacters; i++) {
 
-            var charArgs = {
-                world: scope,
-                onDead: scope.removeCharacter,
-                team: i
-            };
-
-            var character = this.characterFactory.createCharacter(charArgs);
-            character.placeAtGridPos(i + 3, 4);
-            character.setID(i);
-            this.characterList.push(character);
-            this.markTileOccupiedByCharacter(i + 3, 4);
-
-            this.characterMeshes.push(character.mesh);
-            this.scene.add(character.mesh);
+        for (var team_id = 0; team_id < this.numOfTeams; team_id++) {
+          for (var i = 0; i < this.numOfCharacters; i++) {
+              var charArgs = {
+                  world: scope,
+                  onDead: scope.removeCharacter,
+                  team: team_id
+              };
+              var character = this.characterFactory.createCharacter(charArgs);
+              character.placeAtGridPos(i + 3, this.teamStartPos[team_id]);
+              character.setID(i);
+              this.characterList.push(character);
+              this.markTileOccupiedByCharacter(i + 3, this.teamStartPos[team_id]);
+              this.characterMeshes.push(character.mesh);
+              this.scene.add(character.mesh);
+          }
         }
-
         // bullet info
         this.bullets = [];
 
