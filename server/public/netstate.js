@@ -8,6 +8,7 @@ var Message = {
 };
 
 var Move = {
+  team: 'team',
   index : 'index',
   X : 'X',
   Y : 'Y',
@@ -16,6 +17,7 @@ var Move = {
 
 var Shoot = {
   // Index of the shooter.
+  team: 'team',
   index : 'index',
   fromX : 'fromX',
   fromY : 'fromY',

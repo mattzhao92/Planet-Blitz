@@ -3,7 +3,7 @@
 var socket;
 var name;
 var game;
-var myTeam;
+var myTeamId;
 var netMode = true;
 
 function connectServer(gameStartCallback) {
@@ -11,7 +11,7 @@ function connectServer(gameStartCallback) {
 
   /* Handle the team id message */
   socket.on(Message.TEAM, function(data) {
-      myTeam = data;
+      myTeamId = data;
   });
 
   /* Handle the start message */
@@ -21,17 +21,19 @@ function connectServer(gameStartCallback) {
 
   /* Handle the move message */
   socket.on(Message.MOVE, function(data) {
+      var team = parseInt(data[Move.team]);
       var index = parseInt(data[Move.index]);
       var deltaX = parseInt(data[Move.X]);
       var deltaY = parseInt(data[Move.Y]);
       var deltaZ = parseInt(data[Move.Z]);
-      var target = game.getWorld().getCharacterById(index);
+      var target = game.getWorld().getCharacterById(team, index);
       target.setDirection(new THREE.Vector3(deltaX, deltaY, deltaZ));
       target.enqueueMotion(game.getWorld(), null);
   });
 
   /* Handle the shot message */
   socket.on(Message.SHOOT, function(data) {
+      var team = parseInt(data[Shoot.team]);
       var index = parseInt(data[Shoot.index]);
       var fromX = parseInt(data[Shoot.fromX]);
       var fromY = parseInt(data[Shoot.fromY]);
@@ -39,7 +41,7 @@ function connectServer(gameStartCallback) {
       var toX = parseInt(data[Shoot.toX]);
       var toY = parseInt(data[Shoot.toY]);
       var toZ = parseInt(data[Shoot.toZ]);
-      var target = game.getWorld().getCharacterById(index);
+      var target = game.getWorld().getCharacterById(team, index);
       game.getWorld().shootBullet(target, 
         new THREE.Vector3(fromX, fromY, fromZ),
         new THREE.Vector3(toX, toY, toZ));
@@ -50,6 +52,7 @@ function connectServer(gameStartCallback) {
 function sendMoveMsg(index, x, y, z) {
   if (netMode) {
     var data = {};
+    data[Move.team] = myTeamId;
     data[Move.index] = index;
     data[Move.X] = x;
     data[Move.Y] = y;
@@ -61,6 +64,7 @@ function sendMoveMsg(index, x, y, z) {
 function sendShootMsg(index, from, to) {
   if (netMode) {
     var shoot = {};
+    shoot[Shoot.team] = myTeamId;
     shoot[Shoot.index] = index;
     shoot[Shoot.fromX] = from.x;
     shoot[Shoot.fromY] = from.y;

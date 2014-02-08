@@ -41,6 +41,7 @@ var Grid = Class.extend({
         var scope = this;
 
         for (var team_id = 0; team_id < this.numOfTeams; team_id++) {
+          this.characterList.push(new Array());
           for (var i = 0; i < this.numOfCharacters; i++) {
               var charArgs = {
                   world: scope,
@@ -50,7 +51,7 @@ var Grid = Class.extend({
               var character = this.characterFactory.createCharacter(charArgs);
               character.placeAtGridPos(i + 3, this.teamStartPos[team_id]);
               character.setID(i);
-              this.characterList.push(character);
+              this.characterList[team_id].push(character);
               this.markTileOccupiedByCharacter(i + 3, this.teamStartPos[team_id]);
               this.characterMeshes.push(character.mesh);
               this.scene.add(character.mesh);
@@ -63,8 +64,8 @@ var Grid = Class.extend({
         this.setupMouseDownListener();
     },
 
-    getCharacterById: function(id) {
-        return this.characterList[id];
+    getCharacterById: function(team, id) {
+        return this.characterList[team][id];
     },
 
     handleCharacterDead: function(character) {

@@ -112,10 +112,12 @@ var Character = Class.extend({
             return;
         }
         // world.deselectAll();
-        this.unitSelectorMesh.material.color.setRGB(1.0, 0, 0);
-        this.unitSelectorMesh.visible = true;
-        world.markCharacterAsSelected(this);
-        this.isActive = true;
+        if (myTeamId == null || this.team == myTeamId) {
+          this.unitSelectorMesh.material.color.setRGB(1.0, 0, 0);
+          this.unitSelectorMesh.visible = true;
+          world.markCharacterAsSelected(this);
+          this.isActive = true;
+        }
     },
 
     deselect: function() {
