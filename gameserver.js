@@ -64,7 +64,6 @@ io.sockets.on('connection', function(socket) {
   // Game packet handling.
   socket.on(Message.MOVE, function(message) {
     socket.get('gameId', function(error, gameId) {
-      console.log('user ' + name + ' send this : ' + message);
       // Forward it to other player.
       games[gameId].getOpponentClient(socket).emit(Message.MOVE, message);
     });
