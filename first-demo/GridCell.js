@@ -43,8 +43,20 @@ var GridCell = Class.extend({
 
     markAsNotSelected: function() {
         if (this.isMovable) {
-            this.tileMesh.material.color.setRGB(0, 1.0, 0);
+            this.highlightGreen();
         }
+    },
+
+    highlightGreen: function() {
+        this.tileMesh.material.color.setRGB(0, 1.0, 0);
+    },
+
+    highlightRed: function() {
+        this.tileMesh.material.color.setRGB(1.0, 0, 0);
+    },
+
+    highlightYellow: function() {
+        this.tileMesh.material.color.setRGB(3.0, 3.0, 0);
     },
 
     setSelectable: function(isSelectable) {
@@ -57,8 +69,7 @@ var GridCell = Class.extend({
 
     onMouseOver: function(scope) {
         if (this.isSelectable) {
-            // console.log("mouse over");
-            this.tileMesh.material.color.setRGB(1.0, 0, 0);
+            this.highlightRed();
             this.world.markTileAsSelected(this);
             return {
                 x: this.xPos,
@@ -70,12 +81,12 @@ var GridCell = Class.extend({
 
     markAsMovable: function() {
         if (this.isMovable) {
-            this.tileMesh.material.color.setRGB(0, 1.0, 0);
+            this.highlightGreen();
         }
     },
 
     markAsRoadMap: function() {
-        this.tileMesh.material.color.setRGB(3.0, 3.0, 0);
+        this.highlightYellow();
     }
 });
 
