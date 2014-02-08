@@ -472,7 +472,7 @@ var Grid = Class.extend({
             for (var j = 0; j < this.numberSquaresOnZAxis; j++) {
                 var tile = this.tileFactory.createTile(i, j);
 
-                var tileMesh = tile.mesh;
+                var tileMesh = tile.getTileMesh();
 
                 tileMesh.position.x = this.convertXPosToWorldX(i);
                 tileMesh.position.y = 0;
