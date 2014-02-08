@@ -73,7 +73,7 @@ var Grid = Class.extend({
             // deselect character
             character.deselect();
 
-            // deselect tiles
+            // deselect tiles.
             this.highlightedTiles.forEach(function(tile) {
                 tile.reset();
             });
