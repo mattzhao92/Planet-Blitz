@@ -3,7 +3,7 @@
 var socket;
 var name;
 var game;
-var myTeamId;
+var myTeamId = 0;
 var netMode = true;
 
 function connectServer(gameStartCallback) {
