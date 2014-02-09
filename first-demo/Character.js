@@ -43,7 +43,7 @@ var Character = Class.extend({
 
         this.loader = new THREE.JSONLoader();
         this.loadFile("blendermodels/headcombinedtextured.js");
-
+        this.highlightedTiles = null;
         this.health = 100;
     },
 
@@ -77,21 +77,14 @@ var Character = Class.extend({
     	this.isCoolDown = 1;
     	var scope = this;
     	setTimeout(function() {
-                        scope.isCoolDown = 0;
-    		scope.recoverFromCoolDown(world);
+            console.log("time out ");
+            scope.isCoolDown = 0;
+            if (world.currentSelectedUnits[scope.team] == scope && !scope.sequenceMotionInProgres)
+                world.displayMovementArea(scope);
     	}
 		, 1500);
     },
 
-    recoverFromCoolDown: function(world) {
-        if (this.sequenceMotionInProgres && this.isCoolDown != 0) {
-            this.isCoolDown = 2;
-        }
-        if (this.isCoolDown == 0) {
-            if (world.currentCharacterSelected == this)
-                world.displayMovementArea(this);
-        }
-    },
 
     addUnitSelector: function() {
         // setup unit selector mesh
@@ -144,8 +137,10 @@ var Character = Class.extend({
 
     deselect: function() {
         // return to original color
-        this.unitSelectorMesh.visible = false;
-        this.isActive = false;
+        if (myTeamId == null || this.team == myTeamId) {
+            this.unitSelectorMesh.visible = false;
+            this.isActive = false;
+        }
     },
 
     loadFile: function(filename) {
@@ -186,9 +181,7 @@ var Character = Class.extend({
                                   this.getTileZPos() + this.direction.z);
         var addNewItem = true;
         var newMotions = new Array();
-        world.getTileAtTilePos(this.getTileXPos(), this.getTileZPos()).markAsRoadMap();
         for (var i = 1; i < path.length; i++) {
-            world.getTileAtTilePos(path[i][0], path[i][1]).markAsRoadMap();
             // checking if path[i], path[i-1], path[i-2] are on the same line
             if (i > 1) {
                 if ( (path[i][0] == path[i-2][0] || path[i][1] == path[i-2][1]) &&
@@ -271,16 +264,29 @@ var Character = Class.extend({
             var direction = this.motionQueue.pop();
             if (direction.sentinal == 'start') {
                 var path = direction.highlightTiles;
-                world.clearPreviousMoveForTeam();
-                for (var i = 0; i < path.length; i++) {
-                    console.log("makr ");
-                    world.getTileAtTilePos(path[i][0], path[i][1]).markAsRoadMap();
+                
+                if (this.team == myTeamId) {
+                    console.log("list "+this.highlightedTiles);
+                    if (this.highlightedTiles){
+                        for (var i = 0; i < this.highlightedTiles.length; i++) {
+                            console.log("clearing \n");
+                            this.highlightedTiles[i].reset();
+                        }
+                    }
+
+                    for (var i = 0; i < path.length; i++) {
+                        world.getTileAtTilePos(path[i][0], path[i][1]).markAsRoadMap();
+                    }
                 }
+
                 this.sequenceMotionInProgres = true;
                 return;
             } else if (direction.sentinal == 'end') {
                 this.sequenceMotionInProgres = false;
-                this.recoverFromCoolDown(world);
+               
+                if (world.currentSelectedUnits[this.team] == this && this.isCoolDown == 0)
+                    world.displayMovementArea(this);
+
                 return;
             }
 
