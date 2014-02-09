@@ -111,26 +111,29 @@ THREE.MapControls = function ( object, scene, domElement ) {
     var _panStart = new THREE.Vector2();
     var _panEnd = new THREE.Vector2();
 
-    this.mousePosition = {x: -1, y: -1};
+    // make sure this arbitrary mouse position is slightl
+    var ARBITRARY_MOUSE_POS = 11;
+    this.mousePosition = {x: ARBITRARY_MOUSE_POS, y: ARBITRARY_MOUSE_POS};
 
     this.handleResize = function () {
         if ( this.domElement === document ) {
-
             this.screen.left = 0;
             this.screen.top = 0;
             this.screen.width = window.innerWidth;
             this.screen.height = window.innerHeight;
-
         } else {
-
             this.screen = this.domElement.getBoundingClientRect();
         }
+
+        // update the mouse boundaries in response to screen size changing
+        this.mouseBounds = {minX: SCREEN_MARGIN, minY: SCREEN_MARGIN, maxX: scope.screen.width - SCREEN_MARGIN, maxY: scope.screen.height - SCREEN_MARGIN};
+
     };
 
     this.resetMousePosition = function() {
-        scope.mousePosition = {x: -1, y: -1};
+        scope.mousePosition.x = ARBITRARY_MOUSE_POS;
+        scope.mousePosition.y = ARBITRARY_MOUSE_POS;
     }
-
 
     this.handleEvent = function ( event ) {
 
@@ -662,12 +665,14 @@ THREE.MapControls = function ( object, scene, domElement ) {
                     console.log("[Mouse controls] exit");
 
                     document.removeEventListener("mousemove", moveCallback, false);
+                    scope.resetMousePosition();
 
                 }, function(event) {
                     console.log("Error: could not obtain pointerlock");
                 });
         }
     );
+
 
     function calculateInitialMousePosition(canvas, event) {
         var x = new Number();
@@ -692,13 +697,10 @@ THREE.MapControls = function ( object, scene, domElement ) {
     }
 
     function moveCallback(event) {
-        // console.log("moveCallback");
-
         // calculate initial position
         var canvas = $(containerName).get()[0];
-        // var ctx = canvas.getContext("2d");
 
-        if (scope.mousePosition.x == -1 && scope.mousePosition.y == -1) {
+        if (scope.mousePosition.x == ARBITRARY_MOUSE_POS && scope.mousePosition.y == ARBITRARY_MOUSE_POS) {
             scope.mousePosition = calculateInitialMousePosition(canvas, event);
         }
 
@@ -710,29 +712,18 @@ THREE.MapControls = function ( object, scene, domElement ) {
         scope.mousePosition.y += event.movementY;
 
         // limit boundaries of mouse
-
-        // TODO (replace with scope.mouseBounds)
-        var SCREEN_MARGIN = 10;
-        var minX = SCREEN_MARGIN;
-        var minY = SCREEN_MARGIN;
-        // var maxX = $(containerName).width() - SCREEN_MARGIN;
-        var maxX = scope.screen.width - SCREEN_MARGIN;
-        // var maxY = $(containerName).height() - SCREEN_MARGIN;
-        var maxY = scope.screen.height - SCREEN_MARGIN;
-
-        if (scope.mousePosition.x < minX) {
-            scope.mousePosition.x = minX;
-        } else if (scope.mousePosition.x > maxX) {
-            scope.mousePosition.x = maxX;
+        if (scope.mousePosition.x < scope.mouseBounds.minX) {
+            scope.mousePosition.x = scope.mouseBounds.minX;
+        } else if (scope.mousePosition.x > scope.mouseBounds.maxX) {
+            scope.mousePosition.x = scope.mouseBounds.maxX;
         }
 
-        if (scope.mousePosition.y < minY) {
-            scope.mousePosition.y = minY;
-        } else if (scope.mousePosition.y > maxY) {
-            scope.mousePosition.y = maxY;
+        if (scope.mousePosition.y < scope.mouseBounds.minY) {
+            scope.mousePosition.y = scope.mouseBounds.minY;
+        } else if (scope.mousePosition.y > scope.mouseBounds.maxY) {
+            scope.mousePosition.y = scope.mouseBounds.maxY;
         }
 
-        // console.log(scope.mousePosition);
         scope.drawMouseCursor();
     }
 
