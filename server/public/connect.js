@@ -3,11 +3,13 @@
 var socket;
 var name;
 var game;
-var myTeamId;
+var myTeamId = 0;
+var numOfTeam;
 var netMode = true;
 
-function connectServer(gameStartCallback) {
+function connectServer(type, gameStartCallback) {
   socket = io.connect();
+  socket.emit(Message.GAME, type);
 
   /* Handle the team id message */
   socket.on(Message.TEAM, function(data) {

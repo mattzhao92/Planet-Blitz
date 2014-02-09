@@ -31,9 +31,9 @@ var Grid = Class.extend({
         this.characters = new THREE.Object3D();
         this.numOfCharacters = 3;
         // Limit the game to 1 vs 1 now.
-        this.numOfTeams = 2;
+        this.numOfTeams = 4;
         // The row position.
-        this.teamStartPos = [2, 8];
+        this.teamStartPos = [2, 8, 1, 8];
         this.characterMeshes = [];
         this.characterList = new Array();
         this.characterMovementHistory = new Array();
@@ -50,10 +50,18 @@ var Grid = Class.extend({
                   team: team_id
               };
               var character = this.characterFactory.createCharacter(charArgs);
-              character.placeAtGridPos(i + 3, this.teamStartPos[team_id]);
+              var startX, startY;
+              if (team_id < 2) {
+                startX = i + 3;
+                startY = this.teamStartPos[team_id];
+              } else {
+                startX = this.teamStartPos[team_id];
+                startY = i + 4;
+              }
+              character.placeAtGridPos(startX, startY);
+              this.markTileOccupiedByCharacter(startX, startY);
               character.setID(i);
               this.characterList[team_id].push(character);
-              this.markTileOccupiedByCharacter(i + 3, this.teamStartPos[team_id]);
               this.characterMeshes.push(character.mesh);
               this.scene.add(character.mesh);
           }

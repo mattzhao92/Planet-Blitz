@@ -1,6 +1,6 @@
 // Network packet type
 var Message = {
-  CONNECT : 'CONNECT',
+  GAME : 'GAME',
   START : 'START',
   TEAM : 'TEAM',
   MOVE : 'MOVE',

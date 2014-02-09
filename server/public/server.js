@@ -19,7 +19,7 @@ $(document).ready(function() {
   $('#Stats-output').hide();
   $('#playBtn').click(function() {
     loading();
-    connectServer(startGame);
+    connectServer(2, startGame);
   });
 
   /* Start the game locally */
