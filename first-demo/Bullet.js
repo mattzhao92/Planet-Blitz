@@ -33,7 +33,7 @@ var Bullet = Class.extend({
     this.speed = 500;
     this.damage = 20;
 
-    this.maxDistance = 1000;
+    this.maxDistance = 240;
 
     // alias to position
     this.position = this.mesh.position;
