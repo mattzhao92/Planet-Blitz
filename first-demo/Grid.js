@@ -186,6 +186,13 @@ var Grid = Class.extend({
     displayMovementArea: function(character) {
         console.log("displayMovementArea is called ");
         // deselect any previously highlighted tiles
+
+        if (this.highlightedTiles) {
+        for (var i = 0; i < this.highlightedTiles.length; i++) {
+            this.highlightedTiles[i].reset();
+        }
+    }
+
         if (this.currentMouseOverTile) {
             this.currentMouseOverTile.reset();
         }
@@ -195,6 +202,7 @@ var Grid = Class.extend({
         // highlight adjacent squares - collect all tiles from radius
         var tilesToHighlight = this.getTilesInArea(character, characterMovementRange);
         character.highlightedTiles = tilesToHighlight;
+        this.highlightedTiles = tilesToHighlight;
         this.highlightTiles(tilesToHighlight);
     },
 

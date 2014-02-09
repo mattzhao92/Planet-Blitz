@@ -206,7 +206,6 @@ var Character = Class.extend({
         }
         this.motionQueue.push({'sentinal' : 'start', 'highlightTiles': path});
 
-        // TODO: define actual tween timeout
         if (onMotionFinish) {
             setTimeout(onMotionFinish, 800);
         }
@@ -266,19 +265,10 @@ var Character = Class.extend({
                 var path = direction.highlightTiles;
                 
                 if (this.team == myTeamId) {
-                    console.log("list "+this.highlightedTiles);
-                    if (this.highlightedTiles){
-                        for (var i = 0; i < this.highlightedTiles.length; i++) {
-                            console.log("clearing \n");
-                            this.highlightedTiles[i].reset();
-                        }
-                    }
-
                     for (var i = 0; i < path.length; i++) {
                         world.getTileAtTilePos(path[i][0], path[i][1]).markAsRoadMap();
                     }
                 }
-
                 this.sequenceMotionInProgres = true;
                 return;
             } else if (direction.sentinal == 'end') {
@@ -296,7 +286,6 @@ var Character = Class.extend({
                 if (this.collide()) {
                     return false;
                 }
-
 
                 this.motionInProgress = true;
                 // ... we move the character
