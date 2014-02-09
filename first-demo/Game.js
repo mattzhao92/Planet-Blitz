@@ -119,7 +119,7 @@ $(function () {
 
         setupGameWorld: function() {
             var squareSize = 40;
-            this.world = new Grid(400, 400, squareSize, this.scene, this.camera, this.controls);
+            this.world = new Grid(800, 800, squareSize, this.scene, this.camera, this.controls);
         },
 
         update: function() {
