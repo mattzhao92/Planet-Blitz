@@ -14,7 +14,7 @@ var Grid = Class.extend({
         // information about what's being selected
         this.highlightedTiles = null;
         this.currentMouseOverTile = null;
-        this.currentCharacterSelected = null;
+        this.currentSelectedUnits = new Array();
 
         // listeners and state
         this.mouseDownListenerActive = true;
@@ -36,13 +36,12 @@ var Grid = Class.extend({
         this.teamStartPos = [2, 8];
         this.characterMeshes = [];
         this.characterList = new Array();
-        this.characterMovementHistory = new Array();
         this.characterFactory = new CharacterFactory();
 
         var scope = this;
-
         for (var team_id = 0; team_id < this.numOfTeams; team_id++) {
           this.characterList.push(new Array());
+          this.currentSelectedUnits.push(null);
           for (var i = 0; i < this.numOfCharacters; i++) {
               var charArgs = {
                   world: scope,
@@ -60,7 +59,7 @@ var Grid = Class.extend({
         }
         // bullet info
         this.bullets = [];
-
+        console.log("Grid.js team id "+ myTeamId);
         this.setupMouseMoveListener();
         this.setupMouseDownListener();
     },
@@ -71,14 +70,15 @@ var Grid = Class.extend({
 
     handleCharacterDead: function(character) {
         // if the character was the currently selected unit, then reset tile state
-        if (this.currentCharacterSelected == character) {
+        if (this.currentSelectedUnits[myTeamId] == character) {
             // deselect character
             character.deselect();
 
             // deselect tiles.
-            this.highlightedTiles.forEach(function(tile) {
+            character.highlightedTiles.forEach(function(tile) {
                 tile.reset();
             });
+            this.currentSelectedUnits[myTeamId] = null;
         }
 
         // mark tile position as available
@@ -132,13 +132,13 @@ var Grid = Class.extend({
 
     markCharacterAsSelected: function(character) {
         // deselect previous character if there was one
-        if (this.currentCharacterSelected) {
-            if (this.currentCharacterSelected != character) {
-                this.currentCharacterSelected.deselect();
+        if (this.currentSelectedUnits[myTeamId]) {
+            if (this.currentSelectedUnits[myTeamId] != character) {
+                this.currentSelectedUnits[myTeamId].deselect();
             }
         }
 
-        this.currentCharacterSelected = character;
+        this.currentSelectedUnits[myTeamId] = character;
 
         // show character movement speed
         this.displayMovementArea(character);
@@ -183,15 +183,8 @@ var Grid = Class.extend({
         return this.pathFinder.findPath(oldXPos, oldZPos, newXPos, newZPos, this.PFGrid.clone());
     },
 
-
-    clearPreviousMoveForTeam: function(teamId) {
-        for (var i = 0; i < this.highlightedTiles.length; i++) {
-            this.highlightedTiles[i].reset();
-        }
-    },
-
-
     displayMovementArea: function(character) {
+        console.log("displayMovementArea is called ");
         // deselect any previously highlighted tiles
         if (this.currentMouseOverTile) {
             this.currentMouseOverTile.reset();
@@ -201,16 +194,7 @@ var Grid = Class.extend({
 
         // highlight adjacent squares - collect all tiles from radius
         var tilesToHighlight = this.getTilesInArea(character, characterMovementRange);
-
-        var scope = this;
-        this.characterMovementHistory.length = 0;
-        if (this.highlightedTiles) {
-            this.highlightedTiles.forEach(function(tile) {
-                tile.reset();
-            });
-        }
-
-
+        character.highlightedTiles = tilesToHighlight;
         this.highlightTiles(tilesToHighlight);
     },
 
@@ -221,8 +205,6 @@ var Grid = Class.extend({
             tile.markAsMovable();
 
         });
-
-        this.highlightedTiles = tilesToHighlight;
     },
 
     setPFGridCellAccessibility: function(x, z, hasObstacleOnCell) {
@@ -362,23 +344,23 @@ var Grid = Class.extend({
         var intersectsWithTiles = raycaster.intersectObjects(scope.tiles.children);
 
         // should put this at the end of mouseDown
-        if (this.currentCharacterSelected) {
+        if (this.currentSelectedUnits[myTeamId]) {
             // fire on click
             if (event.which == RIGHT_CLICK) {
                 console.log("Firing bullet");
 
                 if (intersectsWithTiles.length > 0) {
                     var tileSelected = intersectsWithTiles[0].object.owner;
-                    var from = this.currentCharacterSelected.mesh.position.clone();
+                    var from = this.currentSelectedUnits[myTeamId].mesh.position.clone();
 
                     // keep bullets level
                     from.y = 15;
                     var to = new THREE.Vector3(this.convertXPosToWorldX(tileSelected.xPos), 15, this.convertZPosToWorldZ(tileSelected.zPos));
 
                     // shoot a bullet because you can
-                    sendShootMsg(this.currentCharacterSelected.id, from, to);
+                    sendShootMsg(this.currentSelectedUnits[myTeamId].id, from, to);
                     
-                    this.shootBullet(this.currentCharacterSelected, from, to);
+                    this.shootBullet(this.currentSelectedUnits[myTeamId], from, to);
                 }
             }
         }
@@ -395,7 +377,7 @@ var Grid = Class.extend({
                 var clickedObject = intersects[0].object.owner;
 
                 // done so that you can click on a tile behind a character easily
-                if (clickedObject != this.currentCharacterSelected) {
+                if (clickedObject != this.currentSelectedUnits[myTeamId]) {
                     clickedObject.onSelect(scope);
                 } else {
                     continueHandlingIntersects = true;
@@ -408,23 +390,23 @@ var Grid = Class.extend({
                 if (intersectsWithTiles.length > 0) {
                     var tileSelected = intersectsWithTiles[0].object.owner;
                     var coordinate = tileSelected.onMouseOver();
-                    if (this.currentCharacterSelected && coordinate) {
+                    if (this.currentSelectedUnits[myTeamId] && coordinate) {
                         // allow only one character to move at a time
                         if (this.allowCharacterMovement) {
-    						var deltaX = coordinate.x - this.currentCharacterSelected.getTileXPos();
+    						var deltaX = coordinate.x - this.currentSelectedUnits[myTeamId].getTileXPos();
     						var deltaY = 0;
-    						var deltaZ = coordinate.z - this.currentCharacterSelected.getTileZPos();
-                            this.currentCharacterSelected.setDirection(
+    						var deltaZ = coordinate.z - this.currentSelectedUnits[myTeamId].getTileZPos();
+                            this.currentSelectedUnits[myTeamId].setDirection(
                                 new THREE.Vector3(deltaX, deltaY, deltaZ));
 
     						// Put the network communication here.
-    						sendMoveMsg(this.currentCharacterSelected.id, 
+    						sendMoveMsg(this.currentSelectedUnits[myTeamId].id, 
     								deltaX, deltaY, deltaZ);
 
                             // this.disableMouseMoveListener();
                             // this.disableMouseDownListener();
 
-                            this.currentCharacterSelected.enqueueMotion(this,function() {
+                            this.currentSelectedUnits[myTeamId].enqueueMotion(this,function() {
                                 // console.log("Motion finished");
                                 this.allowCharacterMovement = true;
                                 // scope.enableMouseMoveListener();
