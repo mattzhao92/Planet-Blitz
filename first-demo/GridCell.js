@@ -72,9 +72,9 @@ var GridCell = Class.extend({
     },
 
     markAsRoadMap: function() {
-        if (this.isMovable) {
-            this.mesh.material.color.setRGB(3.0, 3.0, 0);
-        }
+        //console.log("222222 XPos "+this.xPos +" zPos "+this.zPos+" isMovable " + this.isMovable);
+        //this.mesh.callMe();
+        this.mesh.material.color.setRGB(3.0, 3.0, 0);
     }
 });
 

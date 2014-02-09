@@ -36,6 +36,7 @@ var Grid = Class.extend({
         this.teamStartPos = [2, 8];
         this.characterMeshes = [];
         this.characterList = new Array();
+        this.characterMovementHistory = new Array();
         this.characterFactory = new CharacterFactory();
 
         var scope = this;
@@ -179,9 +180,16 @@ var Grid = Class.extend({
 
 
     findPath: function(oldXPos, oldZPos, newXPos, newZPos) {
-        //console.log("findPath oldXPos: "+oldXPos+" oldZPos: "+oldZPos +" newXPos: "+newXPos+" newZPos: "+ newZPos);
         return this.pathFinder.findPath(oldXPos, oldZPos, newXPos, newZPos, this.PFGrid.clone());
     },
+
+
+    clearPreviousMoveForTeam: function(teamId) {
+        for (var i = 0; i < this.highlightedTiles.length; i++) {
+            this.highlightedTiles[i].reset();
+        }
+    },
+
 
     displayMovementArea: function(character) {
         // deselect any previously highlighted tiles
@@ -194,11 +202,14 @@ var Grid = Class.extend({
         // highlight adjacent squares - collect all tiles from radius
         var tilesToHighlight = this.getTilesInArea(character, characterMovementRange);
 
+        var scope = this;
+        this.characterMovementHistory.length = 0;
         if (this.highlightedTiles) {
             this.highlightedTiles.forEach(function(tile) {
                 tile.reset();
             });
         }
+
 
         this.highlightTiles(tilesToHighlight);
     },

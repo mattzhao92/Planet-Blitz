@@ -34,10 +34,12 @@ var Character = Class.extend({
 
         // Set the current animation step
         this.step = 0;
+        this.sequenceMotionInProgres = false;
         this.motionInProcess = false;
         this.motionQueue = new Array();
 
         this.addUnitSelector();
+        this.isCoolDown = false;
 
         this.loader = new THREE.JSONLoader();
         this.loadFile("blendermodels/headcombinedtextured.js");
@@ -68,6 +70,26 @@ var Character = Class.extend({
         console.log("Health: " + this.getHealth());
         if (this.health < 0) {
             this.world.handleCharacterDead(this);
+        }
+    },
+
+    enterCoolDown: function(world) {
+    	this.isCoolDown = 1;
+    	var scope = this;
+    	setTimeout(function() {
+                        scope.isCoolDown = 0;
+    		scope.recoverFromCoolDown(world);
+    	}
+		, 1500);
+    },
+
+    recoverFromCoolDown: function(world) {
+        if (this.sequenceMotionInProgres && this.isCoolDown != 0) {
+            this.isCoolDown = 2;
+        }
+        if (this.isCoolDown == 0) {
+            if (world.currentCharacterSelected == this)
+                world.displayMovementArea(this);
         }
     },
 
@@ -159,6 +181,7 @@ var Character = Class.extend({
 
     enqueueMotion: function(world, onMotionFinish) {
         console.log("enqueueMotion \n");
+        if (this.isCoolDown == 0) {
         var path = world.findPath(this.getTileXPos(), this.getTileZPos(), this.getTileXPos() + this.direction.x, 
                                   this.getTileZPos() + this.direction.z);
         var addNewItem = true;
@@ -184,14 +207,19 @@ var Character = Class.extend({
             addNewItem = true;
         }
 
+        this.motionQueue.push({'sentinal' : 'end'});
         for (var i = newMotions.length-1; i >= 0; i--) {
             this.motionQueue.push(newMotions[i]);
         }
-  
+        this.motionQueue.push({'sentinal' : 'start', 'highlightTiles': path});
+
         // TODO: define actual tween timeout
         if (onMotionFinish) {
             setTimeout(onMotionFinish, 800);
         }
+
+        this.enterCoolDown(world);
+    	}
     },
 
     update: function(world, delta) {
@@ -216,7 +244,6 @@ var Character = Class.extend({
                 this.mesh.position.x = this.goalMeshX;
                 this.motionInProgress = false;
                 this.xPos = this.goalXPos;
-                world.displayMovementArea(this);
             } else {
                 this.mesh.position.x = newMeshX;
                 this.velocityX *= 1.05;
@@ -226,7 +253,6 @@ var Character = Class.extend({
                 this.mesh.position.z = this.goalMeshZ;
                 this.motionInProgress = false;
                 this.zPos = this.goalZPos;
-                world.displayMovementArea(this);
             } else {
                 this.mesh.position.z = newMeshZ;
                 this.velocityZ *= 1.05;
@@ -243,6 +269,21 @@ var Character = Class.extend({
         if (this.motionQueue.length > 0) {
             this.motionInProcess = true;
             var direction = this.motionQueue.pop();
+            if (direction.sentinal == 'start') {
+                var path = direction.highlightTiles;
+                world.clearPreviousMoveForTeam();
+                for (var i = 0; i < path.length; i++) {
+                    console.log("makr ");
+                    world.getTileAtTilePos(path[i][0], path[i][1]).markAsRoadMap();
+                }
+                this.sequenceMotionInProgres = true;
+                return;
+            } else if (direction.sentinal == 'end') {
+                this.sequenceMotionInProgres = false;
+                this.recoverFromCoolDown(world);
+                return;
+            }
+
             if (direction.x !== 0 || direction.z !== 0) {
                 this.rotate(direction);
                 // And, only if we're not colliding with an obstacle or a wall ...
