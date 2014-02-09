@@ -4,7 +4,7 @@ var socket;
 var name;
 var game;
 var myTeamId = 0;
-var numOfTeam;
+var numOfTeams = 4;
 var netMode = true;
 
 function connectServer(type, gameStartCallback) {

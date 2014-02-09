@@ -9,6 +9,7 @@ function startGame() {
 function loading() {
   $('#debugBtn').hide();
   $('#playBtn').hide();
+  $('#playBtn2').hide();
   $('#helpBtn').hide();
   $('.span').show();
   $('.cloud').show();
@@ -18,8 +19,15 @@ $(document).ready(function() {
   $('#WebGL-output').hide();
   $('#Stats-output').hide();
   $('#playBtn').click(function() {
+    numOfTeam = 2;
+    connectServer(numOfTeam, startGame);
     loading();
-    connectServer(2, startGame);
+  });
+
+  $('#playBtn2').click(function() {
+    numOfTeam = 4;
+    connectServer(numOfTeam, startGame);
+    loading();
   });
 
   /* Start the game locally */

@@ -30,8 +30,6 @@ var Grid = Class.extend({
         // initialize characters
         this.characters = new THREE.Object3D();
         this.numOfCharacters = 3;
-        // Limit the game to 1 vs 1 now.
-        this.numOfTeams = 4;
         // The row position.
         this.teamStartPos = [2, 8, 1, 8];
         this.characterMeshes = [];
@@ -39,7 +37,7 @@ var Grid = Class.extend({
         this.characterFactory = new CharacterFactory();
 
         var scope = this;
-        for (var team_id = 0; team_id < this.numOfTeams; team_id++) {
+        for (var team_id = 0; team_id < numOfTeams; team_id++) {
           this.characterList.push(new Array());
           this.currentSelectedUnits.push(null);
           for (var i = 0; i < this.numOfCharacters; i++) {
