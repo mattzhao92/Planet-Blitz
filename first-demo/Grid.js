@@ -31,7 +31,7 @@ var Grid = Class.extend({
         this.characters = new THREE.Object3D();
         this.numOfCharacters = 3;
         // The row position.
-        this.teamStartPos = [2, 8, 1, 8];
+        this.teamStartPos = [1, 18, 1, 18];
         this.characterMeshes = [];
         this.characterList = new Array();
         this.characterFactory = new CharacterFactory();
@@ -49,11 +49,11 @@ var Grid = Class.extend({
               var character = this.characterFactory.createCharacter(charArgs);
               var startX, startY;
               if (team_id < 2) {
-                startX = i + 3;
+                startX = i + 9;
                 startY = this.teamStartPos[team_id];
               } else {
                 startX = this.teamStartPos[team_id];
-                startY = i + 4;
+                startY = i + 9;
               }
               character.placeAtGridPos(startX, startY);
               this.markTileOccupiedByCharacter(startX, startY);
@@ -65,7 +65,8 @@ var Grid = Class.extend({
         }
         // bullet info
         this.bullets = [];
-        console.log("Grid.js team id "+ myTeamId);
+
+
         this.setupMouseMoveListener();
         this.setupMouseDownListener();
     },
@@ -135,7 +136,6 @@ var Grid = Class.extend({
         return -((this.gridLength / 2)) + (tileZPos * this.tileSize);
     },
 
-
     markCharacterAsSelected: function(character) {
         // deselect previous character if there was one
         if (this.currentSelectedUnits[myTeamId]) {
@@ -198,10 +198,10 @@ var Grid = Class.extend({
 
         // deselect tiles.
         if (this.highlightedTiles) {
-        this.highlightedTiles.forEach(function(tile) {
-            tile.reset();
-        });
-    }
+            this.highlightedTiles.forEach(function(tile) {
+                tile.reset();
+            });
+        }
 
         var characterMovementRange = character.getMovementRange();
 
@@ -212,11 +212,11 @@ var Grid = Class.extend({
     },
 
     highlightTiles: function(tilesToHighlight) {
+
         tilesToHighlight.forEach(function(tile) {
             tile.setSelectable(true);
             tile.setMovable(true);
             tile.markAsMovable();
-
         });
         this.highlightedTiles = tilesToHighlight;
     },
