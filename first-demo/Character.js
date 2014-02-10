@@ -78,15 +78,15 @@ var Character = Class.extend({
     },
 
     enterCoolDown: function(world) {
-    	this.isCoolDown = 1;
-    	var scope = this;
-    	setTimeout(function() {
+        this.isCoolDown = 1;
+        var scope = this;
+        setTimeout(function() {
             console.log("time out ");
             scope.isCoolDown = 0;
             if (world.currentSelectedUnits[scope.team] == scope && !scope.sequenceMotionInProgres)
                 world.displayMovementArea(scope);
-    	}
-		, this.CHARACTER_COOLDOWN_TIMER);
+        }
+        , this.CHARACTER_COOLDOWN_TIMER);
     },
 
 
@@ -210,12 +210,13 @@ var Character = Class.extend({
         }
         this.motionQueue.push({'sentinal' : 'start', 'highlightTiles': path});
 
+        // TODO: define actual tween timeout
         if (onMotionFinish) {
             setTimeout(onMotionFinish, 800);
         }
 
         this.enterCoolDown(world);
-    	}
+        }
     },
 
     update: function(world, delta) {
@@ -269,10 +270,19 @@ var Character = Class.extend({
                 var path = direction.highlightTiles;
                 
                 if (this.team == myTeamId) {
+                    console.log("list "+this.highlightedTiles);
+                    if (this.highlightedTiles){
+                        for (var i = 0; i < this.highlightedTiles.length; i++) {
+                            console.log("clearing \n");
+                            this.highlightedTiles[i].reset();
+                        }
+                    }
+
                     for (var i = 0; i < path.length; i++) {
                         world.getTileAtTilePos(path[i][0], path[i][1]).markAsRoadMap();
                     }
                 }
+
                 this.sequenceMotionInProgres = true;
                 return;
             } else if (direction.sentinal == 'end') {
@@ -290,6 +300,7 @@ var Character = Class.extend({
                 if (this.collide()) {
                     return false;
                 }
+
 
                 this.motionInProgress = true;
                 // ... we move the character

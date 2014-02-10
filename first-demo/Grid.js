@@ -192,13 +192,6 @@ var Grid = Class.extend({
     displayMovementArea: function(character) {
         console.log("displayMovementArea is called ");
         // deselect any previously highlighted tiles
-
-        if (this.highlightedTiles) {
-        for (var i = 0; i < this.highlightedTiles.length; i++) {
-            this.highlightedTiles[i].reset();
-        }
-    }
-
         if (this.currentMouseOverTile) {
             this.currentMouseOverTile.reset();
         }
@@ -215,7 +208,6 @@ var Grid = Class.extend({
         // highlight adjacent squares - collect all tiles from radius
         var tilesToHighlight = this.getTilesInArea(character, characterMovementRange);
         character.highlightedTiles = tilesToHighlight;
-        this.highlightedTiles = tilesToHighlight;
         this.highlightTiles(tilesToHighlight);
     },
 
@@ -415,15 +407,15 @@ var Grid = Class.extend({
                     if (this.currentSelectedUnits[myTeamId] && coordinate) {
                         // allow only one character to move at a time
                         if (this.allowCharacterMovement) {
-    						var deltaX = coordinate.x - this.currentSelectedUnits[myTeamId].getTileXPos();
-    						var deltaY = 0;
-    						var deltaZ = coordinate.z - this.currentSelectedUnits[myTeamId].getTileZPos();
+                            var deltaX = coordinate.x - this.currentSelectedUnits[myTeamId].getTileXPos();
+                            var deltaY = 0;
+                            var deltaZ = coordinate.z - this.currentSelectedUnits[myTeamId].getTileZPos();
                             this.currentSelectedUnits[myTeamId].setDirection(
                                 new THREE.Vector3(deltaX, deltaY, deltaZ));
 
-    						// Put the network communication here.
-    						sendMoveMsg(this.currentSelectedUnits[myTeamId].id, 
-    								deltaX, deltaY, deltaZ);
+                            // Put the network communication here.
+                            sendMoveMsg(this.currentSelectedUnits[myTeamId].id, 
+                                    deltaX, deltaY, deltaZ);
 
                             // this.disableMouseMoveListener();
                             // this.disableMouseDownListener();
