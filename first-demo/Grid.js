@@ -31,7 +31,7 @@ var Grid = Class.extend({
         this.characters = new THREE.Object3D();
         this.numOfCharacters = 3;
         // The row position.
-        this.teamStartPos = [1, 19, 1, 1];
+        this.teamStartPos = [1, 18, 1, 18];
         this.characterMeshes = [];
         this.characterList = new Array();
         this.characterFactory = new CharacterFactory();
@@ -65,7 +65,8 @@ var Grid = Class.extend({
         }
         // bullet info
         this.bullets = [];
-        console.log("Grid.js team id "+ myTeamId);
+
+
         this.setupMouseMoveListener();
         this.setupMouseDownListener();
     },

@@ -27,6 +27,23 @@ function connectServer(type, gameStartCallback) {
           grid.handleCharacterDead(grid.getCharacterById(tm, i));
         }
       }
+
+      console.log("Team id "+ myTeamId);
+
+      switch (myTeamId) {
+          case 0:
+              console.log("You spawned at left");
+              break;
+          case 1:
+              console.log("You spawned at bottom");
+              break;
+          case 2:
+              console.log("You spawned at left");
+              break;
+          case 3:
+              console.log("You spawned at right");
+              break;
+      }
   });
 
   /* Handle the move message */
