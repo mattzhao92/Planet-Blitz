@@ -46,7 +46,7 @@
             // create a render and set the size
             this.renderer = new THREE.WebGLRenderer();
             this.renderer.setSize(window.innerWidth, window.innerHeight);
-            this.renderer.setClearColor(0x000000);
+            this.renderer.setClearColor(0xFFFFFF);
 
             // add the output of the renderer to the html element
             $(containerName).append(this.renderer.domElement);
@@ -84,7 +84,7 @@
                  window.addEventListener( 'resize', function() {
                      scope.onWindowResize() }, false );
 
-
+                 this.bgColorIsWhite = true;
             }, 
 
             clearPreviousView: function() {
@@ -202,12 +202,23 @@
                             scope.setMeshToView(mesh);
                         });
                     };
+
+                    this.bgColorToggle = function() {
+                        if (scope.bgColorIsWhite) {
+                            scope.renderer.setClearColor(0x000000);
+                        } else {
+                            scope.renderer.setClearColor(0xFFFFFF);
+                        }
+
+                        scope.bgColorIsWhite = !scope.bgColorIsWhite;
+                    }
                 }
 
                 var gui = new dat.GUI();
 
                 gui.add(this.datGuiControls, 'modelName');
                 gui.add(this.datGuiControls, 'loadModel').listen();
+                gui.add(this.datGuiControls, 'bgColorToggle').listen();
             },
 
             drawGamePlane: function() {
