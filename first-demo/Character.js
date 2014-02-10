@@ -14,6 +14,8 @@ var Character = Class.extend({
     init: function(args) {
         'use strict';
 
+        this.CHARACTER_COOLDOWN_TIMER = 3000;
+
         this.world = args.world;
         this.onDead = args.onDead;
         this.team = args.team;
@@ -43,6 +45,8 @@ var Character = Class.extend({
 
         this.loader = new THREE.JSONLoader();
         this.loadFile("blendermodels/headcombinedtextured.js");
+        // this.loadFile("blendermodels/spheresoldierrolling.js");
+
         this.highlightedTiles = null;
         this.health = 100;
     },
@@ -82,7 +86,7 @@ var Character = Class.extend({
             if (world.currentSelectedUnits[scope.team] == scope && !scope.sequenceMotionInProgres)
                 world.displayMovementArea(scope);
     	}
-		, 1500);
+		, this.CHARACTER_COOLDOWN_TIMER);
     },
 
 

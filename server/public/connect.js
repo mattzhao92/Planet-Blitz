@@ -4,10 +4,14 @@ var socket;
 var name;
 var game;
 var myTeamId = 0;
+// Default.
+var numOfTeams = 4;
 var netMode = true;
 
-function connectServer(gameStartCallback) {
+function connectServer(type, gameStartCallback) {
   socket = io.connect();
+  numOfTeams = type;
+  socket.emit(Message.GAME, type);
 
   /* Handle the team id message */
   socket.on(Message.TEAM, function(data) {
@@ -17,6 +21,29 @@ function connectServer(gameStartCallback) {
   /* Handle the start message */
   socket.on(Message.START, function() {
       gameStartCallback();
+      var grid = game.getWorld();
+      for (var tm = numOfTeams; tm < 4; tm++) {
+        for (var i = 0; i < grid.numOfCharacters; i++) {
+          grid.handleCharacterDead(grid.getCharacterById(tm, i));
+        }
+      }
+
+      console.log("Team id "+ myTeamId);
+
+      switch (myTeamId) {
+          case 0:
+              console.log("You spawned at left");
+              break;
+          case 1:
+              console.log("You spawned at bottom");
+              break;
+          case 2:
+              console.log("You spawned at left");
+              break;
+          case 3:
+              console.log("You spawned at right");
+              break;
+      }
   });
 
   /* Handle the move message */

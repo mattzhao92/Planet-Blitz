@@ -30,16 +30,14 @@ var Grid = Class.extend({
         // initialize characters
         this.characters = new THREE.Object3D();
         this.numOfCharacters = 3;
-        // Limit the game to 1 vs 1 now.
-        this.numOfTeams = 2;
         // The row position.
-        this.teamStartPos = [2, 8];
+        this.teamStartPos = [1, 18, 1, 18];
         this.characterMeshes = [];
         this.characterList = new Array();
         this.characterFactory = new CharacterFactory();
 
         var scope = this;
-        for (var team_id = 0; team_id < this.numOfTeams; team_id++) {
+        for (var team_id = 0; team_id < numOfTeams; team_id++) {
           this.characterList.push(new Array());
           this.currentSelectedUnits.push(null);
           for (var i = 0; i < this.numOfCharacters; i++) {
@@ -49,17 +47,26 @@ var Grid = Class.extend({
                   team: team_id
               };
               var character = this.characterFactory.createCharacter(charArgs);
-              character.placeAtGridPos(i + 3, this.teamStartPos[team_id]);
+              var startX, startY;
+              if (team_id < 2) {
+                startX = i + 9;
+                startY = this.teamStartPos[team_id];
+              } else {
+                startX = this.teamStartPos[team_id];
+                startY = i + 9;
+              }
+              character.placeAtGridPos(startX, startY);
+              this.markTileOccupiedByCharacter(startX, startY);
               character.setID(i);
               this.characterList[team_id].push(character);
-              this.markTileOccupiedByCharacter(i + 3, this.teamStartPos[team_id]);
               this.characterMeshes.push(character.mesh);
               this.scene.add(character.mesh);
           }
         }
         // bullet info
         this.bullets = [];
-        console.log("Grid.js team id "+ myTeamId);
+
+
         this.setupMouseMoveListener();
         this.setupMouseDownListener();
     },
@@ -129,7 +136,6 @@ var Grid = Class.extend({
         return -((this.gridLength / 2)) + (tileZPos * this.tileSize);
     },
 
-
     markCharacterAsSelected: function(character) {
         // deselect previous character if there was one
         if (this.currentSelectedUnits[myTeamId]) {
@@ -197,6 +203,13 @@ var Grid = Class.extend({
             this.currentMouseOverTile.reset();
         }
 
+        // deselect tiles.
+        if (this.highlightedTiles) {
+            this.highlightedTiles.forEach(function(tile) {
+                tile.reset();
+            });
+        }
+
         var characterMovementRange = character.getMovementRange();
 
         // highlight adjacent squares - collect all tiles from radius
@@ -207,12 +220,13 @@ var Grid = Class.extend({
     },
 
     highlightTiles: function(tilesToHighlight) {
+
         tilesToHighlight.forEach(function(tile) {
             tile.setSelectable(true);
             tile.setMovable(true);
             tile.markAsMovable();
-
         });
+        this.highlightedTiles = tilesToHighlight;
     },
 
     setPFGridCellAccessibility: function(x, z, hasObstacleOnCell) {

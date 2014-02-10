@@ -112,7 +112,7 @@ THREE.MapControls = function ( object, scene, domElement ) {
     var _panEnd = new THREE.Vector2();
 
     // make sure this arbitrary mouse position is slightl
-    var ARBITRARY_MOUSE_POS = 11;
+    var ARBITRARY_MOUSE_POS = 50;
     this.mousePosition = {x: ARBITRARY_MOUSE_POS, y: ARBITRARY_MOUSE_POS};
 
     this.handleResize = function () {
