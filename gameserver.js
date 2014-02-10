@@ -29,50 +29,69 @@ app.get('/', function(req, res) {
 server.listen(8080);
 
 
-var numPlayers = 0;
 var Message = netconst.Message;
 var Move = netconst.Move;
 var games = new Array();
+var numPlayers = 0;
 var curGameId = 0;
-games.push(new Game(curGameId));
+
+games.push(new Game(curGameId++, 2));
+var twoPlayerGameId = 0;
+games.push(new Game(curGameId++, 4));
+var fourPlayerGameId = 1;
 
 // IO communication.
 io.sockets.on('connection', function(socket) {
   socket.set('pseudo', 'player' + numPlayers);
-  socket.set('gameId', curGameId);
   console.log('Player connection, #' + numPlayers);
-  socket.emit(Message.TEAM, numPlayers % 2);
   numPlayers++;
 
-  var curGame = games[curGameId];
-  if (curGame.numPlayers == 0) {
-    curGame.team1 = socket;
-  } else if (curGame.numPlayers == 1) {
-    curGame.team2 = socket;
-  }
-  curGame.numPlayers++;
-  // Once a connection has enough players, start the game.
-  if (curGame.numPlayers == curGame.maxNumPlayers) {
-    console.log('start game for room ' + curGameId);
-    curGame.team1.emit(Message.START);
-    curGame.team2.emit(Message.START);
-    curGame.isStart = true;
-    curGameId++;
-    games.push(new Game(curGameId));
-  }
+  socket.on(Message.GAME, function(gameType) {
+    var type = parseInt(gameType);
+    console.log('type is ' + type);
+    var roomId;
+    if (type == 2) {
+      roomId = twoPlayerGameId;
+    } else if (type == 4) {
+      roomId = fourPlayerGameId;
+    }
+    var curGame = games[roomId];
+    socket.set('gameId', roomId);
+    socket.join(curGame.room);
+    // Send the team id to the player.
+    socket.emit(Message.TEAM, curGame.numPlayers++);
+
+    console.log('cur room players ' + curGame.numPlayers + '/' + curGame.maxNumPlayers);
+    // Start the game when full, and create a new one.
+    if (curGame.numPlayers == curGame.maxNumPlayers) {
+      console.log('start game for room ' + curGame.room);
+      //io.sockets.in(curGame.room).emit(Message.Start);
+      socket.broadcast.to(curGame.room).emit(Message.START);
+      socket.emit(Message.START);
+      if (type == 2) {
+        games.push(new Game(curGameId++, 2));
+        twoPlayerGameId = curGameId - 1;
+      } else {
+        games.push(new Game(curGameId++, 4));
+        fourPlayerGameId = curGameId - 1;
+      }
+    } 
+  });
+  
 
   // Game packet handling.
   socket.on(Message.MOVE, function(message) {
     socket.get('gameId', function(error, gameId) {
-      // Forward it to other player.
-      games[gameId].getOpponentClient(socket).emit(Message.MOVE, message);
+      // Broadcast to the game room.
+      var room = games[gameId].room;
+      socket.broadcast.to(room).emit(Message.MOVE, message);
     });
   });
 
   socket.on(Message.SHOOT, function(message) {
     socket.get('gameId', function(error, gameId) {
-      console.log('shot msg');
-      games[gameId].getOpponentClient(socket).emit(Message.SHOOT, message);
+      var room = games[gameId].room;
+      socket.broadcast.to(room).emit(Message.SHOOT, message);
     });
   });
 
@@ -86,18 +105,22 @@ io.sockets.on('connection', function(socket) {
 /**
  * Class for a Game.
  */
-function Game(gameId) {
+function Game(gameId, maxPlayers) {
   this.gameId = gameId;
-  this.team1 = null;
-  this.team2 = null;
+  this.teams = new Array();
   this.isStart = false;
   this.numPlayers = 0;
-  this.maxNumPlayers = 2;
-} 
-
-Game.prototype.getOpponentClient = function(client) {
-  if (client == this.team1) {
-    return this.team2;
+  this.maxNumPlayers = maxPlayers;
+  this.room = maxPlayers + 'room' + gameId;
+  this.teamIds = new Array();
+  for (var t = 0; t < maxPlayers; t++) {
+    this.teamIds.push(t);
   }
-  return this.team1;
+  shuffle(this.teamIds);
+  console.log(this.teamIds);
 }
+
+function shuffle(o){ //v1.0
+  for(var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
+  return o;
+};
