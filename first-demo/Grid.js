@@ -190,6 +190,13 @@ var Grid = Class.extend({
             this.currentMouseOverTile.reset();
         }
 
+        // deselect tiles.
+        if (this.highlightedTiles) {
+        this.highlightedTiles.forEach(function(tile) {
+            tile.reset();
+        });
+    }
+
         var characterMovementRange = character.getMovementRange();
 
         // highlight adjacent squares - collect all tiles from radius
@@ -205,6 +212,7 @@ var Grid = Class.extend({
             tile.markAsMovable();
 
         });
+        this.highlightedTiles = tilesToHighlight;
     },
 
     setPFGridCellAccessibility: function(x, z, hasObstacleOnCell) {
