@@ -31,7 +31,7 @@ var Grid = Class.extend({
         this.characters = new THREE.Object3D();
         this.numOfCharacters = 3;
         // The row position.
-        this.teamStartPos = [2, 8, 1, 8];
+        this.teamStartPos = [1, 19, 1, 1];
         this.characterMeshes = [];
         this.characterList = new Array();
         this.characterFactory = new CharacterFactory();
@@ -49,11 +49,11 @@ var Grid = Class.extend({
               var character = this.characterFactory.createCharacter(charArgs);
               var startX, startY;
               if (team_id < 2) {
-                startX = i + 3;
+                startX = i + 9;
                 startY = this.teamStartPos[team_id];
               } else {
                 startX = this.teamStartPos[team_id];
-                startY = i + 4;
+                startY = i + 9;
               }
               character.placeAtGridPos(startX, startY);
               this.markTileOccupiedByCharacter(startX, startY);
@@ -135,7 +135,6 @@ var Grid = Class.extend({
         return -((this.gridLength / 2)) + (tileZPos * this.tileSize);
     },
 
-
     markCharacterAsSelected: function(character) {
         // deselect previous character if there was one
         if (this.currentSelectedUnits[myTeamId]) {
@@ -196,6 +195,12 @@ var Grid = Class.extend({
             this.currentMouseOverTile.reset();
         }
 
+        // quick demo hack - reset all tiles
+        // inefficient as it must update every single square in grid
+        this.tiles.children.forEach(function (tileMesh) {
+            tileMesh.owner.reset();
+        });
+
         var characterMovementRange = character.getMovementRange();
 
         // highlight adjacent squares - collect all tiles from radius
@@ -205,11 +210,11 @@ var Grid = Class.extend({
     },
 
     highlightTiles: function(tilesToHighlight) {
+
         tilesToHighlight.forEach(function(tile) {
             tile.setSelectable(true);
             tile.setMovable(true);
             tile.markAsMovable();
-
         });
     },
 
