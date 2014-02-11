@@ -336,6 +336,40 @@ var Grid = Class.extend({
         this.scene.add(bullet.mesh);
     },
 
+    handleShootEvent: function(projector, mouseVector, intersectsWithTiles) {
+        // console.log("Firing bullet");
+
+        var from = this.currentSelectedUnits[myTeamId].mesh.position.clone();
+        var to;
+
+        var isFiringWithinGrid = intersectsWithTiles.length > 0;
+        if (isFiringWithinGrid) {
+            var tileSelected = intersectsWithTiles[0].object.owner;
+
+            // determine exact point of intersection with tile
+            to = intersectsWithTiles[0].point;
+        } else {
+            // experimental - be able to fire at points outside of space
+            var vector = new THREE.Vector3(mouseVector.x, mouseVector.y, 0.5);
+            projector.unprojectVector(vector, this.camera);
+            var dir = vector.sub(this.camera.position).normalize();
+
+            // calculate distance to the plane
+            var distance = - this.camera.position.y / dir.y;
+            var pos = this.camera.position.clone().add(dir.multiplyScalar(distance));
+
+            to = pos;
+        }
+
+        // keep bullet level
+        to.y = 15;
+        from.y = 15;
+
+        // shoot a bullet because you can
+        sendShootMsg(this.currentSelectedUnits[myTeamId].id, from, to);
+        this.shootBullet(this.currentSelectedUnits[myTeamId], from, to);
+    },
+
     onMouseDown: function(event) {
         var RIGHT_CLICK = 3;
         var LEFT_CLICK = 1;
@@ -356,52 +390,16 @@ var Grid = Class.extend({
         var intersects = raycaster.intersectObjects(scope.characterMeshes, true);
         var intersectsWithTiles = raycaster.intersectObjects(scope.tiles.children);
 
-        // should put this at the end of mouseDown
         if (this.currentSelectedUnits[myTeamId]) {
             // fire on click
             if (event.which == RIGHT_CLICK) {
-                // console.log("Firing bullet");
-
-                var from = this.currentSelectedUnits[myTeamId].mesh.position.clone();
-                var to;
-
-                if (intersectsWithTiles.length > 0) {
-                    var tileSelected = intersectsWithTiles[0].object.owner;
-
-                    // determine exact point of intersection with tile
-                    to = intersectsWithTiles[0].point;
-
-                } else {
-                    // experimental - be able to fire at points outside of space
-                    // console.log("Firing bullet outside of grid space");
-
-                    var vector = new THREE.Vector3(mouseVector.x, mouseVector.y, 0.5);
-                    projector.unprojectVector(vector, this.camera);
-                    var dir = vector.sub(this.camera.position).normalize();
-
-                    // calculate distance to the plane
-                    var distance = - this.camera.position.y / dir.y;
-                    var pos = this.camera.position.clone().add(dir.multiplyScalar(distance));
-
-                    to = pos;
-                }
-
-                // keep bullet level
-                to.y = 15;
-                from.y = 15;
-
-                // shoot a bullet because you can
-                sendShootMsg(this.currentSelectedUnits[myTeamId].id, from, to);
-                this.shootBullet(this.currentSelectedUnits[myTeamId], from, to);
+                this.handleShootEvent(projector, mouseVector, intersectsWithTiles);
             }
         }
 
         // move on click
         if (event.which == LEFT_CLICK) {
             // care about characters first, then tile intersects
-
-            // needed so that you can't click on a character and have that result in an immediate movement
-            // is there a better pattern for this - chain of event handlers?
             var continueHandlingIntersects = false;
 
             if (intersects.length > 0) {
