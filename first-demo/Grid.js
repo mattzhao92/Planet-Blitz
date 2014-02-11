@@ -336,7 +336,6 @@ var Grid = Class.extend({
         this.scene.add(bullet.mesh);
     },
 
-
     onMouseDown: function(event) {
         var RIGHT_CLICK = 3;
         var LEFT_CLICK = 1;
@@ -361,23 +360,39 @@ var Grid = Class.extend({
         if (this.currentSelectedUnits[myTeamId]) {
             // fire on click
             if (event.which == RIGHT_CLICK) {
-                console.log("Firing bullet");
+                // console.log("Firing bullet");
+
+                var from = this.currentSelectedUnits[myTeamId].mesh.position.clone();
+                var to;
 
                 if (intersectsWithTiles.length > 0) {
                     var tileSelected = intersectsWithTiles[0].object.owner;
-                    var from = this.currentSelectedUnits[myTeamId].mesh.position.clone();
 
-                    // keep bullets level
-                    from.y = 15;
-                    // var to = new THREE.Vector3(this.convertXPosToWorldX(tileSelected.xPos), 15, this.convertZPosToWorldZ(tileSelected.zPos));
-                    var to = intersectsWithTiles[0].point;
-                    to.y = 15;
+                    // determine exact point of intersection with tile
+                    to = intersectsWithTiles[0].point;
 
-                    // shoot a bullet because you can
-                    sendShootMsg(this.currentSelectedUnits[myTeamId].id, from, to);
-                    
-                    this.shootBullet(this.currentSelectedUnits[myTeamId], from, to);
+                } else {
+                    // experimental - be able to fire at points outside of space
+                    // console.log("Firing bullet outside of grid space");
+
+                    var vector = new THREE.Vector3(mouseVector.x, mouseVector.y, 0.5);
+                    projector.unprojectVector(vector, this.camera);
+                    var dir = vector.sub(this.camera.position).normalize();
+
+                    // calculate distance to the plane
+                    var distance = - this.camera.position.y / dir.y;
+                    var pos = this.camera.position.clone().add(dir.multiplyScalar(distance));
+
+                    to = pos;
                 }
+
+                // keep bullet level
+                to.y = 15;
+                from.y = 15;
+
+                // shoot a bullet because you can
+                sendShootMsg(this.currentSelectedUnits[myTeamId].id, from, to);
+                this.shootBullet(this.currentSelectedUnits[myTeamId], from, to);
             }
         }
 
