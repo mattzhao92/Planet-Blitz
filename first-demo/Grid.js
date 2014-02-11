@@ -369,7 +369,9 @@ var Grid = Class.extend({
 
                     // keep bullets level
                     from.y = 15;
-                    var to = new THREE.Vector3(this.convertXPosToWorldX(tileSelected.xPos), 15, this.convertZPosToWorldZ(tileSelected.zPos));
+                    // var to = new THREE.Vector3(this.convertXPosToWorldX(tileSelected.xPos), 15, this.convertZPosToWorldZ(tileSelected.zPos));
+                    var to = intersectsWithTiles[0].point;
+                    to.y = 15;
 
                     // shoot a bullet because you can
                     sendShootMsg(this.currentSelectedUnits[myTeamId].id, from, to);
