@@ -115,6 +115,8 @@ THREE.MapControls = function ( object, scene, domElement ) {
     var ARBITRARY_MOUSE_POS = 50;
     this.mousePosition = {x: ARBITRARY_MOUSE_POS, y: ARBITRARY_MOUSE_POS};
 
+    this.CURSOR_IMAGE_PATH = "images/cursor.png";
+
     this.handleResize = function () {
         if ( this.domElement === document ) {
             this.screen.left = 0;
@@ -726,19 +728,24 @@ THREE.MapControls = function ( object, scene, domElement ) {
     }
 
     this.drawMouseCursor = function() {
-        this.mouseSprite.position.set( scope.mousePosition.x, scope.mousePosition.y, 0 );
+        this.mouseSprite.position.set(scope.mousePosition.x, scope.mousePosition.y, 0);
     }
 
     this.setupMouseCursor = function() {
-        var ballTexture = THREE.ImageUtils.loadTexture( 'images/redball.png' );
-        
+        var cursorTexture = THREE.ImageUtils.loadTexture(this.CURSOR_IMAGE_PATH);
+
         // suggested- alignment: THREE.SpriteAlignment.center  for targeting-style icon
         //            alignment: THREE.SpriteAlignment.topLeft for cursor-pointer style icon
-        var ballMaterial = new THREE.SpriteMaterial( { map: ballTexture, useScreenCoordinates: true, alignment: THREE.SpriteAlignment.center } );
-        this.mouseSprite = new THREE.Sprite( ballMaterial );
-        this.mouseSprite.scale.set( 16, 16, 1.0 );
-        this.mouseSprite.position.set( 50, 50, 0 );
-        this.scene.add( this.mouseSprite );    
+        var cursorMaterial = new THREE.SpriteMaterial({
+            map: cursorTexture,
+            useScreenCoordinates: true,
+            // alignment: THREE.SpriteAlignment.center
+            alignment: THREE.SpriteAlignment.topLeft
+        });
+        this.mouseSprite = new THREE.Sprite(cursorMaterial);
+        this.mouseSprite.scale.set(20, 20, 1.0);
+        this.mouseSprite.position.set(this.mousePosition.x, this.mousePosition.y, 0);
+        this.scene.add(this.mouseSprite);
     }
 
     this.getMousePosition = function() {
