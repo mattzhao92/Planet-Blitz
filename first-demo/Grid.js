@@ -337,8 +337,6 @@ var Grid = Class.extend({
     },
 
     handleShootEvent: function(projector, mouseVector, intersectsWithTiles) {
-        // console.log("Firing bullet");
-
         var from = this.currentSelectedUnits[myTeamId].mesh.position.clone();
         var to;
 
@@ -390,7 +388,8 @@ var Grid = Class.extend({
         var intersects = raycaster.intersectObjects(scope.characterMeshes, true);
         var intersectsWithTiles = raycaster.intersectObjects(scope.tiles.children);
 
-        if (this.currentSelectedUnits[myTeamId]) {
+        var unitIsCurrentlySelected = (this.currentSelectedUnits[myTeamId] != null);
+        if (unitIsCurrentlySelected) {
             // fire on click
             if (event.which == RIGHT_CLICK) {
                 this.handleShootEvent(projector, mouseVector, intersectsWithTiles);
