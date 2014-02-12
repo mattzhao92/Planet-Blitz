@@ -19,7 +19,6 @@ var Grid = Class.extend({
         // listeners and state
         this.mouseDownListenerActive = true;
         this.mouseOverListenerActive = true;
-        this.allowCharacterMovement = true;
 
         // create grid tiles
         this.tiles = new THREE.Object3D();
@@ -409,8 +408,7 @@ var Grid = Class.extend({
                     clickedObject.onSelect(scope);
                 } else {
                     continueHandlingIntersects = true;
-                }
-            } else {
+}            } else {
                 continueHandlingIntersects = true;
             }
 
@@ -419,28 +417,19 @@ var Grid = Class.extend({
                     var tileSelected = intersectsWithTiles[0].object.owner;
                     var coordinate = tileSelected.onMouseOver();
                     if (this.currentSelectedUnits[myTeamId] && coordinate) {
-                        // allow only one character to move at a time
-                        if (this.allowCharacterMovement) {
-                            var deltaX = coordinate.x - this.currentSelectedUnits[myTeamId].getTileXPos();
-                            var deltaY = 0;
-                            var deltaZ = coordinate.z - this.currentSelectedUnits[myTeamId].getTileZPos();
-                            this.currentSelectedUnits[myTeamId].setDirection(
-                                new THREE.Vector3(deltaX, deltaY, deltaZ));
+                        var deltaX = coordinate.x - this.currentSelectedUnits[myTeamId].getTileXPos();
+                        var deltaY = 0;
+                        var deltaZ = coordinate.z - this.currentSelectedUnits[myTeamId].getTileZPos();
+                        this.currentSelectedUnits[myTeamId].setDirection(
+                            new THREE.Vector3(deltaX, deltaY, deltaZ));
 
-                            // Put the network communication here.
-                            sendMoveMsg(this.currentSelectedUnits[myTeamId].id, 
-                                    deltaX, deltaY, deltaZ);
+                        // Put the network communication here.
+                        sendMoveMsg(this.currentSelectedUnits[myTeamId].id,
+                            deltaX, deltaY, deltaZ);
 
-                            // this.disableMouseMoveListener();
-                            // this.disableMouseDownListener();
-
-                            this.currentSelectedUnits[myTeamId].enqueueMotion(this,function() {
-                                // console.log("Motion finished");
-                                this.allowCharacterMovement = true;
-                                // scope.enableMouseMoveListener();
-                                // scope.enableMouseDownListener();
-                            });
-                        }
+                        this.currentSelectedUnits[myTeamId].enqueueMotion(this, function() {
+                            this.allowCharacterMovement = true;
+                        });
                     }
                 }
             }
