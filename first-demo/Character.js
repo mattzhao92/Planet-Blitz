@@ -39,7 +39,6 @@ var Character = Class.extend({
 
         // Set the current animation step
         this.step = 0;
-        this.sequenceMotionInProgres = false;
         this.motionInProcess = false;
         this.motionQueue = new Array();
 
@@ -51,6 +50,23 @@ var Character = Class.extend({
 
         this.highlightedTiles = null;
         this.health = 100;
+
+        var canvas = document.createElement('canvas');
+        this.canvas2d = canvas.getContext('2d');
+        
+        this.coolDownBarTexture = new THREE.Texture(canvas) 
+        this.coolDownBarTexture.needsUpdate = true;
+
+        var spriteMaterial = new THREE.SpriteMaterial( { map: this.coolDownBarTexture, useScreenCoordinates: false, alignment: THREE.SpriteAlignment.center } );
+        
+        this.coolDownBarXOffset = this.world.getTileSize()*1.0/6;
+        this.coolDownBarZOffset = this.world.getTileSize()*1.0/8;
+        this.coolDownBarYOffset = 100;
+        this.sprite1 = new THREE.Sprite( spriteMaterial );
+        this.sprite1.scale.set(50,200,1.0);
+        this.lastRoadMap = new Array();
+        this.coolDownCount = 105;
+        this.coolDownLeft = 0;
     },
 
     loadFile: function(filename, onLoad) {
@@ -113,15 +129,17 @@ var Character = Class.extend({
     },
 
     enterCoolDown: function(world) {
-        this.isCoolDown = 1;
-        var scope = this;
-        setTimeout(function() {
-            console.log("time out ");
-            scope.isCoolDown = 0;
-            if (world.currentSelectedUnits[scope.team] == scope && !scope.sequenceMotionInProgres)
-                world.displayMovementArea(scope);
-        }
-        , this.CHARACTER_COOLDOWN_TIMER);
+    	this.isCoolDown = 1;
+    	var scope = this;
+    	
+        this.canvas2d.rect(20,20,150,100);
+        this.canvas2d.fillStyle = "red";
+        this.canvas2d.fill();
+        this.coolDownBarTexture.needsUpdate = true;
+        this.sprite1.position.set(this.mesh.position.x + this.coolDownBarXOffset,this.mesh.position.y + this.coolDownBarYOffset,this.mesh.position.z + this.coolDownBarZOffset);        
+        this.world.scene.add(this.sprite1 );   
+
+        this.coolDownLeft = this.coolDownCount;
     },
 
 
@@ -143,8 +161,8 @@ var Character = Class.extend({
     placeAtGridPos: function(xPos, zPos) {
         this.xPos = xPos;
         this.zPos = zPos;
-        this.mesh.position.x = this.world.convertXPosToWorldX(xPos);
-        this.mesh.position.z = this.world.convertZPosToWorldZ(zPos);
+        this.setCharacterMeshPosX(this.world.convertXPosToWorldX(xPos));
+        this.setCharacterMeshPosZ(this.world.convertZPosToWorldZ(zPos));
     },
 
     getTileXPos: function() {
@@ -222,22 +240,47 @@ var Character = Class.extend({
             addNewItem = true;
         }
 
-        this.motionQueue.push({'sentinal' : 'end'});
+        this.motionQueue.push({'sentinel' : 'end'});
         for (var i = newMotions.length-1; i >= 0; i--) {
             this.motionQueue.push(newMotions[i]);
         }
-        this.motionQueue.push({'sentinal' : 'start', 'highlightTiles': path});
+        this.motionQueue.push({'sentinel' : 'start', 'highlightTiles': path});
 
         // TODO: define actual tween timeout
         if (onMotionFinish) {
             setTimeout(onMotionFinish, 800);
         }
+	    	}
+	    },
 
-        this.enterCoolDown(world);
-        }
+    setCharacterMeshPosX: function(x) {
+        this.mesh.position.x = x;
+        this.sprite1.position.x = x;
+        this.sprite1.position.x = x + this.coolDownBarXOffset;
+    },
+
+    setCharacterMeshPosY: function(y) {
+        this.mesh.position.y = y;
+        this.sprite1.position.y = y + this.coolDownBarYOffset;
+    },
+
+    setCharacterMeshPosZ: function(z) {
+        this.mesh.position.z = z;
+        this.sprite1.position.z = z + this.coolDownBarZOffset;
     },
 
     update: function(world, delta) {
+
+        if (this.isCoolDown) {
+            this.coolDownLeft--;
+            this.sprite1.scale.set(50, 200.0 * this.coolDownLeft/this.coolDownCount, 1.0);
+            if (this.coolDownLeft == 0) {
+                this.isCoolDown = false;
+                if (world.currentSelectedUnits[this.team] == this)
+                    world.displayMovementArea(this);
+            }
+        }
+
         if (this.rotationInProgress) {
             var newAngle = this.mesh.rotation.y + this.angularVelocity * delta;
             if ((newAngle  - this.goalAngle) / (this.goalAngle - this.prevAngle) > 0) {
@@ -256,20 +299,20 @@ var Character = Class.extend({
 
 
             if ((newMeshX - this.goalMeshX) / (this.goalMeshX - this.prevMeshX) > 0) {
-                this.mesh.position.x = this.goalMeshX;
+                this.setCharacterMeshPosX(this.goalMeshX);
                 this.motionInProgress = false;
                 this.xPos = this.goalXPos;
             } else {
-                this.mesh.position.x = newMeshX;
+                this.setCharacterMeshPosX(newMeshX);
                 this.velocityX *= 1.05;
             }
 
             if ((newMeshZ - this.goalMeshZ) / (this.goalMeshZ - this.prevMeshZ) > 0) {
-                this.mesh.position.z = this.goalMeshZ;
+                this.setCharacterMeshPosZ(this.goalMeshZ);
                 this.motionInProgress = false;
                 this.zPos = this.goalZPos;
             } else {
-                this.mesh.position.z = newMeshZ;
+                this.setCharacterMeshPosZ(newMeshZ);
                 this.velocityZ *= 1.05;
             }
 
@@ -284,30 +327,30 @@ var Character = Class.extend({
         if (this.motionQueue.length > 0) {
             this.motionInProcess = true;
             var direction = this.motionQueue.pop();
-            if (direction.sentinal == 'start') {
+            if (direction.sentinel == 'start') {
                 var path = direction.highlightTiles;
                 
                 if (this.team == myTeamId) {
-                    console.log("list "+this.highlightedTiles);
                     if (this.highlightedTiles){
                         for (var i = 0; i < this.highlightedTiles.length; i++) {
-                            console.log("clearing \n");
                             this.highlightedTiles[i].reset();
                         }
                     }
 
+                    this.lastRoadMap.length = 0;
                     for (var i = 0; i < path.length; i++) {
-                        world.getTileAtTilePos(path[i][0], path[i][1]).markAsRoadMap();
+                        var roadTile = world.getTileAtTilePos(path[i][0], path[i][1]);
+                        roadTile.markAsRoadMap();
+                        this.lastRoadMap.push(roadTile);
                     }
                 }
-
-                this.sequenceMotionInProgres = true;
                 return;
-            } else if (direction.sentinal == 'end') {
-                this.sequenceMotionInProgres = false;
-               
-                if (world.currentSelectedUnits[this.team] == this && this.isCoolDown == 0)
-                    world.displayMovementArea(this);
+            } else if (direction.sentinel == 'end') {
+                for (var i = 0; i < this.lastRoadMap.length; i++) {
+                    this.lastRoadMap[i].reset();
+                }
+
+                this.enterCoolDown();
 
                 return;
             }
