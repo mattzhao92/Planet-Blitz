@@ -22,9 +22,12 @@ var Character = Class.extend({
         this.team = args.team;
 
         // red, light blue, green, purple
-        var TEAM_COLORS = [0xFF0000, 0x3399FF, 0x006600, 0x9966FF];
+        // var TEAM_COLOR_CONSTANTS = [0xFF0000, 0x3399FF, 0x006600, 0x9966FF];
         // console.log(TEAM_COLORS);
-        this.teamColor = TEAM_COLORS[this.team];
+        // var TEAM_COLOR_CONSTANTS = [0xFF0000, 0x3399FF, 0x006600, 0x9966FF];
+        var TEAM_COLOR_CONSTANTS = [0xFF0000, 0x00FF00, 0x0000FF, 0xFFFFFF];
+
+        this.teamColor = new THREE.Color(TEAM_COLOR_CONSTANTS[this.team]);
         console.log(this.teamColor);
 
         this.isActive = false;
@@ -158,7 +161,9 @@ var Character = Class.extend({
         var scope = this;
 
         this.loader.load(filename, function(geometry) {
-            mesh = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial());
+            var material = new THREE.MeshLambertMaterial();
+            material.color = scope.teamColor;
+            mesh = new THREE.Mesh(geometry, material);
             mesh.scale.set(24, 24, 24);
             // this is very temporary
             mesh.position.y = -10;
@@ -168,6 +173,8 @@ var Character = Class.extend({
 
             scope.mesh.add(mesh);
             scope.characterMesh = mesh;
+
+
         });
     },
 
