@@ -21,12 +21,7 @@ var Character = Class.extend({
         this.onDead = args.onDead;
         this.team = args.team;
 
-        // red, light blue, green, purple
-        // var TEAM_COLOR_CONSTANTS = [0xFF0000, 0x3399FF, 0x006600, 0x9966FF];
-        // console.log(TEAM_COLORS);
-        // var TEAM_COLOR_CONSTANTS = [0xFF0000, 0x3399FF, 0x006600, 0x9966FF];
-        var TEAM_COLOR_CONSTANTS = [0xFF0000, 0x00FF00, 0x0000FF, 0xFFFFFF];
-        this.teamColor = new THREE.Color(TEAM_COLOR_CONSTANTS[this.team]);
+        this.teamColor = new THREE.Color(Constants.TEAM_COLORS[this.team]);
 
         this.isActive = false;
         this.id = 0;
