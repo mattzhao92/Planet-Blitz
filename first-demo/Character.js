@@ -26,9 +26,7 @@ var Character = Class.extend({
         // console.log(TEAM_COLORS);
         // var TEAM_COLOR_CONSTANTS = [0xFF0000, 0x3399FF, 0x006600, 0x9966FF];
         var TEAM_COLOR_CONSTANTS = [0xFF0000, 0x00FF00, 0x0000FF, 0xFFFFFF];
-
         this.teamColor = new THREE.Color(TEAM_COLOR_CONSTANTS[this.team]);
-        console.log(this.teamColor);
 
         this.isActive = false;
         this.id = 0;
@@ -54,11 +52,37 @@ var Character = Class.extend({
         this.isCoolDown = false;
 
         this.loader = new THREE.JSONLoader();
-        this.loadFile("blendermodels/headcombinedtextured.js");
-        // this.loadFile("blendermodels/spheresoldierrolling.js");
+        this.loadFile("blendermodels/spheresoldierrolling.js");
 
         this.highlightedTiles = null;
         this.health = 100;
+    },
+
+    loadFile: function(filename, onLoad) {
+        var scope = this;
+
+        var fullFilename = filename;
+
+        this.loader.load(fullFilename, function(geometry, materials) {
+            // scope.handle(geometry, materials);
+            var combinedMaterials = new THREE.MeshFaceMaterial(materials);
+            mesh = new THREE.Mesh(geometry, combinedMaterials);
+
+            // scale to correct width / height / depth
+            geometry.computeBoundingBox();
+
+            // TODO: should use this bounding box to compute correct scale
+            var boundingBox = geometry.boundingBox;
+            var width = geometry.boundingBox.max.x - geometry.boundingBox.min.x
+            var height = geometry.boundingBox.max.y - geometry.boundingBox.min.y
+            var depth = geometry.boundingBox.max.z - geometry.boundingBox.min.z
+            mesh.scale.set(10, 10, 10);
+
+            // link the mesh with the character owner object
+            this.mesh.owner = scope;
+            scope.mesh.add(mesh);
+            scope.characterMesh = mesh;
+        });
     },
 
     setID: function(id) {
@@ -155,27 +179,6 @@ var Character = Class.extend({
             this.unitSelectorMesh.visible = false;
             this.isActive = false;
         }
-    },
-
-    loadFile: function(filename) {
-        var scope = this;
-
-        this.loader.load(filename, function(geometry) {
-            var material = new THREE.MeshLambertMaterial();
-            material.color = scope.teamColor;
-            mesh = new THREE.Mesh(geometry, material);
-            mesh.scale.set(24, 24, 24);
-            // this is very temporary
-            mesh.position.y = -10;
-            mesh.position.x = 0;
-            mesh.position.z = 10;
-            this.mesh.owner = scope;
-
-            scope.mesh.add(mesh);
-            scope.characterMesh = mesh;
-
-
-        });
     },
 
     // Update the direction of the current motion
