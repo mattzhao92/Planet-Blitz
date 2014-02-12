@@ -375,7 +375,7 @@ var Grid = Class.extend({
 
         var projector = new THREE.Projector();
         var mouseVector = new THREE.Vector3();
-        
+
         var mousePosition = this.controls.getMousePosition();
 
         mouseVector.x = 2 * (mousePosition.x / window.innerWidth) - 1;
@@ -408,7 +408,8 @@ var Grid = Class.extend({
                     clickedObject.onSelect(scope);
                 } else {
                     continueHandlingIntersects = true;
-}            } else {
+                }
+            } else {
                 continueHandlingIntersects = true;
             }
 
@@ -434,7 +435,6 @@ var Grid = Class.extend({
                 }
             }
         }
-
     },
 
     getTileAtTilePos: function(xPos, zPos) {

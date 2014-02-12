@@ -59,11 +59,11 @@ var Character = Class.extend({
 
         var spriteMaterial = new THREE.SpriteMaterial( { map: this.coolDownBarTexture, useScreenCoordinates: false, alignment: THREE.SpriteAlignment.center } );
         
-        this.coolDownBarXOffset = this.world.getTileSize()*1.0/6;
-        this.coolDownBarZOffset = this.world.getTileSize()*1.0/8;
-        this.coolDownBarYOffset = 100;
-        this.sprite1 = new THREE.Sprite( spriteMaterial );
-        this.sprite1.scale.set(50,200,1.0);
+        this.coolDownBarXOffset = this.world.getTileSize() * 1.0 / 6;
+        this.coolDownBarZOffset = this.world.getTileSize() * 1.0 / 8;
+        this.coolDownBarYOffset = 60;
+        this.sprite1 = new THREE.Sprite(spriteMaterial);
+        this.sprite1.scale.set(50, 200, 1.0);
         this.lastRoadMap = new Array();
         this.coolDownCount = 105;
         this.coolDownLeft = 0;
@@ -132,7 +132,7 @@ var Character = Class.extend({
     	this.isCoolDown = 1;
     	var scope = this;
     	
-        this.canvas2d.rect(20,20,150,100);
+        this.canvas2d.rect(20, 20, 30, 60);
         this.canvas2d.fillStyle = "red";
         this.canvas2d.fill();
         this.coolDownBarTexture.needsUpdate = true;
@@ -277,6 +277,7 @@ var Character = Class.extend({
 
         if (this.isCoolDown) {
             this.coolDownLeft--;
+            // update cooldown timer
             this.sprite1.scale.set(50, 200.0 * this.coolDownLeft/this.coolDownCount, 1.0);
             if (this.coolDownLeft == 0) {
                 this.isCoolDown = false;
