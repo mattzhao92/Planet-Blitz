@@ -1,0 +1,16 @@
+{
+  "name": "PlanetBlitz",
+  "subdomain": "jtkmcwx",
+  "scripts": {
+    "start": "gameserver.js"
+  },
+  "version": "0.0.0-9",
+  "engines": {
+    "node": "0.10.x"
+  },
+  "dependencies": {
+    "socket.io": "*",
+    "express": "*",
+    "jade": "*"
+  }
+}
