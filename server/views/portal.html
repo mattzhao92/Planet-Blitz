@@ -19,11 +19,6 @@
     <script type="text/javascript" src="keyboard.js"></script>
     <script type="text/javascript" src="MapControls.js"></script>
 
-    <!-- Networking -->
-    <script type="text/javascript" src="netstate.js"></script>
-    <script type="text/javascript" src="connect.js"></script>
-    <script type="text/javascript" src="server.js"></script>
-
     <!-- Game core -->
     <script type="text/javascript" src="Constants.js"></script>
 
@@ -32,6 +27,13 @@
     <script type="text/javascript" src="Game.js"></script>
     <script type="text/javascript" src="GridCell.js"></script>
     <script type="text/javascript" src="Bullet.js"></script>
+
+    <!-- Networking -->
+    <script type="text/javascript" src="netstate.js"></script>
+    <script type="text/javascript" src="connect.js"></script>
+    <!-- WARNING: server.js manipulates the CSS, so it should be the last one to be included. 
+    If it is included before MapControls, the mouse will freeze. -->
+    <script type="text/javascript" src="server.js"></script>
 
     <script id="vertexShader" type="x-shader/x-vertex">
     uniform vec3 viewVector;
