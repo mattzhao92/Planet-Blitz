@@ -655,24 +655,21 @@ THREE.MapControls = function ( object, scene, domElement ) {
     $(containerName).click(
         function() {
             PL.requestPointerLock(document.body,
+                // on pointerlock enable
                 function(event) {
-                    console.log("[Mouse controls] enable");
-
                     document.addEventListener("mousemove", moveCallback, false);
-
-                }, function(event) {
-
-                    console.log("[Mouse controls] exit");
-
+                }, 
+                // on pointerlock disable
+                function(event) {
                     document.removeEventListener("mousemove", moveCallback, false);
                     scope.resetMousePosition();
-
-                }, function(event) {
+                }, 
+                // on error
+                function(event) {
                     console.log("Error: could not obtain pointerlock");
                 });
         }
     );
-
 
     function calculateInitialMousePosition(canvas, event) {
         var x = new Number();

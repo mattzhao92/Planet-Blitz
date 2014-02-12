@@ -32,7 +32,7 @@ function connectServer(type, gameStartCallback) {
 
       switch (myTeamId) {
           case 0:
-              console.log("You spawned at left");
+              console.log("You spawned at top");
               break;
           case 1:
               console.log("You spawned at bottom");
