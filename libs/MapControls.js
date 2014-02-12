@@ -657,6 +657,7 @@ THREE.MapControls = function ( object, scene, domElement ) {
             PL.requestPointerLock(document.body,
                 // on pointerlock enable
                 function(event) {
+                    scope.handleResize();
                     document.addEventListener("mousemove", moveCallback, false);
                 }, 
                 // on pointerlock disable
