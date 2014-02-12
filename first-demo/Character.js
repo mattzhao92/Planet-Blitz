@@ -10,6 +10,7 @@ var CharacterFactory = Class.extend({
 });
 
 var Character = Class.extend({
+
     // Class constructor
     init: function(args) {
         'use strict';
@@ -19,6 +20,12 @@ var Character = Class.extend({
         this.world = args.world;
         this.onDead = args.onDead;
         this.team = args.team;
+
+        // red, light blue, green, purple
+        var TEAM_COLORS = [0xFF0000, 0x3399FF, 0x006600, 0x9966FF];
+        // console.log(TEAM_COLORS);
+        this.teamColor = TEAM_COLORS[this.team];
+        console.log(this.teamColor);
 
         this.isActive = false;
         this.id = 0;
