@@ -743,7 +743,7 @@ THREE.MapControls = function ( object, scene, domElement ) {
             alignment: THREE.SpriteAlignment.topLeft
         });
         this.mouseSprite = new THREE.Sprite(cursorMaterial);
-        this.mouseSprite.scale.set(20, 20, 1.0);
+        this.mouseSprite.scale.set(40, 40, 1.0);
         this.mouseSprite.position.set(this.mousePosition.x, this.mousePosition.y, 0);
         this.scene.add(this.mouseSprite);
     }
