@@ -51,6 +51,7 @@ var GridCell = Class.extend({
     highlight: function(color) {
 
         this.tileMesh.visible = true;
+        this.tileMesh.material.opacity = 0.3;
         var rgb;
         switch (color) {
             case "GREEN":
@@ -110,7 +111,8 @@ var TileFactory = Class.extend({
     createTile: function(xPos, zPos) {
 
         var mat = new THREE.MeshLambertMaterial({
-            overdraw: true
+            overdraw: true,
+            transparent: true
         });
 
         var grayness = Math.random() * 0.5 + 0.25;
@@ -127,7 +129,6 @@ var TileFactory = Class.extend({
         tileMesh.position.y = 0;
         tileMesh.position.z = this.world.convertZPosToWorldZ(zPos);
         tileMesh.rotation.x = -0.5 * Math.PI;
-
 
         tileMesh.visible = false;
 

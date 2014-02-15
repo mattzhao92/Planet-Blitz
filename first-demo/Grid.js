@@ -471,7 +471,10 @@ var Grid = Class.extend({
         var ground = new THREE.Mesh(new THREE.PlaneGeometry(this.gridWidth, this.gridLength), groundMaterial
             );
         ground.rotation.x = -0.5 * Math.PI;
-        ground.position.y = -0.3;
+        ground.position.y = -0.2;
+        // offset to fit grid drawing 
+        ground.position.x -= this.tileSize / 2;
+        ground.position.z -= this.tileSize / 2;
 
         this.scene.add(ground);
     },
@@ -497,6 +500,7 @@ var Grid = Class.extend({
                 this.tiles.add(tileMesh);
             }
         }
+
         this.PFGrid = new PF.Grid(this.numberSquaresOnXAxis, this.numberSquaresOnZAxis);
         this.pathFinder = new PF.AStarFinder();
 
