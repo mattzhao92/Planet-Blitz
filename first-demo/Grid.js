@@ -4,6 +4,8 @@ var Grid = Class.extend({
     init: function(width, length, tileSize, scene, camera, controls) {
         'use strict';
 
+        this.GROUND_TEXTURE = "images/Supernova.jpg"
+
         this.gridWidth = width;
         this.gridLength = length;
         this.tileSize = tileSize;
@@ -459,7 +461,19 @@ var Grid = Class.extend({
     },
 
     loadGround: function() {
-        
+        var texture = THREE.ImageUtils.loadTexture(this.GROUND_TEXTURE);
+
+        var groundMaterial = new THREE.MeshLambertMaterial({
+            color: 0xffffff, 
+            map: texture
+        });
+
+        var ground = new THREE.Mesh(new THREE.PlaneGeometry(this.gridWidth, this.gridLength), groundMaterial
+            );
+        ground.rotation.x = -0.5 * Math.PI;
+        ground.position.y = -0.3;
+
+        this.scene.add(ground);
     },
 
     drawGridSquares: function(width, length, size) {
