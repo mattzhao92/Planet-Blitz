@@ -371,8 +371,6 @@ var Grid = Class.extend({
         var RIGHT_CLICK = 3;
         var LEFT_CLICK = 1;
 
-        var scope = this;
-
         var projector = new THREE.Projector();
         var mouseVector = new THREE.Vector3();
 
@@ -381,11 +379,11 @@ var Grid = Class.extend({
         mouseVector.x = 2 * (mousePosition.x / window.innerWidth) - 1;
         mouseVector.y = 1 - 2 * (mousePosition.y / window.innerHeight);
 
-        var raycaster = projector.pickingRay(mouseVector.clone(), scope.camera);
+        var raycaster = projector.pickingRay(mouseVector.clone(), this.camera);
 
         // recursively call intersects
-        var intersects = raycaster.intersectObjects(scope.characterMeshes, true);
-        var intersectsWithTiles = raycaster.intersectObjects(scope.tiles.children);
+        var intersects = raycaster.intersectObjects(this.characterMeshes, true);
+        var intersectsWithTiles = raycaster.intersectObjects(this.tiles.children);
 
         var unitIsCurrentlySelected = (this.currentSelectedUnits[myTeamId] != null);
         if (unitIsCurrentlySelected) {
@@ -398,40 +396,50 @@ var Grid = Class.extend({
         // move on click
         if (event.which == LEFT_CLICK) {
             // care about characters first, then tile intersects
-            var continueHandlingIntersects = false;
+            var continueClickHandler = false;
 
             if (intersects.length > 0) {
                 var clickedObject = intersects[0].object.owner;
 
                 // done so that you can click on a tile behind a character easily
                 if (clickedObject != this.currentSelectedUnits[myTeamId]) {
-                    clickedObject.onSelect(scope);
+                    clickedObject.onSelect(this);
                 } else {
-                    continueHandlingIntersects = true;
+                    continueClickHandler = true;
                 }
             } else {
-                continueHandlingIntersects = true;
+                continueClickHandler = true;
             }
 
-            if (continueHandlingIntersects) {
-                if (intersectsWithTiles.length > 0) {
-                    var tileSelected = intersectsWithTiles[0].object.owner;
-                    var coordinate = tileSelected.onMouseOver();
-                    if (this.currentSelectedUnits[myTeamId] && coordinate) {
-                        var deltaX = coordinate.x - this.currentSelectedUnits[myTeamId].getTileXPos();
-                        var deltaY = 0;
-                        var deltaZ = coordinate.z - this.currentSelectedUnits[myTeamId].getTileZPos();
-                        this.currentSelectedUnits[myTeamId].setDirection(
-                            new THREE.Vector3(deltaX, deltaY, deltaZ));
+            // case where unit is moving
+            if (continueClickHandler) {
+                this.handleMoveCase(intersectsWithTiles);
+            }
+        }
+    },
 
-                        // Put the network communication here.
-                        sendMoveMsg(this.currentSelectedUnits[myTeamId].id,
-                            deltaX, deltaY, deltaZ);
+    handleMoveCase: function(intersectsWithTiles) {
+        if (intersectsWithTiles.length > 0) {
+            var tileSelected = intersectsWithTiles[0].object.owner;
+            var coordinate = tileSelected.onMouseOver();
+            if (this.currentSelectedUnits[myTeamId] && coordinate) {
+                var deltaX = coordinate.x - this.currentSelectedUnits[myTeamId].getTileXPos();
+                var deltaY = 0;
+                var deltaZ = coordinate.z - this.currentSelectedUnits[myTeamId].getTileZPos();
 
-                        this.currentSelectedUnits[myTeamId].enqueueMotion(this, function() {
-                            this.allowCharacterMovement = true;
-                        });
-                    }
+                var unitMovedToDifferentSquare = !(deltaX == 0 && deltaZ == 0);
+
+                if (unitMovedToDifferentSquare) {
+                    this.currentSelectedUnits[myTeamId].setDirection(
+                        new THREE.Vector3(deltaX, deltaY, deltaZ));
+
+                    // Put the network communication here.
+                    sendMoveMsg(this.currentSelectedUnits[myTeamId].id,
+                        deltaX, deltaY, deltaZ);
+
+                    this.currentSelectedUnits[myTeamId].enqueueMotion(this, function() {
+                        this.allowCharacterMovement = true;
+                    });
                 }
             }
         }
