@@ -46,7 +46,8 @@ var Grid = Class.extend({
               var charArgs = {
                   world: scope,
                   onDead: scope.removeCharacter,
-                  team: team_id
+                  team: team_id,
+                  characterSize: scope.tileSize / 2
               };
               var character = this.characterFactory.createCharacter(charArgs);
               var startX, startY;

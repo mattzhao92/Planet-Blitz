@@ -20,6 +20,7 @@ var Character = Class.extend({
         this.world = args.world;
         this.onDead = args.onDead;
         this.team = args.team;
+        this.characterSize = args.characterSize;
 
         this.teamColor = new THREE.Color(Constants.TEAM_COLORS[this.team]);
 
@@ -90,9 +91,9 @@ var Character = Class.extend({
 
             // TODO: should use this bounding box to compute correct scale
             var boundingBox = geometry.boundingBox;
-            var width = geometry.boundingBox.max.x - geometry.boundingBox.min.x
-            var height = geometry.boundingBox.max.y - geometry.boundingBox.min.y
-            var depth = geometry.boundingBox.max.z - geometry.boundingBox.min.z
+            var width = geometry.boundingBox.max.x - geometry.boundingBox.min.x;
+            var height = geometry.boundingBox.max.y - geometry.boundingBox.min.y;
+            var depth = geometry.boundingBox.max.z - geometry.boundingBox.min.z;
             mesh.scale.set(10, 10, 10);
 
             // link the mesh with the character owner object
@@ -107,8 +108,7 @@ var Character = Class.extend({
     },
 
     getRadius: function() {
-        // TODO: remove this hardcoding
-        return 20;
+        return this.characterSize;
     },
 
     update: function(delta) {
@@ -374,8 +374,8 @@ var Character = Class.extend({
                 this.prevMeshZ = this.mesh.position.z;
 
                 world.markTileNotOccupiedByCharacter(this.getTileXPos(), this.getTileZPos());
-                this.goalMeshX = this.mesh.position.x + direction.x * 40;
-                this.goalMeshZ = this.mesh.position.z + direction.z * 40;
+                this.goalMeshX = this.mesh.position.x + direction.x * this.world.getTileSize();
+                this.goalMeshZ = this.mesh.position.z + direction.z * this.world.getTileSize();
                 
                 if (direction.x < 0) {
                     this.velocityX = -100;
