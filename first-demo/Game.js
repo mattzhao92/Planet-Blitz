@@ -149,14 +149,32 @@ $(function () {
         initStats: function() {
             var stats = new Stats();
 
-            stats.setMode(0); // 0: fps, 1: ms
+            // stats.setMode(0); // 0: fps, 1: ms
 
-            // Align top-left
-            stats.domElement.style.position = 'absolute';
-            stats.domElement.style.left = '9px';
-            stats.domElement.style.top = '10px';
+            // // Align top-left
+            // stats.domElement.style.position = 'absolute';
+            // stats.domElement.style.left = '9px';
+            // stats.domElement.style.top = '10px';
 
-            $("#Stats-output").append( stats.domElement );
+            // $("#Stats-output").append(stats.domElement);
+
+            var container = document.createElement('div');
+            container.id = 'gameConsole';
+            // container.addEventListener( 'mousedown', function ( event ) { event.preventDefault(); setMode( ++ mode % 2 ) }, false );
+            container.style.cssText = 'width:80px;opacity:0.7;cursor:pointer;padding:0 0 3px 3px;text-align:left;background-color:#002';
+            // container.appendChild(textArea);
+
+            container.style.position = 'absolute';
+            container.style.left = '9px';
+            container.style.top = '10px';
+
+            var fpsText = document.createElement( 'div' );
+            fpsText.id = 'fpsText';
+            fpsText.style.cssText = 'width:80px;color:#0ff;font-family:Helvetica,Arial,sans-serif;font-size:9px;font-weight:bold;line-height:15px';
+            fpsText.innerHTML = '<textarea/>';
+            container.appendChild( fpsText );
+
+            $("#Stats-output").append(container);
 
             return stats;
         }, 
