@@ -1,11 +1,10 @@
 var GridCell = Class.extend({
     // Class constructor
-    init: function(world, tileMesh, grayness, xPos, zPos) {
+    init: function(world, tileMesh, xPos, zPos) {
         this.world = world;
         this.tileMesh = tileMesh;
         this.xPos = xPos;
         this.zPos = zPos;
-        this.grayness = grayness;
 
         this.isSelectable = false;
         this.isMovable = false;
@@ -30,13 +29,7 @@ var GridCell = Class.extend({
         this.hasCharacter = hasCharacterOnMe;
     },
 
-    getGrayness: function() {
-        return this.grayness;
-    },
-
     reset: function() {
-        // reset color
-        this.tileMesh.material.color.setRGB(this.grayness, this.grayness, this.grayness);
         this.isSelectable = false;
         this.isMovable = false;
         this.tileMesh.visible = false;
@@ -51,11 +44,11 @@ var GridCell = Class.extend({
     highlight: function(color) {
 
         this.tileMesh.visible = true;
-        this.tileMesh.material.opacity = 0.3;
+        this.tileMesh.material.opacity = 0.65;
         var rgb;
         switch (color) {
             case "GREEN":
-                rgb = [0, 1.0, 0];
+                rgb = [0.1, 1.0, 0.1];
                 break;
             case "YELLOW":
                 rgb = [3.0, 3.0, 0];
@@ -81,7 +74,8 @@ var GridCell = Class.extend({
 
     onMouseOver: function(scope) {
         if (this.isSelectable) {
-            this.highlight("RED");
+            // this.highlight("RED");
+            this.highlight("YELLOW");
             this.world.markTileAsSelected(this);
             return {
                 x: this.xPos,
@@ -115,12 +109,9 @@ var TileFactory = Class.extend({
             transparent: true
         });
 
-        var grayness = Math.random() * 0.5 + 0.25;
-        mat.color.setRGB(grayness, grayness, grayness);
-
         var tile = new THREE.Mesh(this.tileGeom, mat);
 
-        var gridCell = new GridCell(this.world, tile, grayness, xPos, zPos);
+        var gridCell = new GridCell(this.world, tile, xPos, zPos);
         tile.owner = gridCell;
 
         var tileMesh = gridCell.getTileMesh();

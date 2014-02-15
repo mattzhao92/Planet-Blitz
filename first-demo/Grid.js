@@ -471,7 +471,8 @@ var Grid = Class.extend({
         var ground = new THREE.Mesh(new THREE.PlaneGeometry(this.gridWidth, this.gridLength), groundMaterial
             );
         ground.rotation.x = -0.5 * Math.PI;
-        ground.position.y = -0.2;
+        // needed because otherwise tiles will overlay directly on the grid and will cause glitching during scrolling
+        ground.position.y = -0.3;
         // offset to fit grid drawing 
         ground.position.x -= this.tileSize / 2;
         ground.position.z -= this.tileSize / 2;
