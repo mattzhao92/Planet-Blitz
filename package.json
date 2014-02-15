@@ -1,10 +1,10 @@
 {
   "name": "PlanetBlitz",
-  "subdomain": "jtkmcwx",
+  "subdomain": "blitz",
   "scripts": {
     "start": "gameserver.js"
   },
-  "version": "0.0.0-9",
+  "version": "0.0.0-13",
   "engines": {
     "node": "0.10.x"
   },
