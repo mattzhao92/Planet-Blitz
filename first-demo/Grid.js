@@ -24,6 +24,7 @@ var Grid = Class.extend({
         this.tiles = new THREE.Object3D();
         this.tilesArray = null;
 
+        this.loadGround();
         this.drawGridSquares(width, length, tileSize);
 
         // initialize characters
@@ -455,6 +456,10 @@ var Grid = Class.extend({
         }
 
         return this.tilesArray[xPos][zPos];
+    },
+
+    loadGround: function() {
+        
     },
 
     drawGridSquares: function(width, length, size) {

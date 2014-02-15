@@ -39,24 +39,35 @@ var GridCell = Class.extend({
         this.tileMesh.material.color.setRGB(this.grayness, this.grayness, this.grayness);
         this.isSelectable = false;
         this.isMovable = false;
+        this.tileMesh.visible = false;
     },
 
     markAsNotSelected: function() {
         if (this.isMovable) {
-            this.highlightGreen();
+            this.highlight("GREEN");
         }
     },
 
-    highlightGreen: function() {
-        this.tileMesh.material.color.setRGB(0, 1.0, 0);
-    },
+    highlight: function(color) {
 
-    highlightRed: function() {
-        this.tileMesh.material.color.setRGB(1.0, 0, 0);
-    },
+        this.tileMesh.visible = true;
+        var rgb;
+        switch (color) {
+            case "GREEN":
+                rgb = [0, 1.0, 0];
+                break;
+            case "YELLOW":
+                rgb = [3.0, 3.0, 0];
+                break;
+            case "RED": 
+                rgb = [1.0, 0, 0];
+                break;
+            default:
+                console.log("Invalid color specified");
+                break;
+        }
 
-    highlightYellow: function() {
-        this.tileMesh.material.color.setRGB(3.0, 3.0, 0);
+        this.tileMesh.material.color.setRGB(rgb[0], rgb[1], rgb[2]);
     },
 
     setSelectable: function(isSelectable) {
@@ -69,7 +80,7 @@ var GridCell = Class.extend({
 
     onMouseOver: function(scope) {
         if (this.isSelectable) {
-            this.highlightRed();
+            this.highlight("RED");
             this.world.markTileAsSelected(this);
             return {
                 x: this.xPos,
@@ -81,12 +92,12 @@ var GridCell = Class.extend({
 
     markAsMovable: function() {
         if (this.isMovable) {
-            this.highlightGreen();
+            this.highlight("GREEN");
         }
     },
 
     markAsRoadMap: function() {
-        this.highlightYellow();
+        this.highlight("YELLOW");
     }
 });
 
@@ -117,6 +128,8 @@ var TileFactory = Class.extend({
         tileMesh.position.z = this.world.convertZPosToWorldZ(zPos);
         tileMesh.rotation.x = -0.5 * Math.PI;
 
+
+        tileMesh.visible = false;
 
         return gridCell;
     }
