@@ -22,6 +22,7 @@ $(function () {
             this.GRID_LENGTH = 400;
 
             this.stats = this.initStats();
+            this.createGameConsole();
 
             this.setupCamera();
             this.setupCameraControls();
@@ -158,27 +159,15 @@ $(function () {
 
             // $("#Stats-output").append(stats.domElement);
 
-            var container = document.createElement('div');
-            container.id = 'gameConsole';
-            // container.addEventListener( 'mousedown', function ( event ) { event.preventDefault(); setMode( ++ mode % 2 ) }, false );
-            container.style.cssText = 'width:80px;opacity:0.7;cursor:pointer;padding:0 0 3px 3px;text-align:left;background-color:#002';
-            // container.appendChild(textArea);
-
-            container.style.position = 'absolute';
-            container.style.left = '9px';
-            container.style.top = '10px';
-
-            var fpsText = document.createElement('div');
-            fpsText.id = 'fpsText';
-            fpsText.style.cssText = 'width:80px;color:#0ff;font-family:Helvetica,Arial,sans-serif;font-size:9px;font-weight:bold;line-height:15px';
-            // fpsText.innerHTML = '<textarea/>';
-            fpsText.innerHTML = "<button type=\"button\" onclick=\"alert(\'Hello world!\')\">Click Me!</button>";
-            container.appendChild(fpsText);
-
-            $("#Stats-output").append(container);
-
-
             return stats;
+        },
+
+        createGameConsole: function() {
+            var gameConsole = new GameConsole();
+            $("#Stats-output").append(gameConsole.domElement);
+            // $('#gameTextDisplay').val("Welcome to Planet Blitz!");
+            gameConsole.displayWelcomeMessage();
+            gameConsole.append("Fight to the death!");
         },
 
         onWindowResize: function() {

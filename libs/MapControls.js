@@ -756,6 +756,7 @@ THREE.MapControls = function ( object, scene, domElement ) {
     this.mouseSprite = null;
     this.setupMouseCursor();
 
+    // create synthetic events - allow mouse click with "corrected" mouse position (from pointerlock) on HTML DOM elements to occur correctly
     document.addEventListener("click", function(e) {
         if (e._isSynthetic)
             return;
@@ -769,10 +770,8 @@ THREE.MapControls = function ( object, scene, domElement ) {
             y + e.screenY - e.clientY,
             x,
             y);
-        console.log("Dispatched mouse event");
         var target = document.elementFromPoint(x, y);
         if (target) {
-            console.log(target);
             target.dispatchEvent(ee);
         }
     });
