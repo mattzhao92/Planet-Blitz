@@ -4,6 +4,8 @@ var Grid = Class.extend({
     init: function(width, length, tileSize, scene, camera, controls) {
         'use strict';
 
+        this.GROUND_TEXTURE = "images/Supernova.jpg"
+
         this.gridWidth = width;
         this.gridLength = length;
         this.tileSize = tileSize;
@@ -24,6 +26,7 @@ var Grid = Class.extend({
         this.tiles = new THREE.Object3D();
         this.tilesArray = null;
 
+        this.loadGround();
         this.drawGridSquares(width, length, tileSize);
 
         // initialize characters
@@ -43,7 +46,8 @@ var Grid = Class.extend({
               var charArgs = {
                   world: scope,
                   onDead: scope.removeCharacter,
-                  team: team_id
+                  team: team_id,
+                  characterSize: scope.tileSize / 2
               };
               var character = this.characterFactory.createCharacter(charArgs);
               var startX, startY;
@@ -459,6 +463,26 @@ var Grid = Class.extend({
         return this.tilesArray[xPos][zPos];
     },
 
+    loadGround: function() {
+        var texture = THREE.ImageUtils.loadTexture(this.GROUND_TEXTURE);
+
+        var groundMaterial = new THREE.MeshLambertMaterial({
+            color: 0xffffff, 
+            map: texture
+        });
+
+        var ground = new THREE.Mesh(new THREE.PlaneGeometry(this.gridWidth, this.gridLength), groundMaterial
+            );
+        ground.rotation.x = -0.5 * Math.PI;
+        // needed because otherwise tiles will overlay directly on the grid and will cause glitching during scrolling
+        ground.position.y = -0.3;
+        // offset to fit grid drawing 
+        ground.position.x -= this.tileSize / 2;
+        ground.position.z -= this.tileSize / 2;
+
+        this.scene.add(ground);
+    },
+
     drawGridSquares: function(width, length, size) {
         this.tileFactory = new TileFactory(this, size);
 
@@ -473,19 +497,14 @@ var Grid = Class.extend({
         for (var i = 0; i < this.numberSquaresOnXAxis; i++) {
             for (var j = 0; j < this.numberSquaresOnZAxis; j++) {
                 var tile = this.tileFactory.createTile(i, j);
-
-                var tileMesh = tile.mesh;
-
-                tileMesh.position.x = this.convertXPosToWorldX(i);
-                tileMesh.position.y = 0;
-                tileMesh.position.z = this.convertZPosToWorldZ(j);
-                tileMesh.rotation.x = -0.5 * Math.PI;
-
+                
+                var tileMesh = tile.getTileMesh();
                 this.tilesArray[i][j] = tile;
 
                 this.tiles.add(tileMesh);
             }
         }
+
         this.PFGrid = new PF.Grid(this.numberSquaresOnXAxis, this.numberSquaresOnZAxis);
         this.pathFinder = new PF.AStarFinder();
 
