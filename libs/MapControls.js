@@ -756,6 +756,28 @@ THREE.MapControls = function ( object, scene, domElement ) {
     this.mouseSprite = null;
     this.setupMouseCursor();
 
+    document.addEventListener("click", function(e) {
+        if (e._isSynthetic)
+            return;
+        // send a synthetic click
+        var ee = document.createEvent("MouseEvents");
+        ee._isSynthetic = true;
+        x = scope.mousePosition.x;
+        y = scope.mousePosition.y;
+        ee.initMouseEvent("click", true, true, null, 1,
+            x + e.screenX - e.clientX,
+            y + e.screenY - e.clientY,
+            x,
+            y);
+        console.log("Dispatched mouse event");
+        var target = document.elementFromPoint(x, y);
+        if (target) {
+            console.log(target);
+            target.dispatchEvent(ee);
+        }
+    });
+
+
     this.handleResize();
 };
 

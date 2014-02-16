@@ -168,16 +168,18 @@ $(function () {
             container.style.left = '9px';
             container.style.top = '10px';
 
-            var fpsText = document.createElement( 'div' );
+            var fpsText = document.createElement('div');
             fpsText.id = 'fpsText';
             fpsText.style.cssText = 'width:80px;color:#0ff;font-family:Helvetica,Arial,sans-serif;font-size:9px;font-weight:bold;line-height:15px';
-            fpsText.innerHTML = '<textarea/>';
-            container.appendChild( fpsText );
+            // fpsText.innerHTML = '<textarea/>';
+            fpsText.innerHTML = "<button type=\"button\" onclick=\"alert(\'Hello world!\')\">Click Me!</button>";
+            container.appendChild(fpsText);
 
             $("#Stats-output").append(container);
 
+
             return stats;
-        }, 
+        },
 
         onWindowResize: function() {
 
