@@ -24,6 +24,7 @@ var Character = Class.extend({
         this.teamColor = new THREE.Color(Constants.TEAM_COLORS[this.team]);
 
         this.isActive = false;
+        this.alive = true;
         this.id = 0;
 
         this.xPos = 0;

@@ -3,15 +3,17 @@ var Message = {
   GAME : 'GAME',
   START : 'START',
   TEAM : 'TEAM',
+  STATE: 'STATE',
+  SEQ: 'seq',
   MOVE : 'MOVE',
-  SHOOT : 'SHOOT' 
+  SHOOT : 'SHOOT',
+  HIT : 'HIT'
 };
 
 var Move = {
   team: 'team',
   index : 'index',
   X : 'X',
-  Y : 'Y',
   Z : 'Z'
 };
 
@@ -20,13 +22,26 @@ var Shoot = {
   team: 'team',
   index : 'index',
   fromX : 'fromX',
-  fromY : 'fromY',
   fromZ : 'fromZ',
   toX : 'toX',
-  toY : 'toY',
   toZ : 'toZ'
+};
+
+var Hit = {
+  team: 'team',
+  index : 'index',
+};
+
+var State = {
+  team: 'team',
+  index : 'index',
+  X : 'X',
+  Z : 'Z',
+  health : 'health'
 };
 
 exports.Message = Message;
 exports.Move = Move;
+exports.Hit = Hit;
 exports.Shoot = Shoot;
+exports.State = State;

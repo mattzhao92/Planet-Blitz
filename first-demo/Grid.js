@@ -35,6 +35,9 @@ var Grid = Class.extend({
         this.characterList = new Array();
         this.characterFactory = new CharacterFactory();
 
+        // Sequence number for synchornization.
+        this.seq = 0;
+
         var scope = this;
         for (var team_id = 0; team_id < numOfTeams; team_id++) {
           this.characterList.push(new Array());
@@ -87,6 +90,8 @@ var Grid = Class.extend({
             this.currentSelectedUnits[myTeamId] = null;
         }
 
+        // mark dead.
+        character.alive = false;
         // mark tile position as available
         var xPos = character.getTileXPos();
         var zPos = character.getTileZPos();
@@ -437,9 +442,12 @@ var Grid = Class.extend({
                     sendMoveMsg(this.currentSelectedUnits[myTeamId].id,
                         deltaX, deltaY, deltaZ);
 
-                    this.currentSelectedUnits[myTeamId].enqueueMotion(this, function() {
-                        this.allowCharacterMovement = true;
-                    });
+                    if (!netMode) {
+                      this.currentSelectedUnits[myTeamId].enqueueMotion(
+                          this, function() {
+                            this.allowCharacterMovement = true;
+                          });
+                    }
                 }
             }
         }
@@ -545,9 +553,58 @@ var Grid = Class.extend({
             // also need to check for bullet team here
             if (character.team != bullet.owner.team && this.checkOverlap(bullet, character)) {
                 this.handleBulletDestroy(bullet);
-                character.applyDamage(30);
+                if (netMode) {
+                    sendHitMsg(character.team, character.id);
+                } else {
+                    character.applyDamage(30);
+                }
+                // Send the server hit message.
                 break;
             }
         }
+    },
+
+    syncGameState: function(state) {
+        
+        var liveChars = new Array();
+        var liveStates = new Array();
+        for (var t = 0; t < numOfTeams; t++) {
+            liveStates.push(new Array());
+            for (var i = 0; i < this.numOfCharacters; i++) {
+                liveStates.push(false);
+            }
+        }
+        // First check the correctness of each position.
+        for (var t = 0; t < state.length; t++) {
+            var teamId = parseInt(state[t][State.team]);
+            var index = parseInt(state[t][State.index]);
+            var x = parseInt(state[t][State.X]);
+            var z = parseInt(state[t][State.Z]);
+            var health = parseInt(state[t][State.health]);
+            // Character to check.
+            var charToCheck = this.getCharacterById(teamId, index);
+            liveStates[teamId][index] = true;
+            if (charToCheck.alive) {
+                // Sync the health.
+                charToCheck.health = health;
+                if (charToCheck.xPos != x || charToCheck.zPos != z) {
+                    // Inconsistent with auth state, adjust position.
+                    console.log("Inconsi pos ");
+                    charToCheck.placeAtGridPos(x, z);
+               }
+            }
+        }
+
+        for (var t = 0; t < numOfTeams; t++) {
+            for (var i = 0; i < this.numOfCharacters; i++) {
+                var charToCheck = this.getCharacterById(teamId, index);
+                if (!liveStates && charToCheck.alive) {
+                    console.log("Zombie character!");
+                    // Server says dead but alive locally.
+                    handleCharacterDead(charToCheck);
+                }
+            }
+        }
+       
     }
 });
