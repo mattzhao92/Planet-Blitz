@@ -18,7 +18,6 @@ var Character = Class.extend({
         this.CHARACTER_COOLDOWN_TIMER = 3000;
 
         this.world = args.world;
-        this.onDead = args.onDead;
         this.team = args.team;
         this.characterSize = args.characterSize;
 
@@ -154,7 +153,7 @@ var Character = Class.extend({
         this.ammoCountBar.scale.set(width * (1.0 * this.ammoCount)/this.maximumAmmoCapacity, 
                                                 width/this.barAspectRatio, 1.0);
     },
-    
+
     getRadius: function() {
         return this.characterSize;
     },
@@ -232,17 +231,18 @@ var Character = Class.extend({
         return 3;
     },
 
-    onShoot: function() {
-        if (this.ammoCount > 1) {
-            this.setAmmoCount(this.ammoCount - 1);
-        }
-        this.needsReload = true;
-    },
 
     onDead: function() {
         this.world.scene.remove(this.mesh);
         this.world.scene.remove(this.coolDownBar);
         this.world.scene.remove(this.ammoCountBar);
+    },
+
+    onShoot: function() {
+        if (this.ammoCount > 1) {
+            this.setAmmoCount(this.ammoCount - 1);
+        }
+        this.needsReload = true;
     },
     
     // callback - called when unit is selected. Gets a reference to the game state ("world")
