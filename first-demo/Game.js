@@ -165,12 +165,10 @@ $(function () {
         createGameConsole: function() {
             var gameConsole = new GameConsole();
             $("#Stats-output").append(gameConsole.domElement);
-            gameConsole.append("Welcome to Planet Blitz!");
-            gameConsole.append("Fight to the death!");
-            gameConsole.append("Fight to the death2!");
-            gameConsole.append("Fight to the death3!");
-            gameConsole.append("Fight to the death4!");
-
+            gameConsole.displayInitialMessage("Welcome to Planet Blitz!");
+            setTimeout(function() {
+                gameConsole.append("Fight to the death!");
+            }, 3000);
         },
 
         onWindowResize: function() {

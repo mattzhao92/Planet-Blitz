@@ -6,7 +6,7 @@ var GameConsole = function() {
 	// initialize game console
 	var container = document.createElement('div');
 	container.id = 'gameControls';
-	container.style.cssText = 'width:100px;opacity:0.7;cursor:pointer;padding:0 0 3px 3px;text-align:left;background-color:transaprent';
+	container.style.cssText = 'width:100px;height:60px;opacity:0.7;cursor:pointer;padding:0 0 3px 3px;text-align:left;background-color:transaprent';
 
 	container.style.position = 'absolute';
 	container.style.left = '9px';
@@ -23,12 +23,19 @@ var GameConsole = function() {
 	container.appendChild(gameConsole);
 
 	return {
-		domElement: container, 
+		domElement: container,
+
+		displayInitialMessage: function(text) {
+			var box = $(scope.GAME_TEXT_DISPLAY);
+			box.val(box.val() + text + "\n");
+		},
 
 		append: function(text) {
 			var box = $(scope.GAME_TEXT_DISPLAY);
 			box.val(box.val() + text + "\n");
-			box.caretToEnd();
+			box.animate({
+				scrollTop: box[0].scrollHeight - box.height()
+			}, 1000);
 		}
 	}
 };
