@@ -55,7 +55,7 @@ function connectServer(type, gameStartCallback) {
       var deltaZ = parseInt(data[Move.Z]);
       var target = game.getWorld().getCharacterById(team, index);
       target.setDirection(new THREE.Vector3(deltaX, deltaY, deltaZ));
-      target.enqueueMotion(game.getWorld(), null);
+      target.enqueueMotion(null);
   });
 
   /* Handle the shot message */

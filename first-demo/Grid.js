@@ -98,7 +98,7 @@ var Grid = Class.extend({
         if (index > -1) {
             this.characterMeshes.splice(index, 1);
             // remove object form scene
-            this.scene.remove(character.mesh);
+            character.onDead();
         }
     },
 
@@ -189,7 +189,6 @@ var Grid = Class.extend({
     },
 
     displayMovementArea: function(character) {
-        console.log("displayMovementArea is called ");
         // deselect any previously highlighted tiles
         if (this.currentMouseOverTile) {
             this.currentMouseOverTile.reset();
@@ -364,7 +363,10 @@ var Grid = Class.extend({
 
         // shoot a bullet because you can
         sendShootMsg(this.currentSelectedUnits[myTeamId].id, from, to);
-        this.shootBullet(this.currentSelectedUnits[myTeamId], from, to);
+        if (this.currentSelectedUnits[myTeamId].canShoot()) {
+            this.currentSelectedUnits[myTeamId].onShoot();
+            this.shootBullet(this.currentSelectedUnits[myTeamId], from, to);
+        }
     },
 
     onMouseDown: function(event) {
@@ -403,7 +405,7 @@ var Grid = Class.extend({
 
                 // done so that you can click on a tile behind a character easily
                 if (clickedObject != this.currentSelectedUnits[myTeamId]) {
-                    clickedObject.onSelect(this);
+                    clickedObject.onSelect();
                 } else {
                     continueClickHandler = true;
                 }
@@ -437,7 +439,7 @@ var Grid = Class.extend({
                     sendMoveMsg(this.currentSelectedUnits[myTeamId].id,
                         deltaX, deltaY, deltaZ);
 
-                    this.currentSelectedUnits[myTeamId].enqueueMotion(this, function() {
+                    this.currentSelectedUnits[myTeamId].enqueueMotion(function() {
                         this.allowCharacterMovement = true;
                     });
                 }
@@ -518,8 +520,7 @@ var Grid = Class.extend({
         // update character movements
         for (var i = 0; i < this.characterMeshes.length; i++) {
             var character = this.characterMeshes[i].owner;
-            //character.dequeueMotion(this);
-            character.update(this, delta);
+            character.update(delta);
         }
 
         // update bullet movements
