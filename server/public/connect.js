@@ -30,20 +30,22 @@ function connectServer(type, gameStartCallback) {
 
       console.log("Team id "+ myTeamId);
 
+      var teamJoinMessage;
       switch (myTeamId) {
           case 0:
-              console.log("You spawned at top");
+              teamJoinMessage = "You spawned at top";
               break;
           case 1:
-              console.log("You spawned at bottom");
+              teamJoinMessage = "You spawned at bottom";
               break;
           case 2:
-              console.log("You spawned at left");
+              teamJoinMessage = "You spawned at left";
               break;
           case 3:
-              console.log("You spawned at right");
+              teamJoinMessage = "You spawned at right";
               break;
       }
+      game.displayMessage(teamJoinMessage);
   });
 
   /* Handle the move message */

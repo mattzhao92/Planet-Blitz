@@ -1,26 +1,31 @@
 var GameConsole = function() {
 
 	var scope = this;
-	this.GAME_TEXT_DISPLAY = '#gameTextDisplay';
 
 	// initialize game console
 	var container = document.createElement('div');
 	container.id = 'gameControls';
-	container.style.cssText = 'width:100px;height:60px;opacity:0.7;cursor:pointer;padding:0 0 3px 3px;text-align:left;background-color:transaprent';
+	container.style.cssText = 'width:150px;height:100px;opacity:0.7;cursor:pointer;padding:0 0 3px 3px;text-align:left;background-color:transparent';
 
 	container.style.position = 'absolute';
-	container.style.left = '9px';
-	container.style.top = '10px';
+	container.style.left = '13px';
+	container.style.top = '13px';
 
 	var gameConsole = document.createElement('div');
 	gameConsole.id = 'gameConsole';
 
 	var gameTextDisplay = document.createElement('textarea');
-	gameTextDisplay.style.cssText = 'overflow:hidden;border: none;color:white;font-family:Helvetica,Arial,sans-serif;font-size:14px;font-weight:bold;line-height:15px;background-color:transparent';
+	// should change these attributes to match size of parent / container
+	gameTextDisplay.style.cssText = 'resize:none;width:150px;height:100px;overflow:hidden;border: none;color:white;font-family:Helvetica,Arial,sans-serif;font-size:13px;line-height:20px;background-color:transparent';
 	gameTextDisplay.id = 'gameTextDisplay';
 
 	gameConsole.appendChild(gameTextDisplay);
 	container.appendChild(gameConsole);
+
+	this.GAME_TEXT_DISPLAY = '#gameTextDisplay';
+
+	// slow down jquery animations
+	jQuery.fx.interval = 30;
 
 	return {
 		domElement: container,
@@ -35,7 +40,7 @@ var GameConsole = function() {
 			box.val(box.val() + text + "\n");
 			box.animate({
 				scrollTop: box[0].scrollHeight - box.height()
-			}, 1000);
+			}, 700);
 		}
 	}
 };

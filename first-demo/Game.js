@@ -120,7 +120,7 @@ $(function () {
 
         setupGameWorld: function() {
             var squareSize = 40;
-            this.world = new Grid(800, 800, squareSize, this.scene, this.camera, this.controls);
+            this.world = new Grid(this, 800, 800, squareSize, this.scene, this.camera, this.controls);
         },
 
         update: function() {
@@ -165,10 +165,16 @@ $(function () {
         createGameConsole: function() {
             var gameConsole = new GameConsole();
             $("#Stats-output").append(gameConsole.domElement);
-            gameConsole.displayInitialMessage("Welcome to Planet Blitz!");
-            setTimeout(function() {
-                gameConsole.append("Fight to the death!");
-            }, 3000);
+            gameConsole.displayInitialMessage("Welcome to Planet Blitz! Fight to the death!");
+            // setTimeout(function() {
+            //     gameConsole.append("Fight to the death!");
+            // }, 3000);
+
+            this.gameConsole = gameConsole;
+        },
+
+        displayMessage: function(msg) {
+            this.gameConsole.append(msg);
         },
 
         onWindowResize: function() {
@@ -176,21 +182,21 @@ $(function () {
             this.camera.aspect = window.innerWidth / window.innerHeight;
             this.camera.updateProjectionMatrix();
 
-            this.renderer.setSize( window.innerWidth, window.innerHeight );
+            this.renderer.setSize(window.innerWidth, window.innerHeight);
 
             // adjust camera controls
             this.controls.handleResize();
         },
 
-				getWorld: function() {
-						return this.world;
-				}
+        getWorld: function() {
+            return this.world;
+        }
 
     };
 
     var app = new App("#WebGL-output");
     var MAPGAME = app;
-		game = app;
+    game = app;
 
 });
 

@@ -1,8 +1,10 @@
 /* Game world */
 var Grid = Class.extend({
     // Class constructor
-    init: function(width, length, tileSize, scene, camera, controls) {
+    init: function(gameApp, width, length, tileSize, scene, camera, controls) {
         'use strict';
+
+        this.gameApp = gameApp;
 
         this.GROUND_TEXTURE = "images/Supernova.jpg"
 
@@ -77,7 +79,13 @@ var Grid = Class.extend({
         return this.characterList[team][id];
     },
 
+    displayMessage: function(msg) {
+        this.gameApp.displayMessage(msg);
+    },
+
     handleCharacterDead: function(character) {
+        this.displayMessage("A robot was destroyed!");
+
         // if the character was the currently selected unit, then reset tile state
         if (this.currentSelectedUnits[myTeamId] == character) {
             // deselect character
