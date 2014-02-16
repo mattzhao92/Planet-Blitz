@@ -6,7 +6,7 @@ var GameConsole = function() {
 	// initialize game console
 	var container = document.createElement('div');
 	container.id = 'gameControls';
-	container.style.cssText = 'width:80px;opacity:0.7;cursor:pointer;padding:0 0 3px 3px;text-align:left;background-color:#002';
+	container.style.cssText = 'width:100px;opacity:0.7;cursor:pointer;padding:0 0 3px 3px;text-align:left;background-color:transaprent';
 
 	container.style.position = 'absolute';
 	container.style.left = '9px';
@@ -16,7 +16,7 @@ var GameConsole = function() {
 	gameConsole.id = 'gameConsole';
 
 	var gameTextDisplay = document.createElement('textarea');
-	gameTextDisplay.style.cssText = 'width:80px;color:#0ff;font-family:Helvetica,Arial,sans-serif;font-size:9px;font-weight:bold;line-height:15px';
+	gameTextDisplay.style.cssText = 'overflow:hidden;border: none;color:white;font-family:Helvetica,Arial,sans-serif;font-size:14px;font-weight:bold;line-height:15px;background-color:transparent';
 	gameTextDisplay.id = 'gameTextDisplay';
 
 	gameConsole.appendChild(gameTextDisplay);
@@ -25,13 +25,10 @@ var GameConsole = function() {
 	return {
 		domElement: container, 
 
-		displayWelcomeMessage: function() {
-			$(scope.GAME_TEXT_DISPLAY).val("Welcome to Planet Blitz!");
-		},
-
 		append: function(text) {
 			var box = $(scope.GAME_TEXT_DISPLAY);
-			box.val(box.val() + "\n" + text);
+			box.val(box.val() + text + "\n");
+			box.caretToEnd();
 		}
 	}
 };

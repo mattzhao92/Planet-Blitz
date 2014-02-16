@@ -165,9 +165,12 @@ $(function () {
         createGameConsole: function() {
             var gameConsole = new GameConsole();
             $("#Stats-output").append(gameConsole.domElement);
-            // $('#gameTextDisplay').val("Welcome to Planet Blitz!");
-            gameConsole.displayWelcomeMessage();
+            gameConsole.append("Welcome to Planet Blitz!");
             gameConsole.append("Fight to the death!");
+            gameConsole.append("Fight to the death2!");
+            gameConsole.append("Fight to the death3!");
+            gameConsole.append("Fight to the death4!");
+
         },
 
         onWindowResize: function() {
