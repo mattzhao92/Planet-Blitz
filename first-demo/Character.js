@@ -90,19 +90,32 @@ var Character = Class.extend({
         this.canvas2d2.rect(0, 0, 600, 150);
         this.canvas2d2.fillStyle = "blue";
         this.canvas2d2.fill(); 
-        // this.canvas2d2.beginPath();
-        // this.canvas2d2.moveTo(0,0);
-        // this.canvas2d2.lineTo(0,150);
-        // this.canvas2d2.lineTo(600,150);
-        // this.canvas2d2.lineTo(600,0);
-        // this.canvas2d2.closePath();
-        // this.canvas2d2.lineWidth = 20;
-        // this.canvas2d2.strokeStyle = 'black';
-        // this.canvas2d2.stroke();
         this.ammoCountBar.position.set(this.mesh.position.x + this.ammoCountBarXOffset, 
                                        this.mesh.position.y + this.ammoCountBarYOffset,
                                        this.mesh.position.z + this.ammoCountBarZOffset);        
         this.world.scene.add(this.ammoCountBar );
+
+        this.isCharacterInRoute = false;
+        // var canvas3 = document.createElement('canvas');
+        // this.canvas2d3 = canvas2.getContext('2d');
+        // this.healthBarTexture = new THREE.Texture(canvas3);
+        // this.healthBarTexture.needsUpdate = true;
+        // this.healthBarXOffset = -1 * this.world.getTileSize()/2;
+        // this.healthBarZOffset = 0;
+        // this.healthBarYOffset = 55;
+        // this.maximumHealth = this.getHealth();
+        // this.currentHealth = this.maximumHealth;
+        // this.healthBar = new THREE.Sprite(this.healthBarTexture);
+        // this.healthBar.scale.set(this.world.getTileSize(), this.world.getTileSize()/this.barAspectRatio, 1.0);
+
+        // this.canvas2d3.rect(0, 0, 600, 150);
+        // this.canvas2d3.fillStyle = "yellow";
+        // this.canvas2d3.fill();
+
+        // this.healthBar.position.set(this.mesh.position.x + this.healthBarXOffset, 
+        //                             this.mesh.position.y + this.healthBarYOffset,
+        //                             this.mesh.position.z + this.healthBarZOffset);        
+        // this.world.scene.add(this.healthBar);
         this.breakUpdateHere = false;
     },
 
@@ -184,9 +197,9 @@ var Character = Class.extend({
     },
 
     enterCoolDown: function() {
-    	this.isCoolDown = 1;
-    	var scope = this;
-    	
+        this.isCoolDown = 1;
+        var scope = this;
+        
         this.canvas2d.rect(0, 0, 800, 200);
         this.canvas2d.fillStyle = "red";
         this.canvas2d.fill();
@@ -420,6 +433,14 @@ var Character = Class.extend({
         } 
     },
 
+    isInRoute: function() {
+        return this.isCharacterInRoute;
+    },
+
+    getDestination: function() {
+        return {'x': this.goalXPos, 'y':0, 'z':this.goalZPos};  
+    },
+
     update: function(delta) {
 
         this.breakUpdateHere = false;
@@ -435,7 +456,7 @@ var Character = Class.extend({
             var direction = this.motionQueue.pop();
             if (direction.sentinel == 'start') {
                 var path = direction.highlightTiles;
-                
+                this.isCharacterInRoute = true;
                 if (this.team == myTeamId) {
                     if (this.highlightedTiles){
                         for (var i = 0; i < this.highlightedTiles.length; i++) {
@@ -456,7 +477,7 @@ var Character = Class.extend({
                 for (var i = 0; i < this.lastRoadMap.length; i++) {
                     this.lastRoadMap[i].reset();
                 }
-
+                this.isCharacterInRoute = false;
                 this.enterCoolDown();
 
                 return;
