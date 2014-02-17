@@ -373,8 +373,8 @@ var Grid = Class.extend({
         from.y = 15;
 
         // shoot a bullet because you can
-        sendShootMsg(this.currentSelectedUnits[myTeamId].id, from, to);
         if (this.currentSelectedUnits[myTeamId].canShoot()) {
+            sendShootMsg(this.currentSelectedUnits[myTeamId].id, from, to);
             this.currentSelectedUnits[myTeamId].onShoot();
             this.shootBullet(this.currentSelectedUnits[myTeamId], from, to);
         }
