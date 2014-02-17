@@ -98,9 +98,9 @@ THREE.MapControls = function ( object, scene, domElement ) {
 
     // used for when scrolling with mouse
     this.INITIAL_CAMERA_VELOCITY = 2.3;
-    this.MAX_CAMERA_VELOCITY = 7.5;
+    this.MAX_CAMERA_VELOCITY = 9.0;
 
-    this.MAP_SCROLL_ACCELERATION = 13;
+    this.MAP_SCROLL_ACCELERATION = 15;
     this.DECELERATION = 10;
 
     this.enableTraditionalMouseDrag = false;
@@ -345,40 +345,61 @@ THREE.MapControls = function ( object, scene, domElement ) {
         }
     };
 
-    this.scrollCameraLeft = function(delta) {
-        scope.velocityX = Math.max(scope.velocityX, scope.INITIAL_CAMERA_VELOCITY);
-        scope.velocityX += scope.MAP_SCROLL_ACCELERATION * delta;
+    this.scrollCamera = function(delta) {
+        var xDiff = this.screen.width / 2 - scope.mousePosition.x ;
+        // multiply by 2 because of wide-screen format
+        var yDiff = (this.screen.height / 2 - scope.mousePosition.y) * 2;
+
+        var mouseVector = new THREE.Vector2(xDiff, yDiff);
+        mouseVector.normalize();
+
+        if (mouseVector.x < 0) {
+            scope.velocityX = Math.min(scope.velocityX, scope.INITIAL_CAMERA_VELOCITY * mouseVector.x);
+            scope.velocityX -= scope.MAP_SCROLL_ACCELERATION * delta;
+
+        } else {
+            scope.velocityX = Math.max(scope.velocityX, scope.INITIAL_CAMERA_VELOCITY * mouseVector.x);
+            scope.velocityX += scope.MAP_SCROLL_ACCELERATION * delta * mouseVector.x;
+        }
+ 
+        if (mouseVector.y < 0) {
+            scope.velocityZ = Math.min(scope.velocityZ, scope.INITIAL_CAMERA_VELOCITY * mouseVector.y);
+            scope.velocityZ += scope.MAP_SCROLL_ACCELERATION * delta * mouseVector.y;
+        } else {
+            scope.velocityZ = Math.max(scope.velocityZ, scope.INITIAL_CAMERA_VELOCITY * mouseVector.y);
+            scope.velocityZ += scope.MAP_SCROLL_ACCELERATION * delta * mouseVector.y;
+        }
+        // scope.velocityZ = Math.max(scope.velocityZ, scope.INITIAL_CAMERA_VELOCITY);
     };
 
-    this.scrollCameraRight = function(delta) {
-        scope.velocityX = Math.min(scope.velocityX, -scope.INITIAL_CAMERA_VELOCITY);
-        scope.velocityX -= scope.MAP_SCROLL_ACCELERATION * delta;
+    // this.scrollCameraRight = function(delta) {
+    //     scope.velocityX = Math.min(scope.velocityX, -scope.INITIAL_CAMERA_VELOCITY);
+    //     scope.velocityX -= scope.MAP_SCROLL_ACCELERATION * delta;
 
-    };
+    // };
 
-    this.scrollCameraUp = function(delta) {
-        scope.velocityZ = Math.max(scope.velocityZ, scope.INITIAL_CAMERA_VELOCITY);
-        scope.velocityZ += scope.MAP_SCROLL_ACCELERATION * delta;
-    };
+    // this.scrollCameraUp = function(delta) {
+    //     scope.velocityZ = Math.max(scope.velocityZ, scope.INITIAL_CAMERA_VELOCITY);
+    //     scope.velocityZ += scope.MAP_SCROLL_ACCELERATION * delta;
+    // };
 
-    this.scrollCameraDown = function(delta) {
-        scope.velocityZ = Math.min(scope.velocityZ, -scope.INITIAL_CAMERA_VELOCITY);
-        scope.velocityZ -= scope.MAP_SCROLL_ACCELERATION * delta;
-    };
+    // this.scrollCameraDown = function(delta) {
+    //     scope.velocityZ = Math.min(scope.velocityZ, -scope.INITIAL_CAMERA_VELOCITY);
+    //     scope.velocityZ -= scope.MAP_SCROLL_ACCELERATION * delta;
+    // };
+
+    this.checkIfMouseAtScreenEdge = function() {
+        return (scope.mousePosition.x == scope.mouseBounds.minX) || 
+            (scope.mousePosition.x == scope.mouseBounds.maxX) || 
+            (scope.mousePosition.y == scope.mouseBounds.minY) ||
+            (scope.mousePosition.y == scope.mouseBounds.maxY);
+    }
 
     this.updateCameraFromVelocity = function(delta) {
 
         // keep on applying velocity if mouse is on edges of screen
-        if (scope.mousePosition.x == scope.mouseBounds.minX) {
-            scope.scrollCameraLeft(delta);
-        } else if (scope.mousePosition.x == scope.mouseBounds.maxX) {
-            scope.scrollCameraRight(delta);
-        }
-
-        if (scope.mousePosition.y == scope.mouseBounds.minY) {
-            scope.scrollCameraUp(delta);
-        } else if (scope.mousePosition.y == scope.mouseBounds.maxY) {
-            scope.scrollCameraDown(delta);
+        if (scope.checkIfMouseAtScreenEdge()) {
+            scope.scrollCamera(delta);
         }
 
         // enforce velocity restrictions
