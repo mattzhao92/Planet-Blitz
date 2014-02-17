@@ -62,7 +62,7 @@ THREE.MapControls = function ( object, scene, domElement ) {
 
     var phiDelta = 0;
     var thetaDelta = 0;
-    var scale = 1;
+    var scale = 1.20;
 
     var lastPosition = new THREE.Vector3();
 
