@@ -65,7 +65,7 @@ function connectServer(type, gameStartCallback) {
             state[t][State.Z] = parseInt(state[t][State.Z]) - deltaZ;
         }
       }
-      game.getWorld().syncGameState(state);
+      game.getWorld().syncGameState(state, moverTeam, moverIndex);
       target.setDirection(new THREE.Vector3(deltaX, 0, deltaZ));
       target.enqueueMotion(null);
   });
@@ -84,7 +84,7 @@ function connectServer(type, gameStartCallback) {
         new THREE.Vector3(toX, 0, toZ));
   });
 
-  /* Handle the move message */
+  /* Handle the hit message */
   socket.on(Message.HIT, function(hitData) {
       var state = hitData[Message.STATE];
       var data = hitData[Message.HIT];

@@ -593,7 +593,7 @@ var Grid = Class.extend({
         }
     },
 
-    syncGameState: function(state) {
+    syncGameState: function(state, moverTeam, moverId) {
         
         var liveChars = new Array();
         var liveStates = new Array();
@@ -607,6 +607,9 @@ var Grid = Class.extend({
         for (var t = 0; t < state.length; t++) {
             var teamId = parseInt(state[t][State.team]);
             var index = parseInt(state[t][State.index]);
+            if (teamId == moverTeam && index == moverId) {
+              break;
+            }
             var x = parseInt(state[t][State.X]);
             var z = parseInt(state[t][State.Z]);
             var health = parseInt(state[t][State.health]);
