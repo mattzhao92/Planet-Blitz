@@ -356,16 +356,10 @@ THREE.MapControls = function ( object, scene, domElement ) {
         scope.mouseVector.y = yDiff;
         scope.mouseVector.normalize();
 
-        // x-dead should be around 0.25
-        // y-dead should be around 0.15
-
-        // console.log(scope.mouseVector);
         var X_DEAD_RANGE = 0.23;
         var Y_DEAD_RANGE = 0.15;
-        // // if vector is within certain range, simply ignore it and re-normalize
-        // if (scope.mouseVector.x < )
-        // scope.mouseVector.normalize();
 
+        // if vector is within certain range, simply ignore it and re-normalize
         if (-X_DEAD_RANGE < scope.mouseVector.x && scope.mouseVector.x < X_DEAD_RANGE) {
             scope.mouseVector.x = 0;
         }
@@ -373,8 +367,6 @@ THREE.MapControls = function ( object, scene, domElement ) {
         if (-Y_DEAD_RANGE < scope.mouseVector.y && scope.mouseVector.y < Y_DEAD_RANGE) {
             scope.mouseVector.y = 0;
         }
-
-
     }
 
     this.scrollCameraLeft = function(delta) {
