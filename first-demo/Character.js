@@ -18,8 +18,8 @@ var Character = Class.extend({
         this.CHARACTER_COOLDOWN_TIMER = 3000;
 
         this.world = args.world;
-        this.onDead = args.onDead;
         this.team = args.team;
+        this.characterSize = args.characterSize;
 
         this.teamColor = new THREE.Color(Constants.TEAM_COLORS[this.team]);
 
@@ -58,16 +58,52 @@ var Character = Class.extend({
         this.coolDownBarTexture = new THREE.Texture(canvas) 
         this.coolDownBarTexture.needsUpdate = true;
 
-        var spriteMaterial = new THREE.SpriteMaterial( { map: this.coolDownBarTexture, useScreenCoordinates: false, alignment: THREE.SpriteAlignment.center } );
+        var spriteMaterial = new THREE.SpriteMaterial( { map: this.coolDownBarTexture, useScreenCoordinates: false, alignment: THREE.SpriteAlignment.centerLeft } );
         
-        this.coolDownBarXOffset = this.world.getTileSize() * 1.0 / 6;
-        this.coolDownBarZOffset = this.world.getTileSize() * 1.0 / 8;
-        this.coolDownBarYOffset = 60;
-        this.sprite1 = new THREE.Sprite(spriteMaterial);
-        this.sprite1.scale.set(50, 200, 1.0);
+        this.barAspectRatio = 10;
+        this.coolDownBarXOffset = 0;
+        this.coolDownBarZOffset = 0;
+        this.coolDownBarYOffset = 55;
+        this.coolDownBar = new THREE.Sprite(spriteMaterial);
+        this.coolDownBar.scale.set(this.world.getTileSize(), this.world.getTileSize()/this.barAspectRatio, 1.0);
         this.lastRoadMap = new Array();
         this.coolDownCount = 105;
         this.coolDownLeft = 0;
+
+        var canvas2 = document.createElement('canvas');
+        this.canvas2d2 = canvas2.getContext('2d');
+        this.ammoCountBarTexture = new THREE.Texture(canvas2);
+        this.ammoCountBarTexture.needsUpdate = true;
+
+        var ammoCountBarMaterial = new THREE.SpriteMaterial( { map: this.ammoCountBarTexture, useScreenCoordinates: false, alignment: THREE.SpriteAlignment.centerLeft } );
+        
+        this.ammoCountBarXOffset = -1 * this.world.getTileSize()/2;
+        this.ammoCountBarZOffset = 0;
+        this.ammoCountBarYOffset = 60;
+        this.ammoCountBar = new THREE.Sprite(ammoCountBarMaterial);
+        this.ammoCountBar.scale.set(this.world.getTileSize(), this.world.getTileSize()/this.barAspectRatio, 1.0);
+        this.maximumAmmoCapacity = 5;
+        this.ammoCount = this.maximumAmmoCapacity;
+        this.ammoReplenishRate = 0.01;
+        this.needsReload = false;
+
+        this.canvas2d2.rect(0, 0, 600, 150);
+        this.canvas2d2.fillStyle = "blue";
+        this.canvas2d2.fill(); 
+        // this.canvas2d2.beginPath();
+        // this.canvas2d2.moveTo(0,0);
+        // this.canvas2d2.lineTo(0,150);
+        // this.canvas2d2.lineTo(600,150);
+        // this.canvas2d2.lineTo(600,0);
+        // this.canvas2d2.closePath();
+        // this.canvas2d2.lineWidth = 20;
+        // this.canvas2d2.strokeStyle = 'black';
+        // this.canvas2d2.stroke();
+        this.ammoCountBar.position.set(this.mesh.position.x + this.ammoCountBarXOffset, 
+                                       this.mesh.position.y + this.ammoCountBarYOffset,
+                                       this.mesh.position.z + this.ammoCountBarZOffset);        
+        this.world.scene.add(this.ammoCountBar );
+        this.breakUpdateHere = false;
     },
 
     loadFile: function(filename, onLoad) {
@@ -91,9 +127,9 @@ var Character = Class.extend({
 
             // TODO: should use this bounding box to compute correct scale
             var boundingBox = geometry.boundingBox;
-            var width = geometry.boundingBox.max.x - geometry.boundingBox.min.x
-            var height = geometry.boundingBox.max.y - geometry.boundingBox.min.y
-            var depth = geometry.boundingBox.max.z - geometry.boundingBox.min.z
+            var width = geometry.boundingBox.max.x - geometry.boundingBox.min.x;
+            var height = geometry.boundingBox.max.y - geometry.boundingBox.min.y;
+            var depth = geometry.boundingBox.max.z - geometry.boundingBox.min.z;
             mesh.scale.set(10, 10, 10);
 
             // link the mesh with the character owner object
@@ -107,18 +143,36 @@ var Character = Class.extend({
         this.id = id;
     },
 
+    setAmmoCount: function(number) {
+        if (number < this.maximumAmmoCapacity) {
+            this.ammoCount = number;
+        }
+        if (number == this.maximumAmmoCapacity) {
+            this.needsReload = false;
+        }
+        var width = this.world.getTileSize();
+        this.ammoCountBar.scale.set(width * (1.0 * this.ammoCount)/this.maximumAmmoCapacity, 
+                                                width/this.barAspectRatio, 1.0);
+    },
+
+    getRadius: function() {
+        return this.characterSize;
+    },
+
+
+    canShoot: function() {
+        return this.ammoCount > 1;
+    },
+
     getRadius: function() {
         // TODO: remove this hardcoding
         return 20;
     },
 
-    update: function(delta) {
-
-    },
-
     getHealth: function() {
         return this.health;
     },
+
 
     applyDamage: function(damage) {
 
@@ -129,16 +183,16 @@ var Character = Class.extend({
         }
     },
 
-    enterCoolDown: function(world) {
+    enterCoolDown: function() {
     	this.isCoolDown = 1;
     	var scope = this;
     	
-        this.canvas2d.rect(20, 20, 30, 60);
+        this.canvas2d.rect(0, 0, 800, 200);
         this.canvas2d.fillStyle = "red";
         this.canvas2d.fill();
         this.coolDownBarTexture.needsUpdate = true;
-        this.sprite1.position.set(this.mesh.position.x + this.coolDownBarXOffset,this.mesh.position.y + this.coolDownBarYOffset,this.mesh.position.z + this.coolDownBarZOffset);        
-        this.world.scene.add(this.sprite1 );   
+        this.coolDownBar.position.set(this.mesh.position.x - this.world.getTileSize()/2 + this.coolDownBarXOffset,this.mesh.position.y + this.coolDownBarYOffset,this.mesh.position.z + this.coolDownBarZOffset);        
+        this.world.scene.add(this.coolDownBar );   
 
         this.coolDownLeft = this.coolDownCount;
     },
@@ -178,8 +232,22 @@ var Character = Class.extend({
         return 3;
     },
 
+
+    onDead: function() {
+        this.world.scene.remove(this.mesh);
+        this.world.scene.remove(this.coolDownBar);
+        this.world.scene.remove(this.ammoCountBar);
+    },
+
+    onShoot: function() {
+        if (this.ammoCount > 1) {
+            this.setAmmoCount(this.ammoCount - 1);
+        }
+        this.needsReload = true;
+    },
+    
     // callback - called when unit is selected. Gets a reference to the game state ("world")
-    onSelect: function(world) {
+    onSelect: function() {
         // don't do anything if this unit was already selected
         if (this.isActive) {
             return;
@@ -188,7 +256,7 @@ var Character = Class.extend({
         if (myTeamId == null || this.team == myTeamId) {
           this.unitSelectorMesh.material.color.setRGB(1.0, 0, 0);
           this.unitSelectorMesh.visible = true;
-          world.markCharacterAsSelected(this);
+          this.world.markCharacterAsSelected(this);
           this.isActive = true;
         }
     },
@@ -215,10 +283,10 @@ var Character = Class.extend({
         this.direction = direction;
     },
 
-    enqueueMotion: function(world, onMotionFinish) {
+    enqueueMotion: function(onMotionFinish) {
         console.log("enqueueMotion \n");
         if (this.isCoolDown == 0) {
-            var path = world.findPath(this.getTileXPos(), this.getTileZPos(), this.getTileXPos() + this.direction.x,
+            var path = this.world.findPath(this.getTileXPos(), this.getTileZPos(), this.getTileXPos() + this.direction.x,
                 this.getTileZPos() + this.direction.z);
             var addNewItem = true;
             var newMotions = new Array();
@@ -260,33 +328,50 @@ var Character = Class.extend({
 
     setCharacterMeshPosX: function(x) {
         this.mesh.position.x = x;
-        this.sprite1.position.x = x;
-        this.sprite1.position.x = x + this.coolDownBarXOffset;
+        this.coolDownBar.position.x = x - this.world.getTileSize()/2 + this.coolDownBarXOffset;
+        this.ammoCountBar.position.x = x + this.ammoCountBarXOffset;
     },
 
     setCharacterMeshPosY: function(y) {
         this.mesh.position.y = y;
-        this.sprite1.position.y = y + this.coolDownBarYOffset;
+        this.coolDownBar.position.y = y + this.coolDownBarYOffset;
+
+        this.ammoCountBar.position.y = y + this.ammoCountBarYOffset;
     },
 
     setCharacterMeshPosZ: function(z) {
         this.mesh.position.z = z;
-        this.sprite1.position.z = z + this.coolDownBarZOffset;
+        this.coolDownBar.position.z = z + this.coolDownBarZOffset;
+        this.ammoCountBar.position.z = z + this.ammoCountBarZOffset;
     },
 
-    update: function(world, delta) {
+    updateWeaponReload : function(delta) {
+        if (this.breakUpdateHere) return;
+        if (this.needsReload) {
+            this.setAmmoCount(this.ammoCount + this.ammoReplenishRate);
+        }
+    },
 
+    updateMovementCoolDown: function(delta) {
+        if (this.breakUpdateHere) return;
         if (this.isCoolDown) {
             this.coolDownLeft--;
             // update cooldown timer
-            this.sprite1.scale.set(50, 200.0 * this.coolDownLeft/this.coolDownCount, 1.0);
             if (this.coolDownLeft == 0) {
                 this.isCoolDown = false;
-                if (world.currentSelectedUnits[this.team] == this)
-                    world.displayMovementArea(this);
+                if (this.world.currentSelectedUnits[this.team] == this)
+                    this.world.displayMovementArea(this);
             }
         }
+        var width = this.world.getTileSize();
+        this.coolDownBar.scale.set(width * (this.coolDownCount-this.coolDownLeft)/this.coolDownCount, 
+                                            width/this.barAspectRatio, 1.0);
+    },
 
+
+
+    updateInProgressRotation: function(delta) {
+        if (this.breakUpdateHere) return;
         if (this.rotationInProgress) {
             var newAngle = this.mesh.rotation.y + this.angularVelocity * delta;
             if ((newAngle  - this.goalAngle) / (this.goalAngle - this.prevAngle) > 0) {
@@ -296,9 +381,13 @@ var Character = Class.extend({
                 this.mesh.rotation.y = newAngle;
                 this.prevAngle = newAngle;
             }
-            return;
+            this.breakUpdateHere = true;
         }
-                  
+    },
+
+
+    updateInProgressLinearMotion: function(delta) {
+        if (this.breakUpdateHere) return;
         if (this.motionInProgress) {
             var newMeshX = this.mesh.position.x + this.velocityX * delta;
             var newMeshZ = this.mesh.position.z + this.velocityZ * delta;
@@ -327,10 +416,21 @@ var Character = Class.extend({
                 this.prevMeshZ = newMeshZ;
             }
 
-            return;                     
+            this.breakUpdateHere = true;                   
         } 
+    },
 
-        if (this.motionQueue.length > 0) {
+    update: function(delta) {
+
+        this.breakUpdateHere = false;
+
+        this.updateWeaponReload(delta);
+        this.updateMovementCoolDown(delta); 
+        this.updateInProgressRotation(delta);
+        this.updateInProgressLinearMotion(delta);
+
+        // handle deque action here
+        if (this.motionQueue.length > 0 && !this.breakUpdateHere) {
             this.motionInProcess = true;
             var direction = this.motionQueue.pop();
             if (direction.sentinel == 'start') {
@@ -345,11 +445,12 @@ var Character = Class.extend({
 
                     this.lastRoadMap.length = 0;
                     for (var i = 0; i < path.length; i++) {
-                        var roadTile = world.getTileAtTilePos(path[i][0], path[i][1]);
+                        var roadTile = this.world.getTileAtTilePos(path[i][0], path[i][1]);
                         roadTile.markAsRoadMap();
                         this.lastRoadMap.push(roadTile);
                     }
                 }
+                this.coolDownLeft = this.coolDownCount;
                 return;
             } else if (direction.sentinel == 'end') {
                 for (var i = 0; i < this.lastRoadMap.length; i++) {
@@ -374,7 +475,7 @@ var Character = Class.extend({
                 this.prevMeshX = this.mesh.position.x;
                 this.prevMeshZ = this.mesh.position.z;
 
-                world.markTileNotOccupiedByCharacter(this.getTileXPos(), this.getTileZPos());
+                this.world.markTileNotOccupiedByCharacter(this.getTileXPos(), this.getTileZPos());
                 this.goalMeshX = this.mesh.position.x + direction.x * 40;
                 this.goalMeshZ = this.mesh.position.z + direction.z * 40;
                 
@@ -397,10 +498,8 @@ var Character = Class.extend({
                 //this.velocityZ = direction.z?direction.z<0?-10:10:0;
                 this.goalXPos = this.xPos + direction.x;
                 this.goalZPos = this.zPos + direction.z;
-                world.markTileOccupiedByCharacter(this.goalXPos, this.goalZPos);
-                return true;
+                this.world.markTileOccupiedByCharacter(this.goalXPos, this.goalZPos);
             }
-            return false;
         }
     },
 

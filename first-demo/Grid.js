@@ -1,8 +1,12 @@
 /* Game world */
 var Grid = Class.extend({
     // Class constructor
-    init: function(width, length, tileSize, scene, camera, controls) {
+    init: function(gameApp, width, length, tileSize, scene, camera, controls) {
         'use strict';
+
+        this.gameApp = gameApp;
+
+        this.GROUND_TEXTURE = "images/Supernova.jpg"
 
         this.gridWidth = width;
         this.gridLength = length;
@@ -24,6 +28,7 @@ var Grid = Class.extend({
         this.tiles = new THREE.Object3D();
         this.tilesArray = null;
 
+        this.loadGround();
         this.drawGridSquares(width, length, tileSize);
 
         // initialize characters
@@ -45,8 +50,8 @@ var Grid = Class.extend({
           for (var i = 0; i < this.numOfCharacters; i++) {
               var charArgs = {
                   world: scope,
-                  onDead: scope.removeCharacter,
-                  team: team_id
+                  team: team_id,
+                  characterSize: scope.tileSize / 2
               };
               var character = this.characterFactory.createCharacter(charArgs);
               var startX, startY;
@@ -77,7 +82,13 @@ var Grid = Class.extend({
         return this.characterList[team][id];
     },
 
+    displayMessage: function(msg) {
+        this.gameApp.displayMessage(msg);
+    },
+
     handleCharacterDead: function(character) {
+        this.displayMessage("A robot was destroyed!");
+
         // if the character was the currently selected unit, then reset tile state
         if (this.currentSelectedUnits[myTeamId] == character) {
             // deselect character
@@ -103,7 +114,7 @@ var Grid = Class.extend({
         if (index > -1) {
             this.characterMeshes.splice(index, 1);
             // remove object form scene
-            this.scene.remove(character.mesh);
+            character.onDead();
         }
     },
 
@@ -194,7 +205,6 @@ var Grid = Class.extend({
     },
 
     displayMovementArea: function(character) {
-        console.log("displayMovementArea is called ");
         // deselect any previously highlighted tiles
         if (this.currentMouseOverTile) {
             this.currentMouseOverTile.reset();
@@ -368,8 +378,11 @@ var Grid = Class.extend({
         from.y = 15;
 
         // shoot a bullet because you can
-        sendShootMsg(this.currentSelectedUnits[myTeamId].id, from, to);
-        this.shootBullet(this.currentSelectedUnits[myTeamId], from, to);
+        if (this.currentSelectedUnits[myTeamId].canShoot()) {
+            sendShootMsg(this.currentSelectedUnits[myTeamId].id, from, to);
+            this.currentSelectedUnits[myTeamId].onShoot();
+            this.shootBullet(this.currentSelectedUnits[myTeamId], from, to);
+        }
     },
 
     onMouseDown: function(event) {
@@ -408,7 +421,7 @@ var Grid = Class.extend({
 
                 // done so that you can click on a tile behind a character easily
                 if (clickedObject != this.currentSelectedUnits[myTeamId]) {
-                    clickedObject.onSelect(this);
+                    clickedObject.onSelect();
                 } else {
                     continueClickHandler = true;
                 }
@@ -465,6 +478,28 @@ var Grid = Class.extend({
         return this.tilesArray[xPos][zPos];
     },
 
+    loadGround: function() {
+        var texture = THREE.ImageUtils.loadTexture(this.GROUND_TEXTURE);
+
+        var groundMaterial = new THREE.MeshLambertMaterial({
+            color: 0xffffff, 
+            map: texture
+        });
+
+        var ground = new THREE.Mesh(new THREE.PlaneGeometry(this.gridWidth, this.gridLength), groundMaterial
+            );
+        ground.rotation.x = -0.5 * Math.PI;
+
+        var Y_BUFFER = -0.5;
+        // needed because otherwise tiles will overlay directly on the grid and will cause glitching during scrolling ("z fighting")
+        ground.position.y = Y_BUFFER;
+        // offset to fit grid drawing 
+        ground.position.x -= this.tileSize / 2;
+        ground.position.z -= this.tileSize / 2;
+
+        this.scene.add(ground);
+    },
+
     drawGridSquares: function(width, length, size) {
         this.tileFactory = new TileFactory(this, size);
 
@@ -479,19 +514,14 @@ var Grid = Class.extend({
         for (var i = 0; i < this.numberSquaresOnXAxis; i++) {
             for (var j = 0; j < this.numberSquaresOnZAxis; j++) {
                 var tile = this.tileFactory.createTile(i, j);
-
-                var tileMesh = tile.mesh;
-
-                tileMesh.position.x = this.convertXPosToWorldX(i);
-                tileMesh.position.y = 0;
-                tileMesh.position.z = this.convertZPosToWorldZ(j);
-                tileMesh.rotation.x = -0.5 * Math.PI;
-
+                
+                var tileMesh = tile.getTileMesh();
                 this.tilesArray[i][j] = tile;
 
                 this.tiles.add(tileMesh);
             }
         }
+
         this.PFGrid = new PF.Grid(this.numberSquaresOnXAxis, this.numberSquaresOnZAxis);
         this.pathFinder = new PF.AStarFinder();
 
@@ -526,8 +556,7 @@ var Grid = Class.extend({
         // update character movements
         for (var i = 0; i < this.characterMeshes.length; i++) {
             var character = this.characterMeshes[i].owner;
-            //character.dequeueMotion(this);
-            character.update(this, delta);
+            character.update(delta);
         }
 
         // update bullet movements

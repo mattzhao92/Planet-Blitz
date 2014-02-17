@@ -22,6 +22,7 @@ $(function () {
             this.GRID_LENGTH = 400;
 
             this.stats = this.initStats();
+            this.createGameConsole();
 
             this.setupCamera();
             this.setupCameraControls();
@@ -43,9 +44,9 @@ $(function () {
         setupCamera: function() {
             // create a camera, which defines where we're looking at
             this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 10000);
-            this.camera.position.x = -1.5;
-            this.camera.position.y = 292;
-            this.camera.position.z = 446;
+            this.camera.position.x = 0;
+            this.camera.position.y = 600;
+            this.camera.position.z = 400;
 
             var origin = new THREE.Vector3(0, 0, 0);
             this.camera.lookAt(origin);
@@ -119,7 +120,7 @@ $(function () {
 
         setupGameWorld: function() {
             var squareSize = 40;
-            this.world = new Grid(800, 800, squareSize, this.scene, this.camera, this.controls);
+            this.world = new Grid(this, 800, 800, squareSize, this.scene, this.camera, this.controls);
         },
 
         update: function() {
@@ -149,38 +150,53 @@ $(function () {
         initStats: function() {
             var stats = new Stats();
 
-            stats.setMode(0); // 0: fps, 1: ms
+            // stats.setMode(0); // 0: fps, 1: ms
 
-            // Align top-left
-            stats.domElement.style.position = 'absolute';
-            stats.domElement.style.left = '9px';
-            stats.domElement.style.top = '10px';
+            // // Align top-left
+            // stats.domElement.style.position = 'absolute';
+            // stats.domElement.style.left = '9px';
+            // stats.domElement.style.top = '10px';
 
-            $("#Stats-output").append( stats.domElement );
+            // $("#Stats-output").append(stats.domElement);
 
             return stats;
-        }, 
+        },
+
+        createGameConsole: function() {
+            var gameConsole = new GameConsole();
+            $("#Stats-output").append(gameConsole.domElement);
+            gameConsole.displayInitialMessage("Welcome to Planet Blitz! Fight to the death!");
+            // setTimeout(function() {
+            //     gameConsole.append("Fight to the death!");
+            // }, 3000);
+
+            this.gameConsole = gameConsole;
+        },
+
+        displayMessage: function(msg) {
+            this.gameConsole.append(msg);
+        },
 
         onWindowResize: function() {
 
             this.camera.aspect = window.innerWidth / window.innerHeight;
             this.camera.updateProjectionMatrix();
 
-            this.renderer.setSize( window.innerWidth, window.innerHeight );
+            this.renderer.setSize(window.innerWidth, window.innerHeight);
 
             // adjust camera controls
             this.controls.handleResize();
         },
 
-				getWorld: function() {
-						return this.world;
-				}
+        getWorld: function() {
+            return this.world;
+        }
 
     };
 
     var app = new App("#WebGL-output");
     var MAPGAME = app;
-		game = app;
+    game = app;
 
 });
 

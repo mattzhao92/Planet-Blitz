@@ -3,7 +3,7 @@ function Constants() {
 	
 };
 
-// red, light blue, green, purple
-// var TEAM_COLOR_CONSTANTS = [0xFF0000, 0x3399FF, 0x006600, 0x9966FF];
+// dark red, light blue, dark green, gold
+Constants.TEAM_COLORS = [0x990000, 0x007A29, 0x0066CC, 0xD4A017];
 
-Constants.TEAM_COLORS = [0xFF0000, 0x00FF00, 0x0000FF, 0xFFFFFF];
+Constants.GLOW_COLORS = {green: new THREE.Color(0x66E066)};

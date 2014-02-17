@@ -1,17 +1,20 @@
 var GridCell = Class.extend({
     // Class constructor
-    init: function(world, mesh, grayness, xPos, zPos) {
+    init: function(world, tileMesh, xPos, zPos) {
         this.world = world;
-        this.mesh = mesh;
+        this.tileMesh = tileMesh;
         this.xPos = xPos;
         this.zPos = zPos;
-        this.grayness = grayness;
 
         this.isSelectable = false;
         this.isMovable = false;
 
         this.hasObstacle = false;
         this.hasCharacter = false;
+    },
+
+    getTileMesh: function() {
+        return this.tileMesh;
     },
 
     isObstacle: function() {
@@ -26,22 +29,39 @@ var GridCell = Class.extend({
         this.hasCharacter = hasCharacterOnMe;
     },
 
-    getGrayness: function() {
-        return this.grayness;
-    },
-
     reset: function() {
-        // reset color
-        // this.mesh.material.color.setRGB(1, 1, 1);
-        this.mesh.material.color.setRGB(this.grayness, this.grayness, this.grayness);
         this.isSelectable = false;
         this.isMovable = false;
+        this.tileMesh.visible = false;
     },
 
     markAsNotSelected: function() {
         if (this.isMovable) {
-            this.mesh.material.color.setRGB(0, 1.0, 0);
+            this.highlight("GREEN");
         }
+    },
+
+    highlight: function(color) {
+
+        this.tileMesh.visible = true;
+        this.tileMesh.material.opacity = 0.65;
+        var rgb;
+        switch (color) {
+            case "GREEN":
+                rgb = [0.1, 1.0, 0.1];
+                break;
+            case "YELLOW":
+                rgb = [3.0, 3.0, 0];
+                break;
+            case "RED": 
+                rgb = [1.0, 0, 0];
+                break;
+            default:
+                console.log("Invalid color specified");
+                break;
+        }
+
+        this.tileMesh.material.color.setRGB(rgb[0], rgb[1], rgb[2]);
     },
 
     setSelectable: function(isSelectable) {
@@ -54,8 +74,8 @@ var GridCell = Class.extend({
 
     onMouseOver: function(scope) {
         if (this.isSelectable) {
-            // console.log("mouse over");
-            this.mesh.material.color.setRGB(1.0, 0, 0);
+            // this.highlight("RED");
+            this.highlight("YELLOW");
             this.world.markTileAsSelected(this);
             return {
                 x: this.xPos,
@@ -67,14 +87,12 @@ var GridCell = Class.extend({
 
     markAsMovable: function() {
         if (this.isMovable) {
-            this.mesh.material.color.setRGB(0, 1.0, 0);
+            this.highlight("GREEN");
         }
     },
 
     markAsRoadMap: function() {
-        //console.log("222222 XPos "+this.xPos +" zPos "+this.zPos+" isMovable " + this.isMovable);
-        //this.mesh.callMe();
-        this.mesh.material.color.setRGB(3.0, 3.0, 0);
+        this.highlight("YELLOW");
     }
 });
 
@@ -87,16 +105,23 @@ var TileFactory = Class.extend({
     createTile: function(xPos, zPos) {
 
         var mat = new THREE.MeshLambertMaterial({
-            overdraw: true
+            overdraw: true,
+            transparent: true
         });
-
-        var grayness = Math.random() * 0.5 + 0.25;
-        mat.color.setRGB(grayness, grayness, grayness);
 
         var tile = new THREE.Mesh(this.tileGeom, mat);
 
-        var gridCell = new GridCell(this.world, tile, grayness, xPos, zPos);
+        var gridCell = new GridCell(this.world, tile, xPos, zPos);
         tile.owner = gridCell;
+
+        var tileMesh = gridCell.getTileMesh();
+
+        tileMesh.position.x = this.world.convertXPosToWorldX(xPos);
+        tileMesh.position.y = 0;
+        tileMesh.position.z = this.world.convertZPosToWorldZ(zPos);
+        tileMesh.rotation.x = -0.5 * Math.PI;
+
+        tileMesh.visible = false;
 
         return gridCell;
     }
