@@ -44,9 +44,9 @@ $(function () {
         setupCamera: function() {
             // create a camera, which defines where we're looking at
             this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 10000);
-            this.camera.position.x = -1.5;
-            this.camera.position.y = 292;
-            this.camera.position.z = 446;
+            this.camera.position.x = 0;
+            this.camera.position.y = 600;
+            this.camera.position.z = 400;
 
             var origin = new THREE.Vector3(0, 0, 0);
             this.camera.lookAt(origin);
