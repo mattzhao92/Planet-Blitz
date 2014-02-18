@@ -15,7 +15,12 @@ function connectServer(type, gameStartCallback) {
 
   /* Handle the team id message */
   socket.on(Message.TEAM, function(data) {
-      myTeamId = data;
+      myTeamId = data[Message.TEAM];
+      updateLoadingPlayerState(data[Message.JOIN]);
+  });
+
+  socket.on(Message.JOIN, function(playerState) {
+      updateLoadingPlayerState(playerState);
   });
 
   /* Handle the start message */
@@ -52,20 +57,15 @@ function connectServer(type, gameStartCallback) {
   socket.on(Message.MOVE, function(moveData) {
       var state = moveData[Message.STATE];
       var data = moveData[Message.MOVE];
+      console.log(state);
       console.log(data);
       var moverTeam = parseInt(data[Move.team]);
       var moverIndex = parseInt(data[Move.index]);
       var deltaX = parseInt(data[Move.X]);
       var deltaZ = parseInt(data[Move.Z]);
+      var seq = parseInt(moveData[Message.SEQ]);
       var target = game.getWorld().getCharacterById(moverTeam, moverIndex);
-      for (var t = 0; t < state.length; t++) {
-        if (state[t][State.team] == moverTeam && 
-          state[t][State.index] == moverIndex) {
-            state[t][State.X] = parseInt(state[t][State.X]) - deltaX;
-            state[t][State.Z] = parseInt(state[t][State.Z]) - deltaZ;
-        }
-      }
-      game.getWorld().syncGameState(state, moverTeam, moverIndex);
+      game.getWorld().syncGameState(state, seq);
       target.setDirection(new THREE.Vector3(deltaX, 0, deltaZ));
       target.enqueueMotion(null);
   });
@@ -89,16 +89,11 @@ function connectServer(type, gameStartCallback) {
       var state = hitData[Message.STATE];
       var data = hitData[Message.HIT];
       console.log(data);
-      game.getWorld().syncGameState(state);
       var team = parseInt(data[Hit.team]);
       var index = parseInt(data[Hit.index]);
+      var seq = parseInt(moveData[Message.SEQ]);
       var target = game.getWorld().getCharacterById(team, index);
-      for (var t = 0; t < state.length; t++) {
-        if (state[t][State.team] == team && 
-          state[t][State.index] == index) {
-            state[t][State.health] = parseInt(state[t][State.health]) + 30;
-        }
-      } 
+      game.getWorld().syncGameState(state, seq);
       target.applyDamage(30);
   });
 
@@ -134,4 +129,8 @@ function sendHitMsg(team, index) {
   hit[Hit.team] = team;
   hit[Hit.index] = index;
   socket.emit(Message.HIT, hit);
+}
+
+function updateLoadingPlayerState(state) {
+  $('#Loading-output').html('Player: ' + state);
 }

@@ -12,6 +12,11 @@ body {
   height: 50px;
 }
 
+p {
+  text-align: center;
+  font-size: 30;
+}
+
 #debugBtn {
   top: 100px;
 }
@@ -33,6 +38,18 @@ body {
 
 
 #WebGL-output {
+}
+
+#Loading-output-container {
+  position: absolute;
+  left: 300px;
+  width: 200px;
+  top: 260px;
+  top: 180px;
+}
+
+#Loading-output {
+  
 }
 
 .span, .span_large{

@@ -441,6 +441,10 @@ var Character = Class.extend({
         return {'x': this.goalXPos, 'y':0, 'z':this.goalZPos};  
     },
 
+    getCurrentPosition: function() {
+        return {'x': this.xPos, 'y':0, 'z':this.zPos};
+    },
+
     update: function(delta) {
 
         this.breakUpdateHere = false;

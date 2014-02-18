@@ -1,5 +1,6 @@
 function startGame() {
   $('body').css('background-image', 'none');
+  $('#Loading-output').hide();
   $('.span').hide();
   $('.cloud').hide();
   $('#Stats-output').show();
@@ -11,6 +12,7 @@ function loading() {
   $('#playBtn').hide();
   $('#playBtn2').hide();
   $('#helpBtn').hide();
+  $('#Loading-output').show();
   $('.span').show();
   $('.cloud').show();
 }
@@ -18,6 +20,7 @@ function loading() {
 $(document).ready(function() {
   $('#WebGL-output').hide();
   $('#Stats-output').hide();
+  $('#Loading-output').hide();
   $('#playBtn').click(function() {
     numOfTeam = 2;
     connectServer(numOfTeam, startGame);

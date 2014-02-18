@@ -63,9 +63,15 @@ io.sockets.on('connection', function(socket) {
     socket.set('gameId', roomId);
     socket.join(curGame.room);
     // Send the team id to the player.
-    socket.emit(Message.TEAM, curGame.numPlayers++);
+    var randomTeamId = curGame.teamIds[curGame.numPlayers++];
+    var teamMsg = {}
+    teamMsg[Message.TEAM] = randomTeamId;
+    var playerState = curGame.numPlayers + '/' + curGame.maxNumPlayers;
+    teamMsg[Message.JOIN] = playerState;
+    socket.emit(Message.TEAM, teamMsg);
+    socket.broadcast.to(curGame.room).emit(Message.JOIN, playerState);
 
-    console.log('cur room players ' + curGame.numPlayers + '/' + curGame.maxNumPlayers);
+    console.log('cur room players ' + playerState);
     // Start the game when full, and create a new one.
     if (curGame.numPlayers == curGame.maxNumPlayers) {
       console.log('start game for room ' + curGame.room);
@@ -86,18 +92,18 @@ io.sockets.on('connection', function(socket) {
   // Game packet handling.
   socket.on(Message.MOVE, function(message) {
     socket.get('gameId', function(error, gameId) {
-      // Broadcast to the game room.
-      var room = games[gameId].room;
+      var game = games[gameId];
+      var newState = game.gameState.toJSON();
       // TODO: detect collision
-      var validMove = games[gameId].gameState.updatePosState(message);
+      var validMove = game.gameState.updatePosState(message);
       if (validMove) {
         // Increase the seq for synchronization version.
-        games[gameId].seq++;
-        var newState = games[gameId].gameState.toJSON();
+        game.seq++;
         newState[Message.MOVE] =  message;
         newState[Message.SEQ] = games[gameId].seq;
         // When sends back the move update, sends the server state too.
-        socket.broadcast.to(room).emit(Message.MOVE, newState);
+        // Broadcast to the game room.
+        socket.broadcast.to(game.room).emit(Message.MOVE, newState);
         socket.emit(Message.MOVE, newState);
       }
     });
@@ -113,9 +119,9 @@ io.sockets.on('connection', function(socket) {
   socket.on(Message.HIT, function(message) {
     socket.get('gameId', function(error, gameId) {
       var game = games[gameId];
+      var newState = game.gameState.toJSON();
       if (game.gameState.updateHealthState(message)) {
         game.seq++;
-        var newState = game.gameState.toJSON();
         newState[Message.HIT] = message;
         newState[Message.SEQ] = game.seq;
         socket.broadcast.to(game.room).emit(Message.HIT, newState);
@@ -187,14 +193,27 @@ GameState.prototype.updatePosState = function(data) {
   var index = parseInt(data[Move.index]);
   var deltaX = parseInt(data[Move.X]);
   var deltaZ = parseInt(data[Move.Z]);
-  var character = this.teams[teamId][index];
+  var mover = this.teams[teamId][index];
   // Already dead?
-  if (!character.alive) {
+  if (!mover.alive) {
     console.log("Dead move...");
     return false;
   }
-  character.x += deltaX;
-  character.z += deltaZ;
+  var nextX = mover.x + deltaX;
+  var nextZ = mover.z + deltaZ;
+  for (var teamId = 0; teamId < this.teams.length; teamId++) {
+    for (var i = 0; i < this.teamSize; i++) {
+      var character = this.teams[teamId][i];
+      if (character.alive) {
+        if (character.x == nextX && character.z == nextZ) {
+          console.log('Position conflict');
+          return false;
+        }
+      }
+    }
+  }
+  mover.x = nextX;
+  mover.z = nextZ;
   return true;
 };
 

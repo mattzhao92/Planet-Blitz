@@ -593,23 +593,25 @@ var Grid = Class.extend({
         }
     },
 
-    syncGameState: function(state, moverTeam, moverId) {
-        
+    syncGameState: function(state, seq) {
+        // Old seq, discard it.
+        if (seq < this.seq) {
+            return;
+        }
+        this.seq = seq;
+        // This is usd to check ghosts.
         var liveChars = new Array();
         var liveStates = new Array();
         for (var t = 0; t < numOfTeams; t++) {
             liveStates.push(new Array());
             for (var i = 0; i < this.numOfCharacters; i++) {
-                liveStates.push(false);
+                liveStates[t].push(false);
             }
         }
         // First check the correctness of each position.
         for (var t = 0; t < state.length; t++) {
             var teamId = parseInt(state[t][State.team]);
             var index = parseInt(state[t][State.index]);
-            if (teamId == moverTeam && index == moverId) {
-              break;
-            }
             var x = parseInt(state[t][State.X]);
             var z = parseInt(state[t][State.Z]);
             var health = parseInt(state[t][State.health]);
@@ -619,21 +621,27 @@ var Grid = Class.extend({
             if (charToCheck.alive) {
                 // Sync the health.
                 charToCheck.health = health;
-                if (charToCheck.xPos != x || charToCheck.zPos != z) {
+                var dest;
+                if (charToCheck.isInRoute()) {
+                    dest = charToCheck.getDestination();
+                } else {
+                    dest = charToCheck.getCurrentPosition();
+                }
+                if (dest.x != x || dest.z != z) {
                     // Inconsistent with auth state, adjust position.
                     console.log("Inconsi pos ");
                     charToCheck.placeAtGridPos(x, z);
-               }
+                }
             }
         }
 
         for (var t = 0; t < numOfTeams; t++) {
             for (var i = 0; i < this.numOfCharacters; i++) {
-                var charToCheck = this.getCharacterById(teamId, index);
-                if (!liveStates && charToCheck.alive) {
+                var charToCheck = this.getCharacterById(t, i);
+                if (!liveStates[t][i] && charToCheck.alive) {
                     console.log("Zombie character!");
                     // Server says dead but alive locally.
-                    handleCharacterDead(charToCheck);
+                    this.handleCharacterDead(charToCheck);
                 }
             }
         }
