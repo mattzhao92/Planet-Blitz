@@ -13,6 +13,7 @@ body {
 }
 
 p {
+  margin: auto;
   text-align: center;
   font-size: 30;
 }
@@ -75,7 +76,11 @@ p {
               18px 0px 0px 0px rgba(255,255,255,1),
               24px 0px 0px 0px rgba(255,255,255,1),
               30px 0px 0px 0px rgba(255,255,255,1),
-              36px 0px 0px 0px rgba(255,255,255,1);
+              36px 0px 0px 0px rgba(255,255,255,1),
+              42px 0px 0px 0px rgba(255,255,255,1),
+              48px 0px 0px 0px rgba(255,255,255,1),
+              54px 0px 0px 0px rgba(255,255,255,1),
+              60px 0px 0px 0px rgba(255,255,255,1);
   
   -webkit-animation: rain 1s linear infinite alternate;
      -moz-animation: rain 1s linear infinite alternate;
@@ -98,19 +103,54 @@ p {
 @-webkit-keyframes rain{
   0%{
    box-shadow: 6px 0px 0px 0px rgba(255,255,255,1),
-              12px 0px 0px 0px rgba(255,255,255,0.9),
-              18px 0px 0px 0px rgba(255,255,255,0.7),
-              24px 0px 0px 0px rgba(255,255,255,0.6),
-              30px 0px 0px 0px rgba(255,255,255,0.3),
-              36px 0px 0px 0px rgba(255,255,255,0.2);
+              12px 0px 0px 0px rgba(255,255,255,0.95),
+              18px 0px 0px 0px rgba(255,255,255,0.9),
+              24px 0px 0px 0px rgba(255,255,255,0.85),
+              30px 0px 0px 0px rgba(255,255,255,0.8),
+              36px 0px 0px 0px rgba(255,255,255,0.75),
+              42px 0px 0px 0px rgba(255,255,255,0.7),
+              48px 0px 0px 0px rgba(255,255,255,0.65),
+              54px 0px 0px 0px rgba(255,255,255,0.6),
+              60px 0px 0px 0px rgba(255,255,255,0.55),
+              66px 0px 0px 0px rgba(255,255,255,0.5),
+              72px 0px 0px 0px rgba(255,255,255,0.45),
+              78px 0px 0px 0px rgba(255,255,255,0.4),
+              84px 0px 0px 0px rgba(255,255,255,0.35),
+              90px 0px 0px 0px rgba(255,255,255,0.3),
+              96px 0px 0px 0px rgba(255,255,255,0.25),
+              102px 0px 0px 0px rgba(255,255,255,0.2),
+              108px 0px 0px 0px rgba(255,255,255,0.15),
+              114px 0px 0px 0px rgba(255,255,255,0.1),
+              120px 0px 0px 0px rgba(255,255,255,0.05),
+              126px 0px 0px 0px rgba(255,255,255,0.01),
+              132px 0px 0px 0px rgba(255,255,255,0.01),
+              138px 0px 0px 0px rgba(255,255,255,0.01);
   }
   100%{
-  box-shadow: 6px 0px 0px 0px rgba(255,255,255,0.2),
-              12px 0px 0px 0px rgba(255,255,255,0.3),
-              18px 0px 0px 0px rgba(255,255,255,0.6),
-              24px 0px 0px 0px rgba(255,255,255,0.7),
-              30px 0px 0px 0px rgba(255,255,255,0.9),
-              36px 0px 0px 0px rgba(255,255,255,1);
+  box-shadow: 6px 0px 0px 0px rgba(255,255,255,0.01),
+              12px 0px 0px 0px rgba(255,255,255,0.01),
+              18px 0px 0px 0px rgba(255,255,255,0.01),
+              24px 0px 0px 0px rgba(255,255,255,0.05),
+              30px 0px 0px 0px rgba(255,255,255,0.1),
+              36px 0px 0px 0px rgba(255,255,255,0.15),
+              42px 0px 0px 0px rgba(255,255,255,0.2),
+              48px 0px 0px 0px rgba(255,255,255,0.25),
+              54px 0px 0px 0px rgba(255,255,255,0.3),
+              60px 0px 0px 0px rgba(255,255,255,0.35),
+              66px 0px 0px 0px rgba(255,255,255,0.4),
+              72px 0px 0px 0px rgba(255,255,255,0.45),
+              78px 0px 0px 0px rgba(255,255,255,0.5),
+              84px 0px 0px 0px rgba(255,255,255,0.55),
+              90px 0px 0px 0px rgba(255,255,255,0.6),
+              96px 0px 0px 0px rgba(255,255,255,0.65),
+              102px 0px 0px 0px rgba(255,255,255,0.7),
+              108px 0px 0px 0px rgba(255,255,255,0.75),
+              114px 0px 0px 0px rgba(255,255,255,0.8),
+              120px 0px 0px 0px rgba(255,255,255,0.85),
+              126px 0px 0px 0px rgba(255,255,255,0.9),
+              132px 0px 0px 0px rgba(255,255,255,0.95),
+              138px 0px 0px 0px rgba(255,255,255,1);
+
       opacity: 1;
   }
 }
@@ -155,7 +195,7 @@ p {
 
 @-webkit-keyframes line_flow{
   0%{ width: 0px;}
-  100%{width: 40px;}
+  100%{width: 140px;}
 }
 @-moz-keyframes line_flow{
   0%{ width: 0px;}

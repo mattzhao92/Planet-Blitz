@@ -132,5 +132,5 @@ function sendHitMsg(team, index) {
 }
 
 function updateLoadingPlayerState(state) {
-  $('#Loading-output').html('Player: ' + state);
+  $('#Loading-output').html('Waiting...</br>Player: ' + state);
 }
