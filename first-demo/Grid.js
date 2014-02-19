@@ -108,7 +108,7 @@ var Grid = Class.extend({
         var index = this.characterMeshes.indexOf(character.mesh);
         if (index > -1) {
             this.characterMeshes.splice(index, 1);
-            // remove object form scene
+            // remove object from scene
             character.onDead();
         }
     },

@@ -204,7 +204,8 @@ var Character = Class.extend({
     canShoot: function() {
 
 
-        return this.ammoCount > 1 && !this.isCharacterInRoute;
+        // return this.ammoCount > 1 && !this.isCharacterInRoute;
+        return this.ammoCount > 1;
     },
 
     getRadius: function() {
@@ -269,7 +270,7 @@ var Character = Class.extend({
     },
 
     getMovementRange: function() {
-        return 3;
+        return 7;
     },
 
 
@@ -443,7 +444,6 @@ var Character = Class.extend({
                 this.xPos = this.goalXPos;
             } else {
                 this.setCharacterMeshPosX(newMeshX);
-                this.velocityX *= 1.05;
             }
 
             if ((newMeshZ - this.goalMeshZ) / (this.goalMeshZ - this.prevMeshZ) > 0) {
@@ -452,7 +452,6 @@ var Character = Class.extend({
                 this.zPos = this.goalZPos;
             } else {
                 this.setCharacterMeshPosZ(newMeshZ);
-                this.velocityZ *= 1.05;
             }
 
             if (this.motionInProgress) {
@@ -522,7 +521,6 @@ var Character = Class.extend({
                     return false;
                 }
 
-
                 this.motionInProgress = true;
                 // ... we move the character
                 this.prevMeshX = this.mesh.position.x;
@@ -532,18 +530,20 @@ var Character = Class.extend({
                 this.goalMeshX = this.mesh.position.x + direction.x * 40;
                 this.goalMeshZ = this.mesh.position.z + direction.z * 40;
                 
+                var MOVE_VELOCITY = 100;
+
                 if (direction.x < 0) {
-                    this.velocityX = -100;
+                    this.velocityX = -MOVE_VELOCITY;
                 } else if(direction.x > 0) {
-                    this.velocityX = 100;
+                    this.velocityX = MOVE_VELOCITY;
                 } else {
                     this.velocityX = 0;
                 }
 
                 if (direction.z < 0) {
-                    this.velocityZ = -100;
+                    this.velocityZ = -MOVE_VELOCITY;
                 } else if (direction.z > 0) {
-                    this.velocityZ = 100;
+                    this.velocityZ = MOVE_VELOCITY;
                 } else {
                     this.velocityZ = 0;
                 }
