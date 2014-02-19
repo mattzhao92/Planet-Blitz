@@ -198,7 +198,7 @@ var Character = Class.extend({
 
 
     canShoot: function() {
-        return this.ammoCount > 1;
+        return this.ammoCount > 1 && !this.isCharacterInRoute;
     },
 
     getRadius: function() {
@@ -274,10 +274,11 @@ var Character = Class.extend({
         this.world.scene.remove(this.healthBar);
     },
 
-    onShoot: function() {
+    onShoot: function(from, to) {
         if (this.ammoCount > 1) {
             this.setAmmoCount(this.ammoCount - 1);
         }
+        this.rotate(new THREE.Vector3(to.x-from.x, to.y-from.y, to.z-from.z));
         this.needsReload = true;
     },
     
