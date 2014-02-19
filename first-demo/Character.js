@@ -59,15 +59,22 @@ var Character = Class.extend({
 
         var spriteMaterial = new THREE.SpriteMaterial( { map: this.coolDownBarTexture, useScreenCoordinates: false, alignment: THREE.SpriteAlignment.centerLeft } );
         
-        this.barAspectRatio = 10;
+           this.barAspectRatio = 10;
         this.coolDownBarXOffset = 0;
         this.coolDownBarZOffset = 0;
         this.coolDownBarYOffset = 55;
         this.coolDownBar = new THREE.Sprite(spriteMaterial);
-        this.coolDownBar.scale.set(this.world.getTileSize(), this.world.getTileSize()/this.barAspectRatio, 1.0);
         this.lastRoadMap = new Array();
         this.coolDownCount = 105;
         this.coolDownLeft = 0;
+        this.canvas2d.rect(0, 0, 800, 200);
+        this.canvas2d.fillStyle = "green";
+        this.canvas2d.fill();
+        this.coolDownBar.position.set(this.mesh.position.x - this.world.getTileSize()/2 + this.coolDownBarXOffset,
+                                      this.mesh.position.y + this.coolDownBarYOffset,
+                                      this.mesh.position.z + this.coolDownBarZOffset);   
+        this.coolDownBar.scale.set(this.world.getTileSize(), this.world.getTileSize()/this.barAspectRatio, 1.0);    
+        this.world.scene.add(this.coolDownBar);
 
         var canvas2 = document.createElement('canvas');
         this.canvas2d2 = canvas2.getContext('2d');
@@ -80,9 +87,9 @@ var Character = Class.extend({
         this.ammoCountBarZOffset = 0;
         this.ammoCountBarYOffset = 60;
         this.ammoCountBar = new THREE.Sprite(ammoCountBarMaterial);
-        this.ammoCountBar.scale.set(this.world.getTileSize(), this.world.getTileSize()/this.barAspectRatio, 1.0);
+        //this.ammoCountBar.scale.set(this.world.getTileSize(), this.world.getTileSize()/this.barAspectRatio, 1.0);
         this.maximumAmmoCapacity = 5;
-        this.ammoCount = this.maximumAmmoCapacity;
+        this.ammoCount = this.maximumAmmoCapacity
         this.ammoReplenishRate = 0.01;
         this.needsReload = false;
 
@@ -91,30 +98,37 @@ var Character = Class.extend({
         this.canvas2d2.fill(); 
         this.ammoCountBar.position.set(this.mesh.position.x + this.ammoCountBarXOffset, 
                                        this.mesh.position.y + this.ammoCountBarYOffset,
-                                       this.mesh.position.z + this.ammoCountBarZOffset);        
+                                       this.mesh.position.z + this.ammoCountBarZOffset); 
+        this.ammoCountBar.scale.set(this.world.getTileSize(), this.world.getTileSize()/this.barAspectRatio, 1.0);     
         this.world.scene.add(this.ammoCountBar );
 
+
         this.isCharacterInRoute = false;
-        // var canvas3 = document.createElement('canvas');
-        // this.canvas2d3 = canvas2.getContext('2d');
-        // this.healthBarTexture = new THREE.Texture(canvas3);
-        // this.healthBarTexture.needsUpdate = true;
-        // this.healthBarXOffset = -1 * this.world.getTileSize()/2;
-        // this.healthBarZOffset = 0;
-        // this.healthBarYOffset = 55;
-        // this.maximumHealth = this.getHealth();
-        // this.currentHealth = this.maximumHealth;
-        // this.healthBar = new THREE.Sprite(this.healthBarTexture);
-        // this.healthBar.scale.set(this.world.getTileSize(), this.world.getTileSize()/this.barAspectRatio, 1.0);
 
-        // this.canvas2d3.rect(0, 0, 600, 150);
-        // this.canvas2d3.fillStyle = "yellow";
-        // this.canvas2d3.fill();
+        var canvas3 = document.createElement('canvas');
+        this.canvas2d3 = canvas3.getContext('2d');
+        
+        this.healthBarTexture = new THREE.Texture(canvas3);
+        this.healthBarTexture.needsUpdate = true;
 
-        // this.healthBar.position.set(this.mesh.position.x + this.healthBarXOffset, 
-        //                             this.mesh.position.y + this.healthBarYOffset,
-        //                             this.mesh.position.z + this.healthBarZOffset);        
-        // this.world.scene.add(this.healthBar);
+        var healthBarMaterial = new THREE.SpriteMaterial( { map: this.healthBarTexture, useScreenCoordinates: false, alignment: THREE.SpriteAlignment.centerLeft } );
+        
+        this.healthBarXOffset = -1 * this.world.getTileSize()/2;
+        this.healthBarZOffset = 0;
+        this.healthBarYOffset = 65;
+        this.healthBar = new THREE.Sprite(healthBarMaterial);
+
+        this.maximumHealth = this.getHealth();
+        this.health = this.maximumHealth;
+
+        this.canvas2d3.rect(0, 0, 600, 150);
+        this.canvas2d3.fillStyle = "red";
+        this.canvas2d3.fill(); 
+        this.healthBar.position.set(this.mesh.position.x + this.healthBarXOffset, 
+                                       this.mesh.position.y + this.healthBarYOffset,
+                                       this.mesh.position.z + this.healthBarZOffset); 
+        this.healthBar.scale.set(this.world.getTileSize(), this.world.getTileSize()/this.barAspectRatio, 1.0);   
+        this.world.scene.add(this.healthBar);
         this.breakUpdateHere = false;
     },
 
@@ -156,7 +170,7 @@ var Character = Class.extend({
     },
 
     setAmmoCount: function(number) {
-        if (number < this.maximumAmmoCapacity) {
+        if (number <= this.maximumAmmoCapacity) {
             this.ammoCount = number;
         }
         if (number == this.maximumAmmoCapacity) {
@@ -166,6 +180,17 @@ var Character = Class.extend({
         this.ammoCountBar.scale.set(width * (1.0 * this.ammoCount)/this.maximumAmmoCapacity, 
                                                 width/this.barAspectRatio, 1.0);
     },
+
+    setHealth: function(health) {
+        if (health <= this.maximumHealth) {
+            this.health = health;
+        } 
+
+        var width = this.world.getTileSize();
+        this.healthBar.scale.set(width * (1.0 * this.health)/this.maximumHealth, 
+                                                width/this.barAspectRatio, 1.0);
+    },
+
 
     getRadius: function() {
         return this.characterSize;
@@ -188,7 +213,7 @@ var Character = Class.extend({
 
     applyDamage: function(damage) {
 
-        this.health -= damage;
+        this.setHealth(this.health - damage);
         console.log("Health: " + this.getHealth());
         if (this.health < 0) {
             this.world.handleCharacterDead(this);
@@ -198,10 +223,7 @@ var Character = Class.extend({
     enterCoolDown: function() {
         this.isCoolDown = 1;
         var scope = this;
-        
-        this.canvas2d.rect(0, 0, 800, 200);
-        this.canvas2d.fillStyle = "red";
-        this.canvas2d.fill();
+
         this.coolDownBarTexture.needsUpdate = true;
         this.coolDownBar.position.set(this.mesh.position.x - this.world.getTileSize()/2 + this.coolDownBarXOffset,this.mesh.position.y + this.coolDownBarYOffset,this.mesh.position.z + this.coolDownBarZOffset);        
         this.world.scene.add(this.coolDownBar );   
@@ -249,6 +271,7 @@ var Character = Class.extend({
         this.world.scene.remove(this.mesh);
         this.world.scene.remove(this.coolDownBar);
         this.world.scene.remove(this.ammoCountBar);
+        this.world.scene.remove(this.healthBar);
     },
 
     onShoot: function() {
@@ -342,19 +365,21 @@ var Character = Class.extend({
         this.mesh.position.x = x;
         this.coolDownBar.position.x = x - this.world.getTileSize()/2 + this.coolDownBarXOffset;
         this.ammoCountBar.position.x = x + this.ammoCountBarXOffset;
+        this.healthBar.position.x    = x + this.healthBarXOffset;
     },
 
     setCharacterMeshPosY: function(y) {
         this.mesh.position.y = y;
         this.coolDownBar.position.y = y + this.coolDownBarYOffset;
-
         this.ammoCountBar.position.y = y + this.ammoCountBarYOffset;
+        this.healthBar.position.y    = y + this.healthBarYOffset;
     },
 
     setCharacterMeshPosZ: function(z) {
         this.mesh.position.z = z;
         this.coolDownBar.position.z = z + this.coolDownBarZOffset;
         this.ammoCountBar.position.z = z + this.ammoCountBarZOffset;
+        this.healthBar.position.z    = z + this.healthBarZOffset;
     },
 
     updateWeaponReload : function(delta) {
