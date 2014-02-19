@@ -225,6 +225,9 @@ GameState.prototype.updateHealthState = function(data) {
     return false;
   }
   this.teams[teamId][index].health -= 30;
+  if (this.teams[teamId][index].health < 0) {
+    this.team[teamId][index].alive = false;
+  }
   return true;
 };
   
