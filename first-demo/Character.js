@@ -290,7 +290,7 @@ var Character = Class.extend({
             return;
         }
         // world.deselectAll();
-        if (myTeamId == null || this.team == myTeamId) {
+        if (GameInfo.myTeamId == null || this.team == GameInfo.myTeamId) {
           this.unitSelectorMesh.material.color.setRGB(1.0, 0, 0);
           this.unitSelectorMesh.visible = true;
           this.world.markCharacterAsSelected(this);
@@ -300,7 +300,7 @@ var Character = Class.extend({
 
     deselect: function() {
         // return to original color
-        if (myTeamId == null || this.team == myTeamId) {
+        if (GameInfo.myTeamId == null || this.team == GameInfo.myTeamId) {
             this.unitSelectorMesh.visible = false;
             this.isActive = false;
         }
@@ -487,7 +487,7 @@ var Character = Class.extend({
             if (direction.sentinel == 'start') {
                 var path = direction.highlightTiles;
                 this.isCharacterInRoute = true;
-                if (this.team == myTeamId) {
+                if (this.team == GameInfo.myTeamId) {
                     if (this.highlightedTiles){
                         for (var i = 0; i < this.highlightedTiles.length; i++) {
                             this.highlightedTiles[i].reset();

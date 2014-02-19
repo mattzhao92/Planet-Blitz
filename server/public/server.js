@@ -22,20 +22,20 @@ $(document).ready(function() {
   $('#Stats-output').hide();
   $('#Loading-output').hide();
   $('#playBtn').click(function() {
-    numOfTeam = 2;
-    connectServer(numOfTeam, startGame);
+    GameInfo.numOfTeam = 2;
+    connectServer(GameInfo.numOfTeam, startGame);
     loading();
   });
 
   $('#playBtn2').click(function() {
-    numOfTeam = 4;
-    connectServer(numOfTeam, startGame);
+    GameInfo.numOfTeam = 4;
+    connectServer(GameInfo.numOfTeam, startGame);
     loading();
   });
 
   /* Start the game locally */
   $('#debugBtn').click(function() {
-    netMode = false;
+    GameInfo.netMode = false;
     loading();
     startGame();
   });

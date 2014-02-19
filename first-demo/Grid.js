@@ -44,7 +44,7 @@ var Grid = Class.extend({
         this.seq = 0;
 
         var scope = this;
-        for (var team_id = 0; team_id < numOfTeams; team_id++) {
+        for (var team_id = 0; team_id < GameInfo.numOfTeams; team_id++) {
           this.characterList.push(new Array());
           this.currentSelectedUnits.push(null);
           for (var i = 0; i < this.numOfCharacters; i++) {
@@ -90,7 +90,7 @@ var Grid = Class.extend({
         this.displayMessage("A robot was destroyed!");
 
         // if the character was the currently selected unit, then reset tile state
-        if (this.currentSelectedUnits[myTeamId] == character) {
+        if (this.currentSelectedUnits[GameInfo.myTeamId] == character) {
             // deselect character
             character.deselect();
 
@@ -98,7 +98,7 @@ var Grid = Class.extend({
             character.highlightedTiles.forEach(function(tile) {
                 tile.reset();
             });
-            this.currentSelectedUnits[myTeamId] = null;
+            this.currentSelectedUnits[GameInfo.myTeamId] = null;
         }
 
         // mark dead.
@@ -153,13 +153,13 @@ var Grid = Class.extend({
 
     markCharacterAsSelected: function(character) {
         // deselect previous character if there was one
-        if (this.currentSelectedUnits[myTeamId]) {
-            if (this.currentSelectedUnits[myTeamId] != character) {
-                this.currentSelectedUnits[myTeamId].deselect();
+        if (this.currentSelectedUnits[GameInfo.myTeamId]) {
+            if (this.currentSelectedUnits[GameInfo.myTeamId] != character) {
+                this.currentSelectedUnits[GameInfo.myTeamId].deselect();
             }
         }
 
-        this.currentSelectedUnits[myTeamId] = character;
+        this.currentSelectedUnits[GameInfo.myTeamId] = character;
 
         // show character movement speed
         this.displayMovementArea(character);
@@ -351,7 +351,7 @@ var Grid = Class.extend({
     },
 
     handleShootEvent: function(projector, mouseVector, intersectsWithTiles) {
-        var from = this.currentSelectedUnits[myTeamId].mesh.position.clone();
+        var from = this.currentSelectedUnits[GameInfo.myTeamId].mesh.position.clone();
         var to;
 
         var isFiringWithinGrid = intersectsWithTiles.length > 0;
@@ -378,10 +378,10 @@ var Grid = Class.extend({
         from.y = 15;
 
         // shoot a bullet because you can
-        if (this.currentSelectedUnits[myTeamId].canShoot()) {
-            sendShootMsg(this.currentSelectedUnits[myTeamId].id, from, to);
-            this.currentSelectedUnits[myTeamId].onShoot(from, to);
-            this.shootBullet(this.currentSelectedUnits[myTeamId], from, to);
+        if (this.currentSelectedUnits[GameInfo.myTeamId].canShoot()) {
+            sendShootMsg(this.currentSelectedUnits[GameInfo.myTeamId].id, from, to);
+            this.currentSelectedUnits[GameInfo.myTeamId].onShoot(from, to);
+            this.shootBullet(this.currentSelectedUnits[GameInfo.myTeamId], from, to);
         }
     },
 
@@ -403,7 +403,7 @@ var Grid = Class.extend({
         var intersects = raycaster.intersectObjects(this.characterMeshes, true);
         var intersectsWithTiles = raycaster.intersectObjects(this.tiles.children);
 
-        var unitIsCurrentlySelected = (this.currentSelectedUnits[myTeamId] != null);
+        var unitIsCurrentlySelected = (this.currentSelectedUnits[GameInfo.myTeamId] != null);
         if (unitIsCurrentlySelected) {
             // fire on click
             if (event.which == RIGHT_CLICK) {
@@ -420,7 +420,7 @@ var Grid = Class.extend({
                 var clickedObject = intersects[0].object.owner;
 
                 // done so that you can click on a tile behind a character easily
-                if (clickedObject != this.currentSelectedUnits[myTeamId]) {
+                if (clickedObject != this.currentSelectedUnits[GameInfo.myTeamId]) {
                     clickedObject.onSelect();
                 } else {
                     continueClickHandler = true;
@@ -440,23 +440,23 @@ var Grid = Class.extend({
         if (intersectsWithTiles.length > 0) {
             var tileSelected = intersectsWithTiles[0].object.owner;
             var coordinate = tileSelected.onMouseOver();
-            if (this.currentSelectedUnits[myTeamId] && coordinate) {
-                var deltaX = coordinate.x - this.currentSelectedUnits[myTeamId].getTileXPos();
+            if (this.currentSelectedUnits[GameInfo.myTeamId] && coordinate) {
+                var deltaX = coordinate.x - this.currentSelectedUnits[GameInfo.myTeamId].getTileXPos();
                 var deltaY = 0;
-                var deltaZ = coordinate.z - this.currentSelectedUnits[myTeamId].getTileZPos();
+                var deltaZ = coordinate.z - this.currentSelectedUnits[GameInfo.myTeamId].getTileZPos();
 
                 var unitMovedToDifferentSquare = !(deltaX == 0 && deltaZ == 0);
 
                 if (unitMovedToDifferentSquare) {
-                    this.currentSelectedUnits[myTeamId].setDirection(
+                    this.currentSelectedUnits[GameInfo.myTeamId].setDirection(
                         new THREE.Vector3(deltaX, deltaY, deltaZ));
 
                     // Put the network communication here.
-                    sendMoveMsg(this.currentSelectedUnits[myTeamId].id,
+                    sendMoveMsg(this.currentSelectedUnits[GameInfo.myTeamId].id,
                         deltaX, deltaY, deltaZ);
 
-                    if (!netMode) {
-                      this.currentSelectedUnits[myTeamId].enqueueMotion(
+                    if (!GameInfo.netMode) {
+                      this.currentSelectedUnits[GameInfo.myTeamId].enqueueMotion(
                           this, function() {
                             this.allowCharacterMovement = true;
                           });
@@ -582,7 +582,7 @@ var Grid = Class.extend({
             // also need to check for bullet team here
             if (character.team != bullet.owner.team && this.checkOverlap(bullet, character)) {
                 this.handleBulletDestroy(bullet);
-                if (netMode) {
+                if (GameInfo.netMode) {
                     sendHitMsg(character.team, character.id);
                 } else {
                     character.applyDamage(30);
@@ -602,7 +602,7 @@ var Grid = Class.extend({
         // This is usd to check ghosts.
         var liveChars = new Array();
         var liveStates = new Array();
-        for (var t = 0; t < numOfTeams; t++) {
+        for (var t = 0; t < GameInfo.numOfTeams; t++) {
             liveStates.push(new Array());
             for (var i = 0; i < this.numOfCharacters; i++) {
                 liveStates[t].push(false);
@@ -635,7 +635,7 @@ var Grid = Class.extend({
             }
         }
 
-        for (var t = 0; t < numOfTeams; t++) {
+        for (var t = 0; t < GameInfo.numOfTeams; t++) {
             for (var i = 0; i < this.numOfCharacters; i++) {
                 var charToCheck = this.getCharacterById(t, i);
                 if (!liveStates[t][i] && charToCheck.alive) {

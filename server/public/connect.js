@@ -3,19 +3,16 @@
 var socket;
 var name;
 var game;
-var myTeamId = 0;
-// Default.
-var numOfTeams = 4;
-var netMode = true;
+var GameInfo = new GameConfig();
 
 function connectServer(type, gameStartCallback) {
   socket = io.connect();
-  numOfTeams = type;
+  GameInfo.numOfTeams = type;
   socket.emit(Message.GAME, type);
 
   /* Handle the team id message */
   socket.on(Message.TEAM, function(data) {
-      myTeamId = data[Message.TEAM];
+      GameInfo.myTeamId = data[Message.TEAM];
       updateLoadingPlayerState(data[Message.JOIN]);
   });
 
@@ -27,16 +24,16 @@ function connectServer(type, gameStartCallback) {
   socket.on(Message.START, function() {
       gameStartCallback();
       var grid = game.getWorld();
-      for (var tm = numOfTeams; tm < 4; tm++) {
+      for (var tm = GameInfo.numOfTeams; tm < 4; tm++) {
         for (var i = 0; i < grid.numOfCharacters; i++) {
           grid.handleCharacterDead(grid.getCharacterById(tm, i));
         }
       }
 
-      console.log("Team id "+ myTeamId);
+      console.log("Team id "+ GameInfo.myTeamId);
 
       var teamJoinMessage;
-      switch (myTeamId) {
+      switch (GameInfo.myTeamId) {
           case 0:
               teamJoinMessage = "You spawned at top";
               break;
@@ -99,11 +96,18 @@ function connectServer(type, gameStartCallback) {
 
 }
 
+// A wrapper class for all game parameter.
+function GameConfig() {
+  this.numOfTeams = 4;
+  this.myTeamId = 0;
+  this.netMode = true;
+}
+
 
 function sendMoveMsg(index, x, y, z) {
-  if (netMode) {
+  if (GameInfo.netMode) {
     var data = {};
-    data[Move.team] = myTeamId;
+    data[Move.team] = GameInfo.myTeamId;
     data[Move.index] = index;
     data[Move.X] = x;
     data[Move.Z] = z;
@@ -112,9 +116,9 @@ function sendMoveMsg(index, x, y, z) {
 }
 
 function sendShootMsg(index, from, to) {
-  if (netMode) {
+  if (GameInfo.netMode) {
     var shoot = {};
-    shoot[Shoot.team] = myTeamId;
+    shoot[Shoot.team] = GameInfo.myTeamId;
     shoot[Shoot.index] = index;
     shoot[Shoot.fromX] = from.x;
     shoot[Shoot.fromZ] = from.z;
