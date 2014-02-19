@@ -304,7 +304,6 @@ var Grid = Class.extend({
         }
 
         var scope = this;
-
         var projector = new THREE.Projector();
         var mouseVector = new THREE.Vector3();
 
@@ -313,14 +312,34 @@ var Grid = Class.extend({
         mouseVector.x = 2 * (mousePosition.x / window.innerWidth) - 1;
         mouseVector.y = 1 - 2 * (mousePosition.y / window.innerHeight);
 
-        var raycaster = projector.pickingRay(mouseVector.clone(), scope.camera),
-            intersects = raycaster.intersectObjects(scope.tiles.children);
+        var raycaster = projector.pickingRay(mouseVector.clone(), this.camera);
 
-        for (var i = 0; i < intersects.length; i++) {
-            var intersection = intersects[i],
-                obj = intersection.object.owner;
+        // recursively call intersects
+        var intersectsWithTiles = raycaster.intersectObjects(this.tiles.children);
+        var isFiringWithinGrid = intersectsWithTiles.length > 0;
 
-            obj.onMouseOver();
+        var to;
+        if (isFiringWithinGrid) {
+            var tileSelected = intersectsWithTiles[0].object.owner;
+
+            // determine exact point of intersection with tile
+            to = intersectsWithTiles[0].point;
+        } else {
+            // experimental - be able to fire at points outside of space
+            var vector = new THREE.Vector3(mouseVector.x, mouseVector.y, 0.5);
+            projector.unprojectVector(vector, this.camera);
+            var dir = vector.sub(this.camera.position).normalize();
+
+            // calculate distance to the plane
+            var distance = - this.camera.position.y / dir.y;
+            var pos = this.camera.position.clone().add(dir.multiplyScalar(distance));
+
+            to = pos;
+        }
+
+        if (this.currentSelectedUnits[myTeamId]) {
+            var from = this.currentSelectedUnits[myTeamId].mesh.position.clone();
+            this.currentSelectedUnits[myTeamId].rotate2(new THREE.Vector3(to.x-from.x, to.y-from.y, to.z-from.z));
         }
     },
 
@@ -344,6 +363,7 @@ var Grid = Class.extend({
         this.bullets.push(bullet);
         this.scene.add(bullet.mesh);
     },
+
 
     handleShootEvent: function(projector, mouseVector, intersectsWithTiles) {
         var from = this.currentSelectedUnits[myTeamId].mesh.position.clone();
@@ -375,8 +395,8 @@ var Grid = Class.extend({
         // shoot a bullet because you can
         if (this.currentSelectedUnits[myTeamId].canShoot()) {
             sendShootMsg(this.currentSelectedUnits[myTeamId].id, from, to);
-            this.currentSelectedUnits[myTeamId].onShoot(from, to);
             this.shootBullet(this.currentSelectedUnits[myTeamId], from, to);
+            this.currentSelectedUnits[myTeamId].onShoot(from, to);
         }
     },
 

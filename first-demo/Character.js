@@ -197,7 +197,13 @@ var Character = Class.extend({
     },
 
 
+    isInViewPort: function (target) {
+
+    },
+
     canShoot: function() {
+
+
         return this.ammoCount > 1 && !this.isCharacterInRoute;
     },
 
@@ -453,7 +459,8 @@ var Character = Class.extend({
                 this.prevMeshX = newMeshX;
                 this.prevMeshZ = newMeshZ;
             }
-
+            console.log("x: "+this.mesh.position.x);
+            console.log("z: "+this.mesh.position.z);
             this.breakUpdateHere = true;                   
         } 
     },
@@ -549,20 +556,31 @@ var Character = Class.extend({
         }
     },
 
+    onMouseMovement: function(direction) {
+
+    },
+
     // Rotate the character
     rotate: function(direction) {
+        // 'use strict';
+        // // Set the direction's angle, and the difference between it and our Object3D's current rotation
+        // this.goalAngle = Math.atan2(direction.x, direction.z);
+
+        // if (this.goalAngle - this.mesh.rotation.y > Math.PI) {
+        //     this.goalAngle -= 2 * Math.PI;
+        // }
+        // this.angularVelocity = (this.goalAngle - this.mesh.rotation.y) * 2;
+        // if (this.angularVelocity != 0) {
+        //     this.rotationInProgress = true;
+        //     this.prevAngle = this.mesh.rotation.y;
+        // }
+    },
+
+    // Rotate the character 2
+    rotate2: function(direction) {
         'use strict';
         // Set the direction's angle, and the difference between it and our Object3D's current rotation
-        this.goalAngle = Math.atan2(direction.x, direction.z);
-
-        if (this.goalAngle - this.mesh.rotation.y > Math.PI) {
-            this.goalAngle -= 2 * Math.PI;
-        }
-        this.angularVelocity = (this.goalAngle - this.mesh.rotation.y) * 2;
-        if (this.angularVelocity != 0) {
-            this.rotationInProgress = true;
-            this.prevAngle = this.mesh.rotation.y;
-        }
+        this.mesh.rotation.y = Math.atan2(direction.x, direction.z);
     },
 
     collide: function() {
