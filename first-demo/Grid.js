@@ -89,7 +89,7 @@ var Grid = Class.extend({
         this.displayMessage("A robot was destroyed!");
 
         // if the character was the currently selected unit, then reset tile state
-        if (this.currentSelectedUnits[myTeamId] == character) {
+        if (this.getCurrentSelectedUnit() == character) {
             // deselect character
             character.deselect();
 
@@ -97,7 +97,7 @@ var Grid = Class.extend({
             character.highlightedTiles.forEach(function(tile) {
                 tile.reset();
             });
-            this.currentSelectedUnits[myTeamId] = null;
+            this.getCurrentSelectedUnit() = null;
         }
 
         // mark tile position as available
@@ -134,9 +134,9 @@ var Grid = Class.extend({
 
     markCharacterAsSelected: function(character) {
         // deselect previous character if there was one
-        if (this.currentSelectedUnits[myTeamId]) {
-            if (this.currentSelectedUnits[myTeamId] != character) {
-                this.currentSelectedUnits[myTeamId].deselect();
+        if (this.getCurrentSelectedUnit()) {
+            if (this.getCurrentSelectedUnit() != character) {
+                this.getCurrentSelectedUnit().deselect();
             }
         }
 
@@ -298,11 +298,11 @@ var Grid = Class.extend({
             obj.onMouseOver();
         }
 
-        if (this.currentSelectedUnits[myTeamId]) {
-            var from = this.currentSelectedUnits[myTeamId].mesh.position.clone();
+        if (this.getCurrentSelectedUnit()) {
+            var from = this.getCurrentSelectedUnit().mesh.position.clone();
             var to = this.gridHelper.getMouseProjectionOnGrid();
 
-            this.currentSelectedUnits[myTeamId].snapToDirection(new THREE.Vector3(to.x - from.x, to.y - from.y, to.z - from.z));
+            this.getCurrentSelectedUnit().snapToDirection(new THREE.Vector3(to.x - from.x, to.y - from.y, to.z - from.z));
         }
     },
 
@@ -328,7 +328,7 @@ var Grid = Class.extend({
     },
 
     handleShootEvent: function() {
-        var from = this.currentSelectedUnits[myTeamId].mesh.position.clone();
+        var from = this.getCurrentSelectedUnit().mesh.position.clone();
         var to = this.gridHelper.getMouseProjectionOnGrid();
 
         // keep bullet level
@@ -336,11 +336,15 @@ var Grid = Class.extend({
         from.y = 15;
 
         // shoot a bullet because you can
-        if (this.currentSelectedUnits[myTeamId].canShoot()) {
-            sendShootMsg(this.currentSelectedUnits[myTeamId].id, from, to);
-            this.shootBullet(this.currentSelectedUnits[myTeamId], from, to);
-            this.currentSelectedUnits[myTeamId].onShoot(from, to);
+        if (this.getCurrentSelectedUnit().canShoot()) {
+            sendShootMsg(this.getCurrentSelectedUnit().id, from, to);
+            this.shootBullet(this.getCurrentSelectedUnit(), from, to);
+            this.getCurrentSelectedUnit().onShoot(from, to);
         }
+    },
+
+    getCurrentSelectedUnit: function() {
+        return this.currentSelectedUnits[myTeamId];
     },
 
     onMouseDown: function(event) {
@@ -353,7 +357,7 @@ var Grid = Class.extend({
         var intersects = raycaster.intersectObjects(this.characterMeshes, true);
         var intersectsWithTiles = raycaster.intersectObjects(this.tiles.children);
 
-        var unitIsCurrentlySelected = (this.currentSelectedUnits[myTeamId] != null);
+        var unitIsCurrentlySelected = (this.getCurrentSelectedUnit() != null);
         if (unitIsCurrentlySelected) {
             // fire on click
             if (event.which == RIGHT_CLICK) {
@@ -370,7 +374,7 @@ var Grid = Class.extend({
                 var clickedObject = intersects[0].object.owner;
 
                 // done so that you can click on a tile behind a character easily
-                if (clickedObject != this.currentSelectedUnits[myTeamId]) {
+                if (clickedObject != this.getCurrentSelectedUnit()) {
                     clickedObject.onSelect();
                 } else {
                     continueClickHandler = true;
@@ -390,22 +394,22 @@ var Grid = Class.extend({
         if (intersectsWithTiles.length > 0) {
             var tileSelected = intersectsWithTiles[0].object.owner;
             var coordinate = tileSelected.onMouseOver();
-            if (this.currentSelectedUnits[myTeamId] && coordinate) {
-                var deltaX = coordinate.x - this.currentSelectedUnits[myTeamId].getTileXPos();
+            if (this.getCurrentSelectedUnit() && coordinate) {
+                var deltaX = coordinate.x - this.getCurrentSelectedUnit().getTileXPos();
                 var deltaY = 0;
-                var deltaZ = coordinate.z - this.currentSelectedUnits[myTeamId].getTileZPos();
+                var deltaZ = coordinate.z - this.getCurrentSelectedUnit().getTileZPos();
 
                 var unitMovedToDifferentSquare = !(deltaX == 0 && deltaZ == 0);
 
                 if (unitMovedToDifferentSquare) {
-                    this.currentSelectedUnits[myTeamId].setDirection(
+                    this.getCurrentSelectedUnit().setDirection(
                         new THREE.Vector3(deltaX, deltaY, deltaZ));
 
                     // Put the network communication here.
-                    sendMoveMsg(this.currentSelectedUnits[myTeamId].id,
+                    sendMoveMsg(this.getCurrentSelectedUnit().id,
                         deltaX, deltaY, deltaZ);
 
-                    this.currentSelectedUnits[myTeamId].enqueueMotion(function() {
+                    this.getCurrentSelectedUnit().enqueueMotion(function() {
                         this.allowCharacterMovement = true;
                     });
                 }
