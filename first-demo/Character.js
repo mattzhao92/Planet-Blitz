@@ -60,7 +60,7 @@ var Character = Class.extend({
 
         var spriteMaterial = new THREE.SpriteMaterial( { map: this.coolDownBarTexture, useScreenCoordinates: false, alignment: THREE.SpriteAlignment.centerLeft } );
         
-           this.barAspectRatio = 10;
+        this.barAspectRatio = 10;
         this.coolDownBarXOffset = 0;
         this.coolDownBarZOffset = 0;
         this.coolDownBarYOffset = 55;
@@ -89,8 +89,8 @@ var Character = Class.extend({
         this.ammoCountBarYOffset = 60;
         this.ammoCountBar = new THREE.Sprite(ammoCountBarMaterial);
         //this.ammoCountBar.scale.set(this.world.getTileSize(), this.world.getTileSize()/this.barAspectRatio, 1.0);
-        this.maximumAmmoCapacity = 5;
-        this.ammoCount = this.maximumAmmoCapacity
+        this.maximumAmmoCapacity = 3;
+        this.ammoCount = this.maximumAmmoCapacity;
         this.ammoReplenishRate = 0.01;
         this.needsReload = false;
 
@@ -198,8 +198,15 @@ var Character = Class.extend({
     },
 
 
+    isInViewPort: function (target) {
+
+    },
+
     canShoot: function() {
-        return this.ammoCount > 1 && !this.isCharacterInRoute;
+
+
+        // return this.ammoCount > 1 && !this.isCharacterInRoute;
+        return this.ammoCount > 1;
     },
 
     getRadius: function() {
@@ -211,11 +218,9 @@ var Character = Class.extend({
         return this.health;
     },
 
-
     applyDamage: function(damage) {
 
         this.setHealth(this.health - damage);
-        console.log("Health: " + this.getHealth());
         if (this.health < 0) {
             this.world.handleCharacterDead(this);
         }
@@ -264,7 +269,7 @@ var Character = Class.extend({
     },
 
     getMovementRange: function() {
-        return 3;
+        return 5;
     },
 
 
@@ -279,7 +284,6 @@ var Character = Class.extend({
         if (this.ammoCount > 1) {
             this.setAmmoCount(this.ammoCount - 1);
         }
-        this.rotate(new THREE.Vector3(to.x-from.x, to.y-from.y, to.z-from.z));
         this.needsReload = true;
     },
     
@@ -407,8 +411,6 @@ var Character = Class.extend({
                                             width/this.barAspectRatio, 1.0);
     },
 
-
-
     updateInProgressRotation: function(delta) {
         if (this.breakUpdateHere) return;
         if (this.rotationInProgress) {
@@ -424,7 +426,6 @@ var Character = Class.extend({
         }
     },
 
-
     updateInProgressLinearMotion: function(delta) {
         if (this.breakUpdateHere) return;
         if (this.motionInProgress) {
@@ -438,7 +439,6 @@ var Character = Class.extend({
                 this.xPos = this.goalXPos;
             } else {
                 this.setCharacterMeshPosX(newMeshX);
-                this.velocityX *= 1.05;
             }
 
             if ((newMeshZ - this.goalMeshZ) / (this.goalMeshZ - this.prevMeshZ) > 0) {
@@ -447,14 +447,14 @@ var Character = Class.extend({
                 this.zPos = this.goalZPos;
             } else {
                 this.setCharacterMeshPosZ(newMeshZ);
-                this.velocityZ *= 1.05;
             }
 
             if (this.motionInProgress) {
                 this.prevMeshX = newMeshX;
                 this.prevMeshZ = newMeshZ;
             }
-
+            console.log("x: "+this.mesh.position.x);
+            console.log("z: "+this.mesh.position.z);
             this.breakUpdateHere = true;                   
         } 
     },
@@ -514,12 +514,10 @@ var Character = Class.extend({
             }
 
             if (direction.x !== 0 || direction.z !== 0) {
-                this.rotate(direction);
                 // And, only if we're not colliding with an obstacle or a wall ...
                 if (this.collide()) {
                     return false;
                 }
-
 
                 this.motionInProgress = true;
                 // ... we move the character
@@ -530,18 +528,20 @@ var Character = Class.extend({
                 this.goalMeshX = this.mesh.position.x + direction.x * 40;
                 this.goalMeshZ = this.mesh.position.z + direction.z * 40;
                 
+                var MOVE_VELOCITY = 100;
+
                 if (direction.x < 0) {
-                    this.velocityX = -100;
+                    this.velocityX = -MOVE_VELOCITY;
                 } else if(direction.x > 0) {
-                    this.velocityX = 100;
+                    this.velocityX = MOVE_VELOCITY;
                 } else {
                     this.velocityX = 0;
                 }
 
                 if (direction.z < 0) {
-                    this.velocityZ = -100;
+                    this.velocityZ = -MOVE_VELOCITY;
                 } else if (direction.z > 0) {
-                    this.velocityZ = 100;
+                    this.velocityZ = MOVE_VELOCITY;
                 } else {
                     this.velocityZ = 0;
                 }
@@ -554,20 +554,15 @@ var Character = Class.extend({
         }
     },
 
-    // Rotate the character
-    rotate: function(direction) {
+    onMouseMovement: function(direction) {
+
+    },
+
+    // Immediately rotate character to following direction
+    snapToDirection: function(direction) {
         'use strict';
         // Set the direction's angle, and the difference between it and our Object3D's current rotation
-        this.goalAngle = Math.atan2(direction.x, direction.z);
-
-        if (this.goalAngle - this.mesh.rotation.y > Math.PI) {
-            this.goalAngle -= 2 * Math.PI;
-        }
-        this.angularVelocity = (this.goalAngle - this.mesh.rotation.y) * 2;
-        if (this.angularVelocity != 0) {
-            this.rotationInProgress = true;
-            this.prevAngle = this.mesh.rotation.y;
-        }
+        this.mesh.rotation.y = Math.atan2(direction.x, direction.z);
     },
 
     collide: function() {

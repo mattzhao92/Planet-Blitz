@@ -31,51 +31,59 @@ var Grid = Class.extend({
         this.loadGround();
         this.drawGridSquares(width, length, tileSize);
 
+        this.gridHelper = new GridHelper(this.camera, this.controls);
+
         // initialize characters
+        this.setupCharacters();
+
+        // bullet info
+        this.bullets = [];
+
+        this.setupMouseMoveListener();
+        this.setupMouseDownListener();
+    },
+
+    setupCharacters: function() {
         this.characters = new THREE.Object3D();
         this.numOfCharacters = 3;
         // The row position.
         this.teamStartPos = [1, 18, 1, 18];
         this.characterMeshes = [];
         this.characterList = new Array();
+
         this.characterFactory = new CharacterFactory();
 
         // Sequence number for synchornization.
         this.seq = 0;
 
         var scope = this;
+
         for (var team_id = 0; team_id < GameInfo.numOfTeams; team_id++) {
-          this.characterList.push(new Array());
-          this.currentSelectedUnits.push(null);
-          for (var i = 0; i < this.numOfCharacters; i++) {
-              var charArgs = {
-                  world: scope,
-                  team: team_id,
-                  characterSize: scope.tileSize / 2
-              };
-              var character = this.characterFactory.createCharacter(charArgs);
-              var startX, startY;
-              if (team_id < 2) {
-                startX = i + 9;
-                startY = this.teamStartPos[team_id];
-              } else {
-                startX = this.teamStartPos[team_id];
-                startY = i + 9;
-              }
-              character.placeAtGridPos(startX, startY);
-              this.markTileOccupiedByCharacter(startX, startY);
-              character.setID(i);
-              this.characterList[team_id].push(character);
-              this.characterMeshes.push(character.mesh);
-              this.scene.add(character.mesh);
-          }
+            this.characterList.push(new Array());
+            this.currentSelectedUnits.push(null);
+            for (var i = 0; i < this.numOfCharacters; i++) {
+                var charArgs = {
+                    world: scope,
+                    team: team_id,
+                    characterSize: scope.tileSize / 2
+                };
+                var character = this.characterFactory.createCharacter(charArgs);
+                var startX, startY;
+                if (team_id < 2) {
+                    startX = i + 9;
+                    startY = this.teamStartPos[team_id];
+                } else {
+                    startX = this.teamStartPos[team_id];
+                    startY = i + 9;
+                }
+                character.placeAtGridPos(startX, startY);
+                this.markTileOccupiedByCharacter(startX, startY);
+                character.setID(i);
+                this.characterList[team_id].push(character);
+                this.characterMeshes.push(character.mesh);
+                this.scene.add(character.mesh);
+            }
         }
-        // bullet info
-        this.bullets = [];
-
-
-        this.setupMouseMoveListener();
-        this.setupMouseDownListener();
     },
 
     getCharacterById: function(team, id) {
@@ -90,7 +98,7 @@ var Grid = Class.extend({
         this.displayMessage("A robot was destroyed!");
 
         // if the character was the currently selected unit, then reset tile state
-        if (this.currentSelectedUnits[GameInfo.myTeamId] == character) {
+        if (this.getCurrentSelectedUnit() == character) {
             // deselect character
             character.deselect();
 
@@ -98,6 +106,7 @@ var Grid = Class.extend({
             character.highlightedTiles.forEach(function(tile) {
                 tile.reset();
             });
+          
             this.currentSelectedUnits[GameInfo.myTeamId] = null;
         }
 
@@ -108,12 +117,11 @@ var Grid = Class.extend({
         var zPos = character.getTileZPos();
         this.getTileAtTilePos(xPos, zPos).hasCharacter = false;
 
-
         // remove character mesh from list of active meshes
         var index = this.characterMeshes.indexOf(character.mesh);
         if (index > -1) {
             this.characterMeshes.splice(index, 1);
-            // remove object form scene
+            // remove object from scene
             character.onDead();
         }
     },
@@ -123,24 +131,8 @@ var Grid = Class.extend({
         var index = this.bullets.indexOf(bullet);
         if (index > -1) {
             this.bullets.splice(index, 1);
-            this.scene.remove(bullet.mesh);            
+            this.scene.remove(bullet.mesh);
         }
-    },
-
-    disableMouseDownListener: function() {
-        this.mouseDownListenerActive = false;
-    },
-
-    enableMouseDownListener: function() {
-        this.mouseDownListenerActive = true;
-    },
-
-    disableMouseMoveListener: function() {
-        this.mouseMoveListenerActive = false;
-    },
-
-    enableMouseMoveListener: function() {
-        this.mouseMoveListenerActive = true;
     },
 
     convertXPosToWorldX: function(tileXPos) {
@@ -153,9 +145,9 @@ var Grid = Class.extend({
 
     markCharacterAsSelected: function(character) {
         // deselect previous character if there was one
-        if (this.currentSelectedUnits[GameInfo.myTeamId]) {
-            if (this.currentSelectedUnits[GameInfo.myTeamId] != character) {
-                this.currentSelectedUnits[GameInfo.myTeamId].deselect();
+        if (this.getCurrentSelectedUnit()) {
+            if (this.getCurrentSelectedUnit() != character) {
+                this.getCurrentSelectedUnit().deselect();
             }
         }
 
@@ -198,7 +190,6 @@ var Grid = Class.extend({
     markTileOccupiedByObstacle: function() {
 
     },
-
 
     findPath: function(oldXPos, oldZPos, newXPos, newZPos) {
         return this.pathFinder.findPath(oldXPos, oldZPos, newXPos, newZPos, this.PFGrid.clone());
@@ -308,24 +299,21 @@ var Grid = Class.extend({
             return;
         }
 
-        var scope = this;
+        // recursively call intersects
+        var raycaster = this.gridHelper.getRaycaster();
+        var intersectsWithTiles = raycaster.intersectObjects(this.tiles.children);
 
-        var projector = new THREE.Projector();
-        var mouseVector = new THREE.Vector3();
-
-        var mousePosition = this.controls.getMousePosition();
-
-        mouseVector.x = 2 * (mousePosition.x / window.innerWidth) - 1;
-        mouseVector.y = 1 - 2 * (mousePosition.y / window.innerHeight);
-
-        var raycaster = projector.pickingRay(mouseVector.clone(), scope.camera),
-            intersects = raycaster.intersectObjects(scope.tiles.children);
-
-        for (var i = 0; i < intersects.length; i++) {
-            var intersection = intersects[i],
-                obj = intersection.object.owner;
-
+        for (var i = 0; i < intersectsWithTiles.length; i++) {
+            var intersection = intersectsWithTiles[i];
+            obj = intersection.object.owner;
             obj.onMouseOver();
+        }
+
+        if (this.getCurrentSelectedUnit()) {
+            var from = this.getCurrentSelectedUnit().mesh.position.clone();
+            var to = this.gridHelper.getMouseProjectionOnGrid();
+
+            this.getCurrentSelectedUnit().snapToDirection(new THREE.Vector3(to.x - from.x, to.y - from.y, to.z - from.z));
         }
     },
 
@@ -350,64 +338,41 @@ var Grid = Class.extend({
         this.scene.add(bullet.mesh);
     },
 
-    handleShootEvent: function(projector, mouseVector, intersectsWithTiles) {
-        var from = this.currentSelectedUnits[GameInfo.myTeamId].mesh.position.clone();
-        var to;
-
-        var isFiringWithinGrid = intersectsWithTiles.length > 0;
-        if (isFiringWithinGrid) {
-            var tileSelected = intersectsWithTiles[0].object.owner;
-
-            // determine exact point of intersection with tile
-            to = intersectsWithTiles[0].point;
-        } else {
-            // experimental - be able to fire at points outside of space
-            var vector = new THREE.Vector3(mouseVector.x, mouseVector.y, 0.5);
-            projector.unprojectVector(vector, this.camera);
-            var dir = vector.sub(this.camera.position).normalize();
-
-            // calculate distance to the plane
-            var distance = - this.camera.position.y / dir.y;
-            var pos = this.camera.position.clone().add(dir.multiplyScalar(distance));
-
-            to = pos;
-        }
+    handleShootEvent: function() {
+        var from = this.getCurrentSelectedUnit().mesh.position.clone();
+        var to = this.gridHelper.getMouseProjectionOnGrid();
 
         // keep bullet level
         to.y = 15;
         from.y = 15;
 
         // shoot a bullet because you can
-        if (this.currentSelectedUnits[GameInfo.myTeamId].canShoot()) {
-            sendShootMsg(this.currentSelectedUnits[GameInfo.myTeamId].id, from, to);
-            this.currentSelectedUnits[GameInfo.myTeamId].onShoot(from, to);
-            this.shootBullet(this.currentSelectedUnits[GameInfo.myTeamId], from, to);
+        if (this.getCurrentSelectedUnit().canShoot()) {
+            sendShootMsg(this.getCurrentSelectedUnit().id, from, to);
+            this.shootBullet(this.getCurrentSelectedUnit(), from, to);
+            this.getCurrentSelectedUnit().onShoot(from, to);
         }
+    },
+
+    getCurrentSelectedUnit: function() {
+        return this.currentSelectedUnits[GameInfo.myTeamId];
     },
 
     onMouseDown: function(event) {
         var RIGHT_CLICK = 3;
         var LEFT_CLICK = 1;
 
-        var projector = new THREE.Projector();
-        var mouseVector = new THREE.Vector3();
-
-        var mousePosition = this.controls.getMousePosition();
-
-        mouseVector.x = 2 * (mousePosition.x / window.innerWidth) - 1;
-        mouseVector.y = 1 - 2 * (mousePosition.y / window.innerHeight);
-
-        var raycaster = projector.pickingRay(mouseVector.clone(), this.camera);
+        var raycaster = this.gridHelper.getRaycaster();
 
         // recursively call intersects
         var intersects = raycaster.intersectObjects(this.characterMeshes, true);
         var intersectsWithTiles = raycaster.intersectObjects(this.tiles.children);
+        var unitIsCurrentlySelected = (this.getCurrentSelectedUnit() != null);
 
-        var unitIsCurrentlySelected = (this.currentSelectedUnits[GameInfo.myTeamId] != null);
         if (unitIsCurrentlySelected) {
             // fire on click
             if (event.which == RIGHT_CLICK) {
-                this.handleShootEvent(projector, mouseVector, intersectsWithTiles);
+                this.handleShootEvent();
             }
         }
 
@@ -420,7 +385,7 @@ var Grid = Class.extend({
                 var clickedObject = intersects[0].object.owner;
 
                 // done so that you can click on a tile behind a character easily
-                if (clickedObject != this.currentSelectedUnits[GameInfo.myTeamId]) {
+                if (clickedObject != this.getCurrentSelectedUnit()) {
                     clickedObject.onSelect();
                 } else {
                     continueClickHandler = true;
@@ -440,19 +405,20 @@ var Grid = Class.extend({
         if (intersectsWithTiles.length > 0) {
             var tileSelected = intersectsWithTiles[0].object.owner;
             var coordinate = tileSelected.onMouseOver();
-            if (this.currentSelectedUnits[GameInfo.myTeamId] && coordinate) {
-                var deltaX = coordinate.x - this.currentSelectedUnits[GameInfo.myTeamId].getTileXPos();
+
+            if (this.getCurrentSelectedUnit() && coordinate) {
+                var deltaX = coordinate.x - this.getCurrentSelectedUnit().getTileXPos();
                 var deltaY = 0;
-                var deltaZ = coordinate.z - this.currentSelectedUnits[GameInfo.myTeamId].getTileZPos();
+                var deltaZ = coordinate.z - this.getCurrentSelectedUnit().getTileZPos();
 
                 var unitMovedToDifferentSquare = !(deltaX == 0 && deltaZ == 0);
 
                 if (unitMovedToDifferentSquare) {
-                    this.currentSelectedUnits[GameInfo.myTeamId].setDirection(
+                    this.getCurrentSelectedUnit().setDirection(
                         new THREE.Vector3(deltaX, deltaY, deltaZ));
 
                     // Put the network communication here.
-                    sendMoveMsg(this.currentSelectedUnits[GameInfo.myTeamId].id,
+                    sendMoveMsg(this.getCurrentSelectedUnit().id,
                         deltaX, deltaY, deltaZ);
 
                     if (!GameInfo.netMode) {
@@ -482,12 +448,11 @@ var Grid = Class.extend({
         var texture = THREE.ImageUtils.loadTexture(this.GROUND_TEXTURE);
 
         var groundMaterial = new THREE.MeshLambertMaterial({
-            color: 0xffffff, 
+            color: 0xffffff,
             map: texture
         });
 
-        var ground = new THREE.Mesh(new THREE.PlaneGeometry(this.gridWidth, this.gridLength), groundMaterial
-            );
+        var ground = new THREE.Mesh(new THREE.PlaneGeometry(this.gridWidth, this.gridLength), groundMaterial);
         ground.rotation.x = -0.5 * Math.PI;
 
         var Y_BUFFER = -0.5;
@@ -514,7 +479,7 @@ var Grid = Class.extend({
         for (var i = 0; i < this.numberSquaresOnXAxis; i++) {
             for (var j = 0; j < this.numberSquaresOnZAxis; j++) {
                 var tile = this.tileFactory.createTile(i, j);
-                
+
                 var tileMesh = tile.getTileMesh();
                 this.tilesArray[i][j] = tile;
 
@@ -540,34 +505,26 @@ var Grid = Class.extend({
         return this.numberSquaresOnZAxis;
     },
 
-    hasObstacleAtCell: function(args) {
-
-    },
-
-    hasCharacterAtCell: function(args) {
-
-    },
-
-    isCellOutOfBounds: function(args) {
-
-    },
-
     update: function(delta) {
-        // update character movements
+        // update characters
+        this.updateCharacters(delta);
+
+        // update bullet movements
+        this.updateBullets(delta);
+    },
+
+    updateCharacters: function(delta) {
         for (var i = 0; i < this.characterMeshes.length; i++) {
             var character = this.characterMeshes[i].owner;
             character.update(delta);
         }
-
-        // update bullet movements
-        this.updateBullets(delta);
     },
 
     updateBullets: function(delta) {
         for (var i = 0; i < this.bullets.length; i++) {
             var bullet = this.bullets[i];
             bullet.update(delta);
-            this.checkBulletCollision(bullet, i);   
+            this.checkBulletCollision(bullet, i);
         }
     },
 
@@ -645,6 +602,21 @@ var Grid = Class.extend({
                 }
             }
         }
-       
+    }, 
+
+    disableMouseDownListener: function() {
+        this.mouseDownListenerActive = false;
+    },
+
+    enableMouseDownListener: function() {
+        this.mouseDownListenerActive = true;
+    },
+
+    disableMouseMoveListener: function() {
+        this.mouseMoveListenerActive = false;
+    },
+
+    enableMouseMoveListener: function() {
+        this.mouseMoveListenerActive = true;
     }
 });
