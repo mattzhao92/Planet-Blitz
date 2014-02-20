@@ -31,16 +31,27 @@ var Grid = Class.extend({
         this.loadGround();
         this.drawGridSquares(width, length, tileSize);
 
+        this.gridHelper = new GridHelper(this.camera, this.controls);
+
         // initialize characters
+        this.setupCharacters();
+
+        // bullet info
+        this.bullets = [];
+
+        this.setupMouseMoveListener();
+        this.setupMouseDownListener();
+    },
+
+    setupCharacters: function() {
         this.characters = new THREE.Object3D();
         this.numOfCharacters = 3;
         // The row position.
         this.teamStartPos = [1, 18, 1, 18];
         this.characterMeshes = [];
         this.characterList = new Array();
-        this.characterFactory = new CharacterFactory();
 
-        this.gridHelper = new GridHelper(this.camera, this.controls);
+        this.characterFactory = new CharacterFactory();
 
         var scope = this;
         for (var team_id = 0; team_id < numOfTeams; team_id++) {
@@ -69,12 +80,6 @@ var Grid = Class.extend({
                 this.scene.add(character.mesh);
             }
         }
-        // bullet info
-        this.bullets = [];
-
-
-        this.setupMouseMoveListener();
-        this.setupMouseDownListener();
     },
 
     getCharacterById: function(team, id) {
