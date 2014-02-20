@@ -40,7 +40,7 @@ var Grid = Class.extend({
         this.characterList = new Array();
         this.characterFactory = new CharacterFactory();
 
-        this.gridHelper = new GridHelper(this.camera);
+        this.gridHelper = new GridHelper(this.camera, this.controls);
 
         var scope = this;
         for (var team_id = 0; team_id < numOfTeams; team_id++) {
@@ -304,20 +304,9 @@ var Grid = Class.extend({
             return;
         }
 
-        var scope = this;
-        var projector = new THREE.Projector();
-        var mouseVector = new THREE.Vector3();
-
-        var mousePosition = this.controls.getMousePosition();
-
-        mouseVector.x = 2 * (mousePosition.x / window.innerWidth) - 1;
-        mouseVector.y = 1 - 2 * (mousePosition.y / window.innerHeight);
-
-        var raycaster = projector.pickingRay(mouseVector.clone(), this.camera);
-
         // recursively call intersects
+        var raycaster = this.gridHelper.getRaycaster();
         var intersectsWithTiles = raycaster.intersectObjects(this.tiles.children);
-        var isFiringWithinGrid = intersectsWithTiles.length > 0;
 
         for (var i = 0; i < intersectsWithTiles.length; i++) {
             var intersection = intersectsWithTiles[i];
@@ -327,7 +316,7 @@ var Grid = Class.extend({
 
         if (this.currentSelectedUnits[myTeamId]) {
             var from = this.currentSelectedUnits[myTeamId].mesh.position.clone();
-            var to = this.gridHelper.getMouseProjectionOnGrid(mouseVector);
+            var to = this.gridHelper.getMouseProjectionOnGrid();
 
             this.currentSelectedUnits[myTeamId].snapToDirection(new THREE.Vector3(to.x-from.x, to.y-from.y, to.z-from.z));
         }
@@ -354,9 +343,9 @@ var Grid = Class.extend({
         this.scene.add(bullet.mesh);
     },
 
-    handleShootEvent: function(mouseVector) {
+    handleShootEvent: function() {
         var from = this.currentSelectedUnits[myTeamId].mesh.position.clone();
-        var to = this.gridHelper.getMouseProjectionOnGrid(mouseVector);
+        var to = this.gridHelper.getMouseProjectionOnGrid();
 
         // keep bullet level
         to.y = 15;
@@ -374,15 +363,7 @@ var Grid = Class.extend({
         var RIGHT_CLICK = 3;
         var LEFT_CLICK = 1;
 
-        var projector = new THREE.Projector();
-        var mouseVector = new THREE.Vector3();
-
-        var mousePosition = this.controls.getMousePosition();
-
-        mouseVector.x = 2 * (mousePosition.x / window.innerWidth) - 1;
-        mouseVector.y = 1 - 2 * (mousePosition.y / window.innerHeight);
-
-        var raycaster = projector.pickingRay(mouseVector.clone(), this.camera);
+        var raycaster = this.gridHelper.getRaycaster();
 
         // recursively call intersects
         var intersects = raycaster.intersectObjects(this.characterMeshes, true);
@@ -392,7 +373,7 @@ var Grid = Class.extend({
         if (unitIsCurrentlySelected) {
             // fire on click
             if (event.which == RIGHT_CLICK) {
-                this.handleShootEvent(mouseVector);
+                this.handleShootEvent();
             }
         }
 

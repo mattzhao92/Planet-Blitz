@@ -1,12 +1,31 @@
 var GridHelper = Class.extend({
-	init: function(camera) {
+	init: function(camera, controls) {
+		this.controls = controls;
 		this.camera = camera;
 		this.projector = new THREE.Projector();
+		this.mouseVector = new THREE.Vector3();
 	},
 
-	getMouseProjectionOnGrid: function(mouseVector) {
+	updateMouseVector: function() {
+		var mousePosition = this.controls.getMousePosition();
+
+		this.mouseVector.x = 2 * (mousePosition.x / window.innerWidth) - 1;
+		this.mouseVector.y = 1 - 2 * (mousePosition.y / window.innerHeight);
+	},
+
+	getRaycaster: function() {
+		this.updateMouseVector();
+
+		// return this.mouseVector;
+		var raycaster = this.projector.pickingRay(this.mouseVector.clone(), this.camera);
+		return raycaster;
+	},
+
+	getMouseProjectionOnGrid: function() {
+		this.updateMouseVector();
+
 	    // experimental - be able to fire at points outside of space
-	    var vector = new THREE.Vector3(mouseVector.x, mouseVector.y, 0.5);
+	    var vector = new THREE.Vector3(this.mouseVector.x, this.mouseVector.y, 0.5);
 	    this.projector.unprojectVector(vector, this.camera);
 	    var dir = vector.sub(this.camera.position).normalize();
 
