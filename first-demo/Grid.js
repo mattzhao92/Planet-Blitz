@@ -41,6 +41,22 @@ var Grid = Class.extend({
 
         this.setupMouseMoveListener();
         this.setupMouseDownListener();
+        this.setupHotkeys();
+    },
+
+    setupHotkeys: function() {
+        var scope = this;
+        var unitNumbers = [1, 2, 3];
+
+        unitNumbers.forEach(function(number) {
+            var hotkey = number.toString();
+            KeyboardJS.on(hotkey, 
+                function(event, keysPressed, keyCombo) {
+                    // TODO: replace this with a more readable line. Also, need to account for out of index errors when units get killed
+                    scope.characterList[GameInfo.myTeamId][parseInt(keyCombo) - 1].onSelect();
+                }
+            );
+        });
     },
 
     setupCharacters: function() {
@@ -201,23 +217,28 @@ var Grid = Class.extend({
             this.currentMouseOverTile.reset();
         }
 
+        this.deselectHighlightedTiles();
+
+        var characterMovementRange = character.getMovementRange();
+
+        // highlight adjacent squares - collect all tiles from radius
+        var tilesToHighlight = this.getTilesInArea(character, characterMovementRange);
+
+        if (character.isCharacterInRoute == false && character.isCoolDown == false) {
+            this.highlightTiles(tilesToHighlight);
+        }
+    },
+
+    deselectHighlightedTiles: function() {
         // deselect tiles.
         if (this.highlightedTiles) {
             this.highlightedTiles.forEach(function(tile) {
                 tile.reset();
             });
         }
-
-        var characterMovementRange = character.getMovementRange();
-
-        // highlight adjacent squares - collect all tiles from radius
-        var tilesToHighlight = this.getTilesInArea(character, characterMovementRange);
-        character.highlightedTiles = tilesToHighlight;
-        this.highlightTiles(tilesToHighlight);
     },
 
     highlightTiles: function(tilesToHighlight) {
-
         tilesToHighlight.forEach(function(tile) {
             tile.setSelectable(true);
             tile.setMovable(true);
