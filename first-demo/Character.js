@@ -59,7 +59,7 @@ var Character = Class.extend({
 
         var spriteMaterial = new THREE.SpriteMaterial( { map: this.coolDownBarTexture, useScreenCoordinates: false, alignment: THREE.SpriteAlignment.centerLeft } );
         
-           this.barAspectRatio = 10;
+        this.barAspectRatio = 10;
         this.coolDownBarXOffset = 0;
         this.coolDownBarZOffset = 0;
         this.coolDownBarYOffset = 55;
@@ -88,8 +88,8 @@ var Character = Class.extend({
         this.ammoCountBarYOffset = 60;
         this.ammoCountBar = new THREE.Sprite(ammoCountBarMaterial);
         //this.ammoCountBar.scale.set(this.world.getTileSize(), this.world.getTileSize()/this.barAspectRatio, 1.0);
-        this.maximumAmmoCapacity = 5;
-        this.ammoCount = this.maximumAmmoCapacity
+        this.maximumAmmoCapacity = 3;
+        this.ammoCount = this.maximumAmmoCapacity;
         this.ammoReplenishRate = 0.01;
         this.needsReload = false;
 
@@ -270,7 +270,7 @@ var Character = Class.extend({
     },
 
     getMovementRange: function() {
-        return 7;
+        return 5;
     },
 
 
