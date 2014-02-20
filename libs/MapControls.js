@@ -840,6 +840,18 @@ THREE.MapControls = function ( object, scene, domElement ) {
         }
     });
 
+    // keyboard shortcuts to rotate
+    KeyboardJS.on("q", 
+        function (event, keysPressed, keyCombo) {
+            scope.rotateLeft(Math.PI/30);
+        }
+    );
+
+    KeyboardJS.on("e", 
+        function (event, keysPressed, keyCombo) {
+            scope.rotateRight(Math.PI/30);
+        }
+    );
 
     this.handleResize();
 };
