@@ -53,7 +53,10 @@ var Grid = Class.extend({
             KeyboardJS.on(hotkey, 
                 function(event, keysPressed, keyCombo) {
                     // TODO: replace this with a more readable line. Also, need to account for out of index errors when units get killed
-                    scope.characterList[GameInfo.myTeamId][parseInt(keyCombo) - 1].onSelect();
+                    var characterSelected = scope.characterList[GameInfo.myTeamId][parseInt(keyCombo) - 1];
+                    if (characterSelected) {
+                        characterSelected.onSelect();
+                    }
                 }
             );
         });
