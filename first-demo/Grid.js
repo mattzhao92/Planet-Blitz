@@ -44,30 +44,30 @@ var Grid = Class.extend({
 
         var scope = this;
         for (var team_id = 0; team_id < numOfTeams; team_id++) {
-          this.characterList.push(new Array());
-          this.currentSelectedUnits.push(null);
-          for (var i = 0; i < this.numOfCharacters; i++) {
-              var charArgs = {
-                  world: scope,
-                  team: team_id,
-                  characterSize: scope.tileSize / 2
-              };
-              var character = this.characterFactory.createCharacter(charArgs);
-              var startX, startY;
-              if (team_id < 2) {
-                startX = i + 9;
-                startY = this.teamStartPos[team_id];
-              } else {
-                startX = this.teamStartPos[team_id];
-                startY = i + 9;
-              }
-              character.placeAtGridPos(startX, startY);
-              this.markTileOccupiedByCharacter(startX, startY);
-              character.setID(i);
-              this.characterList[team_id].push(character);
-              this.characterMeshes.push(character.mesh);
-              this.scene.add(character.mesh);
-          }
+            this.characterList.push(new Array());
+            this.currentSelectedUnits.push(null);
+            for (var i = 0; i < this.numOfCharacters; i++) {
+                var charArgs = {
+                    world: scope,
+                    team: team_id,
+                    characterSize: scope.tileSize / 2
+                };
+                var character = this.characterFactory.createCharacter(charArgs);
+                var startX, startY;
+                if (team_id < 2) {
+                    startX = i + 9;
+                    startY = this.teamStartPos[team_id];
+                } else {
+                    startX = this.teamStartPos[team_id];
+                    startY = i + 9;
+                }
+                character.placeAtGridPos(startX, startY);
+                this.markTileOccupiedByCharacter(startX, startY);
+                character.setID(i);
+                this.characterList[team_id].push(character);
+                this.characterMeshes.push(character.mesh);
+                this.scene.add(character.mesh);
+            }
         }
         // bullet info
         this.bullets = [];
@@ -120,7 +120,7 @@ var Grid = Class.extend({
         var index = this.bullets.indexOf(bullet);
         if (index > -1) {
             this.bullets.splice(index, 1);
-            this.scene.remove(bullet.mesh);            
+            this.scene.remove(bullet.mesh);
         }
     },
 
@@ -318,7 +318,7 @@ var Grid = Class.extend({
             var from = this.currentSelectedUnits[myTeamId].mesh.position.clone();
             var to = this.gridHelper.getMouseProjectionOnGrid();
 
-            this.currentSelectedUnits[myTeamId].snapToDirection(new THREE.Vector3(to.x-from.x, to.y-from.y, to.z-from.z));
+            this.currentSelectedUnits[myTeamId].snapToDirection(new THREE.Vector3(to.x - from.x, to.y - from.y, to.z - from.z));
         }
     },
 
@@ -445,12 +445,11 @@ var Grid = Class.extend({
         var texture = THREE.ImageUtils.loadTexture(this.GROUND_TEXTURE);
 
         var groundMaterial = new THREE.MeshLambertMaterial({
-            color: 0xffffff, 
+            color: 0xffffff,
             map: texture
         });
 
-        var ground = new THREE.Mesh(new THREE.PlaneGeometry(this.gridWidth, this.gridLength), groundMaterial
-            );
+        var ground = new THREE.Mesh(new THREE.PlaneGeometry(this.gridWidth, this.gridLength), groundMaterial);
         ground.rotation.x = -0.5 * Math.PI;
 
         var Y_BUFFER = -0.5;
@@ -477,7 +476,7 @@ var Grid = Class.extend({
         for (var i = 0; i < this.numberSquaresOnXAxis; i++) {
             for (var j = 0; j < this.numberSquaresOnZAxis; j++) {
                 var tile = this.tileFactory.createTile(i, j);
-                
+
                 var tileMesh = tile.getTileMesh();
                 this.tilesArray[i][j] = tile;
 
@@ -518,7 +517,7 @@ var Grid = Class.extend({
         for (var i = 0; i < this.bullets.length; i++) {
             var bullet = this.bullets[i];
             bullet.update(delta);
-            this.checkBulletCollision(bullet, i);   
+            this.checkBulletCollision(bullet, i);
         }
     },
 
