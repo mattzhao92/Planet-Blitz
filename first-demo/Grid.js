@@ -124,22 +124,6 @@ var Grid = Class.extend({
         }
     },
 
-    disableMouseDownListener: function() {
-        this.mouseDownListenerActive = false;
-    },
-
-    enableMouseDownListener: function() {
-        this.mouseDownListenerActive = true;
-    },
-
-    disableMouseMoveListener: function() {
-        this.mouseMoveListenerActive = false;
-    },
-
-    enableMouseMoveListener: function() {
-        this.mouseMoveListenerActive = true;
-    },
-
     convertXPosToWorldX: function(tileXPos) {
         return -((this.gridWidth) / 2) + (tileXPos * this.tileSize);
     },
@@ -503,14 +487,18 @@ var Grid = Class.extend({
     },
 
     update: function(delta) {
-        // update character movements
+        // update characters
+        this.updateCharacters(delta);
+
+        // update bullet movements
+        this.updateBullets(delta);
+    },
+
+    updateCharacters: function(delta) {
         for (var i = 0; i < this.characterMeshes.length; i++) {
             var character = this.characterMeshes[i].owner;
             character.update(delta);
         }
-
-        // update bullet movements
-        this.updateBullets(delta);
     },
 
     updateBullets: function(delta) {
@@ -536,5 +524,21 @@ var Grid = Class.extend({
                 break;
             }
         }
+    }, 
+
+    disableMouseDownListener: function() {
+        this.mouseDownListenerActive = false;
+    },
+
+    enableMouseDownListener: function() {
+        this.mouseDownListenerActive = true;
+    },
+
+    disableMouseMoveListener: function() {
+        this.mouseMoveListenerActive = false;
+    },
+
+    enableMouseMoveListener: function() {
+        this.mouseMoveListenerActive = true;
     }
 });
