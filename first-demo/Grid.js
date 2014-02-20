@@ -319,25 +319,6 @@ var Grid = Class.extend({
         var intersectsWithTiles = raycaster.intersectObjects(this.tiles.children);
         var isFiringWithinGrid = intersectsWithTiles.length > 0;
 
-        var to;
-        if (isFiringWithinGrid) {
-            var tileSelected = intersectsWithTiles[0].object.owner;
-
-            // determine exact point of intersection with tile
-            to = intersectsWithTiles[0].point;
-        } else {
-            // experimental - be able to fire at points outside of space
-            var vector = new THREE.Vector3(mouseVector.x, mouseVector.y, 0.5);
-            projector.unprojectVector(vector, this.camera);
-            var dir = vector.sub(this.camera.position).normalize();
-
-            // calculate distance to the plane
-            var distance = - this.camera.position.y / dir.y;
-            var pos = this.camera.position.clone().add(dir.multiplyScalar(distance));
-
-            to = pos;
-        }
-
         for (var i = 0; i < intersectsWithTiles.length; i++) {
             var intersection = intersectsWithTiles[i];
             obj = intersection.object.owner;
@@ -346,7 +327,9 @@ var Grid = Class.extend({
 
         if (this.currentSelectedUnits[myTeamId]) {
             var from = this.currentSelectedUnits[myTeamId].mesh.position.clone();
-            this.currentSelectedUnits[myTeamId].rotate2(new THREE.Vector3(to.x-from.x, to.y-from.y, to.z-from.z));
+            var to = this.gridHelper.getMouseProjectionOnGrid(mouseVector);
+
+            this.currentSelectedUnits[myTeamId].snapToDirection(new THREE.Vector3(to.x-from.x, to.y-from.y, to.z-from.z));
         }
     },
 

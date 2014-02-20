@@ -217,11 +217,9 @@ var Character = Class.extend({
         return this.health;
     },
 
-
     applyDamage: function(damage) {
 
         this.setHealth(this.health - damage);
-        console.log("Health: " + this.getHealth());
         if (this.health < 0) {
             this.world.handleCharacterDead(this);
         }
@@ -285,7 +283,6 @@ var Character = Class.extend({
         if (this.ammoCount > 1) {
             this.setAmmoCount(this.ammoCount - 1);
         }
-        this.rotate(new THREE.Vector3(to.x-from.x, to.y-from.y, to.z-from.z));
         this.needsReload = true;
     },
     
@@ -413,8 +410,6 @@ var Character = Class.extend({
                                             width/this.barAspectRatio, 1.0);
     },
 
-
-
     updateInProgressRotation: function(delta) {
         if (this.breakUpdateHere) return;
         if (this.rotationInProgress) {
@@ -429,7 +424,6 @@ var Character = Class.extend({
             this.breakUpdateHere = true;
         }
     },
-
 
     updateInProgressLinearMotion: function(delta) {
         if (this.breakUpdateHere) return;
@@ -515,7 +509,6 @@ var Character = Class.extend({
             }
 
             if (direction.x !== 0 || direction.z !== 0) {
-                this.rotate(direction);
                 // And, only if we're not colliding with an obstacle or a wall ...
                 if (this.collide()) {
                     return false;
@@ -560,24 +553,8 @@ var Character = Class.extend({
 
     },
 
-    // Rotate the character
-    rotate: function(direction) {
-        // 'use strict';
-        // // Set the direction's angle, and the difference between it and our Object3D's current rotation
-        // this.goalAngle = Math.atan2(direction.x, direction.z);
-
-        // if (this.goalAngle - this.mesh.rotation.y > Math.PI) {
-        //     this.goalAngle -= 2 * Math.PI;
-        // }
-        // this.angularVelocity = (this.goalAngle - this.mesh.rotation.y) * 2;
-        // if (this.angularVelocity != 0) {
-        //     this.rotationInProgress = true;
-        //     this.prevAngle = this.mesh.rotation.y;
-        // }
-    },
-
-    // Rotate the character 2
-    rotate2: function(direction) {
+    // Immediately rotate character to following direction
+    snapToDirection: function(direction) {
         'use strict';
         // Set the direction's angle, and the difference between it and our Object3D's current rotation
         this.mesh.rotation.y = Math.atan2(direction.x, direction.z);
