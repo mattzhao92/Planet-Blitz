@@ -99,11 +99,11 @@ THREE.MapControls = function ( object, scene, domElement ) {
     this.mouseVector = new THREE.Vector2(0, 0);
 
     // used for when scrolling with mouse
-    this.INITIAL_CAMERA_VELOCITY = 2.3;
-    this.MAX_CAMERA_VELOCITY = 7.5;
+    this.INITIAL_CAMERA_VELOCITY = 7.5;
+    this.MAX_CAMERA_VELOCITY = 12;
 
     this.MAP_SCROLL_ACCELERATION = 13;
-    this.DECELERATION = 10;
+    this.DECELERATION = 14;
 
     this.enableTraditionalMouseDrag = false;
 
