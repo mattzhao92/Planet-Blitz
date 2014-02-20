@@ -196,7 +196,6 @@ var Grid = Class.extend({
 
     },
 
-
     findPath: function(oldXPos, oldZPos, newXPos, newZPos) {
         return this.pathFinder.findPath(oldXPos, oldZPos, newXPos, newZPos, this.PFGrid.clone());
     },
@@ -372,7 +371,7 @@ var Grid = Class.extend({
         this.scene.add(bullet.mesh);
     },
 
-    handleShootEvent: function(projector, mouseVector, intersectsWithTiles) {
+    handleShootEvent: function(mouseVector) {
         var from = this.currentSelectedUnits[myTeamId].mesh.position.clone();
         var to = this.gridHelper.getMouseProjectionOnGrid(mouseVector);
 
@@ -410,7 +409,7 @@ var Grid = Class.extend({
         if (unitIsCurrentlySelected) {
             // fire on click
             if (event.which == RIGHT_CLICK) {
-                this.handleShootEvent(projector, mouseVector, intersectsWithTiles);
+                this.handleShootEvent(mouseVector);
             }
         }
 
@@ -538,18 +537,6 @@ var Grid = Class.extend({
 
     getNumberSquaresOnZAxis: function() {
         return this.numberSquaresOnZAxis;
-    },
-
-    hasObstacleAtCell: function(args) {
-
-    },
-
-    hasCharacterAtCell: function(args) {
-
-    },
-
-    isCellOutOfBounds: function(args) {
-
     },
 
     update: function(delta) {
