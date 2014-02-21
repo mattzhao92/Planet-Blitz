@@ -325,10 +325,13 @@ var Character = Class.extend({
     },
 
     enqueueMotion: function(onMotionFinish) {
-        console.log("enqueueMotion \n");
         if (this.isCoolDown == 0) {
             var path = this.world.findPath(this.getTileXPos(), this.getTileZPos(), this.getTileXPos() + this.direction.x,
                 this.getTileZPos() + this.direction.z);
+            var gx = this.getTileXPos() + this.direction.x;
+            var gz = this.getTileZPos() + this.direction.z;
+
+            console.log("Set to " + gx + " and " + gz + " for id " + this.team + " i " + this.id);
             var addNewItem = true;
             var newMotions = new Array();
             for (var i = 1; i < path.length; i++) {
@@ -362,8 +365,10 @@ var Character = Class.extend({
             });
 
             if (onMotionFinish) {
-                onMotionFinish();
+                onMotionFinise();
             }
+        } else {
+          console.log("movr...without cd?");
         }
     },
 
