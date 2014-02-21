@@ -31,7 +31,7 @@ $(function () {
             this.addLighting();
             this.addSkybox();
 
-            this.addControlGUI();
+            // this.addControlGUI();
 
             // begin animation loop
             this.animate();

@@ -99,11 +99,11 @@ THREE.MapControls = function ( object, scene, domElement ) {
     this.mouseVector = new THREE.Vector2(0, 0);
 
     // used for when scrolling with mouse
-    this.INITIAL_CAMERA_VELOCITY = 2.3;
-    this.MAX_CAMERA_VELOCITY = 7.5;
+    this.INITIAL_CAMERA_VELOCITY = 6.5;
+    this.MAX_CAMERA_VELOCITY = 12;
 
-    this.MAP_SCROLL_ACCELERATION = 13;
-    this.DECELERATION = 10;
+    this.MAP_SCROLL_ACCELERATION = 18;
+    this.DECELERATION = 15;
 
     this.enableTraditionalMouseDrag = false;
 
@@ -378,21 +378,21 @@ THREE.MapControls = function ( object, scene, domElement ) {
     this.addZCameraScrollComponent = function(delta) {
         // add the secondary "y" component (up / down motion)
         if (scope.mouseVector.y < 0) {
-            scope.velocityZ = Math.min(scope.velocityZ, scope.INITIAL_CAMERA_VELOCITY * scope.mouseVector.y);
+            scope.velocityZ = Math.min(scope.velocityZ, 0.8 * scope.INITIAL_CAMERA_VELOCITY * scope.mouseVector.y);
             scope.velocityZ += scope.MAP_SCROLL_ACCELERATION * delta * scope.mouseVector.y;
         } else {
-            scope.velocityZ = Math.max(scope.velocityZ, scope.INITIAL_CAMERA_VELOCITY * scope.mouseVector.y);
+            scope.velocityZ = Math.max(scope.velocityZ, 0.8 * scope.INITIAL_CAMERA_VELOCITY * scope.mouseVector.y);
             scope.velocityZ += scope.MAP_SCROLL_ACCELERATION * delta * scope.mouseVector.y;
         }
     };
 
     this.addXCameraScrollComponent = function(delta) {
         if (scope.mouseVector.x < 0) {
-            scope.velocityX = Math.min(scope.velocityX, scope.INITIAL_CAMERA_VELOCITY * scope.mouseVector.x);
+            scope.velocityX = Math.min(scope.velocityX, 0.8 * scope.INITIAL_CAMERA_VELOCITY * scope.mouseVector.x);
             scope.velocityX -= scope.MAP_SCROLL_ACCELERATION * delta;
 
         } else {
-            scope.velocityX = Math.max(scope.velocityX, scope.INITIAL_CAMERA_VELOCITY * scope.mouseVector.x);
+            scope.velocityX = Math.max(scope.velocityX, 0.8 * scope.INITIAL_CAMERA_VELOCITY * scope.mouseVector.x);
             scope.velocityX += scope.MAP_SCROLL_ACCELERATION * delta * scope.mouseVector.x;
         }
     }
@@ -445,29 +445,23 @@ THREE.MapControls = function ( object, scene, domElement ) {
             scope.scrollCameraDown(delta);
         }
 
-        // enforce velocity restrictions
-        if (scope.velocityX > 0) {
-            scope.velocityX = Math.min(scope.velocityX, this.MAX_CAMERA_VELOCITY);
-        } else {
-            scope.velocityX = Math.max(scope.velocityX, -this.MAX_CAMERA_VELOCITY);
-        }
+        // enforce max velocity restriction
+        var cameraVelocity = new THREE.Vector2(scope.velocityX, scope.velocityZ);
 
-        if (scope.velocityZ > 0) {
-            scope.velocityZ = Math.min(scope.velocityZ, this.MAX_CAMERA_VELOCITY);
-        } else {
-            scope.velocityZ = Math.max(scope.velocityZ, -this.MAX_CAMERA_VELOCITY);
+        if (cameraVelocity.length() > scope.MAX_CAMERA_VELOCITY) {
+            cameraVelocity.setLength(scope.MAX_CAMERA_VELOCITY);
         }
 
         // update camera position based on velocity
-        var velocityX = scope.velocityX;
-        var velocityZ = scope.velocityZ;
+        scope.velocityX = cameraVelocity.x;
+        scope.velocityZ = cameraVelocity.y;
 
         var distance = _eye.clone();
-        distance = distance.cross(this.object.up).setLength(velocityX);
+        distance = distance.cross(this.object.up).setLength(scope.velocityX);
 
         var unitZVector = new THREE.Vector3(0, 0, -1);
         // transform the unit z vector into camera's local space
-        distance.add(unitZVector.transformDirection(this.object.matrix).setLength(velocityZ));
+        distance.add(unitZVector.transformDirection(this.object.matrix).setLength(scope.velocityZ));
         // prevent camera from getting closer to grid
         distance.y = 0;
 
@@ -840,6 +834,18 @@ THREE.MapControls = function ( object, scene, domElement ) {
         }
     });
 
+    // keyboard shortcuts to rotate
+    KeyboardJS.on("q", 
+        function (event, keysPressed, keyCombo) {
+            scope.rotateLeft(Math.PI/30);
+        }
+    );
+
+    KeyboardJS.on("e", 
+        function (event, keysPressed, keyCombo) {
+            scope.rotateRight(Math.PI/30);
+        }
+    );
 
     this.handleResize();
 };

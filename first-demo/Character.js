@@ -53,7 +53,6 @@ var Character = Class.extend({
         this.loader = new THREE.JSONLoader();
         this.loadFile("blendermodels/spheresoldierrolling.js");
 
-        this.highlightedTiles = null;
         this.health = 100;
 
         var canvas = document.createElement('canvas');
@@ -499,11 +498,7 @@ var Character = Class.extend({
                 var path = direction.highlightTiles;
                 this.isCharacterInRoute = true;
                 if (this.team == GameInfo.myTeamId) {
-                    if (this.highlightedTiles){
-                        for (var i = 0; i < this.highlightedTiles.length; i++) {
-                            this.highlightedTiles[i].reset();
-                        }
-                    }
+                    this.world.deselectHighlightedTiles();
 
                     this.lastRoadMap.length = 0;
                     for (var i = 0; i < path.length; i++) {
