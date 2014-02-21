@@ -30,6 +30,10 @@ var Character = Class.extend({
         this.xPos = 0;
         this.zPos = 0;
 
+        this.hasPendingMove = false;
+        this.destX;
+        this.destZ;
+
         // Set the character modelisation object
         this.mesh = new THREE.Object3D();
         this.position = this.mesh.position;
@@ -330,7 +334,9 @@ var Character = Class.extend({
                 this.getTileZPos() + this.direction.z);
             var gx = this.getTileXPos() + this.direction.x;
             var gz = this.getTileZPos() + this.direction.z;
-
+            this.destX = gx;
+            this.destZ = gz;
+            this.hasPendingMove = true;
             console.log("Set to " + gx + " and " + gz + " for id " + this.team + " i " + this.id);
             var addNewItem = true;
             var newMotions = new Array();
@@ -458,18 +464,18 @@ var Character = Class.extend({
                 this.prevMeshX = newMeshX;
                 this.prevMeshZ = newMeshZ;
             }
-            console.log("x: "+this.mesh.position.x);
-            console.log("z: "+this.mesh.position.z);
+            //console.log("x: "+this.mesh.position.x);
+            //console.log("z: "+this.mesh.position.z);
             this.breakUpdateHere = true;                   
         } 
     },
 
     isInRoute: function() {
-        return this.isCharacterInRoute;
+        return this.hasPendingMove;
     },
 
     getDestination: function() {
-        return {'x': this.goalXPos, 'y':0, 'z':this.goalZPos};  
+        return {'x': this.destX, 'y':0, 'z':this.destZ};  
     },
 
     getCurrentPosition: function() {
@@ -513,6 +519,7 @@ var Character = Class.extend({
                     this.lastRoadMap[i].reset();
                 }
                 this.isCharacterInRoute = false;
+                this.hasPendingMove = false;
                 this.enterCoolDown();
 
                 return;
