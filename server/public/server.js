@@ -17,7 +17,36 @@ function loading() {
   $('.cloud').show();
 }
 
-$(document).ready(function() {
+function restartLoading() {
+  $('#WebGL-output').hide();
+  $('#Stats-output').hide();
+  $('body').css('background-image', 'url(images/PlanetBlitz.jpg)');
+  $('#Loading-output').show();
+  $('.span').show();
+  $('.cloud').show();
+}
+
+function showRestartDialog(message) {
+  $("#Message-dialog").html('<p>' + message + '</p>').dialog(
+  {
+    width: 400, 
+    height: 200,
+    modal: true,
+    resizable: false,
+    buttons: {
+      "Play again!": function() {
+        $(this).dialog("close");
+        sendRestartMsg();
+        restartLoading();
+      },
+      "NO!!": function() {
+        $(this).dialog("close");
+      }
+    }
+  });   
+}
+
+$(document).ready(function() { 
   $('#WebGL-output').hide();
   $('#Stats-output').hide();
   $('#Loading-output').hide();
@@ -39,6 +68,8 @@ $(document).ready(function() {
     loading();
     startGame();
   });
+
+
 
 });
 

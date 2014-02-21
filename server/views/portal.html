@@ -1,8 +1,11 @@
 <html>
   <head>
+    <!-- Jquery and JQuery UI -->
     <link rel='stylesheet' type='text/css' href='game.css'>
-
     <script type="text/javascript" src="jquery-1.9.0.js"></script>
+    <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css" />
+    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
+    
     <script type="text/javascript" src="/socket.io/socket.io.js"></script>
     <script type="text/javascript" src="three.js"></script>
     <script type="text/javascript" src="stats.js"></script>
@@ -76,6 +79,7 @@
     <!-- Div which will hold the Output -->
     <div id="WebGL-output">
     </div>
+    <div id="Message-dialog" title="Game Statistics"></div>
     <div id="Loading-output-container"><p id="Loading-output"></p></div>
     <div class='span'>
       <div class='cloud'>

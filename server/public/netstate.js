@@ -3,6 +3,8 @@ var Message = {
   GAME : 'GAME',
   JOIN : 'JOIN',
   START : 'START',
+  FINISH : 'FINISH',
+  RESTART : 'RESTART',
   TEAM : 'TEAM',
   STATE: 'STATE',
   SEQ: 'seq',
@@ -33,6 +35,7 @@ var Hit = {
   index : 'index',
 };
 
+// Game state for sync.
 var State = {
   team: 'team',
   index : 'index',
@@ -41,8 +44,17 @@ var State = {
   health : 'health'
 };
 
+// Game statistics for sending winning msg.
+var Stat = {
+  result : 'result',
+  winner : 'winner',
+  win : 'win',
+  lose : 'lose'
+}
+
 exports.Message = Message;
 exports.Move = Move;
 exports.Hit = Hit;
 exports.Shoot = Shoot;
 exports.State = State;
+exports.Stat = Stat;

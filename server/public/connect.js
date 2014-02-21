@@ -88,10 +88,19 @@ function connectServer(type, gameStartCallback) {
       console.log(data);
       var team = parseInt(data[Hit.team]);
       var index = parseInt(data[Hit.index]);
-      var seq = parseInt(moveData[Message.SEQ]);
+      var seq = parseInt(data[Message.SEQ]);
       var target = game.getWorld().getCharacterById(team, index);
       game.getWorld().syncGameState(state, seq);
       target.applyDamage(30);
+  });
+
+  socket.on(Message.FINISH, function(data) {
+      if (data[Stat.result] == Stat.win) {
+        showRestartDialog('You win');
+      } else {
+        showRestartDialog('You lose');
+      }
+
   });
 
 }
@@ -135,6 +144,9 @@ function sendHitMsg(team, index) {
   socket.emit(Message.HIT, hit);
 }
 
+function sendRestartMsg() {
+  socket.emit(Message.RESTART);
+}
 function updateLoadingPlayerState(state) {
   $('#Loading-output').html('Waiting...</br>Player: ' + state);
 }

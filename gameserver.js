@@ -33,6 +33,7 @@ var Message = netconst.Message;
 var Move = netconst.Move;
 var State = netconst.State;
 var Hit = netconst.Hit;
+var Stat = netconst.Stat;
 var games = new Array();
 var numPlayers = 0;
 var curGameId = 0
@@ -126,7 +127,45 @@ io.sockets.on('connection', function(socket) {
         newState[Message.SEQ] = game.seq;
         socket.broadcast.to(game.room).emit(Message.HIT, newState);
         socket.emit(Message.HIT, newState);
+        // Decide if the game finishes.
+        console.log('Live team ' + game.gameState.numLiveTeams);
+        if (game.gameState.numLiveTeams == 1) {
+          gameStatistics = {};
+          gameStatistics[Stat.result] = Stat.lose;;
+          // Reset the game state.
+          game.restart();
+          gameStatistics[Stat.winner] = 'cwx';
+          socket.broadcast.to(game.room).emit(Message.FINISH, gameStatistics);
+          // Send the winner the win msg.
+          gameStatistics[Stat.result] = Stat.win;
+          socket.emit(Message.FINISH, gameStatistics);
+
+        }
       }
+    });
+  });
+
+  socket.on(Message.RESTART, function(message) {
+    socket.get('gameId', function(error, gameId) {
+      var curGame = games[gameId];
+      // Send the team id to the player.
+      var randomTeamId = curGame.teamIds[curGame.numPlayers++];
+      var teamMsg = {}
+      teamMsg[Message.TEAM] = randomTeamId;
+      var playerState = curGame.numPlayers + '/' + curGame.maxNumPlayers;
+      teamMsg[Message.JOIN] = playerState;
+
+      socket.emit(Message.TEAM, teamMsg);
+      socket.broadcast.to(curGame.room).emit(Message.JOIN, playerState);
+
+      console.log('cur room players ' + playerState);
+      // Start the game when full, and create a new one.
+      if (curGame.numPlayers == curGame.maxNumPlayers) {
+        console.log('start game for room ' + curGame.room);
+        //io.sockets.in(curGame.room).emit(Message.Start);
+        socket.broadcast.to(curGame.room).emit(Message.START);
+        socket.emit(Message.START);
+      } 
     });
   });
 
@@ -142,7 +181,7 @@ io.sockets.on('connection', function(socket) {
  */
 function Game(gameId, maxPlayers) {
   this.gameId = gameId;
-  this.teams = new Array();
+  //this.teams = new Array();
   this.isStart = false;
   this.numPlayers = 0;
   this.maxNumPlayers = maxPlayers;
@@ -165,12 +204,21 @@ function shuffle(o){
   return o;
 };
 
+Game.prototype.restart = function(){
+  this.isStart = false;
+  this.numPlayers = 0;
+  shuffle(this.teamIds);
+  this.seq = 0;
+  console.log(this.teamIds);
+  this.gameState.restart();
+};
 
 
 function GameState(numOfTeams, teamSize) {
-
-  this.teams = new Array();
   this.teamSize = teamSize;
+  this.numOfTeams = numOfTeams;
+  this.numLiveTeams = numOfTeams;
+  this.teams = new Array();
   for (var teamId = 0; teamId < numOfTeams; teamId++) {
     this.teams.push(new Array());
     for (var i = 0; i < teamSize; i++) {
@@ -185,7 +233,25 @@ function GameState(numOfTeams, teamSize) {
         this.teams[teamId].push(new CharState(startX, startZ));
     }
   }
+}
 
+GameState.prototype.restart = function(data) {
+  this.teams = new Array();
+  this.numLiveTeams = this.numOfTeams;
+  for (var teamId = 0; teamId < this.numOfTeams; teamId++) {
+    this.teams.push(new Array());
+    for (var i = 0; i < this.teamSize; i++) {
+        var startX, startZ;
+        if (teamId < 2) {
+          startX = i + 9;
+          startZ = teamStartPos[teamId];
+        } else {
+          startX = teamStartPos[teamId];
+          startZ = i + 9;
+        }
+        this.teams[teamId].push(new CharState(startX, startZ));
+    }
+  }
 }
 
 GameState.prototype.updatePosState = function(data) {
@@ -226,7 +292,19 @@ GameState.prototype.updateHealthState = function(data) {
   }
   this.teams[teamId][index].health -= 30;
   if (this.teams[teamId][index].health < 0) {
-    this.team[teamId][index].alive = false;
+    console.log("die");
+    this.teams[teamId][index].alive = false;
+    var isTeamLive = false;
+    for (var i = 0; i < this.teamSize; i++) {
+      if (this.teams[teamId][i].alive) {
+        isTeamLive = true;
+        break;
+      }
+    }
+    if (!isTeamLive) {
+      this.numLiveTeams--;
+    }
+    console.log('liv team ' + this.numLiveTeams);
   }
   return true;
 };
