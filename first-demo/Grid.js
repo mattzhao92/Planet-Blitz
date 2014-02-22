@@ -46,6 +46,42 @@ var Grid = Class.extend({
         this.unitCycle = 0;
     },
 
+    onGameStart: function() {
+
+        for (var tm = GameInfo.numOfTeams; tm < 4; tm++) {
+          for (var i = 0; i < this.numOfCharacters; i++) {
+            this.silentlyRemoveCharacter(this.getCharacterById(tm, i));
+          }
+        }
+
+        console.log("Team id "+ GameInfo.myTeamId);
+
+        var teamJoinMessage;
+        switch (GameInfo.myTeamId) {
+            case 0:
+                teamJoinMessage = "You spawned at top";
+                break;
+            case 1:
+                teamJoinMessage = "You spawned at bottom";
+                break;
+            case 2:
+                teamJoinMessage = "You spawned at left";
+                break;
+            case 3:
+                teamJoinMessage = "You spawned at right";
+                break;
+        }
+
+        this.displayMessage(teamJoinMessage);
+
+        // focus camera on start position (TODO: hardcoded)
+        this.controls.focusOnPosition(this.getMyTeamCharacters()[0].mesh.position);
+    },
+
+    getMyTeamCharacters: function() {
+        return this.characterList[GameInfo.myTeamId];
+    },
+
     setupHotkeys: function() {
         var scope = this;
         var unitNumbers = [1, 2, 3];
@@ -55,7 +91,7 @@ var Grid = Class.extend({
             KeyboardJS.on(hotkey, 
                 function(event, keysPressed, keyCombo) {
                     // TODO: replace this with a more readable line. Also, need to account for out of index errors when units get killed
-                    var characterSelected = scope.characterList[GameInfo.myTeamId][parseInt(keyCombo) - 1];
+                    var characterSelected = scope.getMyTeamCharacters()[parseInt(keyCombo) - 1];
                     if (characterSelected) {
                         characterSelected.onSelect();
                     }
@@ -66,7 +102,7 @@ var Grid = Class.extend({
         // unit toggle - cycle forwards
         KeyboardJS.on("t", 
             function(event, keysPressed, keyCombo) {
-                var myTeamCharacters = scope.characterList[GameInfo.myTeamId];
+                var myTeamCharacters = scope.getMyTeamCharacters();
                 var characterSelected = myTeamCharacters[scope.unitCycle];
                 if (characterSelected) {
                     characterSelected.onSelect();
@@ -78,7 +114,7 @@ var Grid = Class.extend({
         // unit toggle - cycle backwards
         KeyboardJS.on("r", 
             function(event, keysPressed, keyCombo) {
-                var myTeamCharacters = scope.characterList[GameInfo.myTeamId];
+                var myTeamCharacters = scope.getMyTeamCharacters();
                 var characterSelected = myTeamCharacters[scope.unitCycle];
                 if (characterSelected) {
                     characterSelected.onSelect();
@@ -153,9 +189,7 @@ var Grid = Class.extend({
         this.gameApp.displayMessage(msg);
     },
 
-    handleCharacterDead: function(character) {
-        this.displayMessage("A robot was destroyed!");
-
+    silentlyRemoveCharacter: function(character) {
         // if the character was the currently selected unit, then reset tile state
         if (this.getCurrentSelectedUnit() == character) {
             // deselect character
@@ -183,6 +217,12 @@ var Grid = Class.extend({
             // remove object from scene
             character.onDead();
         }
+    },
+
+    handleCharacterDead: function(character) {
+        this.displayMessage("A robot was destroyed!");
+
+        this.silentlyRemoveCharacter(character);
     },
 
     handleBulletDestroy: function(bullet) {
