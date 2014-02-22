@@ -39,9 +39,6 @@ THREE.MapControls = function ( object, scene, domElement ) {
     this.minDistance = 0;
     this.maxDistance = Infinity;
 
-    // arrow key mappings
-    // this.keys = { LEFT: 37, UP: 38, RIGHT: 39, DOWN: 40 };
-
     // WASD mappings
     this.keys = {LEFT: 65, UP: 87, RIGHT: 68, DOWN: 83};
 
@@ -286,7 +283,6 @@ THREE.MapControls = function ( object, scene, domElement ) {
         }
 
         scale /= zoomScale;
-
     };
 
     this.zoomOut = function ( zoomScale ) {
@@ -298,7 +294,6 @@ THREE.MapControls = function ( object, scene, domElement ) {
         }
 
         scale *= zoomScale;
-
     };
 
     this.pan = function () {

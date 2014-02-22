@@ -111,6 +111,8 @@ $(function () {
             controls.minZ = -this.GRID_LENGTH / 2;
             controls.maxZ = this.GRID_LENGTH / 2;
 
+            controls.minDistance = 240;
+            controls.maxDistance = 2000;
             this.controls = controls;
         },
 
