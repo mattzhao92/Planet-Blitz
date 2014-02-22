@@ -44,12 +44,7 @@ var Grid = Class.extend({
         this.setupHotkeys();
 
         this.unitCycle = 0;
-        // this.selectStack = new Array();
     },
-
-    // pushSelectArray: function(character) {
-    //     this.
-    // },
 
     setupHotkeys: function() {
         var scope = this;
@@ -97,6 +92,14 @@ var Grid = Class.extend({
         );
 
         // focus camera on unit
+        KeyboardJS.on("space", 
+            function(event, keysPressed, keyCombo) {
+                var character = scope.getCurrentSelectedUnit();
+                if (character) {
+                    scope.controls.focusOnPosition(character.mesh.position);
+                }
+            }
+        );
     },
 
     setupCharacters: function() {
@@ -484,9 +487,7 @@ var Grid = Class.extend({
 
                     if (!GameInfo.netMode) {
                       this.currentSelectedUnits[GameInfo.myTeamId].enqueueMotion(
-                          this, function() {
-                            this.allowCharacterMovement = true;
-                          });
+                          );
                     }
                 }
             }
