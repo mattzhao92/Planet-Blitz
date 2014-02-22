@@ -42,7 +42,14 @@ var Grid = Class.extend({
         this.setupMouseMoveListener();
         this.setupMouseDownListener();
         this.setupHotkeys();
+
+        this.unitCycle = 0;
+        // this.selectStack = new Array();
     },
+
+    // pushSelectArray: function(character) {
+    //     this.
+    // },
 
     setupHotkeys: function() {
         var scope = this;
@@ -60,6 +67,36 @@ var Grid = Class.extend({
                 }
             );
         });
+
+        // unit toggle - cycle forwards
+        KeyboardJS.on("t", 
+            function(event, keysPressed, keyCombo) {
+                var myTeamCharacters = scope.characterList[GameInfo.myTeamId];
+                var characterSelected = myTeamCharacters[scope.unitCycle];
+                if (characterSelected) {
+                    characterSelected.onSelect();
+                }
+                scope.unitCycle = (scope.unitCycle + 1) % myTeamCharacters.length;
+            }
+        );
+
+        // unit toggle - cycle backwards
+        KeyboardJS.on("r", 
+            function(event, keysPressed, keyCombo) {
+                var myTeamCharacters = scope.characterList[GameInfo.myTeamId];
+                var characterSelected = myTeamCharacters[scope.unitCycle];
+                if (characterSelected) {
+                    characterSelected.onSelect();
+                }
+                if (scope.unitCycle == 0) {
+                    scope.unitCycle = myTeamCharacters.length - 1
+                } else {
+                    scope.unitCycle -= 1;
+                }
+            }
+        );
+
+        // focus camera on unit
     },
 
     setupCharacters: function() {
