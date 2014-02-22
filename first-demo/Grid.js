@@ -577,7 +577,7 @@ var Grid = Class.extend({
     syncGameState: function(state, seq) {
         // Old seq, discard it.
         if (seq < this.seq) {
-            return;
+            return false;
         }
         this.seq = seq;
         // This is usd to check ghosts.
@@ -616,6 +616,7 @@ var Grid = Class.extend({
             }
         }
 
+        var isStateGood = true;
         for (var t = 0; t < GameInfo.numOfTeams; t++) {
             for (var i = 0; i < this.numOfCharacters; i++) {
                 var charToCheck = this.getCharacterById(t, i);
@@ -623,9 +624,11 @@ var Grid = Class.extend({
                     console.log("Zombie character!");
                     // Server says dead but alive locally.
                     this.handleCharacterDead(charToCheck);
+                    isStateGood = false;
                 }
             }
         }
+        return isStateGood;
     }, 
 
     disableMouseDownListener: function() {

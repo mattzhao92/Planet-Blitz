@@ -106,6 +106,8 @@ io.sockets.on('connection', function(socket) {
         // Broadcast to the game room.
         socket.broadcast.to(game.room).emit(Message.MOVE, newState);
         socket.emit(Message.MOVE, newState);
+      } else {
+        socket.emit(Message.MOVE, newState);
       }
     });
   });

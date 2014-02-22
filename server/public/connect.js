@@ -62,9 +62,11 @@ function connectServer(type, gameStartCallback) {
       var deltaZ = parseInt(data[Move.Z]);
       var seq = parseInt(moveData[Message.SEQ]);
       var target = game.getWorld().getCharacterById(moverTeam, moverIndex);
-      game.getWorld().syncGameState(state, seq);
-      target.setDirection(new THREE.Vector3(deltaX, 0, deltaZ));
-      target.enqueueMotion(null);
+      if (game.getWorld().syncGameState(state, seq)) {
+          target.setDirection(new THREE.Vector3(deltaX, 0, deltaZ));
+          target.enqueueMotion(null);
+      }
+
   });
 
   /* Handle the shot message */
