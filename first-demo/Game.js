@@ -43,7 +43,7 @@ $(function () {
 
         setupCamera: function() {
             // create a camera, which defines where we're looking at
-            this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 10000);
+            this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 8000);
             this.camera.position.x = 0;
             this.camera.position.y = 600;
             this.camera.position.z = 400;
@@ -72,7 +72,7 @@ $(function () {
         },
 
         addSkybox: function() {
-            var skyGeometry = new THREE.CubeGeometry( 5000, 5000, 5000 );
+            var skyGeometry = new THREE.CubeGeometry( 4000, 4000, 4000 );
             
             // x +, x -, y + , y -, z +, z -
             var filenames = [
