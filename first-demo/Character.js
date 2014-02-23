@@ -30,6 +30,8 @@ var Character = Class.extend({
         this.xPos = 0;
         this.zPos = 0;
 
+        this.highlightedTiles = [];
+
         this.hasPendingMove = false;
         this.destX;
         this.destZ;

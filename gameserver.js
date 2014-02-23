@@ -47,12 +47,13 @@ var fourPlayerGameId = 1;
 
 // IO communication.
 io.sockets.on('connection', function(socket) {
-  socket.set('pseudo', 'player' + numPlayers);
   console.log('Player connection, #' + numPlayers);
   numPlayers++;
 
-  socket.on(Message.GAME, function(gameType) {
-    var type = parseInt(gameType);
+  socket.on(Message.GAME, function(gameRequest) {
+    var username = gameRequest[Message.USERNAME];
+    socket.set('username', username);
+    var type = parseInt(gameRequest[Message.TYPE]);
     console.log('type is ' + type);
     var roomId;
     if (type == 2) {
@@ -65,12 +66,14 @@ io.sockets.on('connection', function(socket) {
     socket.join(curGame.room);
     // Send the team id to the player.
     var randomTeamId = curGame.teamIds[curGame.numPlayers++];
-    var teamMsg = {}
+    var teamMsg = {};
     teamMsg[Message.TEAM] = randomTeamId;
     var playerState = curGame.numPlayers + '/' + curGame.maxNumPlayers;
     teamMsg[Message.JOIN] = playerState;
     socket.emit(Message.TEAM, teamMsg);
     socket.broadcast.to(curGame.room).emit(Message.JOIN, playerState);
+    curGame.score[username] = new Score();
+    curGame.score[username].teamId = randomTeamId;
 
     console.log('cur room players ' + playerState);
     // Start the game when full, and create a new one.
@@ -123,15 +126,33 @@ io.sockets.on('connection', function(socket) {
     socket.get('gameId', function(error, gameId) {
       var game = games[gameId];
       var newState = game.gameState.toJSON();
-      if (game.gameState.updateHealthState(message)) {
-        game.seq++;
-        newState[Message.HIT] = message;
-        newState[Message.SEQ] = game.seq;
-        socket.broadcast.to(game.room).emit(Message.HIT, newState);
-        socket.emit(Message.HIT, newState);
+      var isKill = game.gameState.updateHealthState(message);
+      if (isKill) {
+        socket.get('username', function(error, username) {
+          game.score[username].kill++;
+          var team = parseInt(message[Hit.team]);
+          for (var uname in game.score) {
+            if (game.score[uname].teamId == team) {
+              game.score[uname].death++;
+              break;
+            }
+          }
+        });
+        message[Hit.kill] = true;
+      }
+      // TODO
+      game.seq++;
+      newState[Message.HIT] = message;
+      newState[Message.SEQ] = game.seq;
+      socket.broadcast.to(game.room).emit(Message.HIT, newState);
+      socket.emit(Message.HIT, newState);
+
         // Decide if the game finishes.
-        console.log('Live team ' + game.gameState.numLiveTeams);
-        if (game.gameState.numLiveTeams == 1) {
+      console.log('Live team ' + game.gameState.numLiveTeams);
+      if (game.gameState.numLiveTeams == 1) {
+        socket.get('username', function(error, username) {
+          game.score[username].win++;
+
           gameStatistics = {};
           gameStatistics[Stat.result] = Stat.lose;;
           // Reset the game state.
@@ -141,8 +162,7 @@ io.sockets.on('connection', function(socket) {
           // Send the winner the win msg.
           gameStatistics[Stat.result] = Stat.win;
           socket.emit(Message.FINISH, gameStatistics);
-
-        }
+        });
       }
     });
   });
@@ -152,7 +172,10 @@ io.sockets.on('connection', function(socket) {
       var curGame = games[gameId];
       // Send the team id to the player.
       var randomTeamId = curGame.teamIds[curGame.numPlayers++];
-      var teamMsg = {}
+      socket.get('username', function(error, username) {
+        curGame.score[username].teamId = randomTeamId;
+      });
+      var teamMsg = {};
       teamMsg[Message.TEAM] = randomTeamId;
       var playerState = curGame.numPlayers + '/' + curGame.maxNumPlayers;
       teamMsg[Message.JOIN] = playerState;
@@ -191,6 +214,7 @@ function Game(gameId, maxPlayers) {
   this.teamIds = new Array();
   this.gameState = new GameState(maxPlayers, teamSize);
   this.seq = 0;
+  this.score = {};
   for (var t = 0; t < maxPlayers; t++) {
     this.teamIds.push(t);
   }
@@ -288,13 +312,16 @@ GameState.prototype.updatePosState = function(data) {
 GameState.prototype.updateHealthState = function(data) {
   var teamId = parseInt(data[Hit.team]);
   var index = parseInt(data[Hit.index]);
+  var kill = false;
   if (!this.teams[teamId][index].alive) {
     console.log("Shot a corpus??");
-    return false;
+    kill = true;
+    return kill;
   }
   this.teams[teamId][index].health -= 30;
   if (this.teams[teamId][index].health < 0) {
     console.log("die");
+    kill = true;
     this.teams[teamId][index].alive = false;
     var isTeamLive = false;
     for (var i = 0; i < this.teamSize; i++) {
@@ -308,7 +335,7 @@ GameState.prototype.updateHealthState = function(data) {
     }
     console.log('liv team ' + this.numLiveTeams);
   }
-  return true;
+  return kill;
 };
   
 GameState.prototype.toJSON = function() {
@@ -338,4 +365,13 @@ function CharState(x, z) {
   this.x = x;
   this.z = z;
   this.health = 100;
+}
+
+/* A class for the summary of each player */
+function Score() {
+  this.kill = 0;
+  this.death = 0;
+  this.win = 0;
+  // The team of for the player at current game.
+  this.teamId;
 }

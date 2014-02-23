@@ -36,10 +36,36 @@ function showRestartDialog(message) {
     buttons: {
       "Play again!": function() {
         $(this).dialog("close");
-        sendRestartMsg();
-        restartLoading();
+          connectServer(GameInfo.numOfTeam, startGame);
+          loading();
       },
       "NO!!": function() {
+        $(this).dialog("close");
+      }
+    }
+  });   
+}
+
+function getUsername(type) {
+  var content = '<p>What name do you want to use?</p><br/><form>Name : <input type="text" id="uname"></form>';
+  $("#Input-dialog").html(content).dialog(
+  {
+    width: 400, 
+    height: 200,
+    modal: true,
+    resizable: false,
+    buttons: {
+      "Start": function() {
+        var username = $('#uname').val();
+        if (username != '') {
+          $(this).dialog("close");
+          connectServer(type, username, startGame);
+          loading();
+        } else {
+          alert('Name can not be empty!');
+        }
+      },
+      "Quit": function() {
         $(this).dialog("close");
       }
     }
@@ -52,19 +78,18 @@ $(document).ready(function() {
   $('#Loading-output').hide();
   $('#playBtn').click(function() {
     GameInfo.numOfTeam = 2;
-    connectServer(GameInfo.numOfTeam, startGame);
-    loading();
+    getUsername(2);
   });
 
   $('#playBtn2').click(function() {
     GameInfo.numOfTeam = 4;
-    connectServer(GameInfo.numOfTeam, startGame);
-    loading();
+    getUsername(4);
   });
 
   /* Start the game locally */
   $('#debugBtn').click(function() {
     GameInfo.netMode = false;
+    getUsername();
     loading();
     startGame();
   });

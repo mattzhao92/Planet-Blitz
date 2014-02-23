@@ -1,6 +1,8 @@
 // Network packet type
 var Message = {
   GAME : 'GAME',
+  TYPE : 'TYPE',
+  USERNAME : 'USERNAME',
   JOIN : 'JOIN',
   START : 'START',
   FINISH : 'FINISH',
@@ -33,6 +35,7 @@ var Shoot = {
 var Hit = {
   team: 'team',
   index : 'index',
+  kill : 'kill'
 };
 
 // Game state for sync.

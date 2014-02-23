@@ -5,10 +5,14 @@ var name;
 var game;
 var GameInfo = new GameConfig();
 
-function connectServer(type, gameStartCallback) {
+function connectServer(type, username, gameStartCallback) {
   socket = io.connect();
   GameInfo.numOfTeams = type;
-  socket.emit(Message.GAME, type);
+  GameInfo.username = username;
+  var gameRequest = {};
+  gameRequest[Message.TYPE] = type;
+  gameRequest[Message.USERNAME] = username;
+  socket.emit(Message.GAME, gameRequest);
 
   /* Handle the team id message */
   socket.on(Message.TEAM, function(data) {
@@ -93,7 +97,11 @@ function connectServer(type, gameStartCallback) {
       var seq = parseInt(data[Message.SEQ]);
       var target = game.getWorld().getCharacterById(team, index);
       game.getWorld().syncGameState(state, seq);
-      target.applyDamage(30);
+      if (data[Hit.kill]) {
+        game.getWorld().handleCharacterDead(target);
+      } else{
+        target.applyDamage(30);
+      }
   });
 
   socket.on(Message.FINISH, function(data) {
@@ -102,7 +110,6 @@ function connectServer(type, gameStartCallback) {
       } else {
         showRestartDialog('You lose');
       }
-
   });
 
 }
@@ -112,6 +119,7 @@ function GameConfig() {
   this.numOfTeams = 4;
   this.myTeamId = 0;
   this.netMode = true;
+  this.username;
 }
 
 
