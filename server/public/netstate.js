@@ -51,8 +51,10 @@ var State = {
 var Stat = {
   result : 'result',
   winner : 'winner',
-  win : 'win',
-  lose : 'lose'
+  player : 'player',
+  kill : 'kill',
+  death : 'death',
+  win : 'win'
 }
 
 exports.Message = Message;

@@ -564,7 +564,9 @@ var Grid = Class.extend({
             if (character.team != bullet.owner.team && this.checkOverlap(bullet, character)) {
                 this.handleBulletDestroy(bullet);
                 if (GameInfo.netMode) {
-                    sendHitMsg(character.team, character.id);
+                    if (bullet.owner.team == GameInfo.myTeamId) {
+                        sendHitMsg(character.team, character.id);
+                    }
                 } else {
                     character.applyDamage(30);
                 }

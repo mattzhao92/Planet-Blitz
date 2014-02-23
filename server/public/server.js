@@ -26,11 +26,32 @@ function restartLoading() {
   $('.cloud').show();
 }
 
-function showRestartDialog(message) {
-  $("#Message-dialog").html('<p>' + message + '</p>').dialog(
+function showRestartDialog(message, score) {
+  var content = '<p>' + message + '</p><br/>';
+  content += '<table style="width:400px"><tr><td>Name</td><td>Kill</td><td>Death</td><td>Win</td></tr>';
+  // Score the result according to win.
+  var sortedUsernames = new Array();
+  for (var username in score) {
+    sortedUsernames.push(username);
+  }
+  sortedUsernames.sort(function(a, b) {
+    return score[b][Stat.win]; - score[a][Stat.win];
+  });
+  for (var t = 0; t < sortedUsernames.length; t++) {
+    var username = sortedUsernames[t];
+    content += '<tr>';
+    content += '<td>' + username + '</td>';
+    content += '<td>' + score[username][Stat.kill] + '</td>';
+    content += '<td>' + score[username][Stat.death] + '</td>';
+    content += '<td>' + score[username][Stat.win] + '</td>';
+    content += '</tr>';
+  }
+  content += '</table>';
+ 
+  $("#Message-dialog").html(content).dialog(
   {
     width: 400, 
-    height: 200,
+    height: 300,
     modal: true,
     resizable: false,
     buttons: {

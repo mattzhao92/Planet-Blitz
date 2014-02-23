@@ -1,11 +1,11 @@
 // When not passing any argument, it automatically connects to the server
 // which serves the page.
 var socket;
-var name;
 var game;
 var GameInfo = new GameConfig();
 
 function connectServer(type, username, gameStartCallback) {
+  console.log(Stat.kill);
   socket = io.connect();
   GameInfo.numOfTeams = type;
   GameInfo.username = username;
@@ -105,10 +105,12 @@ function connectServer(type, username, gameStartCallback) {
   });
 
   socket.on(Message.FINISH, function(data) {
-      if (data[Stat.result] == Stat.win) {
-        showRestartDialog('You win');
+      console.log(data);
+      var score = data[Stat.result];
+      if (data[Stat.winner] == GameInfo.username) {
+        showRestartDialog('You win', score);
       } else {
-        showRestartDialog('You lose');
+        showRestartDialog('You lose', score);
       }
   });
 

@@ -154,14 +154,14 @@ io.sockets.on('connection', function(socket) {
           game.score[username].win++;
 
           gameStatistics = {};
-          gameStatistics[Stat.result] = Stat.lose;;
+          gameStatistics[Stat.winner] = username
+          var scoreStat = game.getScoreJSON();
+          gameStatistics[Stat.result] = scoreStat;
+          socket.broadcast.to(game.room).emit(Message.FINISH, gameStatistics);
+          socket.emit(Message.FINISH, gameStatistics);
+
           // Reset the game state.
           game.restart();
-          gameStatistics[Stat.winner] = 'cwx';
-          socket.broadcast.to(game.room).emit(Message.FINISH, gameStatistics);
-          // Send the winner the win msg.
-          gameStatistics[Stat.result] = Stat.win;
-          socket.emit(Message.FINISH, gameStatistics);
         });
       }
     });
@@ -239,6 +239,18 @@ Game.prototype.restart = function(){
   this.gameState.restart();
 };
 
+Game.prototype.getScoreJSON = function() {
+  var stat = {};
+  for (var username in this.score) {
+    var score = this.score[username];
+    var detail = {};
+    detail[Stat.kill] = score.kill;
+    detail[Stat.death] = score.death;
+    detail[Stat.win] = score.win;
+    stat[username] = detail;
+  }
+  return stat;
+}
 
 function GameState(numOfTeams, teamSize) {
   this.teamSize = teamSize;
@@ -375,3 +387,5 @@ function Score() {
   // The team of for the player at current game.
   this.teamId;
 }
+
+
