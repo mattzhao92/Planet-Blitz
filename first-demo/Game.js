@@ -116,7 +116,7 @@ $(function () {
         },
 
         addControlGUI: function() {
-            var gui = new dat.GUI();
+            //var gui = new dat.GUI();
         },
 
         setupGameWorld: function() {
