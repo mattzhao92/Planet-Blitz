@@ -736,6 +736,14 @@ THREE.MapControls = function ( object, scene, domElement ) {
         }
     );
 
+    this.reset = function() {
+        // Ask the browser to release the pointer
+        document.exitPointerLock = document.exitPointerLock ||
+                       document.mozExitPointerLock ||
+                       document.webkitExitPointerLock;
+        document.exitPointerLock();
+    }
+
     function calculateInitialMousePosition(canvas, event) {
         var x = new Number();
         var y = new Number();
