@@ -140,6 +140,8 @@ var Character = Class.extend({
     },
 
     reset : function() {
+        if (this.alive == false) 
+            this.world.add.remove(this.mesh);
         this.mesh.position = this.originalPosition;
         this.isCoolDown = false;
         this.coolDownCount = 105;
@@ -165,7 +167,10 @@ var Character = Class.extend({
 
         this.isActive = true;
         this.hasPendingMove = false;
-        this.highlightedTiles[i] = [];
+        this.highlightedTiles = [];
+        this.motionQueue.length = 0;
+
+
     },
 
 
@@ -310,6 +315,7 @@ var Character = Class.extend({
 
 
     onDead: function() {
+        this.alive = false;
         this.world.scene.remove(this.mesh);
         this.world.scene.remove(this.coolDownBar);
         this.world.scene.remove(this.ammoCountBar);
