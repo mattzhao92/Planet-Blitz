@@ -48,7 +48,7 @@ var Grid = Class.extend({
     },
 
     onGameStart: function() {
-
+        this.enableHotKeys();
         for (var tm = GameInfo.numOfTeams; tm < 4; tm++) {
           for (var i = 0; i < this.numOfCharacters; i++) {
             this.silentlyRemoveCharacter(this.getCharacterById(tm, i));

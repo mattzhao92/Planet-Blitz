@@ -99,7 +99,7 @@ function getUsername(type) {
   $("#quitBtn").click(function() {
     $("#Input-dialog").dialog("close");
   });
-  game.getWorld().enableHotKeys();
+  
 }
 
 $(document).ready(function() { 
