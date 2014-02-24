@@ -19,7 +19,7 @@ THREE.MapControls = function ( object, scene, domElement ) {
 
     this.enabled = true;
 
-    this.center = new THREE.Vector3();
+    this.target = new THREE.Vector3();
 
     this.userZoom = true;
     this.userZoomSpeed = 1.0;
@@ -38,9 +38,6 @@ THREE.MapControls = function ( object, scene, domElement ) {
 
     this.minDistance = 0;
     this.maxDistance = Infinity;
-
-    // arrow key mappings
-    // this.keys = { LEFT: 37, UP: 38, RIGHT: 39, DOWN: 40 };
 
     // WASD mappings
     this.keys = {LEFT: 65, UP: 87, RIGHT: 68, DOWN: 83};
@@ -118,6 +115,15 @@ THREE.MapControls = function ( object, scene, domElement ) {
     this.mousePosition = {x: ARBITRARY_MOUSE_POS, y: ARBITRARY_MOUSE_POS};
 
     this.CURSOR_IMAGE_PATH = "images/cursor.png";
+
+    this.focusOnPosition = function(newPosition) {
+        // figure out offset of camera from target
+
+        // target vs camera.position
+        var vectorOffset = this.object.position.clone().sub(this.target);
+        this.target = newPosition.clone();
+        this.object.position = this.target.clone().add(vectorOffset);
+    },
 
     this.handleResize = function () {
         if ( this.domElement === document ) {
@@ -277,7 +283,6 @@ THREE.MapControls = function ( object, scene, domElement ) {
         }
 
         scale /= zoomScale;
-
     };
 
     this.zoomOut = function ( zoomScale ) {
@@ -289,7 +294,6 @@ THREE.MapControls = function ( object, scene, domElement ) {
         }
 
         scale *= zoomScale;
-
     };
 
     this.pan = function () {
@@ -337,7 +341,7 @@ THREE.MapControls = function ( object, scene, domElement ) {
             // }
 
             this.object.position.add( distance );
-            this.center.add( distance );
+            this.target.add( distance );
 
             _panStart.add(mouseChange.subVectors(_panEnd, _panStart).multiplyScalar(_this.dynamicDampingFactor));
 
@@ -466,7 +470,7 @@ THREE.MapControls = function ( object, scene, domElement ) {
         distance.y = 0;
 
         this.object.position.add( distance );
-        this.center.add( distance );
+        this.target.add( distance );
 
         // don't apply deceleration if the velocity was about 0 to begin with
         if (Math.abs(scope.velocityX) < scope.DECELERATION * delta) {
@@ -489,12 +493,12 @@ THREE.MapControls = function ( object, scene, domElement ) {
     };
 
     this.update = function (delta) {
-        _eye.subVectors(_this.object.position, this.center);
+        _eye.subVectors(_this.object.position, this.target);
         _this.updateCameraFromVelocity(delta);
         _this.pan();
 
         var position = this.object.position;
-        var offset = position.clone().sub( this.center );
+        var offset = position.clone().sub( this.target );
 
         // angle from z-axis around y-axis
 
@@ -529,9 +533,9 @@ THREE.MapControls = function ( object, scene, domElement ) {
         offset.y = radius * Math.cos( phi );
         offset.z = radius * Math.sin( phi ) * Math.cos( theta );
 
-        position.copy( this.center ).add( offset );
+        position.copy( this.target ).add( offset );
 
-        this.object.lookAt( this.center );
+        this.object.lookAt( this.target );
 
         thetaDelta = 0;
         phiDelta = 0;

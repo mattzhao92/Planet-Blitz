@@ -329,7 +329,7 @@ var Character = Class.extend({
         this.direction = direction;
     },
 
-    enqueueMotion: function(onMotionFinish) {
+    enqueueMotion: function() {
         if (this.isCoolDown == 0) {
             var path = this.world.findPath(this.getTileXPos(), this.getTileZPos(), this.getTileXPos() + this.direction.x,
                 this.getTileZPos() + this.direction.z);
@@ -371,9 +371,6 @@ var Character = Class.extend({
                 'highlightTiles': path
             });
 
-            if (onMotionFinish) {
-                onMotionFinise();
-            }
         } else {
           console.log("movr...without cd?");
         }

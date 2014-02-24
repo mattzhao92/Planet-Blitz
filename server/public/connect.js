@@ -28,30 +28,8 @@ function connectServer(type, username, gameStartCallback) {
   socket.on(Message.START, function() {
       gameStartCallback();
       var grid = game.getWorld();
-      for (var tm = GameInfo.numOfTeams; tm < 4; tm++) {
-        for (var i = 0; i < grid.numOfCharacters; i++) {
-          grid.handleCharacterDead(grid.getCharacterById(tm, i));
-        }
-      }
+      grid.onGameStart();
 
-      console.log("Team id "+ GameInfo.myTeamId);
-
-      var teamJoinMessage;
-      switch (GameInfo.myTeamId) {
-          case 0:
-              teamJoinMessage = "You spawned at top";
-              break;
-          case 1:
-              teamJoinMessage = "You spawned at bottom";
-              break;
-          case 2:
-              teamJoinMessage = "You spawned at left";
-              break;
-          case 3:
-              teamJoinMessage = "You spawned at right";
-              break;
-      }
-      game.displayMessage(teamJoinMessage);
   });
 
   /* Handle the move message */
