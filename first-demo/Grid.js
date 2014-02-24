@@ -772,7 +772,7 @@ var Grid = Class.extend({
         this.tilesArray = null;
 
         this.loadGround();
-        this.drawGridSquares(width, length, tileSize);
+        this.drawGridSquares(this.gridWidth, this.gridLength, this.tileSize);
 
         this.gridHelper = new GridHelper(this.camera, this.controls);
 

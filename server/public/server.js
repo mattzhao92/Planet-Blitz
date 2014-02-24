@@ -59,7 +59,7 @@ function showRestartDialog(message, score) {
         $(this).dialog("close");
           game.reset();
           sendRestartMsg();
-          loading();
+          restartLoading();
       },
       "NO!!": function() {
         $(this).dialog("close");
