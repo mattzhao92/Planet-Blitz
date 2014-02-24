@@ -762,17 +762,16 @@ var Grid = Class.extend({
     },
 
     reset: function() {
-        for (var team_id = 0; team_id < this.characterList.length; team_id++) {
-            var list = this.characterList[team_id];
-            for (var j = 0; j < list.length; j++) {
-                list[j].reset();
-            }
-        }
+         // create grid tiles
+        this.tiles = new THREE.Object3D();
+        this.tilesArray = null;
 
-        for (var i = 0; i < this.numberSquaresOnXAxis; i++) {
-            for (var j = 0; j < this.numberSquaresOnZAxis; j++) {
-                this.tiles[i][j].reset();
-            }
-        }
+        this.loadGround();
+        this.drawGridSquares(width, length, tileSize);
+
+        this.gridHelper = new GridHelper(this.camera, this.controls);
+
+        // initialize characters
+        this.setupCharacters();
     },
 });

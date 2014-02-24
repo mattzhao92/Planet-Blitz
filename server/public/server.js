@@ -57,7 +57,7 @@ function showRestartDialog(message, score) {
     buttons: {
       "Play again!": function() {
         $(this).dialog("close");
-          connectServer(GameInfo.numOfTeam, startGame);
+          sendRestartMsg();
           loading();
       },
       "NO!!": function() {

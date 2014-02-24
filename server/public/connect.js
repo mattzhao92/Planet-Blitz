@@ -5,6 +5,7 @@ var game;
 var GameInfo = new GameConfig();
 
 function connectServer(type, username, gameStartCallback) {
+  GameInfo.gameStartCallback = gameStartCallback;
   console.log(Stat.kill);
   socket = io.connect();
   GameInfo.numOfTeams = type;
@@ -26,7 +27,7 @@ function connectServer(type, username, gameStartCallback) {
 
   /* Handle the start message */
   socket.on(Message.START, function() {
-      gameStartCallback();
+      GameInfo.gameStartCallback();
       var grid = game.getWorld();
       grid.onGameStart();
 
