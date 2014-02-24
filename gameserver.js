@@ -79,9 +79,10 @@ io.sockets.on('connection', function(socket) {
     // Start the game when full, and create a new one.
     if (curGame.numPlayers == curGame.maxNumPlayers) {
       console.log('start game for room ' + curGame.room);
+      var gameScore = curGame.getScoreJSON();
       //io.sockets.in(curGame.room).emit(Message.Start);
-      socket.broadcast.to(curGame.room).emit(Message.START);
-      socket.emit(Message.START);
+      socket.broadcast.to(curGame.room).emit(Message.START, gameScore);
+      socket.emit(Message.START, gameScore);
       if (type == 2) {
         games.push(new Game(curGameId++, 2));
         twoPlayerGameId = curGameId - 1;
@@ -140,10 +141,11 @@ io.sockets.on('connection', function(socket) {
         });
         message[Hit.kill] = true;
       }
-      // TODO
       game.seq++;
       newState[Message.HIT] = message;
       newState[Message.SEQ] = game.seq;
+      var gameScore = game.getScoreJSON();
+      
       socket.broadcast.to(game.room).emit(Message.HIT, newState);
       socket.emit(Message.HIT, newState);
 
@@ -152,14 +154,12 @@ io.sockets.on('connection', function(socket) {
       if (game.gameState.numLiveTeams == 1) {
         socket.get('username', function(error, username) {
           game.score[username].win++;
-
           gameStatistics = {};
           gameStatistics[Stat.winner] = username
           var scoreStat = game.getScoreJSON();
           gameStatistics[Stat.result] = scoreStat;
           socket.broadcast.to(game.room).emit(Message.FINISH, gameStatistics);
           socket.emit(Message.FINISH, gameStatistics);
-
           // Reset the game state.
           game.restart();
         });

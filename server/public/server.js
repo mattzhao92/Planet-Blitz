@@ -68,29 +68,35 @@ function showRestartDialog(message, score) {
 }
 
 function getUsername(type) {
-  var content = '<p>What name do you want to use?</p><br/><form>Name : <input type="text" id="uname"></form>';
+  var content = '<div class="rain" style="margin:0"><div class="border start">';
+  content += '<form><label for="name" style="margin-left:7">What name do you want to display in the game?</label><input id="uname" name="name" id="quitBtn" type="text" style="margin-left: 25"/>';
+  content += '<input type="button" value="Start" style="margin: 5 23 10 23" id="unameBtn"/><input value="Quit" type="button" id="quitBtn" style="margin: 0 23 0 23"/>';
+  content += '</form></div></div>';
   $("#Input-dialog").html(content).dialog(
   {
     width: 400, 
-    height: 200,
+    // height: 400,
     modal: true,
     resizable: false,
-    buttons: {
-      "Start": function() {
-        var username = $('#uname').val();
-        if (username != '') {
-          $(this).dialog("close");
-          connectServer(type, username, startGame);
-          loading();
-        } else {
-          alert('Name can not be empty!');
-        }
-      },
-      "Quit": function() {
-        $(this).dialog("close");
-      }
+    dialogClass: 'name-dialog'
+  });
+  $(".ui-dialog-titlebar").hide();   
+  $(".ui-widget.name-dialog").css('width', 'auto');
+  $(".ui-widget.name-dialog").css('padding', 0);
+  $("#Input-dialog").css('padding', 0);
+  $("#unameBtn").click(function() {
+    var username = $('#uname').val();
+    if (username != '') {
+      $("#Input-dialog").dialog("close");
+      connectServer(type, username, startGame);
+      loading();
+    } else {
+      alert('Name can not be empty!');
     }
-  });   
+  });
+  $("#quitBtn").click(function() {
+    $("#Input-dialog").dialog("close");
+  });
 }
 
 $(document).ready(function() { 
@@ -118,4 +124,3 @@ $(document).ready(function() {
 
 
 });
-
