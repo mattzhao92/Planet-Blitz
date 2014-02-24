@@ -179,8 +179,24 @@ $(function () {
         createScoreBoard: function() {
             var scoreBoard = new ScoreBoard();
             $("#Stats-output").append(scoreBoard.domElement);
-            scoreBoard.setScoreBoard("hahahahahahahahh 222 ");
+            var exampleData = [{'name' : 'matt', 'score': 2}, {'name' : 'anderson', 'score' : 5}];
             this.scoreBoard = scoreBoard;
+            this.updateScoreBoard(exampleData);
+        },
+
+
+        // scores is expected to be a list of jsonObjects [{name: 'matt', score: 5}, ..]
+        updateScoreBoard: function(listOfScores) {
+            listOfScores.sort(function(a,b){return b.score - a.score});
+            var text = "ScoreBoard \n";
+
+            for (var i = 0; i < listOfScores.length; i++) {
+                console.log("dflasjfldaskjf");
+                var playerScore = listOfScores[i];
+                text += "["+(i+1)+"] Player: "+ playerScore.name +" Score: "+playerScore.score + "\n";
+            }
+
+            this.scoreBoard.setText(text);
         },
 
 

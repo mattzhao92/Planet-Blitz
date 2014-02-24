@@ -8,15 +8,15 @@ var ScoreBoard = function() {
 	container.style.cssText = 'width:150px;height:100px;opacity:0.7;cursor:pointer;padding:0 0 3px 3px;text-align:left;background-color:transparent';
 
 	container.style.position = 'absolute';
-	container.style.right = '53px';
-	container.style.top = '53px';
+	container.style.right = '13px';
+	container.style.top = '13px';
 
 	var gameConsole = document.createElement('div');
 	gameConsole.id = 'scoreConsole';
 
 	var gameTextDisplay = document.createElement('textarea');
 	// should change these attributes to match size of parent / container
-	gameTextDisplay.style.cssText = 'resize:none;width:150px;height:100px;overflow:hidden;border: none;color:white;font-family:Helvetica,Arial,sans-serif;font-size:13px;line-height:20px;background-color:transparent';
+	gameTextDisplay.style.cssText = 'resize:none;width:150px;height:100px;overflow:hidden;border: none;color:white;font-family:Helvetica,Arial,sans-serif;font-size:9px;line-height:20px;background-color:transparent';
 	gameTextDisplay.id = 'scoreTextDisplay';
 
 	gameConsole.appendChild(gameTextDisplay);
@@ -30,7 +30,7 @@ var ScoreBoard = function() {
 	return {
 		domElement: container,
 
-		setScoreBoard: function(text) {
+		setText: function(text) {
 			var box = $(scope.GAME_TEXT_DISPLAY);
 			box.val(box.val() + text + "\n");
 		},
