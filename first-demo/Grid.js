@@ -79,6 +79,11 @@ var Grid = Class.extend({
         this.controls.focusOnPosition(this.getMyTeamCharacters()[0].mesh.position);
     },
 
+    onGameFinish: function() {
+        console.log("Game finish called");
+        this.controls.reset();
+    },
+
     getMyTeamCharacters: function() {
         return this.characterList[GameInfo.myTeamId];
     },
