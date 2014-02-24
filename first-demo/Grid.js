@@ -725,5 +725,20 @@ var Grid = Class.extend({
 
     enableMouseMoveListener: function() {
         this.mouseMoveListenerActive = true;
-    }
+    },
+
+    reset: function() {
+        for (var team_id = 0; team_id < this.characterList.length; team_id++) {
+            var list = this.characterList[team_id];
+            for (var j = 0; j < list.length; j++) {
+                list[j].reset();
+            }
+        }
+
+        for (var i = 0; i < this.numberSquaresOnXAxis; i++) {
+            for (var j = 0; j < this.numberSquaresOnZAxis; j++) {
+                this.tiles[i][j].reset();
+            }
+        }
+    },
 });

@@ -203,6 +203,10 @@ $(function () {
 
         getWorld: function() {
             return this.world;
+        },
+
+        reset: function() {
+            this.world.reset();
         }
 
     };

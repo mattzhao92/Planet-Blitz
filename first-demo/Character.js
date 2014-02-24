@@ -38,6 +38,7 @@ var Character = Class.extend({
 
         // Set the character modelisation object
         this.mesh = new THREE.Object3D();
+        this.originalPosition = this.mesh.position.clone();
         this.position = this.mesh.position;
         this.mesh.owner = this;
 
@@ -137,6 +138,36 @@ var Character = Class.extend({
         this.world.scene.add(this.healthBar);
         this.breakUpdateHere = false;
     },
+
+    reset : function() {
+        this.mesh.position = this.originalPosition;
+        this.isCoolDown = false;
+        this.coolDownCount = 105;
+        this.coolDownLeft = 0;
+        this.coolDownBar.position.set(this.mesh.position.x - this.world.getTileSize()/2 + this.coolDownBarXOffset,
+                                      this.mesh.position.y + this.coolDownBarYOffset,
+                                      this.mesh.position.z + this.coolDownBarZOffset);   
+        this.coolDownBar.scale.set(this.world.getTileSize(), this.world.getTileSize()/this.barAspectRatio, 1.0);    
+ 
+        this.ammoCount = this.maximumAmmoCapacity;
+        this.needsReload = false;
+        this.ammoCountBar.position.set(this.mesh.position.x + this.ammoCountBarXOffset, 
+                                       this.mesh.position.y + this.ammoCountBarYOffset,
+                                       this.mesh.position.z + this.ammoCountBarZOffset); 
+        this.ammoCountBar.scale.set(this.world.getTileSize(), this.world.getTileSize()/this.barAspectRatio, 1.0); 
+
+        this.health = this.maximumHealth;
+        this.healthBar.position.set(this.mesh.position.x + this.healthBarXOffset, 
+                                       this.mesh.position.y + this.healthBarYOffset,
+                                       this.mesh.position.z + this.healthBarZOffset); 
+        this.healthBar.scale.set(this.world.getTileSize(), this.world.getTileSize()/this.barAspectRatio, 1.0);  
+        this.breakUpdateHere = false;
+
+        this.isActive = true;
+        this.hasPendingMove = false;
+        this.highlightedTiles[i] = [];
+    },
+
 
     loadFile: function(filename, onLoad) {
         var scope = this;
