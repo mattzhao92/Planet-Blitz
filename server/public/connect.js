@@ -78,6 +78,7 @@ function connectServer(type, username, gameStartCallback) {
       game.getWorld().syncGameState(state, seq);
       if (data[Hit.kill]) {
         game.getWorld().handleCharacterDead(target);
+        var score = hitData[Stat.result];
       } else{
         target.applyDamage(30);
       }
@@ -89,6 +90,8 @@ function connectServer(type, username, gameStartCallback) {
 
       console.log(data);
       var score = data[Stat.result];
+      var grid = game.getWorld();
+      grid.onGameFinish();
       if (data[Stat.winner] == GameInfo.username) {
         showRestartDialog('You win', score);
       } else {

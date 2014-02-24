@@ -145,6 +145,9 @@ io.sockets.on('connection', function(socket) {
       newState[Message.HIT] = message;
       newState[Message.SEQ] = game.seq;
       var gameScore = game.getScoreJSON();
+      if (isKill) {
+        newState[Stat.result] = gameScore;
+      }
       
       socket.broadcast.to(game.room).emit(Message.HIT, newState);
       socket.emit(Message.HIT, newState);
