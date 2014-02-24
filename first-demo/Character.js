@@ -141,7 +141,7 @@ var Character = Class.extend({
 
     reset : function() {
         if (this.alive == false) 
-            this.world.add.remove(this.mesh);
+            this.world.scene.add(this.mesh);
         this.mesh.position = this.originalPosition;
         this.isCoolDown = false;
         this.coolDownCount = 105;
