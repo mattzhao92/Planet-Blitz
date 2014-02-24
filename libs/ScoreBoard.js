@@ -32,7 +32,7 @@ var ScoreBoard = function() {
 
 		setText: function(text) {
 			var box = $(scope.GAME_TEXT_DISPLAY);
-			box.val(box.val() + text + "\n");
+			box.val(text);
 		},
 	}
 };
