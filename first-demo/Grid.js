@@ -6,7 +6,7 @@ var Grid = Class.extend({
 
         this.gameApp = gameApp;
 
-        this.GROUND_TEXTURE = "images/Supernova.jpg"
+        this.GROUND_TEXTURE = "images/Supernova.jpg";
 
         this.gridWidth = width;
         this.gridLength = length;
@@ -18,7 +18,7 @@ var Grid = Class.extend({
         // information about what's being selected
         this.highlightedTiles = null;
         this.currentMouseOverTile = null;
-        this.currentSelectedUnits = new Array();
+        this.currentSelectedUnits = [];
 
         // listeners and state
         this.mouseDownListenerActive = true;
@@ -139,7 +139,7 @@ var Grid = Class.extend({
                 if (characterSelected) {
                     characterSelected.onSelect();
                 }
-                if (scope.unitCycle == 0) {
+                if (scope.unitCycle === 0) {
                     scope.unitCycle = myTeamCharacters.length - 1;
                 } else {
                     scope.unitCycle -= 1;
@@ -184,7 +184,7 @@ var Grid = Class.extend({
         // The row position.
         this.teamStartPos = [1, 18, 1, 18];
         this.characterMeshes = [];
-        this.characterList = new Array();
+        this.characterList = [];
 
         this.characterFactory = new CharacterFactory();
 
@@ -194,7 +194,7 @@ var Grid = Class.extend({
         var scope = this;
 
         for (var team_id = 0; team_id < 4; team_id++) {
-            this.characterList.push(new Array());
+            this.characterList.push([]);
             this.currentSelectedUnits.push(null);
             for (var i = 0; i < this.numOfCharacters; i++) {
                 var charArgs = {
@@ -347,7 +347,7 @@ var Grid = Class.extend({
         // highlight adjacent squares - collect all tiles from radius
         var tilesToHighlight = this.getTilesInArea(character, characterMovementRange);
 
-        if (character.isCharacterInRoute == false && character.isCoolDown == false) {
+        if (character.isCharacterInRoute === false && character.isCoolDown === false) {
             this.highlightTiles(tilesToHighlight);
         }
     },
@@ -381,9 +381,9 @@ var Grid = Class.extend({
         if (!startTile) return tilesToHighlight;
 
         startTile.isObstacle();
-        var visited = new Array();
-        var nodesInCurrentLevel = new Array();
-        var nodesInNextLevel = new Array();
+        var visited = [];
+        var nodesInCurrentLevel = [];
+        var nodesInNextLevel = [];
         tilesToHighlight.push(startTile);
         nodesInCurrentLevel.push(startTile);
 
@@ -399,9 +399,9 @@ var Grid = Class.extend({
                 }
             }
 
-            if (nodesInCurrentLevel.length == 0) {
+            if (nodesInCurrentLevel.length === 0) {
                 nodesInCurrentLevel = nodesInNextLevel;
-                nodesInNextLevel = new Array();
+                nodesInNextLevel = [];
                 radius = radius - 1;
             }
             visited.push(currentTile);
@@ -419,7 +419,7 @@ var Grid = Class.extend({
         tiles.push(this.getTileAtTilePos(originTileXPos, originTileZPos + 1));
 
         tiles = _.filter(tiles, function(tile) {
-            return (tile != null && !tile.isObstacle() && !tile.isCharacter());
+            return (tile !== null && !tile.isObstacle() && !tile.isCharacter());
         });
         return tiles;
     },
@@ -439,7 +439,7 @@ var Grid = Class.extend({
     },
 
     onMouseMove: function(event) {
-        if (this.mouseMoveListenerActive == false) {
+        if (this.mouseMoveListenerActive === false) {
             return;
         }
 
@@ -511,7 +511,7 @@ var Grid = Class.extend({
         // recursively call intersects
         var intersects = raycaster.intersectObjects(this.characterMeshes, true);
         var intersectsWithTiles = raycaster.intersectObjects(this.tiles.children);
-        var unitIsCurrentlySelected = (this.getCurrentSelectedUnit() != null);
+        var unitIsCurrentlySelected = (this.getCurrentSelectedUnit() !== null);
 
         if (unitIsCurrentlySelected) {
             // fire on click
@@ -555,7 +555,7 @@ var Grid = Class.extend({
                 var deltaY = 0;
                 var deltaZ = coordinate.z - this.getCurrentSelectedUnit().getTileZPos();
 
-                var unitMovedToDifferentSquare = !(deltaX == 0 && deltaZ == 0);
+                var unitMovedToDifferentSquare = !(deltaX === 0 && deltaZ === 0);
 
                 if (unitMovedToDifferentSquare) {
                     this.getCurrentSelectedUnit().setDirection(
@@ -614,12 +614,14 @@ var Grid = Class.extend({
         this.numberSquaresOnZAxis = length / size;
 
         this.tilesArray = new Array(this.numberSquaresOnXAxis);
-        for (var i = 0; i < this.numberSquaresOnXAxis; i++) {
+
+        var i, j;
+        for (i = 0; i < this.numberSquaresOnXAxis; i++) {
             this.tilesArray[i] = new Array(this.numberSquaresOnZAxis);
         }
 
-        for (var i = 0; i < this.numberSquaresOnXAxis; i++) {
-            for (var j = 0; j < this.numberSquaresOnZAxis; j++) {
+        for (i = 0; i < this.numberSquaresOnXAxis; i++) {
+            for (j = 0; j < this.numberSquaresOnZAxis; j++) {
                 var tile = this.tileFactory.createTile(i, j);
 
                 var tileMesh = tile.getTileMesh();
@@ -695,6 +697,8 @@ var Grid = Class.extend({
     },
 
     syncGameState: function(state, seq) {
+        var t, i;
+
         if (this.resetInProgress) return true;
         // Old seq, discard it.
         if (seq < this.seq) {
@@ -702,23 +706,26 @@ var Grid = Class.extend({
         }
         this.seq = seq;
         // This is usd to check ghosts.
-        var liveChars = new Array();
-        var liveStates = new Array();
-        for (var t = 0; t < GameInfo.numOfTeams; t++) {
-            liveStates.push(new Array());
-            for (var i = 0; i < this.numOfCharacters; i++) {
+        var liveChars = [];
+        var liveStates = [];
+        for (t = 0; t < GameInfo.numOfTeams; t++) {
+            liveStates.push([]);
+            for (i = 0; i < this.numOfCharacters; i++) {
                 liveStates[t].push(false);
             }
         }
+
+        var scope = this;
+        var charToCheck;
         // First check the correctness of each position.
-        for (var t = 0; t < state.length; t++) {
-            var teamId = parseInt(state[t][State.team]);
-            var index = parseInt(state[t][State.index]);
-            var x = parseInt(state[t][State.X]);
-            var z = parseInt(state[t][State.Z]);
-            var health = parseInt(state[t][State.health]);
+        _.forEach(state, function(state_time) {
+            var teamId = parseInt(state_time[State.team]);
+            var index = parseInt(state_time[State.index]);
+            var x = parseInt(state_time[State.X]);
+            var z = parseInt(state_time[State.Z]);
+            var health = parseInt(state_time[State.health]);
             // Character to check.
-            var charToCheck = this.getCharacterById(teamId, index);
+            charToCheck = scope.getCharacterById(teamId, index);
             liveStates[teamId][index] = true;
             if (charToCheck.alive) {
                 // Sync the health.
@@ -735,12 +742,12 @@ var Grid = Class.extend({
                     charToCheck.placeAtGridPos(x, z);
                 }
             }
-        }
+        });
 
         var isStateGood = true;
-        for (var t = 0; t < GameInfo.numOfTeams; t++) {
-            for (var i = 0; i < this.numOfCharacters; i++) {
-                var charToCheck = this.getCharacterById(t, i);
+        for (t = 0; t < GameInfo.numOfTeams; t++) {
+            for (i = 0; i < this.numOfCharacters; i++) {
+                charToCheck = this.getCharacterById(t, i);
                 if (!liveStates[t][i] && charToCheck.alive) {
                     console.log("Zombie character!");
                     // Server says dead but alive locally.

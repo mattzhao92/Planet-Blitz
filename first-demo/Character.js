@@ -33,8 +33,8 @@ var Character = Class.extend({
         this.highlightedTiles = [];
 
         this.hasPendingMove = false;
-        this.destX;
-        this.destZ;
+        this.destX = 0;
+        this.destZ = 0;
 
         // Set the character modelisation object
         this.mesh = new THREE.Object3D();
@@ -48,7 +48,7 @@ var Character = Class.extend({
         // Set the current animation step
         this.step = 0;
         this.motionInProcess = false;
-        this.motionQueue = new Array();
+        this.motionQueue = [];
 
         this.addUnitSelector();
         this.isCoolDown = false;
@@ -61,7 +61,7 @@ var Character = Class.extend({
         var canvas = document.createElement('canvas');
         this.canvas2d = canvas.getContext('2d');
         
-        this.coolDownBarTexture = new THREE.Texture(canvas) 
+        this.coolDownBarTexture = new THREE.Texture(canvas);
         this.coolDownBarTexture.needsUpdate = true;
 
         var spriteMaterial = new THREE.SpriteMaterial( { map: this.coolDownBarTexture, useScreenCoordinates: false, alignment: THREE.SpriteAlignment.centerLeft } );
@@ -71,7 +71,7 @@ var Character = Class.extend({
         this.coolDownBarZOffset = 0;
         this.coolDownBarYOffset = 55;
         this.coolDownBar = new THREE.Sprite(spriteMaterial);
-        this.lastRoadMap = new Array();
+        this.lastRoadMap = [];
         this.coolDownCount = 105;
         this.coolDownLeft = 0;
         this.canvas2d.rect(0, 0, 800, 200);
@@ -234,11 +234,9 @@ var Character = Class.extend({
                                                 width/this.barAspectRatio, 1.0);
     },
 
-
     getRadius: function() {
         return this.characterSize;
     },
-
 
     isInViewPort: function (target) {
 
@@ -249,11 +247,6 @@ var Character = Class.extend({
 
         // return this.ammoCount > 1 && !this.isCharacterInRoute;
         return this.ammoCount > 1;
-    },
-
-    getRadius: function() {
-        // TODO: remove this hardcoding
-        return 20;
     },
 
     getHealth: function() {
@@ -337,7 +330,7 @@ var Character = Class.extend({
             return;
         }
         // world.deselectAll();
-        if (GameInfo.myTeamId == null || this.team == GameInfo.myTeamId) {
+        if (GameInfo.myTeamId === null || this.team == GameInfo.myTeamId) {
           this.unitSelectorMesh.material.color.setRGB(1.0, 0, 0);
           this.unitSelectorMesh.visible = true;
           this.world.markCharacterAsSelected(this);
@@ -347,7 +340,7 @@ var Character = Class.extend({
 
     deselect: function() {
         // return to original color
-        if (GameInfo.myTeamId == null || this.team == GameInfo.myTeamId) {
+        if (GameInfo.myTeamId === null || this.team == GameInfo.myTeamId) {
             this.unitSelectorMesh.visible = false;
             this.isActive = false;
         }
@@ -368,7 +361,9 @@ var Character = Class.extend({
     },
 
     enqueueMotion: function() {
-        if (this.isCoolDown == 0) {
+        var i;
+
+        if (this.isCoolDown === 0) {
             var path = this.world.findPath(this.getTileXPos(), this.getTileZPos(), this.getTileXPos() + this.direction.x,
                 this.getTileZPos() + this.direction.z);
             var gx = this.getTileXPos() + this.direction.x;
@@ -378,13 +373,13 @@ var Character = Class.extend({
             this.hasPendingMove = true;
             console.log("Set to " + gx + " and " + gz + " for id " + this.team + " i " + this.id);
             var addNewItem = true;
-            var newMotions = new Array();
-            for (var i = 1; i < path.length; i++) {
+            var newMotions = [];
+            for (i = 1; i < path.length; i++) {
                 // checking if path[i], path[i-1], path[i-2] are on the same line
                 if (i > 1) {
                     if ((path[i][0] == path[i - 2][0] || path[i][1] == path[i - 2][1]) &&
                         (path[i][0] * (path[i - 1][1] - path[i - 2][1]) + path[i - 1][0] * (path[i - 2][1] - path[i][1]) + path[i - 2][0] *
-                            (path[i][1] - path[i - 1][1]) == 0)) {
+                            (path[i][1] - path[i - 1][1]) === 0)) {
                         // if they are on the same, line, expand the last element in the motionQueue
                         var lastMotion = newMotions[newMotions.length - 1];
                         lastMotion.x += (path[i][0] - path[i - 1][0]);
@@ -401,12 +396,14 @@ var Character = Class.extend({
             this.motionQueue.push({
                 'sentinel': 'end'
             });
-            for (var i = newMotions.length - 1; i >= 0; i--) {
-                this.motionQueue.push(newMotions[i]);
+
+            for (var j = newMotions.length - 1; j >= 0; j--) {
+                this.motionQueue.push(newMotions[j]);
             }
+
             this.motionQueue.push({
-                'sentinel': 'start',
-                'highlightTiles': path
+                    'sentinel': 'start',
+                    'highlightTiles': path
             });
 
         } else {
@@ -447,7 +444,7 @@ var Character = Class.extend({
         if (this.isCoolDown) {
             this.coolDownLeft--;
             // update cooldown timer
-            if (this.coolDownLeft == 0) {
+            if (this.coolDownLeft === 0) {
                 this.isCoolDown = false;
                 if (this.world.currentSelectedUnits[this.team] == this)
                     this.world.displayMovementArea(this);
@@ -547,9 +544,9 @@ var Character = Class.extend({
                 this.coolDownLeft = this.coolDownCount;
                 return;
             } else if (direction.sentinel == 'end') {
-                for (var i = 0; i < this.lastRoadMap.length; i++) {
-                    this.lastRoadMap[i].reset();
-                }
+                _.forEach(this.lastRoadMap, function(tile) {
+                    tile.reset();
+                });
                 this.isCharacterInRoute = false;
                 this.hasPendingMove = false;
                 this.enterCoolDown();

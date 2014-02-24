@@ -24,16 +24,16 @@ var GridHelper = Class.extend({
 	getMouseProjectionOnGrid: function() {
 		this.updateMouseVector();
 
-	    // experimental - be able to fire at points outside of space
-	    var vector = new THREE.Vector3(this.mouseVector.x, this.mouseVector.y, 0.5);
-	    this.projector.unprojectVector(vector, this.camera);
-	    var dir = vector.sub(this.camera.position).normalize();
+		// experimental - be able to fire at points outside of space
+		var vector = new THREE.Vector3(this.mouseVector.x, this.mouseVector.y, 0.5);
+		this.projector.unprojectVector(vector, this.camera);
+		var dir = vector.sub(this.camera.position).normalize();
 
-	    // calculate distance to the plane
-	    var distance = -this.camera.position.y / dir.y;
-	    var pos = this.camera.position.clone().add(dir.multiplyScalar(distance));
+		// calculate distance to the plane
+		var distance = -this.camera.position.y / dir.y;
+		var pos = this.camera.position.clone().add(dir.multiplyScalar(distance));
 
-	    return pos;
+		return pos;
 	},
 
 });
