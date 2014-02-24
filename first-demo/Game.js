@@ -23,6 +23,7 @@ $(function () {
 
             this.stats = this.initStats();
             this.createGameConsole();
+            this.createScoreBoard();
 
             this.setupCamera();
             this.setupCameraControls();
@@ -168,12 +169,22 @@ $(function () {
             var gameConsole = new GameConsole();
             $("#Stats-output").append(gameConsole.domElement);
             gameConsole.displayInitialMessage("Welcome to Planet Blitz! Fight to the death!");
+
             // setTimeout(function() {
             //     gameConsole.append("Fight to the death!");
             // }, 3000);
 
             this.gameConsole = gameConsole;
         },
+
+
+        createScoreBoard: function() {
+            var scoreBoard = new ScoreBoard();
+            $("#Stats-output").append(scoreBoard.domElement);
+            scoreBoard.setScoreBoard("hahahahahahahahh 222 ");
+            this.scoreBoard = scoreBoard;
+        },
+
 
         displayMessage: function(msg) {
             this.gameConsole.append(msg);
