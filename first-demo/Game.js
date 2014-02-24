@@ -39,7 +39,7 @@ $(function () {
 
             var scope = this;
             window.addEventListener( 'resize', function() {
-                scope.onWindowResize() }, false );
+                scope.onWindowResize(); }, false );
         }, 
 
         setupCamera: function() {
@@ -99,7 +99,7 @@ $(function () {
         setupCameraControls: function() {
             this.clock = new THREE.Clock();
             var controls = new THREE.MapControls(this.camera, this.scene, document.getElementById("WebGL-output"));
-            controls.panSpeed = .31;
+            controls.panSpeed = 0.31;
 
             // ensure that camera can't rotate too far down or up
             controls.minPolarAngle = 0.3;
@@ -170,10 +170,6 @@ $(function () {
             $("#Stats-output").append(gameConsole.domElement);
             gameConsole.displayInitialMessage("Welcome to Planet Blitz! Fight to the death!");
 
-            // setTimeout(function() {
-            //     gameConsole.append("Fight to the death!");
-            // }, 3000);
-
             this.gameConsole = gameConsole;
         },
 
@@ -190,12 +186,12 @@ $(function () {
         // scores is expected to be a list of jsonObjects [{name: 'matt', score: 5}, ..]
         updateScoreBoard: function(listOfScores) {
             var text = "ScoreBoard \n";
-            var sortedUsernames = new Array();
+            var sortedUsernames = [];
             for (var username in listOfScores) {
                 sortedUsernames.push(username);
             }
             sortedUsernames.sort(function(a, b) {
-                 return listOfScores[b][Stat.kill]; - listOfScores[a][Stat.kill];
+                 return listOfScores[b][Stat.kill] - listOfScores[a][Stat.kill];
             } );
 
             
