@@ -189,15 +189,22 @@ $(function () {
 
         // scores is expected to be a list of jsonObjects [{name: 'matt', score: 5}, ..]
         updateScoreBoard: function(listOfScores) {
-            listOfScores.sort(function(a,b){return b.score - a.score});
             var text = "ScoreBoard \n";
-
-            for (var i = 0; i < listOfScores.length; i++) {
-                console.log("dflasjfldaskjf");
-                var playerScore = listOfScores[i];
-                text += "["+(i+1)+"] Player: "+ playerScore.name +" Score: "+playerScore.score + "\n";
+            var sortedUsernames = new Array();
+            for (var username in listOfScores) {
+                sortedUsernames.push(username);
             }
+            sortedUsernames.sort(function(a, b) {
+                 return listOfScores[b][Stat.kill]; - listOfScores[a][Stat.kill];
+            } );
 
+            
+            for (var i = 0; i < sortedUsernames.length; i++) {
+                console.log("dflasjfldaskjf");
+                var playerScore = listOfScores[sortedUsernames[i]];
+                text += "["+(i+1)+"] Player: "+ sortedUsernames[i] +" Score: "+playerScore.kill + "\n";
+            }
+            alert(text);
             this.scoreBoard.setText(text);
         },
 

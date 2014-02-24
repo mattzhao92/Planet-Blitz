@@ -79,6 +79,7 @@ function connectServer(type, username, gameStartCallback) {
       if (data[Hit.kill]) {
         game.getWorld().handleCharacterDead(target);
         var score = hitData[Stat.result];
+        game.updateScoreBoard(score);
       } else{
         target.applyDamage(30);
       }
