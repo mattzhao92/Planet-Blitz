@@ -200,11 +200,9 @@ $(function () {
 
             
             for (var i = 0; i < sortedUsernames.length; i++) {
-                console.log("dflasjfldaskjf");
                 var playerScore = listOfScores[sortedUsernames[i]];
                 text += "["+(i+1)+"] Player: "+ sortedUsernames[i] +" Score: "+playerScore.kill + "\n";
             }
-            alert(text);
             this.scoreBoard.setText(text);
         },
 

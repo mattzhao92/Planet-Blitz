@@ -45,6 +45,7 @@ var Grid = Class.extend({
 
         this.unitCycle = 0;
         this.hotKeysDisabled = true;
+        this.resetInProgress = false;
     },
 
     onGameStart: function() {
@@ -192,7 +193,7 @@ var Grid = Class.extend({
 
         var scope = this;
 
-        for (var team_id = 0; team_id < GameInfo.numOfTeams; team_id++) {
+        for (var team_id = 0; team_id < 4; team_id++) {
             this.characterList.push(new Array());
             this.currentSelectedUnits.push(null);
             for (var i = 0; i < this.numOfCharacters; i++) {
@@ -694,6 +695,7 @@ var Grid = Class.extend({
     },
 
     syncGameState: function(state, seq) {
+        if (this.resetInProgress) return true;
         // Old seq, discard it.
         if (seq < this.seq) {
             return false;
@@ -767,7 +769,13 @@ var Grid = Class.extend({
     },
 
     reset: function() {
-         // create grid tiles
+        console.log("reset function is called ");
+        for (var i = 0; i < this.characterList.length; i++) {
+            for (var j = 0; j < this.characterList[i].length; j++) {
+                this.characterList[i][j].onDead();
+            }
+        }
+
         this.tiles = new THREE.Object3D();
         this.tilesArray = null;
 
@@ -778,5 +786,6 @@ var Grid = Class.extend({
 
         // initialize characters
         this.setupCharacters();
+        this.resetInProgress = false;
     },
 });
