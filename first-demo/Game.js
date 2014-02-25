@@ -179,27 +179,12 @@ $(function () {
             $("#Stats-output").append(scoreBoard.domElement);
             var exampleData = [{'name' : 'matt', 'score': 2}, {'name' : 'anderson', 'score' : 5}];
             this.scoreBoard = scoreBoard;
-            this.updateScoreBoard(exampleData);
         },
 
 
         // scores is expected to be a list of jsonObjects [{name: 'matt', score: 5}, ..]
         updateScoreBoard: function(listOfScores) {
-            var text = "ScoreBoard \n";
-            var sortedUsernames = [];
-            for (var username in listOfScores) {
-                sortedUsernames.push(username);
-            }
-            sortedUsernames.sort(function(a, b) {
-                 return listOfScores[b][Stat.kill] - listOfScores[a][Stat.kill];
-            } );
-
-            
-            for (var i = 0; i < sortedUsernames.length; i++) {
-                var playerScore = listOfScores[sortedUsernames[i]];
-                text += "["+(i+1)+"] Player: "+ sortedUsernames[i] +" Score: "+playerScore.kill + "\n";
-            }
-            this.scoreBoard.setText(text);
+            this.scoreBoard.setText(listOfScores);
         },
 
 

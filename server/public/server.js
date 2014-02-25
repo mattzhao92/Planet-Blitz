@@ -70,7 +70,7 @@ function showRestartDialog(message, score) {
 
 function getUsername(type) {
   var content = '<div class="rain" style="margin:0"><div class="border start">';
-  content += '<form><label for="name" style="margin-left:7">What name do you want to display in the game?</label><input id="uname" name="name" id="quitBtn" type="text" style="margin-left: 25"/>';
+  content += '<form><label for="name" style="margin-left:7">What name do you want to display in the game?</label><input id="uname" name="name"  maxlength="15" type="text" style="margin-left: 25"/>';
   content += '<input type="button" value="Start" style="margin: 5 23 10 23" id="unameBtn"/><input value="Quit" type="button" id="quitBtn" style="margin: 0 23 0 23"/>';
   content += '</form></div></div>';
   game.getWorld().disableHotKeys();
@@ -123,7 +123,5 @@ $(document).ready(function() {
     loading();
     startGame();
   });
-
-
-
 });
+

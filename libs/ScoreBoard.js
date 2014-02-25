@@ -14,14 +14,22 @@ var ScoreBoard = function() {
 	var gameConsole = document.createElement('div');
 	gameConsole.id = 'scoreConsole';
 
-	var gameTextDisplay = document.createElement('textarea');
+
+
+	// var gameTextDisplay = document.createElement('textarea');
 	// should change these attributes to match size of parent / container
-	gameTextDisplay.style.cssText = 'resize:none;width:150px;height:100px;overflow:hidden;border: none;color:white;font-family:Helvetica,Arial,sans-serif;font-size:9px;line-height:20px;background-color:transparent';
-	gameTextDisplay.id = 'scoreTextDisplay';
+	// gameTextDisplay.style.cssText = 'resize:none;width:150px;height:100px;overflow:hidden;border: none;color:white;font-family:Helvetica,Arial,sans-serif;font-size:9px;line-height:20px;background-color:transparent';
+	// gameTextDisplay.id = 'scoreTextDisplay';
 
-	gameConsole.appendChild(gameTextDisplay);
+	var scoreDisplay = document.createElement('table');
+	scoreDisplay.style.cssText = 'resize:none;width:150px;overflow:hidden;border: none;color:white;font-family:Helvetica,Arial,sans-serif;font-size:9px;line-height:10px;background-color:transparent';
+	scoreDisplay.id = 'scoreTextDisplay';
+	// var tr = scoreDisplay.insertRow();
+	// var td = tr.insertCell();
+	// td.appendChild(document.createTextNode('abc'));
+
+	gameConsole.appendChild(scoreDisplay);
 	container.appendChild(gameConsole);
-
 	this.GAME_TEXT_DISPLAY = '#scoreTextDisplay';
 
 	// slow down jquery animations
@@ -30,9 +38,41 @@ var ScoreBoard = function() {
 	return {
 		domElement: container,
 
-		setText: function(text) {
+		setText: function(listOfScores) {
 			var box = $(scope.GAME_TEXT_DISPLAY);
-			box.val(text);
+			box.empty();
+			var sortedUsernames = new Array();
+            for (var username in listOfScores) {
+                sortedUsernames.push(username);
+            }
+            sortedUsernames.sort(function(a, b) {
+                 return listOfScores[a][Stat.kill] - listOfScores[b][Stat.kill];
+            });
+
+            for (var t = 0; t < sortedUsernames.length; t++) {
+            	var username = sortedUsernames[t];
+            	tr = scoreDisplay.insertRow();
+            	var td = tr.insertCell();
+				td.appendChild(document.createTextNode(listOfScores[username][Stat.win]));
+				td = tr.insertCell();
+				td.appendChild(document.createTextNode(listOfScores[username][Stat.death]));
+				td = tr.insertCell();
+				td.appendChild(document.createTextNode(listOfScores[username][Stat.kill]));
+				td = tr.insertCell();
+				td.appendChild(document.createTextNode(username));
+            }
+            var tr = scoreDisplay.insertRow();
+			var td = tr.insertCell();
+			td.appendChild(document.createTextNode('Win'));
+			td = tr.insertCell();
+			td.appendChild(document.createTextNode('Death'));
+			td = tr.insertCell();
+			td.appendChild(document.createTextNode('Kill'));
+			td = tr.insertCell();
+			td.appendChild(document.createTextNode('Name'));
+            
+
+            
 		},
 	}
 };

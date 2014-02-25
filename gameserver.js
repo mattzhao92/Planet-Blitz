@@ -191,8 +191,9 @@ io.sockets.on('connection', function(socket) {
       if (curGame.numPlayers == curGame.maxNumPlayers) {
         console.log('start game for room ' + curGame.room);
         //io.sockets.in(curGame.room).emit(Message.Start);
-        socket.broadcast.to(curGame.room).emit(Message.START);
-        socket.emit(Message.START);
+        var score = curGame.getScoreJSON();
+        socket.broadcast.to(curGame.room).emit(Message.START, score);
+        socket.emit(Message.START, score);
       } 
     });
   });

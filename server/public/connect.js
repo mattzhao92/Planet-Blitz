@@ -26,9 +26,10 @@ function connectServer(type, username, gameStartCallback) {
   });
 
   /* Handle the start message */
-  socket.on(Message.START, function() {
+  socket.on(Message.START, function(score) {
       GameInfo.gameStartCallback();
       var grid = game.getWorld();
+      game.updateScoreBoard(score);
       grid.onGameStart();
 
   });
