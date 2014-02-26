@@ -368,7 +368,7 @@ var Character = Class.extend({
     },
 
     enqueueMotion: function() {
-        if (this.isCoolDown == 0) {
+        // if (this.isCoolDown == 0) {
             var path = this.world.findPath(this.getTileXPos(), this.getTileZPos(), this.getTileXPos() + this.direction.x,
                 this.getTileZPos() + this.direction.z);
             var gx = this.getTileXPos() + this.direction.x;
@@ -409,9 +409,9 @@ var Character = Class.extend({
                 'highlightTiles': path
             });
 
-        } else {
-          console.log("movr...without cd?");
-        }
+        // } else {
+        //   console.log("movr...without cd?");
+        // }
     },
 
     setCharacterMeshPosX: function(x) {
@@ -561,7 +561,7 @@ var Character = Class.extend({
             }
 
             if (direction.x !== 0 || direction.z !== 0) {
-                // And, only if we're not colliding with an obstacle or a wall ...
+                // And, only if     we're not colliding with an obstacle or a wall ...
                 if (this.collide()) {
                     return false;
                 }

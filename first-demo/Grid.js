@@ -558,16 +558,17 @@ var Grid = Class.extend({
                 var unitMovedToDifferentSquare = !(deltaX == 0 && deltaZ == 0);
 
                 if (unitMovedToDifferentSquare) {
-                    this.getCurrentSelectedUnit().setDirection(
-                        new THREE.Vector3(deltaX, deltaY, deltaZ));
+                    // this.getCurrentSelectedUnit().setDirection(
+                    //     new THREE.Vector3(deltaX, deltaY, deltaZ));
 
                     // Put the network communication here.
-                    sendMoveMsg(this.getCurrentSelectedUnit().id,
-                        deltaX, deltaY, deltaZ);
+                    if (this.getCurrentSelectedUnit().isCoolDown == 0) {
+                        sendMoveMsg(this.getCurrentSelectedUnit().id,
+                            deltaX, deltaY, deltaZ);
 
-                    if (!GameInfo.netMode) {
-                      this.currentSelectedUnits[GameInfo.myTeamId].enqueueMotion(
-                          );
+                        if (!GameInfo.netMode) {
+                            this.currentSelectedUnits[GameInfo.myTeamId].enqueueMotion();
+                        }
                     }
                 }
             }
