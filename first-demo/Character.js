@@ -551,7 +551,10 @@ var Character = Class.extend({
                     this.lastRoadMap[i].reset();
                 }
                 this.isCharacterInRoute = false;
-                this.hasPendingMove = false;
+                if (this.destX == this.xPos && this.destZ == this.zPos) {
+                    this.hasPendingMove = false;
+                }
+                console.log("Set pending move back");
                 this.enterCoolDown();
 
                 return;

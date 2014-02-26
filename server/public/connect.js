@@ -36,6 +36,7 @@ function connectServer(type, username, gameStartCallback) {
 
   /* Handle the move message */
   socket.on(Message.MOVE, function(moveData) {
+      consle.log("Start move receiving");
       var state = moveData[Message.STATE];
       var data = moveData[Message.MOVE];
       console.log(state);
@@ -50,6 +51,7 @@ function connectServer(type, username, gameStartCallback) {
           target.setDirection(new THREE.Vector3(deltaX, 0, deltaZ));
           target.enqueueMotion(null);
       }
+      consle.log("Finish move receiving");
 
   });
 
