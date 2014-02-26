@@ -99,6 +99,14 @@ function getUsername(type) {
   $("#quitBtn").click(function() {
     $("#Input-dialog").dialog("close");
   });
+  $('form').on('submit', function(event){
+    event.preventDefault();
+  });
+  $('#Input-dialog').keypress(function(e) {
+      if (e.keyCode == $.ui.keyCode.ENTER) {
+            $("#unameBtn").click();
+      }
+  });
   
 }
 
