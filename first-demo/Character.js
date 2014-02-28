@@ -15,8 +15,6 @@ var Character = Class.extend({
     init: function(args) {
         'use strict';
 
-        this.CHARACTER_COOLDOWN_TIMER = 3000;
-
         this.world = args.world;
         this.team = args.team;
         this.characterSize = args.characterSize;
@@ -44,11 +42,7 @@ var Character = Class.extend({
 
         // Set the vector of the current motion
         this.direction = new THREE.Vector3(0, 0, 0);
-
-        // Set the current animation step
-        this.step = 0;
-        this.motionInProcess = false;
-        this.motionQueue = new Array();
+        this.motionQueue = [];
 
         this.addUnitSelector();
         this.isCoolDown = false;
@@ -73,31 +67,14 @@ var Character = Class.extend({
         this.addPositionObserver(this.healthBar);
         this.addHealthObserver(this.healthBar);
 
-        var canvas = document.createElement('canvas');
-        this.canvas2d = canvas.getContext('2d');
-        
-        this.coolDownBarTexture = new THREE.Texture(canvas) 
-        this.coolDownBarTexture.needsUpdate = true;
-
-        var spriteMaterial = new THREE.SpriteMaterial( { map: this.coolDownBarTexture, useScreenCoordinates: false, alignment: THREE.SpriteAlignment.centerLeft } );
-        
-        this.coolDownBarXOffset = 0;
-        this.coolDownBarZOffset = 0;
-        this.coolDownBarYOffset = 55;
-        this.coolDownBar = new THREE.Sprite(spriteMaterial);
-        this.lastRoadMap = new Array();
         this.coolDownCount = 105;
         this.coolDownLeft = 0;
-        this.canvas2d.rect(0, 0, 800, 200);
-        this.canvas2d.fillStyle = "green";
-        this.canvas2d.fill();
-        this.coolDownBar.position.set(this.mesh.position.x - this.world.getTileSize()/2 + this.coolDownBarXOffset,
-                                      this.mesh.position.y + this.coolDownBarYOffset,
-                                      this.mesh.position.z + this.coolDownBarZOffset);   
-        this.coolDownBar.scale.set(this.world.getTileSize(), this.world.getTileSize()/this.barAspectRatio, 1.0);    
-        this.world.scene.add(this.coolDownBar);
+        this.cooldownBar = new CooldownBar(this.world.getTileSize(), this.mesh.position, this.barAspectRatio, this.coolDownCount);
+        this.world.scene.add(this.cooldownBar.getSprite());
+        this.addPositionObserver(this.cooldownBar);
 
         this.isCharacterInRoute = false;
+        this.lastRoadMap = new Array();
 
         this.breakUpdateHere = false;
     },
@@ -128,14 +105,7 @@ var Character = Class.extend({
 
         this.world.scene.add(this.mesh);
         this.mesh.position = this.originalPosition;
-        this.isCoolDown = false;
-        this.coolDownCount = 105;
-        this.coolDownLeft = 0;
-        this.coolDownBar.position.set(this.mesh.position.x - this.world.getTileSize()/2 + this.coolDownBarXOffset,
-                                      this.mesh.position.y + this.coolDownBarYOffset,
-                                      this.mesh.position.z + this.coolDownBarZOffset);   
-        this.coolDownBar.scale.set(this.world.getTileSize(), this.world.getTileSize()/this.barAspectRatio, 1.0);    
- 
+
         this.breakUpdateHere = false;
 
         this.isActive = true;
@@ -145,6 +115,12 @@ var Character = Class.extend({
 
         this.healthBar.reset(this.mesh.position);
         this.ammoBar.reset(this.mesh.position);
+        
+        this.isCoolDown = false;
+        this.coolDownLeft = 0;
+        this.coolDownCount = 105;
+
+        this.cooldownBar.reset(this.mesh.position);
     },
 
     loadFile: function(filename, onLoad) {
@@ -220,18 +196,6 @@ var Character = Class.extend({
         }
     },
 
-    enterCoolDown: function() {
-        this.isCoolDown = 1;
-        var scope = this;
-
-        this.coolDownBarTexture.needsUpdate = true;
-        this.coolDownBar.position.set(this.mesh.position.x - this.world.getTileSize()/2 + this.coolDownBarXOffset,this.mesh.position.y + this.coolDownBarYOffset,this.mesh.position.z + this.coolDownBarZOffset);        
-        this.world.scene.add(this.coolDownBar );   
-
-        this.coolDownLeft = this.coolDownCount;
-    },
-
-
     addUnitSelector: function() {
         // setup unit selector mesh
         // have to supply the radius
@@ -270,8 +234,8 @@ var Character = Class.extend({
         this.alive = false;
         this.ammoBar.removeSelf(this.world);
         this.healthBar.removeSelf(this.world);
+        this.cooldownBar.removeSelf(this.world);
         this.world.scene.remove(this.mesh);
-        this.world.scene.remove(this.coolDownBar);
     },
     
     // callback - called when unit is selected. Gets a reference to the game state ("world")
@@ -356,7 +320,6 @@ var Character = Class.extend({
 
     setCharacterMeshPosX: function(x) {
         this.mesh.position.x = x;
-        this.coolDownBar.position.x = x - this.world.getTileSize()/2 + this.coolDownBarXOffset;
 
         var scope = this;
         _.forEach(scope.positionObservers, function(positionObserver) {
@@ -366,8 +329,6 @@ var Character = Class.extend({
 
     setCharacterMeshPosY: function(y) {
         this.mesh.position.y = y;
-        this.coolDownBar.position.y = y + this.coolDownBarYOffset;
-
 
         var scope = this;
         _.forEach(this.positionObservers, function(positionObserver) {
@@ -377,7 +338,6 @@ var Character = Class.extend({
 
     setCharacterMeshPosZ: function(z) {
         this.mesh.position.z = z;
-        this.coolDownBar.position.z = z + this.coolDownBarZOffset;
 
         var scope = this;
         _.forEach(this.positionObservers, function(positionObserver) {
@@ -396,9 +356,8 @@ var Character = Class.extend({
                     this.world.displayMovementArea(this);
             }
         }
-        var width = this.world.getTileSize();
-        this.coolDownBar.scale.set(width * (this.coolDownCount-this.coolDownLeft)/this.coolDownCount, 
-                                            width/this.barAspectRatio, 1.0);
+
+        this.cooldownBar.onCooldownChanged(this.coolDownLeft);
     },
 
     updateInProgressRotation: function(delta) {
@@ -461,6 +420,18 @@ var Character = Class.extend({
         return {'x': this.xPos, 'y':0, 'z':this.zPos};
     },
 
+    beginCooldown: function() {
+        this.isCoolDown = 1;
+
+        this.coolDownLeft = this.coolDownCount;
+        // this.cooldownBar.beginCooldown();
+
+    },
+
+    resetCooldown: function() {
+        this.coolDownLeft = this.coolDownCount;
+    },
+
     update: function(delta) {
 
         this.breakUpdateHere = false;
@@ -487,7 +458,7 @@ var Character = Class.extend({
                         this.lastRoadMap.push(roadTile);
                     }
                 }
-                this.coolDownLeft = this.coolDownCount;
+                this.resetCooldown();
                 return;
             } else if (direction.sentinel == 'end') {
                 for (var i = 0; i < this.lastRoadMap.length; i++) {
@@ -498,7 +469,7 @@ var Character = Class.extend({
                     this.hasPendingMove = false;
                 }
                 console.log("Set pending move back");
-                this.enterCoolDown();
+                this.beginCooldown();
 
                 return;
             }

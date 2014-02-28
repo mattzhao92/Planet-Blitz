@@ -32,7 +32,6 @@ var AmmoBar = Class.extend({
 			position.y + this.ammoCountBarYOffset,
 			position.z + this.ammoCountBarZOffset);
 
-		// this.ammoCountBar.position.set(50, 50, 50);
 		this.ammoCountBar.scale.set(this.tileSize, this.tileSize / this.barAspectRatio, 1.0);
 	},
 
