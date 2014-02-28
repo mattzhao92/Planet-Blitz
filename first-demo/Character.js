@@ -64,6 +64,8 @@ var Character = Class.extend({
         this.ammoBar = new AmmoBar(this.world.getTileSize(), this.mesh.position, this.barAspectRatio);
         this.world.scene.add(this.ammoBar.getSprite());
 
+        this.addPositionObserver(this.ammoBar);
+
         var canvas = document.createElement('canvas');
         this.canvas2d = canvas.getContext('2d');
         
@@ -115,6 +117,10 @@ var Character = Class.extend({
         this.healthBar.scale.set(this.world.getTileSize(), this.world.getTileSize()/this.barAspectRatio, 1.0);   
         this.world.scene.add(this.healthBar);
         this.breakUpdateHere = false;
+    },
+
+    addPositionObserver: function(positionObserver) {
+        this.positionObservers.push(positionObserver);
     },
 
     reset : function() {
@@ -361,21 +367,38 @@ var Character = Class.extend({
     setCharacterMeshPosX: function(x) {
         this.mesh.position.x = x;
         this.coolDownBar.position.x = x - this.world.getTileSize()/2 + this.coolDownBarXOffset;
-        this.ammoBar.onUnitPositionChanged(this.mesh.position);
+
+        var scope = this;
+        _.forEach(scope.positionObservers, function(positionObserver) {
+            positionObserver.onUnitPositionChanged(scope.mesh.position);
+        });
+
         this.healthBar.position.x    = x + this.healthBarXOffset;
     },
 
     setCharacterMeshPosY: function(y) {
         this.mesh.position.y = y;
         this.coolDownBar.position.y = y + this.coolDownBarYOffset;
-        this.ammoBar.onUnitPositionChanged(this.mesh.position);
+
+
+        var scope = this;
+        _.forEach(this.positionObservers, function(positionObserver) {
+            positionObserver.onUnitPositionChanged(scope.mesh.position);
+        });
+
         this.healthBar.position.y    = y + this.healthBarYOffset;
     },
 
     setCharacterMeshPosZ: function(z) {
         this.mesh.position.z = z;
         this.coolDownBar.position.z = z + this.coolDownBarZOffset;
-        this.ammoBar.onUnitPositionChanged(this.mesh.position);
+
+
+        var scope = this;
+        _.forEach(this.positionObservers, function(positionObserver) {
+            positionObserver.onUnitPositionChanged(scope.mesh.position);
+        });
+
         this.healthBar.position.z    = z + this.healthBarZOffset;
     },
 

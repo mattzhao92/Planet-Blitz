@@ -84,7 +84,6 @@ var AmmoBar = Class.extend({
 	},
 
 	updateWeaponReload: function(delta) {
-		if (this.breakUpdateHere) return;
 		if (this.needsReload) {
 			this.setAmmoCount(this.ammoCount + this.ammoReplenishRate);
 		}
