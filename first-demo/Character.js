@@ -56,15 +56,18 @@ var Character = Class.extend({
         this.loader = new THREE.JSONLoader();
         this.loadFile("blendermodels/spheresoldierrolling.js");
 
-        this.health = 100;
+        this.maximumHealth = 100;
 
         this.barAspectRatio = 10;
 
         this.positionObservers = [];
         this.ammoBar = new AmmoBar(this.world.getTileSize(), this.mesh.position, this.barAspectRatio);
         this.world.scene.add(this.ammoBar.getSprite());
-
         this.addPositionObserver(this.ammoBar);
+
+        this.healthBar = new HealthBar(this.world.getTileSize(), this.mesh.position, this.barAspectRatio, this.maximumHealth);
+        this.world.scene.add(this.healthBar.getSprite());
+        this.addPositionObserver(this.healthBar);
 
         var canvas = document.createElement('canvas');
         this.canvas2d = canvas.getContext('2d');
@@ -92,33 +95,9 @@ var Character = Class.extend({
 
         this.isCharacterInRoute = false;
 
-        var canvas3 = document.createElement('canvas');
-        this.canvas2d3 = canvas3.getContext('2d');
-        
-        this.healthBarTexture = new THREE.Texture(canvas3);
-        this.healthBarTexture.needsUpdate = true;
-
-        var healthBarMaterial = new THREE.SpriteMaterial( { map: this.healthBarTexture, useScreenCoordinates: false, alignment: THREE.SpriteAlignment.centerLeft } );
-        
-        this.healthBarXOffset = -1 * this.world.getTileSize()/2;
-        this.healthBarZOffset = 0;
-        this.healthBarYOffset = 65;
-        this.healthBar = new THREE.Sprite(healthBarMaterial);
-
-        this.maximumHealth = this.getHealth();
-        this.health = this.maximumHealth;
-
-        this.canvas2d3.rect(0, 0, 600, 150);
-        this.canvas2d3.fillStyle = "red";
-        this.canvas2d3.fill(); 
-        this.healthBar.position.set(this.mesh.position.x + this.healthBarXOffset, 
-                                       this.mesh.position.y + this.healthBarYOffset,
-                                       this.mesh.position.z + this.healthBarZOffset); 
-        this.healthBar.scale.set(this.world.getTileSize(), this.world.getTileSize()/this.barAspectRatio, 1.0);   
-        this.world.scene.add(this.healthBar);
         this.breakUpdateHere = false;
     },
-    
+
     shoot: function(to) {
         var from = this.mesh.position.clone();
         from.y = Constants.BULLET_LEVEL;
@@ -149,12 +128,6 @@ var Character = Class.extend({
                                       this.mesh.position.z + this.coolDownBarZOffset);   
         this.coolDownBar.scale.set(this.world.getTileSize(), this.world.getTileSize()/this.barAspectRatio, 1.0);    
  
-
-        this.health = this.maximumHealth;
-        this.healthBar.position.set(this.mesh.position.x + this.healthBarXOffset, 
-                                       this.mesh.position.y + this.healthBarYOffset,
-                                       this.mesh.position.z + this.healthBarZOffset); 
-        this.healthBar.scale.set(this.world.getTileSize(), this.world.getTileSize()/this.barAspectRatio, 1.0);  
         this.breakUpdateHere = false;
 
         this.isActive = true;
@@ -162,10 +135,9 @@ var Character = Class.extend({
         this.highlightedTiles = [];
         this.motionQueue.length = 0;
 
-        this.ammoBar.reset();
-        this.ammoBar.onUnitPositionChanged(this.mesh.position);
+        this.healthBar.reset(this.mesh.position);
+        this.ammoBar.reset(this.mesh.position);
     },
-
 
     loadFile: function(filename, onLoad) {
         var scope = this;
@@ -204,22 +176,9 @@ var Character = Class.extend({
         this.id = id;
     },
 
-
-    setHealth: function(health) {
-        if (health <= this.maximumHealth) {
-            this.health = health;
-        } 
-
-        var width = this.world.getTileSize();
-        this.healthBar.scale.set(width * (1.0 * this.health)/this.maximumHealth, 
-                                                width/this.barAspectRatio, 1.0);
-    },
-
-
     getRadius: function() {
         return this.characterSize;
     },
-
 
     isInViewPort: function (target) {
 
@@ -230,14 +189,18 @@ var Character = Class.extend({
         return 20;
     },
 
+    setHealth: function(health) {
+        this.healthBar.setHealth(health);
+    },
+
     getHealth: function() {
-        return this.health;
+        return this.healthBar.getHealth();
     },
 
     applyDamage: function(damage) {
-
-        this.setHealth(this.health - damage);
-        if (this.health < 0) {
+        
+        this.healthBar.setHealth(this.healthBar.getHealth() - damage);
+        if (this.getHealth() < 0) {
             this.world.handleCharacterDead(this);
         }
     },
@@ -288,13 +251,12 @@ var Character = Class.extend({
         return 5;
     },
 
-
     onDead: function() {
         this.alive = false;
         this.ammoBar.removeSelf(this.world);
+        this.healthBar.removeSelf(this.world);
         this.world.scene.remove(this.mesh);
         this.world.scene.remove(this.coolDownBar);
-        this.world.scene.remove(this.healthBar);
     },
     
     // callback - called when unit is selected. Gets a reference to the game state ("world")
@@ -385,8 +347,6 @@ var Character = Class.extend({
         _.forEach(scope.positionObservers, function(positionObserver) {
             positionObserver.onUnitPositionChanged(scope.mesh.position);
         });
-
-        this.healthBar.position.x    = x + this.healthBarXOffset;
     },
 
     setCharacterMeshPosY: function(y) {
@@ -398,21 +358,16 @@ var Character = Class.extend({
         _.forEach(this.positionObservers, function(positionObserver) {
             positionObserver.onUnitPositionChanged(scope.mesh.position);
         });
-
-        this.healthBar.position.y    = y + this.healthBarYOffset;
     },
 
     setCharacterMeshPosZ: function(z) {
         this.mesh.position.z = z;
         this.coolDownBar.position.z = z + this.coolDownBarZOffset;
 
-
         var scope = this;
         _.forEach(this.positionObservers, function(positionObserver) {
             positionObserver.onUnitPositionChanged(scope.mesh.position);
         });
-
-        this.healthBar.position.z    = z + this.healthBarZOffset;
     },
 
     updateMovementCoolDown: function(delta) {

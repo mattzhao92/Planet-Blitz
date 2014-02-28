@@ -1,6 +1,6 @@
 var AmmoBar = Class.extend({
 
-	init: function(tileSize, initialPosition, barAspectRatio) {
+	init: function(tileSize, position, barAspectRatio) {
 		this.tileSize = tileSize;
 		this.barAspectRatio = barAspectRatio;
 
@@ -28,9 +28,9 @@ var AmmoBar = Class.extend({
 		this.canvas2d.rect(0, 0, 600, 150);
 		this.canvas2d.fillStyle = "blue";
 		this.canvas2d.fill();
-		this.ammoCountBar.position.set(initialPosition.x + this.ammoCountBarXOffset,
-			initialPosition.y + this.ammoCountBarYOffset,
-			initialPosition.z + this.ammoCountBarZOffset);
+		this.ammoCountBar.position.set(position.x + this.ammoCountBarXOffset,
+			position.y + this.ammoCountBarYOffset,
+			position.z + this.ammoCountBarZOffset);
 
 		// this.ammoCountBar.position.set(50, 50, 50);
 		this.ammoCountBar.scale.set(this.tileSize, this.tileSize / this.barAspectRatio, 1.0);
@@ -47,10 +47,11 @@ var AmmoBar = Class.extend({
 		return this.ammoCountBar;
 	},
 
-	reset: function() {
+	reset: function(position) {
 		this.ammoCount = this.maximumAmmoCapacity;
 		this.needsReload = false;
 		this.ammoCountBar.scale.set(this.tileSize, this.tileSize / this.barAspectRatio, 1.0);
+		this.onUnitPositionChanged(position);
 	},
 
 	setAmmoCount: function(number) {
