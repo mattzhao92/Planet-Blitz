@@ -118,6 +118,19 @@ var Character = Class.extend({
         this.world.scene.add(this.healthBar);
         this.breakUpdateHere = false;
     },
+    
+    shoot: function(to) {
+        var from = this.mesh.position.clone();
+        from.y = Constants.BULLET_LEVEL;
+        to.y = Constants.BULLET_LEVEL;
+
+        // shoot a bullet because you can
+        if (this.ammoBar.canShoot()) {
+            sendShootMsg(this.id, from, to);
+            this.world.shootBullet(this, from, to);
+            this.ammoBar.onShoot(from, to);
+        }
+    },
 
     addPositionObserver: function(positionObserver) {
         this.positionObservers.push(positionObserver);

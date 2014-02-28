@@ -483,19 +483,8 @@ var Grid = Class.extend({
     },
 
     handleShootEvent: function() {
-        var from = this.getCurrentSelectedUnit().mesh.position.clone();
         var to = this.gridHelper.getMouseProjectionOnGrid();
-
-        // keep bullet level
-        to.y = 15;
-        from.y = 15;
-
-        // shoot a bullet because you can
-        if (this.getCurrentSelectedUnit().ammoBar.canShoot()) {
-            sendShootMsg(this.getCurrentSelectedUnit().id, from, to);
-            this.shootBullet(this.getCurrentSelectedUnit(), from, to);
-            this.getCurrentSelectedUnit().ammoBar.onShoot(from, to);
-        }
+        this.getCurrentSelectedUnit().shoot(to);
     },
 
     getCurrentSelectedUnit: function() {
