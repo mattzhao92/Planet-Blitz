@@ -58,6 +58,12 @@ var Character = Class.extend({
 
         this.health = 100;
 
+        this.barAspectRatio = 10;
+
+        this.positionObservers = [];
+        this.ammoBar = new AmmoBar(this.world.getTileSize(), this.mesh.position, this.barAspectRatio);
+        this.world.scene.add(this.ammoBar.getSprite());
+
         var canvas = document.createElement('canvas');
         this.canvas2d = canvas.getContext('2d');
         
@@ -66,7 +72,6 @@ var Character = Class.extend({
 
         var spriteMaterial = new THREE.SpriteMaterial( { map: this.coolDownBarTexture, useScreenCoordinates: false, alignment: THREE.SpriteAlignment.centerLeft } );
         
-        this.barAspectRatio = 10;
         this.coolDownBarXOffset = 0;
         this.coolDownBarZOffset = 0;
         this.coolDownBarYOffset = 55;
@@ -82,33 +87,6 @@ var Character = Class.extend({
                                       this.mesh.position.z + this.coolDownBarZOffset);   
         this.coolDownBar.scale.set(this.world.getTileSize(), this.world.getTileSize()/this.barAspectRatio, 1.0);    
         this.world.scene.add(this.coolDownBar);
-
-        var canvas2 = document.createElement('canvas');
-        this.canvas2d2 = canvas2.getContext('2d');
-        this.ammoCountBarTexture = new THREE.Texture(canvas2);
-        this.ammoCountBarTexture.needsUpdate = true;
-
-        var ammoCountBarMaterial = new THREE.SpriteMaterial( { map: this.ammoCountBarTexture, useScreenCoordinates: false, alignment: THREE.SpriteAlignment.centerLeft } );
-        
-        this.ammoCountBarXOffset = -1 * this.world.getTileSize()/2;
-        this.ammoCountBarZOffset = 0;
-        this.ammoCountBarYOffset = 60;
-        this.ammoCountBar = new THREE.Sprite(ammoCountBarMaterial);
-        //this.ammoCountBar.scale.set(this.world.getTileSize(), this.world.getTileSize()/this.barAspectRatio, 1.0);
-        this.maximumAmmoCapacity = 3;
-        this.ammoCount = this.maximumAmmoCapacity;
-        this.ammoReplenishRate = 0.01;
-        this.needsReload = false;
-
-        this.canvas2d2.rect(0, 0, 600, 150);
-        this.canvas2d2.fillStyle = "blue";
-        this.canvas2d2.fill(); 
-        this.ammoCountBar.position.set(this.mesh.position.x + this.ammoCountBarXOffset, 
-                                       this.mesh.position.y + this.ammoCountBarYOffset,
-                                       this.mesh.position.z + this.ammoCountBarZOffset); 
-        this.ammoCountBar.scale.set(this.world.getTileSize(), this.world.getTileSize()/this.barAspectRatio, 1.0);     
-        this.world.scene.add(this.ammoCountBar );
-
 
         this.isCharacterInRoute = false;
 
@@ -141,7 +119,7 @@ var Character = Class.extend({
 
     reset : function() {
         this.direction = new THREE.Vector3(0, 0, 0);
-        //if (this.alive == false) 
+
         this.world.scene.add(this.mesh);
         this.mesh.position = this.originalPosition;
         this.isCoolDown = false;
@@ -152,12 +130,6 @@ var Character = Class.extend({
                                       this.mesh.position.z + this.coolDownBarZOffset);   
         this.coolDownBar.scale.set(this.world.getTileSize(), this.world.getTileSize()/this.barAspectRatio, 1.0);    
  
-        this.ammoCount = this.maximumAmmoCapacity;
-        this.needsReload = false;
-        this.ammoCountBar.position.set(this.mesh.position.x + this.ammoCountBarXOffset, 
-                                       this.mesh.position.y + this.ammoCountBarYOffset,
-                                       this.mesh.position.z + this.ammoCountBarZOffset); 
-        this.ammoCountBar.scale.set(this.world.getTileSize(), this.world.getTileSize()/this.barAspectRatio, 1.0); 
 
         this.health = this.maximumHealth;
         this.healthBar.position.set(this.mesh.position.x + this.healthBarXOffset, 
@@ -171,7 +143,8 @@ var Character = Class.extend({
         this.highlightedTiles = [];
         this.motionQueue.length = 0;
 
-
+        this.ammoBar.reset();
+        this.ammoBar.onUnitPositionChanged(this.mesh.position);
     },
 
 
@@ -212,17 +185,6 @@ var Character = Class.extend({
         this.id = id;
     },
 
-    setAmmoCount: function(number) {
-        if (number <= this.maximumAmmoCapacity) {
-            this.ammoCount = number;
-        }
-        if (number == this.maximumAmmoCapacity) {
-            this.needsReload = false;
-        }
-        var width = this.world.getTileSize();
-        this.ammoCountBar.scale.set(width * (1.0 * this.ammoCount)/this.maximumAmmoCapacity, 
-                                                width/this.barAspectRatio, 1.0);
-    },
 
     setHealth: function(health) {
         if (health <= this.maximumHealth) {
@@ -242,13 +204,6 @@ var Character = Class.extend({
 
     isInViewPort: function (target) {
 
-    },
-
-    canShoot: function() {
-
-
-        // return this.ammoCount > 1 && !this.isCharacterInRoute;
-        return this.ammoCount > 1;
     },
 
     getRadius: function() {
@@ -317,17 +272,10 @@ var Character = Class.extend({
 
     onDead: function() {
         this.alive = false;
+        this.ammoBar.removeSelf(this.world);
         this.world.scene.remove(this.mesh);
         this.world.scene.remove(this.coolDownBar);
-        this.world.scene.remove(this.ammoCountBar);
         this.world.scene.remove(this.healthBar);
-    },
-
-    onShoot: function(from, to) {
-        if (this.ammoCount > 1) {
-            this.setAmmoCount(this.ammoCount - 1);
-        }
-        this.needsReload = true;
     },
     
     // callback - called when unit is selected. Gets a reference to the game state ("world")
@@ -408,38 +356,27 @@ var Character = Class.extend({
                 'sentinel': 'start',
                 'highlightTiles': path
             });
-
-        // } else {
-        //   console.log("movr...without cd?");
-        // }
     },
 
     setCharacterMeshPosX: function(x) {
         this.mesh.position.x = x;
         this.coolDownBar.position.x = x - this.world.getTileSize()/2 + this.coolDownBarXOffset;
-        this.ammoCountBar.position.x = x + this.ammoCountBarXOffset;
+        this.ammoBar.onUnitPositionChanged(this.mesh.position);
         this.healthBar.position.x    = x + this.healthBarXOffset;
     },
 
     setCharacterMeshPosY: function(y) {
         this.mesh.position.y = y;
         this.coolDownBar.position.y = y + this.coolDownBarYOffset;
-        this.ammoCountBar.position.y = y + this.ammoCountBarYOffset;
+        this.ammoBar.onUnitPositionChanged(this.mesh.position);
         this.healthBar.position.y    = y + this.healthBarYOffset;
     },
 
     setCharacterMeshPosZ: function(z) {
         this.mesh.position.z = z;
         this.coolDownBar.position.z = z + this.coolDownBarZOffset;
-        this.ammoCountBar.position.z = z + this.ammoCountBarZOffset;
+        this.ammoBar.onUnitPositionChanged(this.mesh.position);
         this.healthBar.position.z    = z + this.healthBarZOffset;
-    },
-
-    updateWeaponReload : function(delta) {
-        if (this.breakUpdateHere) return;
-        if (this.needsReload) {
-            this.setAmmoCount(this.ammoCount + this.ammoReplenishRate);
-        }
     },
 
     updateMovementCoolDown: function(delta) {
@@ -522,7 +459,7 @@ var Character = Class.extend({
 
         this.breakUpdateHere = false;
 
-        this.updateWeaponReload(delta);
+        this.ammoBar.updateWeaponReload(delta);
         this.updateMovementCoolDown(delta); 
         this.updateInProgressRotation(delta);
         this.updateInProgressLinearMotion(delta);

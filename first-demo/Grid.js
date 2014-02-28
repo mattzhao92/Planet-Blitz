@@ -491,10 +491,10 @@ var Grid = Class.extend({
         from.y = 15;
 
         // shoot a bullet because you can
-        if (this.getCurrentSelectedUnit().canShoot()) {
+        if (this.getCurrentSelectedUnit().ammoBar.canShoot()) {
             sendShootMsg(this.getCurrentSelectedUnit().id, from, to);
             this.shootBullet(this.getCurrentSelectedUnit(), from, to);
-            this.getCurrentSelectedUnit().onShoot(from, to);
+            this.getCurrentSelectedUnit().ammoBar.onShoot(from, to);
         }
     },
 
