@@ -21,7 +21,6 @@ var HealthBar = Class.extend({
 		this.healthBar = new THREE.Sprite(healthBarMaterial);
 
 		this.maximumHealth = maxHealth;
-		this.health = this.maximumHealth;
 
 		this.canvas2d3.rect(0, 0, 600, 150);
 		this.canvas2d3.fillStyle = "red";
@@ -36,19 +35,10 @@ var HealthBar = Class.extend({
 		return this.healthBar;
 	},
 
-	setHealth: function(health) {
-		if (health <= this.maximumHealth) {
-			this.health = health;
-		}
-
+	onUnitHealthChanged: function(health) {
 		var width = this.tileSize;
-		this.health = health;
-		this.healthBar.scale.set(width * (1.0 * this.health) / this.maximumHealth,
+		this.healthBar.scale.set(width * (1.0 * health) / this.maximumHealth,
 			width / this.barAspectRatio, 1.0);
-	},
-
-	getHealth: function(health) {
-		return this.health;
 	},
 
 	onUnitPositionChanged: function(position) {
@@ -58,7 +48,6 @@ var HealthBar = Class.extend({
 	},
 
 	reset: function(position) {
-		this.health = this.maximumHealth;
 		this.healthBar.position.set(position.x + this.healthBarXOffset,
 			position.y + this.healthBarYOffset,
 			position.z + this.healthBarZOffset);

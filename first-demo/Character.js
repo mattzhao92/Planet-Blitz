@@ -57,10 +57,13 @@ var Character = Class.extend({
         this.loadFile("blendermodels/spheresoldierrolling.js");
 
         this.maximumHealth = 100;
+        this.health = this.maximumHealth;
 
         this.barAspectRatio = 10;
 
         this.positionObservers = [];
+        this.healthObservers = [];
+
         this.ammoBar = new AmmoBar(this.world.getTileSize(), this.mesh.position, this.barAspectRatio);
         this.world.scene.add(this.ammoBar.getSprite());
         this.addPositionObserver(this.ammoBar);
@@ -68,6 +71,7 @@ var Character = Class.extend({
         this.healthBar = new HealthBar(this.world.getTileSize(), this.mesh.position, this.barAspectRatio, this.maximumHealth);
         this.world.scene.add(this.healthBar.getSprite());
         this.addPositionObserver(this.healthBar);
+        this.addHealthObserver(this.healthBar);
 
         var canvas = document.createElement('canvas');
         this.canvas2d = canvas.getContext('2d');
@@ -113,6 +117,10 @@ var Character = Class.extend({
 
     addPositionObserver: function(positionObserver) {
         this.positionObservers.push(positionObserver);
+    },
+
+    addHealthObserver: function(healthObserver) {
+        this.healthObservers.push(healthObserver);
     },
 
     reset : function() {
@@ -190,16 +198,23 @@ var Character = Class.extend({
     },
 
     setHealth: function(health) {
-        this.healthBar.setHealth(health);
+        if (health <= this.maximumHealth) {
+            this.health = health;
+        }
+
+        var scope = this;
+        _.forEach(this.healthObservers, function(healthObserver) {
+            healthObserver.onUnitHealthChanged(scope.health);
+        });
     },
 
     getHealth: function() {
-        return this.healthBar.getHealth();
+        return this.health;
     },
 
     applyDamage: function(damage) {
-        
-        this.healthBar.setHealth(this.healthBar.getHealth() - damage);
+        this.setHealth(this.getHealth() - damage);
+
         if (this.getHealth() < 0) {
             this.world.handleCharacterDead(this);
         }
