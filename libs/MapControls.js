@@ -19,7 +19,7 @@ THREE.MapControls = function ( object, scene, domElement ) {
 
     this.enabled = true;
 
-    this.center = new THREE.Vector3();
+    this.target = new THREE.Vector3();
 
     this.userZoom = true;
     this.userZoomSpeed = 1.0;
@@ -38,9 +38,6 @@ THREE.MapControls = function ( object, scene, domElement ) {
 
     this.minDistance = 0;
     this.maxDistance = Infinity;
-
-    // arrow key mappings
-    // this.keys = { LEFT: 37, UP: 38, RIGHT: 39, DOWN: 40 };
 
     // WASD mappings
     this.keys = {LEFT: 65, UP: 87, RIGHT: 68, DOWN: 83};
@@ -99,11 +96,11 @@ THREE.MapControls = function ( object, scene, domElement ) {
     this.mouseVector = new THREE.Vector2(0, 0);
 
     // used for when scrolling with mouse
-    this.INITIAL_CAMERA_VELOCITY = 2.3;
-    this.MAX_CAMERA_VELOCITY = 7.5;
+    this.INITIAL_CAMERA_VELOCITY = 6.5;
+    this.MAX_CAMERA_VELOCITY = 12;
 
-    this.MAP_SCROLL_ACCELERATION = 13;
-    this.DECELERATION = 10;
+    this.MAP_SCROLL_ACCELERATION = 18;
+    this.DECELERATION = 15;
 
     this.enableTraditionalMouseDrag = false;
 
@@ -118,6 +115,15 @@ THREE.MapControls = function ( object, scene, domElement ) {
     this.mousePosition = {x: ARBITRARY_MOUSE_POS, y: ARBITRARY_MOUSE_POS};
 
     this.CURSOR_IMAGE_PATH = "images/cursor.png";
+
+    this.focusOnPosition = function(newPosition) {
+        // figure out offset of camera from target
+
+        // target vs camera.position
+        var vectorOffset = this.object.position.clone().sub(this.target);
+        this.target = newPosition.clone();
+        this.object.position = this.target.clone().add(vectorOffset);
+    },
 
     this.handleResize = function () {
         if ( this.domElement === document ) {
@@ -277,7 +283,6 @@ THREE.MapControls = function ( object, scene, domElement ) {
         }
 
         scale /= zoomScale;
-
     };
 
     this.zoomOut = function ( zoomScale ) {
@@ -289,7 +294,6 @@ THREE.MapControls = function ( object, scene, domElement ) {
         }
 
         scale *= zoomScale;
-
     };
 
     this.pan = function () {
@@ -337,7 +341,7 @@ THREE.MapControls = function ( object, scene, domElement ) {
             // }
 
             this.object.position.add( distance );
-            this.center.add( distance );
+            this.target.add( distance );
 
             _panStart.add(mouseChange.subVectors(_panEnd, _panStart).multiplyScalar(_this.dynamicDampingFactor));
 
@@ -378,21 +382,21 @@ THREE.MapControls = function ( object, scene, domElement ) {
     this.addZCameraScrollComponent = function(delta) {
         // add the secondary "y" component (up / down motion)
         if (scope.mouseVector.y < 0) {
-            scope.velocityZ = Math.min(scope.velocityZ, scope.INITIAL_CAMERA_VELOCITY * scope.mouseVector.y);
+            scope.velocityZ = Math.min(scope.velocityZ, 0.8 * scope.INITIAL_CAMERA_VELOCITY * scope.mouseVector.y);
             scope.velocityZ += scope.MAP_SCROLL_ACCELERATION * delta * scope.mouseVector.y;
         } else {
-            scope.velocityZ = Math.max(scope.velocityZ, scope.INITIAL_CAMERA_VELOCITY * scope.mouseVector.y);
+            scope.velocityZ = Math.max(scope.velocityZ, 0.8 * scope.INITIAL_CAMERA_VELOCITY * scope.mouseVector.y);
             scope.velocityZ += scope.MAP_SCROLL_ACCELERATION * delta * scope.mouseVector.y;
         }
     };
 
     this.addXCameraScrollComponent = function(delta) {
         if (scope.mouseVector.x < 0) {
-            scope.velocityX = Math.min(scope.velocityX, scope.INITIAL_CAMERA_VELOCITY * scope.mouseVector.x);
+            scope.velocityX = Math.min(scope.velocityX, 0.8 * scope.INITIAL_CAMERA_VELOCITY * scope.mouseVector.x);
             scope.velocityX -= scope.MAP_SCROLL_ACCELERATION * delta;
 
         } else {
-            scope.velocityX = Math.max(scope.velocityX, scope.INITIAL_CAMERA_VELOCITY * scope.mouseVector.x);
+            scope.velocityX = Math.max(scope.velocityX, 0.8 * scope.INITIAL_CAMERA_VELOCITY * scope.mouseVector.x);
             scope.velocityX += scope.MAP_SCROLL_ACCELERATION * delta * scope.mouseVector.x;
         }
     }
@@ -445,34 +449,28 @@ THREE.MapControls = function ( object, scene, domElement ) {
             scope.scrollCameraDown(delta);
         }
 
-        // enforce velocity restrictions
-        if (scope.velocityX > 0) {
-            scope.velocityX = Math.min(scope.velocityX, this.MAX_CAMERA_VELOCITY);
-        } else {
-            scope.velocityX = Math.max(scope.velocityX, -this.MAX_CAMERA_VELOCITY);
-        }
+        // enforce max velocity restriction
+        var cameraVelocity = new THREE.Vector2(scope.velocityX, scope.velocityZ);
 
-        if (scope.velocityZ > 0) {
-            scope.velocityZ = Math.min(scope.velocityZ, this.MAX_CAMERA_VELOCITY);
-        } else {
-            scope.velocityZ = Math.max(scope.velocityZ, -this.MAX_CAMERA_VELOCITY);
+        if (cameraVelocity.length() > scope.MAX_CAMERA_VELOCITY) {
+            cameraVelocity.setLength(scope.MAX_CAMERA_VELOCITY);
         }
 
         // update camera position based on velocity
-        var velocityX = scope.velocityX;
-        var velocityZ = scope.velocityZ;
+        scope.velocityX = cameraVelocity.x;
+        scope.velocityZ = cameraVelocity.y;
 
         var distance = _eye.clone();
-        distance = distance.cross(this.object.up).setLength(velocityX);
+        distance = distance.cross(this.object.up).setLength(scope.velocityX);
 
         var unitZVector = new THREE.Vector3(0, 0, -1);
         // transform the unit z vector into camera's local space
-        distance.add(unitZVector.transformDirection(this.object.matrix).setLength(velocityZ));
+        distance.add(unitZVector.transformDirection(this.object.matrix).setLength(scope.velocityZ));
         // prevent camera from getting closer to grid
         distance.y = 0;
 
         this.object.position.add( distance );
-        this.center.add( distance );
+        this.target.add( distance );
 
         // don't apply deceleration if the velocity was about 0 to begin with
         if (Math.abs(scope.velocityX) < scope.DECELERATION * delta) {
@@ -495,12 +493,12 @@ THREE.MapControls = function ( object, scene, domElement ) {
     };
 
     this.update = function (delta) {
-        _eye.subVectors(_this.object.position, this.center);
+        _eye.subVectors(_this.object.position, this.target);
         _this.updateCameraFromVelocity(delta);
         _this.pan();
 
         var position = this.object.position;
-        var offset = position.clone().sub( this.center );
+        var offset = position.clone().sub( this.target );
 
         // angle from z-axis around y-axis
 
@@ -535,9 +533,9 @@ THREE.MapControls = function ( object, scene, domElement ) {
         offset.y = radius * Math.cos( phi );
         offset.z = radius * Math.sin( phi ) * Math.cos( theta );
 
-        position.copy( this.center ).add( offset );
+        position.copy( this.target ).add( offset );
 
-        this.object.lookAt( this.center );
+        this.object.lookAt( this.target );
 
         thetaDelta = 0;
         phiDelta = 0;
@@ -738,6 +736,14 @@ THREE.MapControls = function ( object, scene, domElement ) {
         }
     );
 
+    this.reset = function() {
+        // Ask the browser to release the pointer
+        document.exitPointerLock = document.exitPointerLock ||
+                       document.mozExitPointerLock ||
+                       document.webkitExitPointerLock;
+        document.exitPointerLock();
+    }
+
     function calculateInitialMousePosition(canvas, event) {
         var x = new Number();
         var y = new Number();
@@ -839,7 +845,6 @@ THREE.MapControls = function ( object, scene, domElement ) {
             target.dispatchEvent(ee);
         }
     });
-
 
     this.handleResize();
 };

@@ -15,8 +15,6 @@ var Character = Class.extend({
     init: function(args) {
         'use strict';
 
-        this.CHARACTER_COOLDOWN_TIMER = 3000;
-
         this.world = args.world;
         this.team = args.team;
         this.characterSize = args.characterSize;
@@ -24,23 +22,27 @@ var Character = Class.extend({
         this.teamColor = new THREE.Color(Constants.TEAM_COLORS[this.team]);
 
         this.isActive = false;
+        this.alive = true;
         this.id = 0;
 
         this.xPos = 0;
         this.zPos = 0;
 
+        this.highlightedTiles = [];
+
+        this.hasPendingMove = false;
+        this.destX;
+        this.destZ;
+
         // Set the character modelisation object
         this.mesh = new THREE.Object3D();
+        this.originalPosition = this.mesh.position.clone();
         this.position = this.mesh.position;
         this.mesh.owner = this;
 
         // Set the vector of the current motion
         this.direction = new THREE.Vector3(0, 0, 0);
-
-        // Set the current animation step
-        this.step = 0;
-        this.motionInProcess = false;
-        this.motionQueue = new Array();
+        this.motionQueue = [];
 
         this.addUnitSelector();
         this.isCoolDown = false;
@@ -48,88 +50,77 @@ var Character = Class.extend({
         this.loader = new THREE.JSONLoader();
         this.loadFile("blendermodels/spheresoldierrolling.js");
 
-        this.highlightedTiles = null;
-        this.health = 100;
-
-        var canvas = document.createElement('canvas');
-        this.canvas2d = canvas.getContext('2d');
-        
-        this.coolDownBarTexture = new THREE.Texture(canvas) 
-        this.coolDownBarTexture.needsUpdate = true;
-
-        var spriteMaterial = new THREE.SpriteMaterial( { map: this.coolDownBarTexture, useScreenCoordinates: false, alignment: THREE.SpriteAlignment.centerLeft } );
-        
-           this.barAspectRatio = 10;
-        this.coolDownBarXOffset = 0;
-        this.coolDownBarZOffset = 0;
-        this.coolDownBarYOffset = 55;
-        this.coolDownBar = new THREE.Sprite(spriteMaterial);
-        this.lastRoadMap = new Array();
-        this.coolDownCount = 105;
-        this.coolDownLeft = 0;
-        this.canvas2d.rect(0, 0, 800, 200);
-        this.canvas2d.fillStyle = "green";
-        this.canvas2d.fill();
-        this.coolDownBar.position.set(this.mesh.position.x - this.world.getTileSize()/2 + this.coolDownBarXOffset,
-                                      this.mesh.position.y + this.coolDownBarYOffset,
-                                      this.mesh.position.z + this.coolDownBarZOffset);   
-        this.coolDownBar.scale.set(this.world.getTileSize(), this.world.getTileSize()/this.barAspectRatio, 1.0);    
-        this.world.scene.add(this.coolDownBar);
-
-        var canvas2 = document.createElement('canvas');
-        this.canvas2d2 = canvas2.getContext('2d');
-        this.ammoCountBarTexture = new THREE.Texture(canvas2);
-        this.ammoCountBarTexture.needsUpdate = true;
-
-        var ammoCountBarMaterial = new THREE.SpriteMaterial( { map: this.ammoCountBarTexture, useScreenCoordinates: false, alignment: THREE.SpriteAlignment.centerLeft } );
-        
-        this.ammoCountBarXOffset = -1 * this.world.getTileSize()/2;
-        this.ammoCountBarZOffset = 0;
-        this.ammoCountBarYOffset = 60;
-        this.ammoCountBar = new THREE.Sprite(ammoCountBarMaterial);
-        //this.ammoCountBar.scale.set(this.world.getTileSize(), this.world.getTileSize()/this.barAspectRatio, 1.0);
-        this.maximumAmmoCapacity = 5;
-        this.ammoCount = this.maximumAmmoCapacity
-        this.ammoReplenishRate = 0.01;
-        this.needsReload = false;
-
-        this.canvas2d2.rect(0, 0, 600, 150);
-        this.canvas2d2.fillStyle = "blue";
-        this.canvas2d2.fill(); 
-        this.ammoCountBar.position.set(this.mesh.position.x + this.ammoCountBarXOffset, 
-                                       this.mesh.position.y + this.ammoCountBarYOffset,
-                                       this.mesh.position.z + this.ammoCountBarZOffset); 
-        this.ammoCountBar.scale.set(this.world.getTileSize(), this.world.getTileSize()/this.barAspectRatio, 1.0);     
-        this.world.scene.add(this.ammoCountBar );
-
-
-        this.isCharacterInRoute = false;
-
-        var canvas3 = document.createElement('canvas');
-        this.canvas2d3 = canvas3.getContext('2d');
-        
-        this.healthBarTexture = new THREE.Texture(canvas3);
-        this.healthBarTexture.needsUpdate = true;
-
-        var healthBarMaterial = new THREE.SpriteMaterial( { map: this.healthBarTexture, useScreenCoordinates: false, alignment: THREE.SpriteAlignment.centerLeft } );
-        
-        this.healthBarXOffset = -1 * this.world.getTileSize()/2;
-        this.healthBarZOffset = 0;
-        this.healthBarYOffset = 65;
-        this.healthBar = new THREE.Sprite(healthBarMaterial);
-
-        this.maximumHealth = this.getHealth();
+        this.maximumHealth = 100;
         this.health = this.maximumHealth;
 
-        this.canvas2d3.rect(0, 0, 600, 150);
-        this.canvas2d3.fillStyle = "red";
-        this.canvas2d3.fill(); 
-        this.healthBar.position.set(this.mesh.position.x + this.healthBarXOffset, 
-                                       this.mesh.position.y + this.healthBarYOffset,
-                                       this.mesh.position.z + this.healthBarZOffset); 
-        this.healthBar.scale.set(this.world.getTileSize(), this.world.getTileSize()/this.barAspectRatio, 1.0);   
-        this.world.scene.add(this.healthBar);
+        this.barAspectRatio = 10;
+
+        this.positionObservers = [];
+        this.healthObservers = [];
+
+        this.ammoBar = new AmmoBar(this.world.getTileSize(), this.mesh.position, this.barAspectRatio);
+        this.world.scene.add(this.ammoBar.getSprite());
+        this.addPositionObserver(this.ammoBar);
+
+        this.healthBar = new HealthBar(this.world.getTileSize(), this.mesh.position, this.barAspectRatio, this.maximumHealth);
+        this.world.scene.add(this.healthBar.getSprite());
+        this.addPositionObserver(this.healthBar);
+        this.addHealthObserver(this.healthBar);
+
+        this.coolDownCount = 105;
+        this.coolDownLeft = 0;
+        this.cooldownBar = new CooldownBar(this.world.getTileSize(), this.mesh.position, this.barAspectRatio, this.coolDownCount);
+        this.world.scene.add(this.cooldownBar.getSprite());
+        this.addPositionObserver(this.cooldownBar);
+
+        this.isCharacterInRoute = false;
+        this.lastRoadMap = new Array();
+
         this.breakUpdateHere = false;
+    },
+
+    shoot: function(to) {
+        var from = this.mesh.position.clone();
+        from.y = Constants.BULLET_LEVEL;
+        to.y = Constants.BULLET_LEVEL;
+
+        // shoot a bullet because you can
+        if (this.ammoBar.canShoot()) {
+            sendShootMsg(this.id, from, to);
+            this.world.shootBullet(this, from, to);
+            this.ammoBar.onShoot(from, to);
+        }
+    },
+
+    addPositionObserver: function(positionObserver) {
+        this.positionObservers.push(positionObserver);
+    },
+
+    addHealthObserver: function(healthObserver) {
+        this.healthObservers.push(healthObserver);
+    },
+
+    reset : function() {
+        this.direction = new THREE.Vector3(0, 0, 0);
+
+        this.world.scene.add(this.mesh);
+        this.mesh.position = this.originalPosition;
+
+        this.breakUpdateHere = false;
+
+        this.isActive = true;
+        this.hasPendingMove = false;
+        this.highlightedTiles = [];
+        this.motionQueue.length = 0;
+
+        this.healthBar.reset(this.mesh.position);
+        this.ammoBar.reset(this.mesh.position);
+        
+        this.isCoolDown = false;
+        this.coolDownLeft = 0;
+        this.coolDownCount = 105;
+
+        this.cooldownBar.reset(this.mesh.position);
     },
 
     loadFile: function(filename, onLoad) {
@@ -169,36 +160,12 @@ var Character = Class.extend({
         this.id = id;
     },
 
-    setAmmoCount: function(number) {
-        if (number <= this.maximumAmmoCapacity) {
-            this.ammoCount = number;
-        }
-        if (number == this.maximumAmmoCapacity) {
-            this.needsReload = false;
-        }
-        var width = this.world.getTileSize();
-        this.ammoCountBar.scale.set(width * (1.0 * this.ammoCount)/this.maximumAmmoCapacity, 
-                                                width/this.barAspectRatio, 1.0);
-    },
-
-    setHealth: function(health) {
-        if (health <= this.maximumHealth) {
-            this.health = health;
-        } 
-
-        var width = this.world.getTileSize();
-        this.healthBar.scale.set(width * (1.0 * this.health)/this.maximumHealth, 
-                                                width/this.barAspectRatio, 1.0);
-    },
-
-
     getRadius: function() {
         return this.characterSize;
     },
 
+    isInViewPort: function (target) {
 
-    canShoot: function() {
-        return this.ammoCount > 1 && !this.isCharacterInRoute;
     },
 
     getRadius: function() {
@@ -206,31 +173,28 @@ var Character = Class.extend({
         return 20;
     },
 
+    setHealth: function(health) {
+        if (health <= this.maximumHealth) {
+            this.health = health;
+        }
+
+        var scope = this;
+        _.forEach(this.healthObservers, function(healthObserver) {
+            healthObserver.onUnitHealthChanged(scope.health);
+        });
+    },
+
     getHealth: function() {
         return this.health;
     },
 
-
     applyDamage: function(damage) {
+        this.setHealth(this.getHealth() - damage);
 
-        this.setHealth(this.health - damage);
-        console.log("Health: " + this.getHealth());
-        if (this.health < 0) {
+        if (this.getHealth() < 0) {
             this.world.handleCharacterDead(this);
         }
     },
-
-    enterCoolDown: function() {
-        this.isCoolDown = 1;
-        var scope = this;
-
-        this.coolDownBarTexture.needsUpdate = true;
-        this.coolDownBar.position.set(this.mesh.position.x - this.world.getTileSize()/2 + this.coolDownBarXOffset,this.mesh.position.y + this.coolDownBarYOffset,this.mesh.position.z + this.coolDownBarZOffset);        
-        this.world.scene.add(this.coolDownBar );   
-
-        this.coolDownLeft = this.coolDownCount;
-    },
-
 
     addUnitSelector: function() {
         // setup unit selector mesh
@@ -263,23 +227,15 @@ var Character = Class.extend({
     },
 
     getMovementRange: function() {
-        return 3;
+        return 5;
     },
-
 
     onDead: function() {
+        this.alive = false;
+        this.ammoBar.removeSelf(this.world);
+        this.healthBar.removeSelf(this.world);
+        this.cooldownBar.removeSelf(this.world);
         this.world.scene.remove(this.mesh);
-        this.world.scene.remove(this.coolDownBar);
-        this.world.scene.remove(this.ammoCountBar);
-        this.world.scene.remove(this.healthBar);
-    },
-
-    onShoot: function(from, to) {
-        if (this.ammoCount > 1) {
-            this.setAmmoCount(this.ammoCount - 1);
-        }
-        this.rotate(new THREE.Vector3(to.x-from.x, to.y-from.y, to.z-from.z));
-        this.needsReload = true;
     },
     
     // callback - called when unit is selected. Gets a reference to the game state ("world")
@@ -288,8 +244,8 @@ var Character = Class.extend({
         if (this.isActive) {
             return;
         }
-        // world.deselectAll();
-        if (myTeamId == null || this.team == myTeamId) {
+
+        if (GameInfo.myTeamId == null || this.team == GameInfo.myTeamId) {
           this.unitSelectorMesh.material.color.setRGB(1.0, 0, 0);
           this.unitSelectorMesh.visible = true;
           this.world.markCharacterAsSelected(this);
@@ -299,31 +255,26 @@ var Character = Class.extend({
 
     deselect: function() {
         // return to original color
-        if (myTeamId == null || this.team == myTeamId) {
+        if (GameInfo.myTeamId == null || this.team == GameInfo.myTeamId) {
             this.unitSelectorMesh.visible = false;
             this.isActive = false;
         }
-    },
-
-    // Update the direction of the current motion
-    setDirectionWithControl: function(controls) {
-        'use strict';
-        // Either left or right, and either up or down (no jump or dive (on the Y axis), so far ...)
-        var x = controls.left ? 1 : controls.right ? -1 : 0,
-            y = 0,
-            z = controls.up ? 1 : controls.down ? -1 : 0;
-        this.direction.set(x, y, z);
     },
 
     setDirection: function(direction) {
         this.direction = direction;
     },
 
-    enqueueMotion: function(onMotionFinish) {
-        console.log("enqueueMotion \n");
-        if (this.isCoolDown == 0) {
+    enqueueMotion: function() {
+        // if (this.isCoolDown == 0) {
             var path = this.world.findPath(this.getTileXPos(), this.getTileZPos(), this.getTileXPos() + this.direction.x,
                 this.getTileZPos() + this.direction.z);
+            var gx = this.getTileXPos() + this.direction.x;
+            var gz = this.getTileZPos() + this.direction.z;
+            this.destX = gx;
+            this.destZ = gz;
+            this.hasPendingMove = true;
+            console.log("Set to " + gx + " and " + gz + " for id " + this.team + " i " + this.id);
             var addNewItem = true;
             var newMotions = new Array();
             for (var i = 1; i < path.length; i++) {
@@ -355,39 +306,33 @@ var Character = Class.extend({
                 'sentinel': 'start',
                 'highlightTiles': path
             });
-
-            if (onMotionFinish) {
-                onMotionFinish();
-            }
-        }
     },
 
     setCharacterMeshPosX: function(x) {
         this.mesh.position.x = x;
-        this.coolDownBar.position.x = x - this.world.getTileSize()/2 + this.coolDownBarXOffset;
-        this.ammoCountBar.position.x = x + this.ammoCountBarXOffset;
-        this.healthBar.position.x    = x + this.healthBarXOffset;
+
+        var scope = this;
+        _.forEach(scope.positionObservers, function(positionObserver) {
+            positionObserver.onUnitPositionChanged(scope.mesh.position);
+        });
     },
 
     setCharacterMeshPosY: function(y) {
         this.mesh.position.y = y;
-        this.coolDownBar.position.y = y + this.coolDownBarYOffset;
-        this.ammoCountBar.position.y = y + this.ammoCountBarYOffset;
-        this.healthBar.position.y    = y + this.healthBarYOffset;
+
+        var scope = this;
+        _.forEach(this.positionObservers, function(positionObserver) {
+            positionObserver.onUnitPositionChanged(scope.mesh.position);
+        });
     },
 
     setCharacterMeshPosZ: function(z) {
         this.mesh.position.z = z;
-        this.coolDownBar.position.z = z + this.coolDownBarZOffset;
-        this.ammoCountBar.position.z = z + this.ammoCountBarZOffset;
-        this.healthBar.position.z    = z + this.healthBarZOffset;
-    },
 
-    updateWeaponReload : function(delta) {
-        if (this.breakUpdateHere) return;
-        if (this.needsReload) {
-            this.setAmmoCount(this.ammoCount + this.ammoReplenishRate);
-        }
+        var scope = this;
+        _.forEach(this.positionObservers, function(positionObserver) {
+            positionObserver.onUnitPositionChanged(scope.mesh.position);
+        });
     },
 
     updateMovementCoolDown: function(delta) {
@@ -401,28 +346,9 @@ var Character = Class.extend({
                     this.world.displayMovementArea(this);
             }
         }
-        var width = this.world.getTileSize();
-        this.coolDownBar.scale.set(width * (this.coolDownCount-this.coolDownLeft)/this.coolDownCount, 
-                                            width/this.barAspectRatio, 1.0);
+
+        this.cooldownBar.onCooldownChanged(this.coolDownLeft);
     },
-
-
-
-    updateInProgressRotation: function(delta) {
-        if (this.breakUpdateHere) return;
-        if (this.rotationInProgress) {
-            var newAngle = this.mesh.rotation.y + this.angularVelocity * delta;
-            if ((newAngle  - this.goalAngle) / (this.goalAngle - this.prevAngle) > 0) {
-                this.mesh.rotation.y = this.goalAngle;
-                this.rotationInProgress = false;
-            } else {
-                this.mesh.rotation.y = newAngle;
-                this.prevAngle = newAngle;
-            }
-            this.breakUpdateHere = true;
-        }
-    },
-
 
     updateInProgressLinearMotion: function(delta) {
         if (this.breakUpdateHere) return;
@@ -437,7 +363,6 @@ var Character = Class.extend({
                 this.xPos = this.goalXPos;
             } else {
                 this.setCharacterMeshPosX(newMeshX);
-                this.velocityX *= 1.05;
             }
 
             if ((newMeshZ - this.goalMeshZ) / (this.goalMeshZ - this.prevMeshZ) > 0) {
@@ -446,33 +371,46 @@ var Character = Class.extend({
                 this.zPos = this.goalZPos;
             } else {
                 this.setCharacterMeshPosZ(newMeshZ);
-                this.velocityZ *= 1.05;
             }
 
             if (this.motionInProgress) {
                 this.prevMeshX = newMeshX;
                 this.prevMeshZ = newMeshZ;
             }
-
+            //console.log("x: "+this.mesh.position.x);
+            //console.log("z: "+this.mesh.position.z);
             this.breakUpdateHere = true;                   
         } 
     },
 
     isInRoute: function() {
-        return this.isCharacterInRoute;
+        return this.hasPendingMove;
     },
 
     getDestination: function() {
-        return {'x': this.goalXPos, 'y':0, 'z':this.goalZPos};  
+        return {'x': this.destX, 'y':0, 'z':this.destZ};  
+    },
+
+    getCurrentPosition: function() {
+        return {'x': this.xPos, 'y':0, 'z':this.zPos};
+    },
+
+    beginCooldown: function() {
+        this.isCoolDown = true;
+
+        this.coolDownLeft = this.coolDownCount;
+    },
+
+    resetCooldown: function() {
+        this.coolDownLeft = this.coolDownCount;
     },
 
     update: function(delta) {
 
         this.breakUpdateHere = false;
 
-        this.updateWeaponReload(delta);
+        this.ammoBar.updateWeaponReload(delta);
         this.updateMovementCoolDown(delta); 
-        this.updateInProgressRotation(delta);
         this.updateInProgressLinearMotion(delta);
 
         // handle deque action here
@@ -482,12 +420,8 @@ var Character = Class.extend({
             if (direction.sentinel == 'start') {
                 var path = direction.highlightTiles;
                 this.isCharacterInRoute = true;
-                if (this.team == myTeamId) {
-                    if (this.highlightedTiles){
-                        for (var i = 0; i < this.highlightedTiles.length; i++) {
-                            this.highlightedTiles[i].reset();
-                        }
-                    }
+                if (this.team == GameInfo.myTeamId) {
+                    this.world.deselectHighlightedTiles();
 
                     this.lastRoadMap.length = 0;
                     for (var i = 0; i < path.length; i++) {
@@ -496,25 +430,27 @@ var Character = Class.extend({
                         this.lastRoadMap.push(roadTile);
                     }
                 }
-                this.coolDownLeft = this.coolDownCount;
+                this.resetCooldown();
                 return;
             } else if (direction.sentinel == 'end') {
                 for (var i = 0; i < this.lastRoadMap.length; i++) {
                     this.lastRoadMap[i].reset();
                 }
                 this.isCharacterInRoute = false;
-                this.enterCoolDown();
+                if (this.destX == this.xPos && this.destZ == this.zPos) {
+                    this.hasPendingMove = false;
+                }
+                console.log("Set pending move back");
+                this.beginCooldown();
 
                 return;
             }
 
             if (direction.x !== 0 || direction.z !== 0) {
-                this.rotate(direction);
-                // And, only if we're not colliding with an obstacle or a wall ...
+                // And, only if     we're not colliding with an obstacle or a wall ...
                 if (this.collide()) {
                     return false;
                 }
-
 
                 this.motionInProgress = true;
                 // ... we move the character
@@ -525,18 +461,20 @@ var Character = Class.extend({
                 this.goalMeshX = this.mesh.position.x + direction.x * 40;
                 this.goalMeshZ = this.mesh.position.z + direction.z * 40;
                 
+                var MOVE_VELOCITY = 100;
+
                 if (direction.x < 0) {
-                    this.velocityX = -100;
+                    this.velocityX = -MOVE_VELOCITY;
                 } else if(direction.x > 0) {
-                    this.velocityX = 100;
+                    this.velocityX = MOVE_VELOCITY;
                 } else {
                     this.velocityX = 0;
                 }
 
                 if (direction.z < 0) {
-                    this.velocityZ = -100;
+                    this.velocityZ = -MOVE_VELOCITY;
                 } else if (direction.z > 0) {
-                    this.velocityZ = 100;
+                    this.velocityZ = MOVE_VELOCITY;
                 } else {
                     this.velocityZ = 0;
                 }
@@ -549,20 +487,13 @@ var Character = Class.extend({
         }
     },
 
-    // Rotate the character
-    rotate: function(direction) {
-        'use strict';
-        // Set the direction's angle, and the difference between it and our Object3D's current rotation
-        this.goalAngle = Math.atan2(direction.x, direction.z);
+    onMouseMovement: function(mouseLocation) {
+        var from = this.mesh.position;
 
-        if (this.goalAngle - this.mesh.rotation.y > Math.PI) {
-            this.goalAngle -= 2 * Math.PI;
-        }
-        this.angularVelocity = (this.goalAngle - this.mesh.rotation.y) * 2;
-        if (this.angularVelocity != 0) {
-            this.rotationInProgress = true;
-            this.prevAngle = this.mesh.rotation.y;
-        }
+        var direction = new THREE.Vector3(mouseLocation.x - from.x, mouseLocation.y - from.y, mouseLocation.z - from.z)
+
+        // Set the direction's angle, and the difference between it and our Object3D's current rotation
+        this.mesh.rotation.y = Math.atan2(direction.x, direction.z);
     },
 
     collide: function() {

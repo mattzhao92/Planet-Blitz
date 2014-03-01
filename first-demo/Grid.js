@@ -31,48 +31,194 @@ var Grid = Class.extend({
         this.loadGround();
         this.drawGridSquares(width, length, tileSize);
 
+        this.gridHelper = new GridHelper(this.camera, this.controls);
+
         // initialize characters
+        this.setupCharacters();
+
+        // bullet info
+        this.bullets = [];
+
+        this.setupMouseMoveListener();
+        this.setupMouseDownListener();
+        this.setupHotkeys();
+
+        this.unitCycle = 0;
+        this.hotKeysDisabled = true;
+        this.resetInProgress = false;
+    },
+
+    onGameStart: function() {
+        this.enableHotKeys();
+        for (var tm = GameInfo.numOfTeams; tm < 4; tm++) {
+          for (var i = 0; i < this.numOfCharacters; i++) {
+            this.silentlyRemoveCharacter(this.getCharacterById(tm, i));
+          }
+        }
+
+        console.log("Team id "+ GameInfo.myTeamId);
+
+        var teamJoinMessage;
+        switch (GameInfo.myTeamId) {
+            case 0:
+                teamJoinMessage = "You spawned at top";
+                break;
+            case 1:
+                teamJoinMessage = "You spawned at bottom";
+                break;
+            case 2:
+                teamJoinMessage = "You spawned at left";
+                break;
+            case 3:
+                teamJoinMessage = "You spawned at right";
+                break;
+        }
+
+        this.displayMessage(teamJoinMessage);
+
+        // focus camera on start position (TODO: hardcoded)
+        this.controls.focusOnPosition(this.getMyTeamCharacters()[0].mesh.position);
+    },
+
+    onGameFinish: function() {
+        console.log("Game finish called");
+        this.controls.reset();
+    },
+
+    getMyTeamCharacters: function() {
+        return this.characterList[GameInfo.myTeamId];
+    },
+
+    disableHotKeys: function() {
+        this.hotKeysDisabled = true;
+    },
+
+    enableHotKeys: function() {
+        this.hotKeysDisabled = false;
+    },
+
+    setupHotkeys: function() {
+        var scope = this;
+        var unitNumbers = [1, 2, 3];
+
+        unitNumbers.forEach(function(number) {
+            var hotkey = number.toString();
+            KeyboardJS.on(hotkey, 
+                function(event, keysPressed, keyCombo) {
+                    if (scope.hotKeysDisabled) return;
+                    // TODO: replace this with a more readable line. Also, need to account for out of index errors when units get killed
+                    var characterSelected = scope.getMyTeamCharacters()[parseInt(keyCombo) - 1];
+                    if (characterSelected) {
+                        characterSelected.onSelect();
+                    }
+                }
+            );
+        });
+
+        // unit toggle - cycle forwards
+        KeyboardJS.on("t", 
+            function(event, keysPressed, keyCombo) {
+                if (scope.hotKeysDisabled) return;
+
+                var myTeamCharacters = scope.getMyTeamCharacters();
+                var characterSelected = myTeamCharacters[scope.unitCycle];
+                if (characterSelected) {
+                    characterSelected.onSelect();
+                }
+                scope.unitCycle = (scope.unitCycle + 1) % myTeamCharacters.length;
+            }
+        );
+
+        // unit toggle - cycle backwards
+        KeyboardJS.on("r", 
+            function(event, keysPressed, keyCombo) {
+                if (scope.hotKeysDisabled) return;
+
+                var myTeamCharacters = scope.getMyTeamCharacters();
+                var characterSelected = myTeamCharacters[scope.unitCycle];
+                if (characterSelected) {
+                    characterSelected.onSelect();
+                }
+                if (scope.unitCycle == 0) {
+                    scope.unitCycle = myTeamCharacters.length - 1;
+                } else {
+                    scope.unitCycle -= 1;
+                }
+            }
+        );
+
+        // focus camera on unit
+        KeyboardJS.on("space", 
+            function(event, keysPressed, keyCombo) {
+                if (scope.hotKeysDisabled) return;
+
+                var character = scope.getCurrentSelectedUnit();
+                if (character) {
+                    scope.controls.focusOnPosition(character.mesh.position);
+                }
+            }
+        );
+
+        // rudimentary camera rotation
+        KeyboardJS.on("q", 
+            function (event, keysPressed, keyCombo) {
+                if (scope.hotKeysDisabled) return;
+
+                scope.controls.rotateLeft(Math.PI/30);
+            }
+        );
+
+        KeyboardJS.on("e", 
+            function (event, keysPressed, keyCombo) {
+                if (scope.hotKeysDisabled) return;
+
+                scope.controls.rotateRight(Math.PI/30);
+            }
+        );
+
+    },
+
+    setupCharacters: function() {
         this.characters = new THREE.Object3D();
         this.numOfCharacters = 3;
         // The row position.
         this.teamStartPos = [1, 18, 1, 18];
         this.characterMeshes = [];
         this.characterList = new Array();
+
         this.characterFactory = new CharacterFactory();
 
+        // Sequence number for synchornization.
+        this.seq = 0;
+
         var scope = this;
-        for (var team_id = 0; team_id < numOfTeams; team_id++) {
-          this.characterList.push(new Array());
-          this.currentSelectedUnits.push(null);
-          for (var i = 0; i < this.numOfCharacters; i++) {
-              var charArgs = {
-                  world: scope,
-                  team: team_id,
-                  characterSize: scope.tileSize / 2
-              };
-              var character = this.characterFactory.createCharacter(charArgs);
-              var startX, startY;
-              if (team_id < 2) {
-                startX = i + 9;
-                startY = this.teamStartPos[team_id];
-              } else {
-                startX = this.teamStartPos[team_id];
-                startY = i + 9;
-              }
-              character.placeAtGridPos(startX, startY);
-              this.markTileOccupiedByCharacter(startX, startY);
-              character.setID(i);
-              this.characterList[team_id].push(character);
-              this.characterMeshes.push(character.mesh);
-              this.scene.add(character.mesh);
-          }
+
+        for (var team_id = 0; team_id < 4; team_id++) {
+            this.characterList.push(new Array());
+            this.currentSelectedUnits.push(null);
+            for (var i = 0; i < this.numOfCharacters; i++) {
+                var charArgs = {
+                    world: scope,
+                    team: team_id,
+                    characterSize: scope.tileSize / 2
+                };
+                var character = this.characterFactory.createCharacter(charArgs);
+                var startX, startY;
+                if (team_id < 2) {
+                    startX = i + 9;
+                    startY = this.teamStartPos[team_id];
+                } else {
+                    startX = this.teamStartPos[team_id];
+                    startY = i + 9;
+                }
+                character.placeAtGridPos(startX, startY);
+                this.markTileOccupiedByCharacter(startX, startY);
+                character.setID(i);
+                this.characterList[team_id].push(character);
+                this.characterMeshes.push(character.mesh);
+                this.scene.add(character.mesh);
+            }
         }
-        // bullet info
-        this.bullets = [];
-
-
-        this.setupMouseMoveListener();
-        this.setupMouseDownListener();
     },
 
     getCharacterById: function(team, id) {
@@ -83,11 +229,9 @@ var Grid = Class.extend({
         this.gameApp.displayMessage(msg);
     },
 
-    handleCharacterDead: function(character) {
-        this.displayMessage("A robot was destroyed!");
-
+    silentlyRemoveCharacter: function(character) {
         // if the character was the currently selected unit, then reset tile state
-        if (this.currentSelectedUnits[myTeamId] == character) {
+        if (this.getCurrentSelectedUnit() == character) {
             // deselect character
             character.deselect();
 
@@ -95,22 +239,30 @@ var Grid = Class.extend({
             character.highlightedTiles.forEach(function(tile) {
                 tile.reset();
             });
-            this.currentSelectedUnits[myTeamId] = null;
+          
+            this.currentSelectedUnits[GameInfo.myTeamId] = null;
         }
 
+        // mark dead.
+        character.alive = false;
         // mark tile position as available
         var xPos = character.getTileXPos();
         var zPos = character.getTileZPos();
         this.getTileAtTilePos(xPos, zPos).hasCharacter = false;
 
-
         // remove character mesh from list of active meshes
         var index = this.characterMeshes.indexOf(character.mesh);
         if (index > -1) {
             this.characterMeshes.splice(index, 1);
-            // remove object form scene
+            // remove object from scene
             character.onDead();
         }
+    },
+
+    handleCharacterDead: function(character) {
+        this.displayMessage("A robot was destroyed!");
+
+        this.silentlyRemoveCharacter(character);
     },
 
     handleBulletDestroy: function(bullet) {
@@ -118,24 +270,8 @@ var Grid = Class.extend({
         var index = this.bullets.indexOf(bullet);
         if (index > -1) {
             this.bullets.splice(index, 1);
-            this.scene.remove(bullet.mesh);            
+            this.scene.remove(bullet.mesh);
         }
-    },
-
-    disableMouseDownListener: function() {
-        this.mouseDownListenerActive = false;
-    },
-
-    enableMouseDownListener: function() {
-        this.mouseDownListenerActive = true;
-    },
-
-    disableMouseMoveListener: function() {
-        this.mouseMoveListenerActive = false;
-    },
-
-    enableMouseMoveListener: function() {
-        this.mouseMoveListenerActive = true;
     },
 
     convertXPosToWorldX: function(tileXPos) {
@@ -148,13 +284,13 @@ var Grid = Class.extend({
 
     markCharacterAsSelected: function(character) {
         // deselect previous character if there was one
-        if (this.currentSelectedUnits[myTeamId]) {
-            if (this.currentSelectedUnits[myTeamId] != character) {
-                this.currentSelectedUnits[myTeamId].deselect();
+        if (this.getCurrentSelectedUnit()) {
+            if (this.getCurrentSelectedUnit() != character) {
+                this.getCurrentSelectedUnit().deselect();
             }
         }
 
-        this.currentSelectedUnits[myTeamId] = character;
+        this.currentSelectedUnits[GameInfo.myTeamId] = character;
 
         // show character movement speed
         this.displayMovementArea(character);
@@ -194,7 +330,6 @@ var Grid = Class.extend({
 
     },
 
-
     findPath: function(oldXPos, oldZPos, newXPos, newZPos) {
         return this.pathFinder.findPath(oldXPos, oldZPos, newXPos, newZPos, this.PFGrid.clone());
     },
@@ -205,23 +340,28 @@ var Grid = Class.extend({
             this.currentMouseOverTile.reset();
         }
 
+        this.deselectHighlightedTiles();
+
+        var characterMovementRange = character.getMovementRange();
+
+        // highlight adjacent squares - collect all tiles from radius
+        var tilesToHighlight = this.getTilesInArea(character, characterMovementRange);
+
+        if (character.isCharacterInRoute == false && character.isCoolDown == false) {
+            this.highlightTiles(tilesToHighlight);
+        }
+    },
+
+    deselectHighlightedTiles: function() {
         // deselect tiles.
         if (this.highlightedTiles) {
             this.highlightedTiles.forEach(function(tile) {
                 tile.reset();
             });
         }
-
-        var characterMovementRange = character.getMovementRange();
-
-        // highlight adjacent squares - collect all tiles from radius
-        var tilesToHighlight = this.getTilesInArea(character, characterMovementRange);
-        character.highlightedTiles = tilesToHighlight;
-        this.highlightTiles(tilesToHighlight);
     },
 
     highlightTiles: function(tilesToHighlight) {
-
         tilesToHighlight.forEach(function(tile) {
             tile.setSelectable(true);
             tile.setMovable(true);
@@ -303,24 +443,19 @@ var Grid = Class.extend({
             return;
         }
 
-        var scope = this;
+        // recursively call intersects
+        var raycaster = this.gridHelper.getRaycaster();
+        var intersectsWithTiles = raycaster.intersectObjects(this.tiles.children);
 
-        var projector = new THREE.Projector();
-        var mouseVector = new THREE.Vector3();
-
-        var mousePosition = this.controls.getMousePosition();
-
-        mouseVector.x = 2 * (mousePosition.x / window.innerWidth) - 1;
-        mouseVector.y = 1 - 2 * (mousePosition.y / window.innerHeight);
-
-        var raycaster = projector.pickingRay(mouseVector.clone(), scope.camera),
-            intersects = raycaster.intersectObjects(scope.tiles.children);
-
-        for (var i = 0; i < intersects.length; i++) {
-            var intersection = intersects[i],
-                obj = intersection.object.owner;
-
+        for (var i = 0; i < intersectsWithTiles.length; i++) {
+            var intersection = intersectsWithTiles[i];
+            obj = intersection.object.owner;
             obj.onMouseOver();
+        }
+
+        if (this.getCurrentSelectedUnit()) {
+            var mouseLocation = this.gridHelper.getMouseProjectionOnGrid();
+            this.getCurrentSelectedUnit().onMouseMovement(mouseLocation);
         }
     },
 
@@ -345,64 +480,30 @@ var Grid = Class.extend({
         this.scene.add(bullet.mesh);
     },
 
-    handleShootEvent: function(projector, mouseVector, intersectsWithTiles) {
-        var from = this.currentSelectedUnits[myTeamId].mesh.position.clone();
-        var to;
+    handleShootEvent: function() {
+        var to = this.gridHelper.getMouseProjectionOnGrid();
+        this.getCurrentSelectedUnit().shoot(to);
+    },
 
-        var isFiringWithinGrid = intersectsWithTiles.length > 0;
-        if (isFiringWithinGrid) {
-            var tileSelected = intersectsWithTiles[0].object.owner;
-
-            // determine exact point of intersection with tile
-            to = intersectsWithTiles[0].point;
-        } else {
-            // experimental - be able to fire at points outside of space
-            var vector = new THREE.Vector3(mouseVector.x, mouseVector.y, 0.5);
-            projector.unprojectVector(vector, this.camera);
-            var dir = vector.sub(this.camera.position).normalize();
-
-            // calculate distance to the plane
-            var distance = - this.camera.position.y / dir.y;
-            var pos = this.camera.position.clone().add(dir.multiplyScalar(distance));
-
-            to = pos;
-        }
-
-        // keep bullet level
-        to.y = 15;
-        from.y = 15;
-
-        // shoot a bullet because you can
-        if (this.currentSelectedUnits[myTeamId].canShoot()) {
-            sendShootMsg(this.currentSelectedUnits[myTeamId].id, from, to);
-            this.currentSelectedUnits[myTeamId].onShoot(from, to);
-            this.shootBullet(this.currentSelectedUnits[myTeamId], from, to);
-        }
+    getCurrentSelectedUnit: function() {
+        return this.currentSelectedUnits[GameInfo.myTeamId];
     },
 
     onMouseDown: function(event) {
         var RIGHT_CLICK = 3;
         var LEFT_CLICK = 1;
 
-        var projector = new THREE.Projector();
-        var mouseVector = new THREE.Vector3();
-
-        var mousePosition = this.controls.getMousePosition();
-
-        mouseVector.x = 2 * (mousePosition.x / window.innerWidth) - 1;
-        mouseVector.y = 1 - 2 * (mousePosition.y / window.innerHeight);
-
-        var raycaster = projector.pickingRay(mouseVector.clone(), this.camera);
+        var raycaster = this.gridHelper.getRaycaster();
 
         // recursively call intersects
         var intersects = raycaster.intersectObjects(this.characterMeshes, true);
         var intersectsWithTiles = raycaster.intersectObjects(this.tiles.children);
+        var unitIsCurrentlySelected = (this.getCurrentSelectedUnit() != null);
 
-        var unitIsCurrentlySelected = (this.currentSelectedUnits[myTeamId] != null);
         if (unitIsCurrentlySelected) {
             // fire on click
             if (event.which == RIGHT_CLICK) {
-                this.handleShootEvent(projector, mouseVector, intersectsWithTiles);
+                this.handleShootEvent();
             }
         }
 
@@ -415,7 +516,7 @@ var Grid = Class.extend({
                 var clickedObject = intersects[0].object.owner;
 
                 // done so that you can click on a tile behind a character easily
-                if (clickedObject != this.currentSelectedUnits[myTeamId]) {
+                if (clickedObject != this.getCurrentSelectedUnit()) {
                     clickedObject.onSelect();
                 } else {
                     continueClickHandler = true;
@@ -435,24 +536,27 @@ var Grid = Class.extend({
         if (intersectsWithTiles.length > 0) {
             var tileSelected = intersectsWithTiles[0].object.owner;
             var coordinate = tileSelected.onMouseOver();
-            if (this.currentSelectedUnits[myTeamId] && coordinate) {
-                var deltaX = coordinate.x - this.currentSelectedUnits[myTeamId].getTileXPos();
+
+            if (this.getCurrentSelectedUnit() && coordinate) {
+                var deltaX = coordinate.x - this.getCurrentSelectedUnit().getTileXPos();
                 var deltaY = 0;
-                var deltaZ = coordinate.z - this.currentSelectedUnits[myTeamId].getTileZPos();
+                var deltaZ = coordinate.z - this.getCurrentSelectedUnit().getTileZPos();
 
                 var unitMovedToDifferentSquare = !(deltaX == 0 && deltaZ == 0);
 
                 if (unitMovedToDifferentSquare) {
-                    this.currentSelectedUnits[myTeamId].setDirection(
-                        new THREE.Vector3(deltaX, deltaY, deltaZ));
+                    // this.getCurrentSelectedUnit().setDirection(
+                    //     new THREE.Vector3(deltaX, deltaY, deltaZ));
 
                     // Put the network communication here.
-                    sendMoveMsg(this.currentSelectedUnits[myTeamId].id,
-                        deltaX, deltaY, deltaZ);
+                    if (this.getCurrentSelectedUnit().isCoolDown == 0) {
+                        sendMoveMsg(this.getCurrentSelectedUnit().id,
+                            deltaX, deltaY, deltaZ);
 
-                    this.currentSelectedUnits[myTeamId].enqueueMotion(function() {
-                        this.allowCharacterMovement = true;
-                    });
+                        if (!GameInfo.netMode) {
+                            this.currentSelectedUnits[GameInfo.myTeamId].enqueueMotion();
+                        }
+                    }
                 }
             }
         }
@@ -474,12 +578,11 @@ var Grid = Class.extend({
         var texture = THREE.ImageUtils.loadTexture(this.GROUND_TEXTURE);
 
         var groundMaterial = new THREE.MeshLambertMaterial({
-            color: 0xffffff, 
+            color: 0xffffff,
             map: texture
         });
 
-        var ground = new THREE.Mesh(new THREE.PlaneGeometry(this.gridWidth, this.gridLength), groundMaterial
-            );
+        var ground = new THREE.Mesh(new THREE.PlaneGeometry(this.gridWidth, this.gridLength), groundMaterial);
         ground.rotation.x = -0.5 * Math.PI;
 
         var Y_BUFFER = -0.5;
@@ -506,7 +609,7 @@ var Grid = Class.extend({
         for (var i = 0; i < this.numberSquaresOnXAxis; i++) {
             for (var j = 0; j < this.numberSquaresOnZAxis; j++) {
                 var tile = this.tileFactory.createTile(i, j);
-                
+
                 var tileMesh = tile.getTileMesh();
                 this.tilesArray[i][j] = tile;
 
@@ -532,34 +635,26 @@ var Grid = Class.extend({
         return this.numberSquaresOnZAxis;
     },
 
-    hasObstacleAtCell: function(args) {
-
-    },
-
-    hasCharacterAtCell: function(args) {
-
-    },
-
-    isCellOutOfBounds: function(args) {
-
-    },
-
     update: function(delta) {
-        // update character movements
+        // update characters
+        this.updateCharacters(delta);
+
+        // update bullet movements
+        this.updateBullets(delta);
+    },
+
+    updateCharacters: function(delta) {
         for (var i = 0; i < this.characterMeshes.length; i++) {
             var character = this.characterMeshes[i].owner;
             character.update(delta);
         }
-
-        // update bullet movements
-        this.updateBullets(delta);
     },
 
     updateBullets: function(delta) {
         for (var i = 0; i < this.bullets.length; i++) {
             var bullet = this.bullets[i];
             bullet.update(delta);
-            this.checkBulletCollision(bullet, i);   
+            this.checkBulletCollision(bullet, i);
         }
     },
 
@@ -574,9 +669,111 @@ var Grid = Class.extend({
             // also need to check for bullet team here
             if (character.team != bullet.owner.team && this.checkOverlap(bullet, character)) {
                 this.handleBulletDestroy(bullet);
-                character.applyDamage(30);
+                if (GameInfo.netMode) {
+                    if (bullet.owner.team == GameInfo.myTeamId) {
+                        sendHitMsg(character.team, character.id);
+                    }
+                } else {
+                    character.applyDamage(30);
+                }
+                // Send the server hit message.
                 break;
             }
         }
-    }
+    },
+
+    syncGameState: function(state, seq) {
+        if (this.resetInProgress) return true;
+        // Old seq, discard it.
+        if (seq < this.seq) {
+            return false;
+        }
+        this.seq = seq;
+        // This is usd to check ghosts.
+        var liveChars = new Array();
+        var liveStates = new Array();
+        for (var t = 0; t < GameInfo.numOfTeams; t++) {
+            liveStates.push(new Array());
+            for (var i = 0; i < this.numOfCharacters; i++) {
+                liveStates[t].push(false);
+            }
+        }
+        // First check the correctness of each position.
+        for (var t = 0; t < state.length; t++) {
+            var teamId = parseInt(state[t][State.team]);
+            var index = parseInt(state[t][State.index]);
+            var x = parseInt(state[t][State.X]);
+            var z = parseInt(state[t][State.Z]);
+            var health = parseInt(state[t][State.health]);
+            // Character to check.
+            var charToCheck = this.getCharacterById(teamId, index);
+            liveStates[teamId][index] = true;
+            if (charToCheck.alive) {
+                // Sync the health.
+                charToCheck.health = health;
+                var dest;
+                if (charToCheck.isInRoute()) {
+                    dest = charToCheck.getDestination();
+                } else {
+                    dest = charToCheck.getCurrentPosition();
+                }
+                if (dest.x != x || dest.z != z) {
+                    // Inconsistent with auth state, adjust position.
+                    console.log("Inconsi pos ");
+                    charToCheck.placeAtGridPos(x, z);
+                }
+            }
+        }
+
+        var isStateGood = true;
+        for (var t = 0; t < GameInfo.numOfTeams; t++) {
+            for (var i = 0; i < this.numOfCharacters; i++) {
+                var charToCheck = this.getCharacterById(t, i);
+                if (!liveStates[t][i] && charToCheck.alive) {
+                    console.log("Zombie character!");
+                    // Server says dead but alive locally.
+                    this.handleCharacterDead(charToCheck);
+                    isStateGood = false;
+                }
+            }
+        }
+        return isStateGood;
+    }, 
+
+    disableMouseDownListener: function() {
+        this.mouseDownListenerActive = false;
+    },
+
+    enableMouseDownListener: function() {
+        this.mouseDownListenerActive = true;
+    },
+
+    disableMouseMoveListener: function() {
+        this.mouseMoveListenerActive = false;
+    },
+
+    enableMouseMoveListener: function() {
+        this.mouseMoveListenerActive = true;
+    },
+
+    reset: function() {
+        console.log("reset function is called ");
+        for (var i = 0; i < this.characterList.length; i++) {
+            for (var j = 0; j < this.characterList[i].length; j++) {
+                this.characterList[i][j].onDead();
+            }
+        }
+
+        this.tiles = new THREE.Object3D();
+        this.tilesArray = null;
+
+        this.loadGround();
+        this.drawGridSquares(this.gridWidth, this.gridLength, this.tileSize);
+
+        this.gridHelper = new GridHelper(this.camera, this.controls);
+
+        // initialize characters
+        this.setupCharacters();
+        this.resetInProgress = false;
+    },
 });

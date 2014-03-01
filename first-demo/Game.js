@@ -23,6 +23,7 @@ $(function () {
 
             this.stats = this.initStats();
             this.createGameConsole();
+            this.createScoreBoard();
 
             this.setupCamera();
             this.setupCameraControls();
@@ -31,19 +32,19 @@ $(function () {
             this.addLighting();
             this.addSkybox();
 
-            this.addControlGUI();
+            // this.addControlGUI();
 
             // begin animation loop
             this.animate();
 
             var scope = this;
             window.addEventListener( 'resize', function() {
-                scope.onWindowResize() }, false );
+                scope.onWindowResize(); }, false );
         }, 
 
         setupCamera: function() {
             // create a camera, which defines where we're looking at
-            this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 10000);
+            this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 8000);
             this.camera.position.x = 0;
             this.camera.position.y = 600;
             this.camera.position.z = 400;
@@ -72,7 +73,7 @@ $(function () {
         },
 
         addSkybox: function() {
-            var skyGeometry = new THREE.CubeGeometry( 5000, 5000, 5000 );
+            var skyGeometry = new THREE.CubeGeometry( 4000, 4000, 4000 );
             
             // x +, x -, y + , y -, z +, z -
             var filenames = [
@@ -98,7 +99,7 @@ $(function () {
         setupCameraControls: function() {
             this.clock = new THREE.Clock();
             var controls = new THREE.MapControls(this.camera, this.scene, document.getElementById("WebGL-output"));
-            controls.panSpeed = .31;
+            controls.panSpeed = 0.31;
 
             // ensure that camera can't rotate too far down or up
             controls.minPolarAngle = 0.3;
@@ -111,11 +112,13 @@ $(function () {
             controls.minZ = -this.GRID_LENGTH / 2;
             controls.maxZ = this.GRID_LENGTH / 2;
 
+            controls.minDistance = 240;
+            controls.maxDistance = 2000;
             this.controls = controls;
         },
 
         addControlGUI: function() {
-            var gui = new dat.GUI();
+            //var gui = new dat.GUI();
         },
 
         setupGameWorld: function() {
@@ -166,12 +169,24 @@ $(function () {
             var gameConsole = new GameConsole();
             $("#Stats-output").append(gameConsole.domElement);
             gameConsole.displayInitialMessage("Welcome to Planet Blitz! Fight to the death!");
-            // setTimeout(function() {
-            //     gameConsole.append("Fight to the death!");
-            // }, 3000);
 
             this.gameConsole = gameConsole;
         },
+
+
+        createScoreBoard: function() {
+            var scoreBoard = new ScoreBoard();
+            $("#Stats-output").append(scoreBoard.domElement);
+            var exampleData = [{'name' : 'matt', 'score': 2}, {'name' : 'anderson', 'score' : 5}];
+            this.scoreBoard = scoreBoard;
+        },
+
+
+        // scores is expected to be a list of jsonObjects [{name: 'matt', score: 5}, ..]
+        updateScoreBoard: function(listOfScores) {
+            this.scoreBoard.setText(listOfScores);
+        },
+
 
         displayMessage: function(msg) {
             this.gameConsole.append(msg);
@@ -190,6 +205,10 @@ $(function () {
 
         getWorld: function() {
             return this.world;
+        },
+
+        reset: function() {
+            this.world.reset();
         }
 
     };

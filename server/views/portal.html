@@ -1,13 +1,25 @@
 <html>
   <head>
+    <!-- Jquery and JQuery UI -->
+   
+    <script type="text/javascript" src="jquery-1.9.0.js"></script>
+    <!-- Why the 1.9.0 jquery doesn't have the property 'mozilla'? -->
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css" />
+    <!-- Tutorial jquery slide css-->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans+Condensed:700,300,300italic' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <link rel="stylesheet" type="text/css" href="demo.css" />
     <link rel='stylesheet' type='text/css' href='game.css'>
 
-    <script type="text/javascript" src="jquery-1.9.0.js"></script>
+    
     <script type="text/javascript" src="/socket.io/socket.io.js"></script>
     <script type="text/javascript" src="three.js"></script>
     <script type="text/javascript" src="stats.js"></script>
     <script type="text/javascript" src="dat.gui.min.js"></script>
     <script type="text/javascript" src="GameConsole.js"></script>
+    <script type="text/javascript" src="ScoreBoard.js"></script>
 
 
     <!-- Utility libraries -->
@@ -24,11 +36,23 @@
     <!-- Game core -->
     <script type="text/javascript" src="Constants.js"></script>
 
+    <script type="text/javascript" src="GridHelper.js"></script>
+    <script type="text/javascript" src="AmmoBar.js"></script>
+    <script type="text/javascript" src="HealthBar.js"></script>
+    <script type="text/javascript" src="CooldownBar.js"></script>
+
     <script type="text/javascript" src="Character.js"></script>
     <script type="text/javascript" src="Grid.js"></script>
     <script type="text/javascript" src="Game.js"></script>
     <script type="text/javascript" src="GridCell.js"></script>
     <script type="text/javascript" src="Bullet.js"></script>
+
+
+    <!-- jmpress plugin -->
+    <script type="text/javascript" src="jmpress.min.js"></script>
+    <!-- jmslideshow plugin : extends the jmpress plugin -->
+    <script type="text/javascript" src="jquery.jmslideshow.js"></script>
+    <script type="text/javascript" src="modernizr.custom.48780.js"></script>
 
     <!-- Networking -->
     <script type="text/javascript" src="netstate.js"></script>
@@ -63,6 +87,24 @@
     }
     </script>
 
+        <noscript>
+            <style>
+            .step {
+                width: 100%;
+                position: relative;
+            }
+            .step:not(.active) {
+                opacity: 1;
+                filter: alpha(opacity=99);
+                -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(opacity=99)";
+            }
+            .step:not(.active) a.jms-link{
+                opacity: 1;
+                margin-top: 40px;
+            }
+            </style>
+        </noscript>
+
   </head>
 
   <body>
@@ -70,11 +112,74 @@
     <button class='btn' id='playBtn'>Network Mode (2 Players)</button>
     <button class='btn' id='playBtn2'>Network Mode (4 Players)</button>
     <button class='btn' id='helpBtn'>Help</button>
+    <div class="container" id="slide-container">
+        
+            <section id="jms-slideshow" class="jms-slideshow">
+                <div class="step" data-color="color-1" id="step-first">
+                    <div class="jms-content">
+                        <h3>Planet Blitz</h3>
+                        <p>• Death Match!</p>
+                        <p>• Each player controls 3 units</p>
+                        <p>• Read line above unit is the health</p>
+                        <p>• Score borad is at the top right corner</p>
+                        <p>• Get the most kill!</p>        
+                        <button class="jms-link">Main Menu</button>
+                    </div>
+                    <img src="images/1.png" />
+
+                </div>
+                <div class="step" data-color="color-2" data-y="500" data-scale="0.4" data-rotate-x="30">
+                    <div class="jms-content">
+                        <h3>Unit Navigation</h3>
+                        <p> • Click on the unit to see the range of movement in green area</p>
+                        <br/>
+                        <p> • 1, 2, 3 keys provide fast naviation between units</p>
+                        <button class="jms-link">Main Menu</button>
+                    </div>
+                    <img src="images/2.png" />
+                </div>
+                <div class="step" data-color="color-3" data-x="2000" data-z="3000" data-rotate="170">
+                    <div class="jms-content">
+                        <h3>Unit Movement</h3>
+                        <p>• To move a unit, click on any green cell after selecting the unit</p>
+                        <br/>
+                        <p>• The yellow areas show the track of movement</p>
+                        <br/>
+                        <p>• The green line above the unit is the movement cooldown</p>
+                        <button class="jms-link">Main Menu</button>
+                    </div>
+                    <img src="images/3.png" />
+                </div>
+                <div class="step" data-color="color-4" data-x="3000">
+                    <div class="jms-content">
+                        <h3>Unit Shooting!</h3>
+                        <p>• To shot, right click on the position that you want the bullet to fire at</p>
+                        <br/>
+                        <p>• The blue line on the unit indicates the cooldown of the shooting</p>
+                        <button class="jms-link">Main Menu</button>
+                    </div>
+                    <img src="images/4.png" />
+                </div>
+                <div class="step" data-color="color-5" data-x="4500" data-z="1000" data-rotate-y="45">
+                    <div class="jms-content">
+                        <h3>Camera Navigation</h3>
+                        <p>• To move the camera, simply move mouse to the direction that you want to navigate to, and use roller to change camera distance  </p>
+                        <br/>
+                        <p>• To rotate the camera, use key 'q' for clockwise and 'e' for counter-clockwise</p>
+                        <button class="jms-link">Main Menu</button>
+                    </div>
+                    <img src="images/5.png" />
+                </div>
+            </section>  
+        </div>
     <div id="Stats-output">
     </div>
     <!-- Div which will hold the Output -->
     <div id="WebGL-output">
     </div>
+    <div id="Message-dialog" title="Game Statistics"></div>
+    <div id="Input-dialog" title="Player name"></div>
+    <div id="Loading-output-container"><p id="Loading-output"></p></div>
     <div class='span'>
       <div class='cloud'>
       </div>
