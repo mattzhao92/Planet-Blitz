@@ -323,6 +323,7 @@ form input{
   color: #444;
   font-size: 16px;
 }
+
 form input:focus{
   outline: 1px solid #555;
   color: #FFF;
