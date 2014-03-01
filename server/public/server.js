@@ -128,7 +128,6 @@ $(document).ready(function() {
   /* Start the game locally */
   $('#debugBtn').click(function() {
     GameInfo.netMode = false;
-    getUsername();
     loading();
     startGame();
   });
