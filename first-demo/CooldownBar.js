@@ -34,16 +34,11 @@ var CooldownBar = Class.extend({
 		return this.coolDownBar;
 	},
 
-
 	onUnitPositionChanged: function(position) {
 		this.coolDownBar.position.x = position.x + this.coolDownBarXOffset;
 		this.coolDownBar.position.y = position.y + this.coolDownBarYOffset;
 		this.coolDownBar.position.z = position.z + this.coolDownBarZOffset;
 	},
-
-	// beginCooldown: function() {
-	// 	this.coolDownBar.position.set(position.x - this.tileSize / 2 + this.coolDownBarXOffset, position.y + this.coolDownBarYOffset, position.z + this.coolDownBarZOffset);
-	// },
 
 	onCooldownChanged: function(cooldownCount) {
 		var width = this.tileSize;
@@ -57,7 +52,6 @@ var CooldownBar = Class.extend({
 			this.mesh.position.z + this.coolDownBarZOffset);
 		this.coolDownBar.scale.set(this.tileSize, this.tileSize / this.barAspectRatio, 1.0);
 	},
-
 
 	removeSelf: function(world) {
 		world.scene.remove(this.coolDownBar);

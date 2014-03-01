@@ -244,7 +244,7 @@ var Character = Class.extend({
         if (this.isActive) {
             return;
         }
-        // world.deselectAll();
+
         if (GameInfo.myTeamId == null || this.team == GameInfo.myTeamId) {
           this.unitSelectorMesh.material.color.setRGB(1.0, 0, 0);
           this.unitSelectorMesh.visible = true;
@@ -515,13 +515,11 @@ var Character = Class.extend({
         }
     },
 
-    onMouseMovement: function(direction) {
+    onMouseMovement: function(mouseLocation) {
+        var from = this.mesh.position;
 
-    },
+        var direction = new THREE.Vector3(mouseLocation.x - from.x, mouseLocation.y - from.y, mouseLocation.z - from.z)
 
-    // Immediately rotate character to following direction
-    snapToDirection: function(direction) {
-        'use strict';
         // Set the direction's angle, and the difference between it and our Object3D's current rotation
         this.mesh.rotation.y = Math.atan2(direction.x, direction.z);
     },

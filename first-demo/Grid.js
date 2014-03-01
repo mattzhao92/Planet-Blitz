@@ -454,10 +454,8 @@ var Grid = Class.extend({
         }
 
         if (this.getCurrentSelectedUnit()) {
-            var from = this.getCurrentSelectedUnit().mesh.position.clone();
-            var to = this.gridHelper.getMouseProjectionOnGrid();
-
-            this.getCurrentSelectedUnit().snapToDirection(new THREE.Vector3(to.x - from.x, to.y - from.y, to.z - from.z));
+            var mouseLocation = this.gridHelper.getMouseProjectionOnGrid();
+            this.getCurrentSelectedUnit().onMouseMovement(mouseLocation);
         }
     },
 
