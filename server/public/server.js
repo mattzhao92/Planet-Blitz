@@ -114,6 +114,7 @@ $(document).ready(function() {
   $('#WebGL-output').hide();
   $('#Stats-output').hide();
   $('#Loading-output').hide();
+  $('#slide-container').hide();
   $('#playBtn').click(function() {
     GameInfo.numOfTeam = 2;
     getUsername(2);
@@ -131,5 +132,15 @@ $(document).ready(function() {
     loading();
     startGame();
   });
+
+  $('#helpBtn').click(function() {
+    $('#slide-container').fadeIn();
+    $('#jms-slideshow' ).jmslideshow();
+  });
+
+  $('.jms-link').click(function() {
+    $('#slide-container').fadeOut();
+  });
+  
 });
 

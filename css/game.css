@@ -12,11 +12,7 @@ body {
   height: 50px;
 }
 
-p {
-  margin: auto;
-  text-align: center;
-  font-size: 30;
-}
+
 
 #debugBtn {
   top: 100px;
