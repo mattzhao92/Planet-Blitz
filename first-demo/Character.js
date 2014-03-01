@@ -261,16 +261,6 @@ var Character = Class.extend({
         }
     },
 
-    // Update the direction of the current motion
-    setDirectionWithControl: function(controls) {
-        'use strict';
-        // Either left or right, and either up or down (no jump or dive (on the Y axis), so far ...)
-        var x = controls.left ? 1 : controls.right ? -1 : 0,
-            y = 0,
-            z = controls.up ? 1 : controls.down ? -1 : 0;
-        this.direction.set(x, y, z);
-    },
-
     setDirection: function(direction) {
         this.direction = direction;
     },
@@ -360,21 +350,6 @@ var Character = Class.extend({
         this.cooldownBar.onCooldownChanged(this.coolDownLeft);
     },
 
-    updateInProgressRotation: function(delta) {
-        if (this.breakUpdateHere) return;
-        if (this.rotationInProgress) {
-            var newAngle = this.mesh.rotation.y + this.angularVelocity * delta;
-            if ((newAngle  - this.goalAngle) / (this.goalAngle - this.prevAngle) > 0) {
-                this.mesh.rotation.y = this.goalAngle;
-                this.rotationInProgress = false;
-            } else {
-                this.mesh.rotation.y = newAngle;
-                this.prevAngle = newAngle;
-            }
-            this.breakUpdateHere = true;
-        }
-    },
-
     updateInProgressLinearMotion: function(delta) {
         if (this.breakUpdateHere) return;
         if (this.motionInProgress) {
@@ -421,11 +396,9 @@ var Character = Class.extend({
     },
 
     beginCooldown: function() {
-        this.isCoolDown = 1;
+        this.isCoolDown = true;
 
         this.coolDownLeft = this.coolDownCount;
-        // this.cooldownBar.beginCooldown();
-
     },
 
     resetCooldown: function() {
@@ -438,7 +411,6 @@ var Character = Class.extend({
 
         this.ammoBar.updateWeaponReload(delta);
         this.updateMovementCoolDown(delta); 
-        this.updateInProgressRotation(delta);
         this.updateInProgressLinearMotion(delta);
 
         // handle deque action here
