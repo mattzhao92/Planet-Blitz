@@ -18,6 +18,7 @@ var Character = Class.extend({
         this.world = args.world;
         this.team = args.team;
         this.characterSize = args.characterSize;
+        this.sceneAddCmd = args.sceneAddCmd;
 
         this.teamColor = new THREE.Color(Constants.TEAM_COLORS[this.team]);
 
@@ -58,19 +59,19 @@ var Character = Class.extend({
         this.positionObservers = [];
         this.healthObservers = [];
 
-        this.ammoBar = new AmmoBar(this.world.getTileSize(), this.mesh.position, this.barAspectRatio);
-        this.world.scene.add(this.ammoBar.getSprite());
+        this.ammoBar = new AmmoBar(this.characterSize, this.mesh.position, this.barAspectRatio);
+        this.sceneAddCmd(this.ammoBar.getSprite());
         this.addPositionObserver(this.ammoBar);
 
-        this.healthBar = new HealthBar(this.world.getTileSize(), this.mesh.position, this.barAspectRatio, this.maximumHealth);
-        this.world.scene.add(this.healthBar.getSprite());
+        this.healthBar = new HealthBar(this.characterSize, this.mesh.position, this.barAspectRatio, this.maximumHealth);
+        this.sceneAddCmd(this.healthBar.getSprite());
         this.addPositionObserver(this.healthBar);
         this.addHealthObserver(this.healthBar);
 
         this.coolDownCount = 105;
         this.coolDownLeft = 0;
-        this.cooldownBar = new CooldownBar(this.world.getTileSize(), this.mesh.position, this.barAspectRatio, this.coolDownCount);
-        this.world.scene.add(this.cooldownBar.getSprite());
+        this.cooldownBar = new CooldownBar(this.characterSize, this.mesh.position, this.barAspectRatio, this.coolDownCount);
+        this.sceneAddCmd(this.cooldownBar.getSprite());
         this.addPositionObserver(this.cooldownBar);
 
         this.isCharacterInRoute = false;
@@ -103,7 +104,7 @@ var Character = Class.extend({
     reset : function() {
         this.direction = new THREE.Vector3(0, 0, 0);
 
-        this.world.scene.add(this.mesh);
+        this.sceneAddCmd(this.mesh);
         this.mesh.position = this.originalPosition;
 
         this.breakUpdateHere = false;
@@ -161,16 +162,11 @@ var Character = Class.extend({
     },
 
     getRadius: function() {
-        return this.characterSize;
+        return this.characterSize / 2;
     },
 
     isInViewPort: function (target) {
 
-    },
-
-    getRadius: function() {
-        // TODO: remove this hardcoding
-        return 20;
     },
 
     setHealth: function(health) {
@@ -199,7 +195,7 @@ var Character = Class.extend({
     addUnitSelector: function() {
         // setup unit selector mesh
         // have to supply the radius
-        var geometry = new THREE.TorusGeometry(this.world.getTileSize() / 2, 1, 5, 35);
+        var geometry = new THREE.TorusGeometry(this.characterSize / 2, 1, 5, 35);
         var material = new THREE.MeshLambertMaterial({
             color: 0xFF0000
         });
