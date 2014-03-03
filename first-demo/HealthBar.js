@@ -1,5 +1,7 @@
-var HealthBar = Class.extend({
-	init: function(tileSize, position, barAspectRatio, maxHealth) {
+var HealthBar = Sprite.extend({
+	init: function(sceneAddCmd, sceneRemoveCmd, tileSize, position, barAspectRatio, maxHealth) {
+		this._super(sceneAddCmd, sceneRemoveCmd);
+
 		this.tileSize = tileSize;
 		this.barAspectRatio = barAspectRatio;
 
@@ -31,7 +33,7 @@ var HealthBar = Class.extend({
 		this.healthBar.scale.set(this.tileSize, this.tileSize / this.barAspectRatio, 1.0);
 	},
 
-	getSprite: function() {
+	getRepr: function() {
 		return this.healthBar;
 	},
 
@@ -53,10 +55,5 @@ var HealthBar = Class.extend({
 			position.z + this.healthBarZOffset);
 		this.healthBar.scale.set(this.tileSize, this.tileSize / this.barAspectRatio, 1.0);
 	},
-
-	removeSelf: function(world) {
-		world.scene.remove(this.healthBar);
-	},
-
 
 });
