@@ -3,8 +3,8 @@ var CharacterFactory = Class.extend({
 
     },
 
-    createCharacter: function(charArgs) {
-        var character = new Character(charArgs);
+    createCharacter: function(sceneAddCmd, sceneRemoveCmd, world, team, characterSize) {
+        var character = new Character(sceneAddCmd, sceneRemoveCmd, world, team, characterSize);
         return character;
     }
 });
@@ -12,15 +12,16 @@ var CharacterFactory = Class.extend({
 var Character = Sprite.extend({
 
     // Class constructor
-    init: function(args) {
+    // character size refers to the diameter of the character
+    init: function(sceneAddCmd, sceneRemoveCmd, world, team, characterSize) {
         'use strict';
-        this._super(args);
+        this._super(sceneAddCmd, sceneRemoveCmd);
 
-        this.world = args.world;
-        this.team = args.team;
-        this.characterSize = args.characterSize;
-        this.sceneAddCmd = args.sceneAddCmd;
-        this.sceneRemoveCmd = args.sceneRemoveCmd;
+        this.sceneAddCmd = sceneAddCmd;
+        this.sceneRemoveCmd = sceneRemoveCmd;
+        this.world = world;
+        this.team = team;
+        this.characterSize = characterSize;
 
         this.teamColor = new THREE.Color(Constants.TEAM_COLORS[this.team]);
 
@@ -61,19 +62,19 @@ var Character = Sprite.extend({
         this.positionObservers = [];
         this.healthObservers = [];
 
-        this.ammoBar = new AmmoBar(this.characterSize, this.mesh.position, this.barAspectRatio);
-        this.sceneAddCmd(this.ammoBar.getSprite());
+        this.ammoBar = new AmmoBar(this.sceneAddCmd, this.sceneRemoveCmd, this.characterSize, this.mesh.position, this.barAspectRatio);
+        this.sceneAddCmd(this.ammoBar.getRepr());
         this.addPositionObserver(this.ammoBar);
 
-        this.healthBar = new HealthBar(this.characterSize, this.mesh.position, this.barAspectRatio, this.maximumHealth);
-        this.sceneAddCmd(this.healthBar.getSprite());
+        this.healthBar = new HealthBar(this.sceneAddCmd, this.sceneRemoveCmd, this.characterSize, this.mesh.position, this.barAspectRatio, this.maximumHealth);
+        this.sceneAddCmd(this.healthBar.getRepr());
         this.addPositionObserver(this.healthBar);
         this.addHealthObserver(this.healthBar);
 
         this.coolDownCount = 105;
         this.coolDownLeft = 0;
-        this.cooldownBar = new CooldownBar(this.characterSize, this.mesh.position, this.barAspectRatio, this.coolDownCount);
-        this.sceneAddCmd(this.cooldownBar.getSprite());
+        this.cooldownBar = new CooldownBar(this.sceneAddCmd, this.sceneRemoveCmd, this.characterSize, this.mesh.position, this.barAspectRatio, this.coolDownCount);
+        this.sceneAddCmd(this.cooldownBar.getRepr());
         this.addPositionObserver(this.cooldownBar);
 
         this.isCharacterInRoute = false;
@@ -230,9 +231,9 @@ var Character = Sprite.extend({
 
     onDead: function() {
         this.alive = false;
-        this.ammoBar.removeSelf(this.world);
-        this.healthBar.removeSelf(this.world);
-        this.cooldownBar.removeSelf(this.world);
+        this.ammoBar.removeSelf();
+        this.healthBar.removeSelf();
+        this.cooldownBar.removeSelf();
         this.sceneRemoveCmd(this.mesh);
     },
     
@@ -500,7 +501,7 @@ var Character = Sprite.extend({
         return false;
     },
 
-    getMesh: function() {
+    getRepr: function() {
         return this.mesh;
     }
 });

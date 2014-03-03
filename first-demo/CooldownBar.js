@@ -1,5 +1,7 @@
-var CooldownBar = Class.extend({
-	init: function(tileSize, position, barAspectRatio, totalCooldown) {
+var CooldownBar = Sprite.extend({
+	init: function(sceneAddCmd, sceneRemoveCmd, tileSize, position, barAspectRatio, totalCooldown) {
+		this._super(sceneAddCmd, sceneRemoveCmd);
+
 		this.tileSize = tileSize;
 		this.barAspectRatio = barAspectRatio;
 
@@ -30,7 +32,7 @@ var CooldownBar = Class.extend({
 		this.totalCooldown = totalCooldown;
 	},
 
-	getSprite: function() {
+	getRepr: function() {
 		return this.coolDownBar;
 	},
 
@@ -52,9 +54,4 @@ var CooldownBar = Class.extend({
 			this.mesh.position.z + this.coolDownBarZOffset);
 		this.coolDownBar.scale.set(this.tileSize, this.tileSize / this.barAspectRatio, 1.0);
 	},
-
-	removeSelf: function(world) {
-		world.scene.remove(this.coolDownBar);
-	}
-
 });

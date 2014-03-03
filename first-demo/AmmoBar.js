@@ -1,6 +1,8 @@
-var AmmoBar = Class.extend({
+var AmmoBar = Sprite.extend({
 
-	init: function(tileSize, position, barAspectRatio) {
+	init: function(sceneAddCmd, sceneRemoveCmd, tileSize, position, barAspectRatio) {
+		this._super(sceneAddCmd, sceneRemoveCmd);
+
 		this.tileSize = tileSize;
 		this.barAspectRatio = barAspectRatio;
 
@@ -42,7 +44,7 @@ var AmmoBar = Class.extend({
 		this.needsReload = true;
 	},
 
-	getSprite: function() {
+	getRepr: function() {
 		return this.ammoCountBar;
 	},
 
@@ -73,10 +75,6 @@ var AmmoBar = Class.extend({
 
 	canShoot: function() {
 		return this.ammoCount > 1;
-	},
-
-	removeSelf: function(world) {
-		world.scene.remove(this.ammoCountBar);
 	},
 
 	shootOnce: function() {
