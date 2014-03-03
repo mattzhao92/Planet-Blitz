@@ -193,11 +193,11 @@ var Grid = Class.extend({
 
         var scope = this;
 
-        var worldSceneAddCmd = function(mesh) {
+        var sceneAddCmd = function(mesh) {
             scope.scene.add(mesh);
         };
 
-        var worldSceneRemoveCmd = function(mesh) {
+        var sceneRemoveCmd = function(mesh) {
             scope.scene.remove(mesh);
         };
 
@@ -205,14 +205,8 @@ var Grid = Class.extend({
             this.characterList.push(new Array());
             this.currentSelectedUnits.push(null);
             for (var i = 0; i < this.numOfCharacters; i++) {
-                var charArgs = {
-                    world: scope,
-                    team: team_id,
-                    characterSize: scope.tileSize,
-                    sceneAddCmd: worldSceneAddCmd,
-                    sceneRemoveCmd: worldSceneRemoveCmd
-                };
-                var character = this.characterFactory.createCharacter(charArgs);
+                var characterSize = this.getTileSize();
+                var character = this.characterFactory.createCharacter(sceneAddCmd, sceneRemoveCmd, scope, team_id, characterSize);
                 var startX, startY;
                 if (team_id < 2) {
                     startX = i + 9;
