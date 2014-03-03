@@ -9,16 +9,18 @@ var CharacterFactory = Class.extend({
     }
 });
 
-var Character = Class.extend({
+var Character = Sprite.extend({
 
     // Class constructor
     init: function(args) {
         'use strict';
+        this._super(args);
 
         this.world = args.world;
         this.team = args.team;
         this.characterSize = args.characterSize;
         this.sceneAddCmd = args.sceneAddCmd;
+        this.sceneRemoveCmd = args.sceneRemoveCmd;
 
         this.teamColor = new THREE.Color(Constants.TEAM_COLORS[this.team]);
 
@@ -231,7 +233,8 @@ var Character = Class.extend({
         this.ammoBar.removeSelf(this.world);
         this.healthBar.removeSelf(this.world);
         this.cooldownBar.removeSelf(this.world);
-        this.world.scene.remove(this.mesh);
+
+        this.sceneRemoveCmd(this.mesh);
         this.world.displayMovementArea(this);
     },
     
