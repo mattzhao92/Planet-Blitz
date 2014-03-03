@@ -17,8 +17,6 @@ var Character = Sprite.extend({
         'use strict';
         this._super(sceneAddCmd, sceneRemoveCmd);
 
-        this.sceneAddCmd = sceneAddCmd;
-        this.sceneRemoveCmd = sceneRemoveCmd;
         this.world = world;
         this.team = team;
         this.characterSize = characterSize;
@@ -57,23 +55,23 @@ var Character = Sprite.extend({
         this.maximumHealth = 100;
         this.health = this.maximumHealth;
 
-        this.barAspectRatio = 10;
-
         this.positionObservers = [];
         this.healthObservers = [];
 
-        this.ammoBar = new AmmoBar(this.sceneAddCmd, this.sceneRemoveCmd, this.characterSize, this.mesh.position, this.barAspectRatio);
+        var barAspectRatio = 10;
+
+        this.ammoBar = new AmmoBar(this.sceneAddCmd, this.sceneRemoveCmd, this.characterSize, this.mesh.position, 10);
         this.sceneAddCmd(this.ammoBar.getRepr());
         this.addPositionObserver(this.ammoBar);
 
-        this.healthBar = new HealthBar(this.sceneAddCmd, this.sceneRemoveCmd, this.characterSize, this.mesh.position, this.barAspectRatio, this.maximumHealth);
+        this.healthBar = new HealthBar(this.sceneAddCmd, this.sceneRemoveCmd, this.characterSize, this.mesh.position, 10, this.maximumHealth);
         this.sceneAddCmd(this.healthBar.getRepr());
         this.addPositionObserver(this.healthBar);
         this.addHealthObserver(this.healthBar);
 
         this.coolDownCount = 105;
         this.coolDownLeft = 0;
-        this.cooldownBar = new CooldownBar(this.sceneAddCmd, this.sceneRemoveCmd, this.characterSize, this.mesh.position, this.barAspectRatio, this.coolDownCount);
+        this.cooldownBar = new CooldownBar(this.sceneAddCmd, this.sceneRemoveCmd, this.characterSize, this.mesh.position, 10, this.coolDownCount);
         this.sceneAddCmd(this.cooldownBar.getRepr());
         this.addPositionObserver(this.cooldownBar);
 
