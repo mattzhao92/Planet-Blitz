@@ -51,12 +51,12 @@ var Grid = Class.extend({
     onGameStart: function() {
         this.enableHotKeys();
         for (var tm = GameInfo.numOfTeams; tm < 4; tm++) {
-          for (var i = 0; i < this.numOfCharacters; i++) {
-            this.silentlyRemoveCharacter(this.getCharacterById(tm, i));
-          }
+            for (var i = 0; i < this.numOfCharacters; i++) {
+                this.silentlyRemoveCharacter(this.getCharacterById(tm, i));
+            }
         }
 
-        console.log("Team id "+ GameInfo.myTeamId);
+        console.log("Team id " + GameInfo.myTeamId);
 
         var teamJoinMessage;
         switch (GameInfo.myTeamId) {
@@ -103,7 +103,7 @@ var Grid = Class.extend({
 
         unitNumbers.forEach(function(number) {
             var hotkey = number.toString();
-            KeyboardJS.on(hotkey, 
+            KeyboardJS.on(hotkey,
                 function(event, keysPressed, keyCombo) {
                     if (scope.hotKeysDisabled) return;
                     // TODO: replace this with a more readable line. Also, need to account for out of index errors when units get killed
@@ -116,7 +116,7 @@ var Grid = Class.extend({
         });
 
         // unit toggle - cycle forwards
-        KeyboardJS.on("t", 
+        KeyboardJS.on("t",
             function(event, keysPressed, keyCombo) {
                 if (scope.hotKeysDisabled) return;
 
@@ -130,7 +130,7 @@ var Grid = Class.extend({
         );
 
         // unit toggle - cycle backwards
-        KeyboardJS.on("r", 
+        KeyboardJS.on("r",
             function(event, keysPressed, keyCombo) {
                 if (scope.hotKeysDisabled) return;
 
@@ -148,7 +148,7 @@ var Grid = Class.extend({
         );
 
         // focus camera on unit
-        KeyboardJS.on("space", 
+        KeyboardJS.on("space",
             function(event, keysPressed, keyCombo) {
                 if (scope.hotKeysDisabled) return;
 
@@ -160,19 +160,19 @@ var Grid = Class.extend({
         );
 
         // rudimentary camera rotation
-        KeyboardJS.on("q", 
-            function (event, keysPressed, keyCombo) {
+        KeyboardJS.on("q",
+            function(event, keysPressed, keyCombo) {
                 if (scope.hotKeysDisabled) return;
 
-                scope.controls.rotateLeft(Math.PI/30);
+                scope.controls.rotateLeft(Math.PI / 30);
             }
         );
 
-        KeyboardJS.on("e", 
-            function (event, keysPressed, keyCombo) {
+        KeyboardJS.on("e",
+            function(event, keysPressed, keyCombo) {
                 if (scope.hotKeysDisabled) return;
 
-                scope.controls.rotateRight(Math.PI/30);
+                scope.controls.rotateRight(Math.PI / 30);
             }
         );
 
@@ -200,7 +200,7 @@ var Grid = Class.extend({
                 var charArgs = {
                     world: scope,
                     team: team_id,
-                    characterSize: scope.tileSize / 2
+                    characterSize: scope.tileSize,
                 };
                 var character = this.characterFactory.createCharacter(charArgs);
                 var startX, startY;
@@ -212,6 +212,7 @@ var Grid = Class.extend({
                     startY = i + 9;
                 }
                 character.placeAtGridPos(startX, startY);
+
                 this.markTileOccupiedByCharacter(startX, startY);
                 character.setID(i);
                 this.characterList[team_id].push(character);
@@ -239,7 +240,7 @@ var Grid = Class.extend({
             character.highlightedTiles.forEach(function(tile) {
                 tile.reset();
             });
-          
+
             this.currentSelectedUnits[GameInfo.myTeamId] = null;
         }
 
@@ -737,7 +738,7 @@ var Grid = Class.extend({
             }
         }
         return isStateGood;
-    }, 
+    },
 
     disableMouseDownListener: function() {
         this.mouseDownListenerActive = false;
