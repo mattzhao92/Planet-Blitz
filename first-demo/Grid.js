@@ -86,7 +86,10 @@ var Grid = Class.extend({
     },
 
     getMyTeamCharacters: function() {
-        return this.characterList[GameInfo.myTeamId];
+    	var liveTeamMembers = _.filter(this.characterList[GameInfo.myTeamId], function(member) {
+            return (member != null && member.alive);
+        });
+        return liveTeamMembers;
     },
 
     disableHotKeys: function() {
@@ -342,12 +345,12 @@ var Grid = Class.extend({
 
         this.deselectHighlightedTiles();
 
-        var characterMovementRange = character.getMovementRange();
-
-        // highlight adjacent squares - collect all tiles from radius
-        var tilesToHighlight = this.getTilesInArea(character, characterMovementRange);
-
-        if (character.isCharacterInRoute == false && character.isCoolDown == false) {
+        if (character.isCharacterInRoute == false 
+        	&& character.isCoolDown == false 
+        	&& character.alive) {
+        	var characterMovementRange = character.getMovementRange();
+        	// highlight adjacent squares - collect all tiles from radius
+        	var tilesToHighlight = this.getTilesInArea(character, characterMovementRange);
             this.highlightTiles(tilesToHighlight);
         }
     },

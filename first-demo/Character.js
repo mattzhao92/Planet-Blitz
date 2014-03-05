@@ -236,6 +236,7 @@ var Character = Class.extend({
         this.healthBar.removeSelf(this.world);
         this.cooldownBar.removeSelf(this.world);
         this.world.scene.remove(this.mesh);
+        this.world.displayMovementArea(this);
     },
     
     // callback - called when unit is selected. Gets a reference to the game state ("world")
