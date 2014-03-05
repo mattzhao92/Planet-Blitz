@@ -550,11 +550,12 @@ var Grid = Class.extend({
 
                     // Put the network communication here.
                     if (this.getCurrentSelectedUnit().isCoolDown == 0) {
-                        sendMoveMsg(this.getCurrentSelectedUnit().id,
-                            deltaX, deltaY, deltaZ);
-
                         if (!GameInfo.netMode) {
-                            this.currentSelectedUnits[GameInfo.myTeamId].enqueueMotion();
+                            this.getCurrentSelectedUnit().setDirection(new THREE.Vector3(deltaX, 0, deltaZ));
+                            this.getCurrentSelectedUnit().enqueueMotion();
+                        } else {
+                            sendMoveMsg(this.getCurrentSelectedUnit().id,
+                                deltaX, deltaY, deltaZ);
                         }
                     }
                 }
