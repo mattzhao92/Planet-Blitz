@@ -33,6 +33,18 @@ var Grid = Class.extend({
 
         this.gridHelper = new GridHelper(this.camera, this.controls);
 
+        var scope = this;
+
+        var sceneAddCmd = function(mesh) {
+            scope.scene.add(mesh);
+        };
+
+        var sceneRemoveCmd = function(mesh) {
+            scope.scene.remove(mesh);
+        };
+
+        this.spriteFactory = new SpriteFactory(sceneAddCmd, sceneRemoveCmd);
+
         // initialize characters
         this.setupCharacters();
 
@@ -186,27 +198,17 @@ var Grid = Class.extend({
         this.characterMeshes = [];
         this.characterList = new Array();
 
-        this.characterFactory = new CharacterFactory();
-
         // Sequence number for synchornization.
         this.seq = 0;
 
         var scope = this;
-
-        var sceneAddCmd = function(mesh) {
-            scope.scene.add(mesh);
-        };
-
-        var sceneRemoveCmd = function(mesh) {
-            scope.scene.remove(mesh);
-        };
 
         for (var team_id = 0; team_id < 4; team_id++) {
             this.characterList.push(new Array());
             this.currentSelectedUnits.push(null);
             for (var i = 0; i < this.numOfCharacters; i++) {
                 var characterSize = this.getTileSize();
-                var character = this.characterFactory.createCharacter(sceneAddCmd, sceneRemoveCmd, scope, team_id, characterSize);
+                var character = this.spriteFactory.createRobot(scope, team_id, characterSize);
                 var startX, startY;
                 if (team_id < 2) {
                     startX = i + 9;
@@ -221,7 +223,6 @@ var Grid = Class.extend({
                 character.setID(i);
                 this.characterList[team_id].push(character);
                 this.characterMeshes.push(character.mesh);
-                this.scene.add(character.mesh);
             }
         }
     },
@@ -260,7 +261,7 @@ var Grid = Class.extend({
         if (index > -1) {
             this.characterMeshes.splice(index, 1);
             // remove object from scene
-            character.onDead();
+            character.removeSelf();
         }
     },
 
@@ -764,7 +765,7 @@ var Grid = Class.extend({
         console.log("reset function is called ");
         for (var i = 0; i < this.characterList.length; i++) {
             for (var j = 0; j < this.characterList[i].length; j++) {
-                this.characterList[i][j].onDead();
+                this.characterList[i][j].removeSelf();
             }
         }
 

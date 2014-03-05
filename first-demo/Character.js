@@ -196,7 +196,7 @@ var Character = Sprite.extend({
     addUnitSelector: function() {
         // setup unit selector mesh
         // have to supply the radius
-        var geometry = new THREE.TorusGeometry(this.characterSize / 2, 1, 5, 35);
+        var geometry = new THREE.TorusGeometry(this.getRadius(), 1, 5, 35);
         var material = new THREE.MeshLambertMaterial({
             color: 0xFF0000
         });
@@ -227,15 +227,13 @@ var Character = Sprite.extend({
         return 5;
     },
 
-    onDead: function() {
+    removeSelf: function() {
+        this._super();
         this.alive = false;
 
         this.ammoBar.removeSelf();
         this.healthBar.removeSelf();
         this.cooldownBar.removeSelf();
-
-        this.sceneRemoveCmd(this.mesh);
-        this.world.displayMovementArea(this);
     },
     
     // callback - called when unit is selected. Gets a reference to the game state ("world")
