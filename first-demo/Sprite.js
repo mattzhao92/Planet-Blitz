@@ -2,8 +2,6 @@ var Sprite = Class.extend({
 	init: function(sceneAddCmd, sceneRemoveCmd) {
 		this.sceneAddCmd = sceneAddCmd;
 		this.sceneRemoveCmd = sceneRemoveCmd;
-
-		// template pattern to automatically add self?
 	},
 
 	addSelf: function() {
@@ -17,6 +15,10 @@ var Sprite = Class.extend({
 
 	// abstract method which should be overridden
 	getRepr: function() {
-		console.log("Warning: getRepr was not overridden for a derived class!");
+		console.error("getRepr was not overridden for a derived class!");
+	},
+
+	applySpriteCmd: function(spriteCmd) {
+		spriteCmd.execute(this);
 	}
 })
