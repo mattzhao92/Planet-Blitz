@@ -108,7 +108,7 @@ var Grid = Class.extend({
                     if (scope.hotKeysDisabled) return;
                     // TODO: replace this with a more readable line. Also, need to account for out of index errors when units get killed
                     var characterSelected = scope.getMyTeamCharacters()[parseInt(keyCombo) - 1];
-                    if (characterSelected) {
+                    if (characterSelected && characterSelected.alive) {
                         characterSelected.onSelect();
                     }
                 }
@@ -122,7 +122,7 @@ var Grid = Class.extend({
 
                 var myTeamCharacters = scope.getMyTeamCharacters();
                 var characterSelected = myTeamCharacters[scope.unitCycle];
-                if (characterSelected) {
+                if (characterSelected.alive) {
                     characterSelected.onSelect();
                 }
                 scope.unitCycle = (scope.unitCycle + 1) % myTeamCharacters.length;
@@ -136,7 +136,7 @@ var Grid = Class.extend({
 
                 var myTeamCharacters = scope.getMyTeamCharacters();
                 var characterSelected = myTeamCharacters[scope.unitCycle];
-                if (characterSelected) {
+                if (characterSelected.alive) {
                     characterSelected.onSelect();
                 }
                 if (scope.unitCycle == 0) {
@@ -153,7 +153,7 @@ var Grid = Class.extend({
                 if (scope.hotKeysDisabled) return;
 
                 var character = scope.getCurrentSelectedUnit();
-                if (character) {
+                if (character && character.alive) {
                     scope.controls.focusOnPosition(character.mesh.position);
                 }
             }
@@ -341,13 +341,12 @@ var Grid = Class.extend({
         }
 
         this.deselectHighlightedTiles();
-
-        var characterMovementRange = character.getMovementRange();
-
-        // highlight adjacent squares - collect all tiles from radius
-        var tilesToHighlight = this.getTilesInArea(character, characterMovementRange);
-
-        if (character.isCharacterInRoute == false && character.isCoolDown == false) {
+        if (character.isCharacterInRoute == false 
+            && character.isCoolDown == false
+            && character.alive) {
+            var characterMovementRange = character.getMovementRange();
+            // highlight adjacent squares - collect all tiles from radius
+            var tilesToHighlight = this.getTilesInArea(character, characterMovementRange);
             this.highlightTiles(tilesToHighlight);
         }
     },
