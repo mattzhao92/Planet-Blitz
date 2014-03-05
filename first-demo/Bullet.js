@@ -8,21 +8,31 @@ var Bullet = Class.extend({
     this.radius = BULLET_RADIUS;
     this.world = world;
 
-    var material = new THREE.ShaderMaterial( 
-    {
-        uniforms: 
-      { 
-        "c":   { type: "f", value: 1.0 },
-        "p":   { type: "f", value: 1.4 },
-        glowColor: { type: "c", value: new THREE.Color(0x82E6FA) },
-        viewVector: { type: "v3", value: world.camera.position }
+    var material = new THREE.ShaderMaterial({
+      uniforms: {
+        "c": {
+          type: "f",
+          value: 1.0
+        },
+        "p": {
+          type: "f",
+          value: 1.4
+        },
+        glowColor: {
+          type: "c",
+          value: new THREE.Color(0x82E6FA)
+        },
+        viewVector: {
+          type: "v3",
+          value: world.camera.position
+        }
       },
-      vertexShader:   document.getElementById( 'vertexShader'   ).textContent,
-      fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
+      vertexShader: document.getElementById('vertexShader').textContent,
+      fragmentShader: document.getElementById('fragmentShader').textContent,
       side: THREE.FrontSide,
       blending: THREE.AdditiveBlending,
       transparent: true
-    }   );
+    });
 
     var geometry = new THREE.SphereGeometry(BULLET_RADIUS, 12, 12);
 
@@ -63,18 +73,3 @@ var Bullet = Class.extend({
     }
   }
 });
-
-// var BulletFactory = Class.extend({
-//   init: function(world) {
-//     this.world = world;
-
-//     // this.BULLET_RADIUS = 3;
-//     var BULLET_RADIUS = 3;
-//     this.bulletGeometry = new THREE.SphereGeometry(BULLET_RADIUS, 8, 6);
-//   },
-
-//   createBullet: function(from, to) {
-//     return new Bullet(this.world, from, to);
-//   }
-
-// })
