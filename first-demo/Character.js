@@ -125,12 +125,10 @@ var Character = Sprite.extend({
             // TODO: key this in by name
             // set team color for "wheels"
             _.forEach(materials, function(material) {
-                console.log(material);
+               if (material.name == "Wheels" || material.name == "pupil") {
+                    material.color = scope.teamColor;
+               }
             });
-            materials[0].color = scope.teamColor;
-            materials[1].color = scope.teamColor;
-            // "iris"
-            materials[10].color = scope.teamColor;
 
             var combinedMaterials = new THREE.MeshFaceMaterial(materials);
             mesh = new THREE.Mesh(geometry, combinedMaterials);
