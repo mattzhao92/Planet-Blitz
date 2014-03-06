@@ -51,6 +51,8 @@ var Bullet = Sprite.extend({
 
     // store who shot the bullet
     this.owner = owner;
+
+    this.active = true;
   },
 
   getPosition: function() {
@@ -63,6 +65,7 @@ var Bullet = Sprite.extend({
 
   destroy: function() {
     this._super();
+    // this.active = false;
   },
 
   update: function(delta) {
@@ -73,8 +76,10 @@ var Bullet = Sprite.extend({
     this.mesh.position.add(scaledDirection);
 
     if (distance > this.maxDistance) {
-      this.destroy();
+      // this.destroy();
+      // this.applySpriteCmd(this.destroyCmd);
       console.log("Bullet exceeded max distance, destroy");
+      this.active = false;
     }
   },
 

@@ -644,6 +644,23 @@ var Grid = Class.extend({
             bullet.update(delta);
             scope.checkBulletCollision(bullet);
         });
+
+        var inactiveBullets = _.filter(this.spriteFactory.bullets, function(bullet) {
+            return bullet.active == false;
+        });
+
+        _.forEach(inactiveBullets, function(bullet) {
+            scope.scene.remove(bullet.getRepr());
+            // scope.spriteFactory.removeBullet(bullet);
+        });
+
+        // remove all bullets from consideration
+        this.spriteFactory.bullets = _.filter(this.spriteFactory.bullets, function(bullet) {
+            return bullet.active == true;
+        });
+
+        // keep in sync
+        this.bullets = this.spriteFactory.bullets;
     },
 
     checkOverlap: function(obj1, obj2) {
@@ -656,7 +673,8 @@ var Grid = Class.extend({
             var character = this.characters[i];
             // also need to check for bullet team here
             if (character.team != bullet.owner.team && this.checkOverlap(bullet, character)) {
-                bullet.destroy();
+                // bullet.destroy();
+                bullet.active = false;
                 if (GameInfo.netMode) {
                     if (bullet.owner.team == GameInfo.myTeamId) {
                         sendHitMsg(character.team, character.id);
