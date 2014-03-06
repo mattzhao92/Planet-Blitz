@@ -76,7 +76,7 @@ var Character = Sprite.extend({
         this.addPositionObserver(this.cooldownBar);
 
         this.isCharacterInRoute = false;
-        this.lastRoadMap = new Array();
+        this.lastRoadMap = [];
 
         this.breakUpdateHere = false;
     },
@@ -275,7 +275,7 @@ var Character = Sprite.extend({
             this.hasPendingMove = true;
             console.log("Set to " + gx + " and " + gz + " for id " + this.team + " i " + this.id);
             var addNewItem = true;
-            var newMotions = new Array();
+            var newMotions = [];
             for (var i = 1; i < path.length; i++) {
                 // checking if path[i], path[i-1], path[i-2] are on the same line
                 if (i > 1) {
