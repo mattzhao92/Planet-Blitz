@@ -46,12 +46,11 @@ var Grid = Class.extend({
         this.spriteFactory = new SpriteFactory(sceneAddCmd, sceneRemoveCmd);
         // very temporary
         this.characters = this.spriteFactory.getCharacters();
+        // bullet info
+        this.bullets = this.spriteFactory.getBullets();
 
         // initialize characters
         this.setupCharacters();
-
-        // bullet info
-        this.bullets = [];
 
         this.setupMouseMoveListener();
         this.setupMouseDownListener();
@@ -262,15 +261,6 @@ var Grid = Class.extend({
         this.silentlyRemoveCharacter(character);
     },
 
-    handleBulletDestroy: function(bullet) {
-        // todo: remove bullet from scene
-        var index = this.bullets.indexOf(bullet);
-        if (index > -1) {
-            this.bullets.splice(index, 1);
-            this.scene.remove(bullet.mesh);
-        }
-    },
-
     convertXPosToWorldX: function(tileXPos) {
         return -((this.gridWidth) / 2) + (tileXPos * this.tileSize);
     },
@@ -472,9 +462,7 @@ var Grid = Class.extend({
             return;
         }
 
-        var bullet = new Bullet(this, owner, from, to);
-        this.bullets.push(bullet);
-        this.scene.add(bullet.mesh);
+        var bullet = this.spriteFactory.createBullet(this.camera.position, owner, from, to);
     },
 
     handleShootEvent: function() {
@@ -645,17 +633,49 @@ var Grid = Class.extend({
     },
 
     updateCharacters: function(delta) {
+        var scope = this;
         _.forEach(this.characters, function(character) {
             character.update(delta);
         });
+
+        var inactiveChars = _.filter(this.spriteFactory.robots, function(character) {
+            return character.active == false;
+        });
+
+        _.forEach(inactiveChars, function(character) {
+            scope.scene.remove(character.getRepr());
+        });
+
+        this.spriteFactory.robots = _.filter(this.spriteFactory.robots, function(character) {
+            return character.active == true;
+        });
+
+        this.characters = this.spriteFactory.robots;
     },
 
     updateBullets: function(delta) {
-        for (var i = 0; i < this.bullets.length; i++) {
-            var bullet = this.bullets[i];
+        var scope = this;
+        _.forEach(this.bullets, function(bullet) {
             bullet.update(delta);
-            this.checkBulletCollision(bullet, i);
-        }
+            scope.checkBulletCollision(bullet);
+        });
+
+        var inactiveBullets = _.filter(this.spriteFactory.bullets, function(bullet) {
+            return bullet.active == false;
+        });
+
+        _.forEach(inactiveBullets, function(bullet) {
+            scope.scene.remove(bullet.getRepr());
+            // scope.spriteFactory.removeBullet(bullet);
+        });
+
+        // remove all bullets from consideration
+        this.spriteFactory.bullets = _.filter(this.spriteFactory.bullets, function(bullet) {
+            return bullet.active == true;
+        });
+
+        // keep in sync
+        this.bullets = this.spriteFactory.bullets;
     },
 
     checkOverlap: function(obj1, obj2) {
@@ -663,18 +683,20 @@ var Grid = Class.extend({
         return combinedRadius * combinedRadius >= obj1.position.distanceToSquared(obj2.position);
     },
 
-    checkBulletCollision: function(bullet, bulletIndex) {
+    checkBulletCollision: function(bullet) {
         for (var i = 0; i < this.characters.length; i++) {
             var character = this.characters[i];
             // also need to check for bullet team here
             if (character.team != bullet.owner.team && this.checkOverlap(bullet, character)) {
-                this.handleBulletDestroy(bullet);
+                // bullet.destroy();
+                bullet.active = false;
                 if (GameInfo.netMode) {
                     if (bullet.owner.team == GameInfo.myTeamId) {
                         sendHitMsg(character.team, character.id);
                     }
                 } else {
-                    character.applyDamage(30);
+                    character.applyDamage(5);
+                    console.log("Applying damage");
                 }
                 // Send the server hit message.
                 break;

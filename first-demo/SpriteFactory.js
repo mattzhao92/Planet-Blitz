@@ -7,6 +7,19 @@ var SpriteFactory = Class.extend({
 		this.sceneRemoveCmd = sceneRemoveCmd;
 
 		this.robots = [];
+		this.bullets = [];
+	},
+
+	removeFromContainer: function(sprite, container) {
+		var index = container.indexOf(sprite);
+
+		if (index > -1) {
+			container.splice(sprite);
+		}
+
+		if (index == -1) {
+			console.error("Could not delete a sprite");
+		}
 	},
 
 	removeRobot: function(robot) {
@@ -14,6 +27,14 @@ var SpriteFactory = Class.extend({
 
 		if (index > -1) {
 			this.robots.splice(index, -1);
+		}
+	},
+
+	removeBullet: function(bullet) {
+		var index = this.bullets.indexOf(bullet);
+
+		if (index > -1) {
+			this.bullets.splice(index, -1);
 		}
 	},
 
@@ -29,6 +50,7 @@ var SpriteFactory = Class.extend({
 		// decorator - allow character to remove itself form the container
 		var postDestroyCmd = new SpriteCmd(function(sprite) {
 			scope.sceneRemoveCmd.execute(sprite);
+			// scope.removeFromContainer(sprite, scope.robots);
 			scope.removeRobot(sprite);
 		});
 
@@ -36,6 +58,28 @@ var SpriteFactory = Class.extend({
 		robot.setup();
 
 		return robot;
+	},
+
+	createBullet: function(cameraPosition, owner, from, to) {
+		var scope = this;
+
+		// duplicated code TODO - but the "more general version" doesn't work
+		// decorator - allow character to add itself to its container
+		var postInitCmd = new SpriteCmd(function(sprite) {
+			scope.sceneAddCmd.execute(sprite);
+			scope.bullets.push(sprite);
+		});
+
+		// decorator - allow character to remove itself form the container
+		var postDestroyCmd = new SpriteCmd(function(sprite) {
+			scope.sceneRemoveCmd.execute(sprite);
+			scope.removeBullet(sprite);
+		});
+
+		var bullet = new Bullet(postInitCmd, postDestroyCmd, cameraPosition, owner, from, to);
+		bullet.setup();
+
+		return bullet;
 	},
 
 	createAmmoBar: function(characterSize, position, barAspectRatio) {
@@ -61,6 +105,10 @@ var SpriteFactory = Class.extend({
 
 	getCharacters: function() {
 		return this.robots;
+	},
+
+	getBullets: function() {
+		return this.bullets;
 	}
 
 });
