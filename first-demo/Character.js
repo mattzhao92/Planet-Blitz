@@ -13,9 +13,9 @@ var Character = Sprite.extend({
 
     // Class constructor
     // character size refers to the diameter of the character
-    init: function(sceneAddCmd, sceneRemoveCmd, spriteFactory, world, team, characterSize) {
+    init: function(setupCmd, destroyCmd, spriteFactory, world, team, characterSize) {
         'use strict';
-        this._super(sceneAddCmd, sceneRemoveCmd);
+        this._super(setupCmd, destroyCmd);
 
         this.spriteFactory = spriteFactory;
 
@@ -105,7 +105,8 @@ var Character = Sprite.extend({
     reset : function() {
         this.direction = new THREE.Vector3(0, 0, 0);
 
-        this.sceneAddCmd(this.mesh);
+        this.setup();
+
         this.mesh.position = this.originalPosition;
 
         this.breakUpdateHere = false;
@@ -227,14 +228,13 @@ var Character = Sprite.extend({
         return 5;
     },
 
-    removeSelf: function() {
-        // this._super();
-        this.applySpriteCmd(this.sceneRemoveCmd);
+    destroy: function() {
+        this._super();
 
         this.alive = false;
-        this.ammoBar.removeSelf();
-        this.healthBar.removeSelf();
-        this.cooldownBar.removeSelf();
+        this.ammoBar.destroy();
+        this.healthBar.destroy();
+        this.cooldownBar.destroy();
     },
     
     // callback - called when unit is selected. Gets a reference to the game state ("world")
