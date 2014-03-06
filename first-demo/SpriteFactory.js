@@ -22,21 +22,28 @@ var SpriteFactory = Class.extend({
 		}
 	},
 
-	updateBulletsContainer: function() {
+	updateContainer: function(container) {
 		var scope = this;
 
-		var inactiveBullets = _.filter(this.bullets, function(bullet) {
-		    return bullet.active == false;
+		var inactiveSprites = _.filter(container, function(sprite) {
+		    return sprite.active == false;
 		});
 
-		_.forEach(inactiveBullets, function(bullet) {
-		    bullet.applySpriteCmd(scope.sceneRemoveCmd);
+		// remove all inactive sprites
+		_.forEach(inactiveSprites, function(sprite) {
+		    sprite.applySpriteCmd(scope.sceneRemoveCmd);
 		});
 
-		// remove all bullets from consideration
-		this.bullets = _.filter(this.bullets, function(bullet) {
-		    return bullet.active == true;
+		// only retain active sprites
+		var updatedContainer = _.filter(container, function(sprite) {
+		    return sprite.active;
 		});
+
+		return updatedContainer;
+	},
+
+	updateBulletsContainer: function() {
+		this.bullets = this.updateContainer(this.bullets);
 	},
 
 	removeRobot: function(robot) {
