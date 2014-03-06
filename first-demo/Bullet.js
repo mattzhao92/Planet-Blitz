@@ -1,12 +1,12 @@
 var BULLET_RADIUS = 5;
 
 
-var Bullet = Class.extend({
+var Bullet = Sprite.extend({
   // requires two Vector3 denoting start and end
-  init: function(world, owner, from, to) {
+  init: function(setupCmd, destroyCmd, cameraPosition, owner, from, to) {
+    this._super(setupCmd, destroyCmd);
 
     this.radius = BULLET_RADIUS;
-    this.world = world;
 
     var material = new THREE.ShaderMaterial({
       uniforms: {
@@ -24,7 +24,7 @@ var Bullet = Class.extend({
         },
         viewVector: {
           type: "v3",
-          value: world.camera.position
+          value: cameraPosition
         }
       },
       vertexShader: document.getElementById('vertexShader').textContent,
@@ -69,7 +69,11 @@ var Bullet = Class.extend({
     this.mesh.position.add(scaledDirection);
 
     if (distance > this.maxDistance) {
-      this.world.handleBulletDestroy(this);
+      this.destroy();
     }
+  },
+
+  getRepr: function() {
+    return this.mesh;
   }
 });

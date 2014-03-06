@@ -46,12 +46,11 @@ var Grid = Class.extend({
         this.spriteFactory = new SpriteFactory(sceneAddCmd, sceneRemoveCmd);
         // very temporary
         this.characters = this.spriteFactory.getCharacters();
+        // bullet info
+        this.bullets = this.spriteFactory.getBullets();
 
         // initialize characters
         this.setupCharacters();
-
-        // bullet info
-        this.bullets = [];
 
         this.setupMouseMoveListener();
         this.setupMouseDownListener();
@@ -262,15 +261,6 @@ var Grid = Class.extend({
         this.silentlyRemoveCharacter(character);
     },
 
-    handleBulletDestroy: function(bullet) {
-        // todo: remove bullet from scene
-        var index = this.bullets.indexOf(bullet);
-        if (index > -1) {
-            this.bullets.splice(index, 1);
-            this.scene.remove(bullet.mesh);
-        }
-    },
-
     convertXPosToWorldX: function(tileXPos) {
         return -((this.gridWidth) / 2) + (tileXPos * this.tileSize);
     },
@@ -472,9 +462,7 @@ var Grid = Class.extend({
             return;
         }
 
-        var bullet = new Bullet(this, owner, from, to);
-        this.bullets.push(bullet);
-        this.scene.add(bullet.mesh);
+        var bullet = this.spriteFactory.createBullet(this.camera.position, owner, from, to);
     },
 
     handleShootEvent: function() {
@@ -668,7 +656,7 @@ var Grid = Class.extend({
             var character = this.characters[i];
             // also need to check for bullet team here
             if (character.team != bullet.owner.team && this.checkOverlap(bullet, character)) {
-                this.handleBulletDestroy(bullet);
+                bullet.destroy();
                 if (GameInfo.netMode) {
                     if (bullet.owner.team == GameInfo.myTeamId) {
                         sendHitMsg(character.team, character.id);

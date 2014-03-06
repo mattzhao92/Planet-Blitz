@@ -21,5 +21,9 @@ var Sprite = Class.extend({
 
 	applySpriteCmd: function(spriteCmd) {
 		spriteCmd.execute(this);
-	}
+	},
+
+	// update: function(delta) {
+
+	// }
 })
