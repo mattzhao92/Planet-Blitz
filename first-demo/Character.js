@@ -25,8 +25,8 @@ var Character = Sprite.extend({
 
         this.teamColor = new THREE.Color(Constants.TEAM_COLORS[this.team]);
 
-        this.isActive = false;
-        this.alive = true;
+        this.isSelected = false;
+        this.active = true;
         this.id = 0;
 
         this.xPos = 0;
@@ -111,7 +111,7 @@ var Character = Sprite.extend({
 
         this.breakUpdateHere = false;
 
-        this.isActive = true;
+        this.isSelected = true;
         this.hasPendingMove = false;
         this.highlightedTiles = [];
         this.motionQueue.length = 0;
@@ -229,10 +229,8 @@ var Character = Sprite.extend({
     },
 
     destroy: function() {
-        this._super();
-
-        this.alive = false;
-
+        // this._super();
+        this.active = false;
         this.ammoBar.destroy();
         this.healthBar.destroy();
         this.cooldownBar.destroy();
@@ -241,7 +239,7 @@ var Character = Sprite.extend({
     // callback - called when unit is selected. Gets a reference to the game state ("world")
     onSelect: function() {
         // don't do anything if this unit was already selected
-        if (this.isActive) {
+        if (this.isSelected) {
             return;
         }
 
@@ -249,7 +247,7 @@ var Character = Sprite.extend({
           this.unitSelectorMesh.material.color.setRGB(1.0, 0, 0);
           this.unitSelectorMesh.visible = true;
           this.world.markCharacterAsSelected(this);
-          this.isActive = true;
+          this.isSelected = true;
         }
     },
 
@@ -257,7 +255,7 @@ var Character = Sprite.extend({
         // return to original color
         if (GameInfo.myTeamId == null || this.team == GameInfo.myTeamId) {
             this.unitSelectorMesh.visible = false;
-            this.isActive = false;
+            this.isSelected = false;
         }
     },
 

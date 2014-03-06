@@ -1,12 +1,12 @@
 var BULLET_RADIUS = 5;
 
 
-var Bullet = Class.extend({
+var Bullet = Sprite.extend({
   // requires two Vector3 denoting start and end
-  init: function(world, owner, from, to) {
+  init: function(setupCmd, destroyCmd, cameraPosition, owner, from, to) {
+    this._super(setupCmd, destroyCmd);
 
     this.radius = BULLET_RADIUS;
-    this.world = world;
 
     var material = new THREE.ShaderMaterial({
       uniforms: {
@@ -24,7 +24,7 @@ var Bullet = Class.extend({
         },
         viewVector: {
           type: "v3",
-          value: world.camera.position
+          value: cameraPosition
         }
       },
       vertexShader: document.getElementById('vertexShader').textContent,
@@ -51,6 +51,8 @@ var Bullet = Class.extend({
 
     // store who shot the bullet
     this.owner = owner;
+
+    this.active = true;
   },
 
   getPosition: function() {
@@ -61,6 +63,11 @@ var Bullet = Class.extend({
     return BULLET_RADIUS;
   },
 
+  destroy: function() {
+    this._super();
+    // this.active = false;
+  },
+
   update: function(delta) {
     var distance = new THREE.Vector3().subVectors(this.mesh.position, this.startPosition).length();
 
@@ -69,7 +76,14 @@ var Bullet = Class.extend({
     this.mesh.position.add(scaledDirection);
 
     if (distance > this.maxDistance) {
-      this.world.handleBulletDestroy(this);
+      // this.destroy();
+      // this.applySpriteCmd(this.destroyCmd);
+      console.log("Bullet exceeded max distance, destroy");
+      this.active = false;
     }
+  },
+
+  getRepr: function() {
+    return this.mesh;
   }
 });
