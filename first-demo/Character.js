@@ -124,7 +124,9 @@ var Character = Sprite.extend({
         this.loader.load(fullFilename, function(geometry, materials) {
             // TODO: key this in by name
             // set team color for "wheels"
- 
+            _.forEach(materials, function(material) {
+                console.log(material);
+            });
             materials[0].color = scope.teamColor;
             materials[1].color = scope.teamColor;
             // "iris"
