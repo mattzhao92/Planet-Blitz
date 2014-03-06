@@ -2,6 +2,7 @@ var Sprite = Class.extend({
 	init: function(setupCmd, destroyCmd) {
 		this.setupCmd = setupCmd;
 		this.destroyCmd = destroyCmd;
+		this.active = true;
 	},
 
 	// for all behaviors before initialization
@@ -11,6 +12,7 @@ var Sprite = Class.extend({
 
 	// for all behaviors related to destroying this object
 	destroy: function() {
+		this.active = false;
 		this.applySpriteCmd(this.destroyCmd);
 	},
 
