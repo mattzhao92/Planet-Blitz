@@ -1,10 +1,10 @@
 var SpriteCmd = Class.extend({
 
-	init: function() {
-
+	init: function(spriteCmd) {
+		this.spriteCmd = spriteCmd;
 	}, 
 
-	execute: function() {
-
+	execute: function(sprite) {
+		this.spriteCmd(sprite);
 	}
 });

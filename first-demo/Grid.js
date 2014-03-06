@@ -35,15 +35,17 @@ var Grid = Class.extend({
 
         var scope = this;
 
-        var sceneAddCmd = function(mesh) {
-            scope.scene.add(mesh);
-        };
+        var sceneAddCmd = new SpriteCmd(function(sprite) {
+            scope.scene.add(sprite.getRepr());
+        });
 
-        var sceneRemoveCmd = function(mesh) {
-            scope.scene.remove(mesh);
-        };
+        var sceneRemoveCmd = new SpriteCmd(function(sprite) {
+            scope.scene.remove(sprite.getRepr());
+        });
 
         this.spriteFactory = new SpriteFactory(sceneAddCmd, sceneRemoveCmd);
+        // very temporary
+        this.characters = this.spriteFactory.getCharacters();
 
         // initialize characters
         this.setupCharacters();
@@ -191,11 +193,9 @@ var Grid = Class.extend({
     },
 
     setupCharacters: function() {
-        this.characters = new THREE.Object3D();
         this.numOfCharacters = 3;
         // The row position.
         this.teamStartPos = [1, 18, 1, 18];
-        this.characterMeshes = [];
         this.characterList = new Array();
 
         // Sequence number for synchornization.
@@ -222,7 +222,6 @@ var Grid = Class.extend({
                 this.markTileOccupiedByCharacter(startX, startY);
                 character.setID(i);
                 this.characterList[team_id].push(character);
-                this.characterMeshes.push(character.mesh);
             }
         }
     },
@@ -249,20 +248,12 @@ var Grid = Class.extend({
             this.currentSelectedUnits[GameInfo.myTeamId] = null;
         }
 
-        // mark dead.
-        character.alive = false;
         // mark tile position as available
         var xPos = character.getTileXPos();
         var zPos = character.getTileZPos();
         this.getTileAtTilePos(xPos, zPos).hasCharacter = false;
 
-        // remove character mesh from list of active meshes
-        var index = this.characterMeshes.indexOf(character.mesh);
-        if (index > -1) {
-            this.characterMeshes.splice(index, 1);
-            // remove object from scene
-            character.removeSelf();
-        }
+        character.removeSelf();
     },
 
     handleCharacterDead: function(character) {
@@ -431,8 +422,8 @@ var Grid = Class.extend({
     },
 
     deselectAll: function() {
-        this.characterMeshes.forEach(function(characterMesh) {
-            characterMesh.owner.deselect();
+        this.characters.forEach(function(character) {
+            character.deselect();
         });
     },
 
@@ -502,7 +493,11 @@ var Grid = Class.extend({
         var raycaster = this.gridHelper.getRaycaster();
 
         // recursively call intersects
-        var intersects = raycaster.intersectObjects(this.characterMeshes, true);
+        var characterMeshes = _.map(this.characters, function(character) {
+            return character.getRepr();
+        });
+
+        var intersects = raycaster.intersectObjects(characterMeshes, true);
         var intersectsWithTiles = raycaster.intersectObjects(this.tiles.children);
         var unitIsCurrentlySelected = (this.getCurrentSelectedUnit() != null);
 
@@ -650,10 +645,9 @@ var Grid = Class.extend({
     },
 
     updateCharacters: function(delta) {
-        for (var i = 0; i < this.characterMeshes.length; i++) {
-            var character = this.characterMeshes[i].owner;
+        _.forEach(this.characters, function(character) {
             character.update(delta);
-        }
+        });
     },
 
     updateBullets: function(delta) {
@@ -670,8 +664,8 @@ var Grid = Class.extend({
     },
 
     checkBulletCollision: function(bullet, bulletIndex) {
-        for (var i = 0; i < this.characterMeshes.length; i++) {
-            var character = this.characterMeshes[i].owner;
+        for (var i = 0; i < this.characters.length; i++) {
+            var character = this.characters[i];
             // also need to check for bullet team here
             if (character.team != bullet.owner.team && this.checkOverlap(bullet, character)) {
                 this.handleBulletDestroy(bullet);
