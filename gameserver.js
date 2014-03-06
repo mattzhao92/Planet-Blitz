@@ -199,7 +199,9 @@ io.sockets.on('connection', function(socket) {
   });
 
   socket.on('disconnect', function(message) {
-  
+    socket.get('username', function(error, username) {
+      console.log('******player ' + username + ' leave');
+    });
   });
 
 });
