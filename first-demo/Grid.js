@@ -18,7 +18,7 @@ var Grid = Class.extend({
         // information about what's being selected
         this.highlightedTiles = null;
         this.currentMouseOverTile = null;
-        this.currentSelectedUnits = new Array();
+        this.currentSelectedUnits = [];
 
         // listeners and state
         this.mouseDownListenerActive = true;
@@ -196,7 +196,7 @@ var Grid = Class.extend({
         this.numOfCharacters = 3;
         // The row position.
         this.teamStartPos = [1, 18, 1, 18];
-        this.characterList = new Array();
+        this.characterList = [];
 
         // Sequence number for synchornization.
         this.seq = 0;
@@ -377,9 +377,9 @@ var Grid = Class.extend({
         if (!startTile) return tilesToHighlight;
 
         startTile.isObstacle();
-        var visited = new Array();
-        var nodesInCurrentLevel = new Array();
-        var nodesInNextLevel = new Array();
+        var visited = [];
+        var nodesInCurrentLevel = [];
+        var nodesInNextLevel = [];
         tilesToHighlight.push(startTile);
         nodesInCurrentLevel.push(startTile);
 
@@ -397,7 +397,7 @@ var Grid = Class.extend({
 
             if (nodesInCurrentLevel.length == 0) {
                 nodesInCurrentLevel = nodesInNextLevel;
-                nodesInNextLevel = new Array();
+                nodesInNextLevel = [];
                 radius = radius - 1;
             }
             visited.push(currentTile);
@@ -689,8 +689,8 @@ var Grid = Class.extend({
         }
         this.seq = seq;
         // This is usd to check ghosts.
-        var liveChars = new Array();
-        var liveStates = new Array();
+        var liveChars = [];
+        var liveStates = [];
         for (var t = 0; t < GameInfo.numOfTeams; t++) {
             liveStates.push(new Array());
             for (var i = 0; i < this.numOfCharacters; i++) {
