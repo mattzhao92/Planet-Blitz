@@ -33,30 +33,28 @@ var SpriteFactory = Class.extend({
 		});
 
 		var robot = new Character(postInitCmd, postDestroyCmd, this, world, team, characterSize);
-
-		// start post initialization hook
-		robot.addSelf();
+		robot.setup();
 
 		return robot;
 	},
 
 	createAmmoBar: function(characterSize, position, barAspectRatio) {
 		var ammoBar = new AmmoBar(this.sceneAddCmd, this.sceneRemoveCmd, characterSize, position, barAspectRatio);
-		ammoBar.addSelf();
+		ammoBar.setup();
 
 		return ammoBar;
 	},
 
 	createHealthBar: function(characterSize, position, barAspectRatio, maximumHealth) {
 		var healthBar = new HealthBar(this.sceneAddCmd, this.sceneRemoveCmd, characterSize, position, barAspectRatio, maximumHealth);
-		healthBar.addSelf();
+		healthBar.setup();
 
 		return healthBar;
 	},
 
 	createCooldownBar: function(characterSize, position, barAspectRatio, coolDownCount) {
 		var cooldownBar = new CooldownBar(this.sceneAddCmd, this.sceneRemoveCmd, characterSize, position, 10, coolDownCount);
-		cooldownBar.addSelf();
+		cooldownBar.setup();
 
 		return cooldownBar;
 	},

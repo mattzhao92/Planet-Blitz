@@ -1,16 +1,17 @@
 var Sprite = Class.extend({
-	init: function(sceneAddCmd, sceneRemoveCmd) {
-		this.sceneAddCmd = sceneAddCmd;
-		this.sceneRemoveCmd = sceneRemoveCmd;
+	init: function(setupCmd, destroyCmd) {
+		this.setupCmd = setupCmd;
+		this.destroyCmd = destroyCmd;
 	},
 
-	addSelf: function() {
-		this.applySpriteCmd(this.sceneAddCmd);
+	// for all behaviors before initialization
+	setup: function() {
+		this.applySpriteCmd(this.setupCmd);
 	},
 
-	// remove self from the world
-	removeSelf: function() {
-		this.applySpriteCmd(this.sceneRemoveCmd);
+	// for all behaviors related to destroying this object
+	destroy: function() {
+		this.applySpriteCmd(this.destroyCmd);
 	},
 
 	// abstract method which should be overridden

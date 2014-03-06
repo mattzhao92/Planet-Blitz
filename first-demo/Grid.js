@@ -253,7 +253,7 @@ var Grid = Class.extend({
         var zPos = character.getTileZPos();
         this.getTileAtTilePos(xPos, zPos).hasCharacter = false;
 
-        character.removeSelf();
+        character.destroy();
     },
 
     handleCharacterDead: function(character) {
@@ -759,7 +759,7 @@ var Grid = Class.extend({
         console.log("reset function is called ");
         for (var i = 0; i < this.characterList.length; i++) {
             for (var j = 0; j < this.characterList[i].length; j++) {
-                this.characterList[i][j].removeSelf();
+                this.characterList[i][j].destroy();
             }
         }
 
