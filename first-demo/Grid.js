@@ -639,11 +639,11 @@ var Grid = Class.extend({
     },
 
     updateBullets: function(delta) {
-        for (var i = 0; i < this.bullets.length; i++) {
-            var bullet = this.bullets[i];
+        var scope = this;
+        _.forEach(this.bullets, function(bullet) {
             bullet.update(delta);
-            this.checkBulletCollision(bullet, i);
-        }
+            scope.checkBulletCollision(bullet);
+        });
     },
 
     checkOverlap: function(obj1, obj2) {
@@ -651,7 +651,7 @@ var Grid = Class.extend({
         return combinedRadius * combinedRadius >= obj1.position.distanceToSquared(obj2.position);
     },
 
-    checkBulletCollision: function(bullet, bulletIndex) {
+    checkBulletCollision: function(bullet) {
         for (var i = 0; i < this.characters.length; i++) {
             var character = this.characters[i];
             // also need to check for bullet team here
@@ -662,7 +662,8 @@ var Grid = Class.extend({
                         sendHitMsg(character.team, character.id);
                     }
                 } else {
-                    character.applyDamage(30);
+                    character.applyDamage(5);
+                    console.log("Applying damage");
                 }
                 // Send the server hit message.
                 break;

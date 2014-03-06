@@ -23,7 +23,7 @@ var Sprite = Class.extend({
 		spriteCmd.execute(this);
 	},
 
-	// update: function(delta) {
+	update: function(delta) {
 
-	// }
+	}
 })

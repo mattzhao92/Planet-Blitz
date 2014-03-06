@@ -16,6 +16,10 @@ var SpriteFactory = Class.extend({
 		if (index > -1) {
 			container.splice(sprite);
 		}
+
+		if (index == -1) {
+			console.error("Could not delete a sprite");
+		}
 	},
 
 	removeRobot: function(robot) {
@@ -23,6 +27,14 @@ var SpriteFactory = Class.extend({
 
 		if (index > -1) {
 			this.robots.splice(index, -1);
+		}
+	},
+
+	removeBullet: function(bullet) {
+		var index = this.bullets.indexOf(bullet);
+
+		if (index > -1) {
+			this.bullets.splice(index, -1);
 		}
 	},
 
@@ -48,34 +60,10 @@ var SpriteFactory = Class.extend({
 		return robot;
 	},
 
-	getSetupSpriteCmdForContainer: function(container) {
-		var scope = this;
-
-		var setupCmd = new SpriteCmd(function(sprite) {
-			scope.sceneAddCmd.execute(sprite);
-			container.push(sprite);
-		});
-
-		return setupCmd;
-	},
-
-	getDestroySpriteCmdForContainer: function(container) {
-		var scope = this;
-
-		var destroyCmd = new SpriteCmd(function(sprite) {
-			scope.sceneRemoveCmd.execute(sprite);
-			// scope.removeFromContainer(sprite, container);
-		});
-
-		return destroyCmd;
-	},
-
 	createBullet: function(cameraPosition, owner, from, to) {
-		// var setupCmd = this.getSetupSpriteCmdForContainer(this.bullets);
-		// var destroyCmd = this.getDestroySpriteCmdForContainer(this.bullets);
-
 		var scope = this;
-		// duplicated code TODO
+
+		// duplicated code TODO - but the "more general version" doesn't work
 		// decorator - allow character to add itself to its container
 		var postInitCmd = new SpriteCmd(function(sprite) {
 			scope.sceneAddCmd.execute(sprite);
@@ -85,7 +73,7 @@ var SpriteFactory = Class.extend({
 		// decorator - allow character to remove itself form the container
 		var postDestroyCmd = new SpriteCmd(function(sprite) {
 			scope.sceneRemoveCmd.execute(sprite);
-			scope.removeFromContainer(sprite, scope.bullets);
+			scope.removeBullet(sprite);
 		});
 
 		var bullet = new Bullet(postInitCmd, postDestroyCmd, cameraPosition, owner, from, to);

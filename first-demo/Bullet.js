@@ -61,6 +61,10 @@ var Bullet = Sprite.extend({
     return BULLET_RADIUS;
   },
 
+  destroy: function() {
+    this._super();
+  },
+
   update: function(delta) {
     var distance = new THREE.Vector3().subVectors(this.mesh.position, this.startPosition).length();
 
@@ -70,6 +74,7 @@ var Bullet = Sprite.extend({
 
     if (distance > this.maxDistance) {
       this.destroy();
+      console.log("Bullet exceeded max distance, destroy");
     }
   },
 
