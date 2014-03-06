@@ -13,9 +13,11 @@ var Character = Sprite.extend({
 
     // Class constructor
     // character size refers to the diameter of the character
-    init: function(sceneAddCmd, sceneRemoveCmd, world, team, characterSize) {
+    init: function(sceneAddCmd, sceneRemoveCmd, spriteFactory, world, team, characterSize) {
         'use strict';
         this._super(sceneAddCmd, sceneRemoveCmd);
+
+        this.spriteFactory = spriteFactory;
 
         this.world = world;
         this.team = team;
@@ -60,19 +62,17 @@ var Character = Sprite.extend({
 
         var barAspectRatio = 10;
 
-        this.ammoBar = new AmmoBar(this.sceneAddCmd, this.sceneRemoveCmd, this.characterSize, this.mesh.position, 10);
-        this.ammoBar.addSelf();
+        this.ammoBar = this.spriteFactory.createAmmoBar(this.characterSize, this.getRepr().position, 10);
         this.addPositionObserver(this.ammoBar);
 
-        this.healthBar = new HealthBar(this.sceneAddCmd, this.sceneRemoveCmd, this.characterSize, this.mesh.position, 10, this.maximumHealth);
-        this.healthBar.addSelf();
+        this.healthBar = this.spriteFactory.createHealthBar(this.characterSize, this.getRepr().position, 10, this.maximumHealth);
         this.addPositionObserver(this.healthBar);
         this.addHealthObserver(this.healthBar);
 
         this.coolDownCount = 105;
         this.coolDownLeft = 0;
-        this.cooldownBar = new CooldownBar(this.sceneAddCmd, this.sceneRemoveCmd, this.characterSize, this.mesh.position, 10, this.coolDownCount);
-        this.cooldownBar.addSelf();
+
+        this.cooldownBar = this.spriteFactory.createCooldownBar(this.characterSize, this.getRepr().position, 10, this.coolDownCount);
         this.addPositionObserver(this.cooldownBar);
 
         this.isCharacterInRoute = false;
@@ -228,7 +228,9 @@ var Character = Sprite.extend({
     },
 
     removeSelf: function() {
-        this._super();
+        // this._super();
+        this.applySpriteCmd(this.sceneRemoveCmd);
+
         this.alive = false;
         this.ammoBar.removeSelf();
         this.healthBar.removeSelf();
