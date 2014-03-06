@@ -10,18 +10,6 @@ var SpriteFactory = Class.extend({
 		this.bullets = [];
 	},
 
-	removeFromContainer: function(sprite, container) {
-		var index = container.indexOf(sprite);
-
-		if (index > -1) {
-			container.splice(sprite);
-		}
-
-		if (index == -1) {
-			console.error("Could not delete a sprite");
-		}
-	},
-
 	updateContainer: function(container) {
 		var scope = this;
 
@@ -40,6 +28,10 @@ var SpriteFactory = Class.extend({
 		});
 
 		return updatedContainer;
+	},
+
+	updateCharactersContainer: function() {
+		this.robots = this.updateContainer(this.robots);
 	},
 
 	updateBulletsContainer: function() {
@@ -74,7 +66,6 @@ var SpriteFactory = Class.extend({
 		// decorator - allow character to remove itself form the container
 		var postDestroyCmd = new SpriteCmd(function(sprite) {
 			scope.sceneRemoveCmd.execute(sprite);
-			// scope.removeFromContainer(sprite, scope.robots);
 			scope.removeRobot(sprite);
 		});
 
@@ -133,6 +124,18 @@ var SpriteFactory = Class.extend({
 
 	getBullets: function() {
 		return this.bullets;
-	}
+	},
+
+	removeFromContainer: function(sprite, container) {
+		var index = container.indexOf(sprite);
+
+		if (index > -1) {
+			container.splice(sprite);
+		}
+
+		if (index == -1) {
+			console.error("Could not delete a sprite");
+		}
+	},
 
 });
