@@ -44,8 +44,6 @@ var Grid = Class.extend({
         });
 
         this.spriteFactory = new SpriteFactory(sceneAddCmd, sceneRemoveCmd);
-        // very temporary
-        this.characters = this.spriteFactory.getCharacters();
 
         // initialize characters
         this.setupCharacters();
@@ -57,6 +55,10 @@ var Grid = Class.extend({
         this.unitCycle = 0;
         this.hotKeysDisabled = true;
         this.resetInProgress = false;
+    },
+
+    getCharacters: function() {
+        return this.spriteFactory.getCharacters();
     },
 
     onGameStart: function() {
@@ -409,7 +411,7 @@ var Grid = Class.extend({
     },
 
     deselectAll: function() {
-        this.characters.forEach(function(character) {
+        this.getCharacters().forEach(function(character) {
             character.deselect();
         });
     },
@@ -478,7 +480,7 @@ var Grid = Class.extend({
         var raycaster = this.gridHelper.getRaycaster();
 
         // recursively call intersects
-        var characterMeshes = _.map(this.characters, function(character) {
+        var characterMeshes = _.map(this.getCharacters(), function(character) {
             return character.getRepr();
         });
 
@@ -631,23 +633,11 @@ var Grid = Class.extend({
 
     updateCharacters: function(delta) {
         var scope = this;
-        _.forEach(this.characters, function(character) {
+        _.forEach(this.getCharacters(), function(character) {
             character.update(delta);
         });
 
-        var inactiveChars = _.filter(this.spriteFactory.robots, function(character) {
-            return character.active == false;
-        });
-
-        _.forEach(inactiveChars, function(character) {
-            scope.scene.remove(character.getRepr());
-        });
-
-        this.spriteFactory.robots = _.filter(this.spriteFactory.robots, function(character) {
-            return character.active == true;
-        });
-
-        this.characters = this.spriteFactory.robots;
+        this.spriteFactory.updateCharactersContainer();
     },
 
     updateBullets: function(delta) {
@@ -666,8 +656,8 @@ var Grid = Class.extend({
     },
 
     checkBulletCollision: function(bullet) {
-        for (var i = 0; i < this.characters.length; i++) {
-            var character = this.characters[i];
+        for (var i = 0; i < this.getCharacters().length; i++) {
+            var character = this.getCharacters()[i];
             // also need to check for bullet team here
             if (character.team != bullet.owner.team && this.checkOverlap(bullet, character)) {
                 bullet.destroy();
