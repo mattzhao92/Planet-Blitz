@@ -46,8 +46,6 @@ var Grid = Class.extend({
         this.spriteFactory = new SpriteFactory(sceneAddCmd, sceneRemoveCmd);
         // very temporary
         this.characters = this.spriteFactory.getCharacters();
-        // bullet info
-        this.bullets = this.spriteFactory.getBullets();
 
         // initialize characters
         this.setupCharacters();
@@ -654,7 +652,7 @@ var Grid = Class.extend({
 
     updateBullets: function(delta) {
         var scope = this;
-        _.forEach(this.bullets, function(bullet) {
+        _.forEach(this.spriteFactory.getBullets(), function(bullet) {
             bullet.update(delta);
             scope.checkBulletCollision(bullet);
         });
@@ -672,9 +670,6 @@ var Grid = Class.extend({
         this.spriteFactory.bullets = _.filter(this.spriteFactory.bullets, function(bullet) {
             return bullet.active == true;
         });
-
-        // keep in sync
-        this.bullets = this.spriteFactory.bullets;
     },
 
     checkOverlap: function(obj1, obj2) {
