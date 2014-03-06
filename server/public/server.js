@@ -8,6 +8,7 @@ function startGame() {
 }
 
 function loading() {
+  GameInfo.isLoading = true;
   $('#debugBtn').hide();
   $('#playBtn').hide();
   $('#playBtn2').hide();
@@ -24,6 +25,11 @@ function restartLoading() {
   $('#Loading-output').show();
   $('.span').show();
   $('.cloud').show();
+}
+
+function joinGame(gameId) {
+  $("#Input-dialog").dialog("close");
+  getUsername(gameId);
 }
 
 function showRestartDialog(message, score) {
@@ -68,7 +74,7 @@ function showRestartDialog(message, score) {
   });   
 }
 
-function getUsername(type) {
+function getUsername(forGameId) {
   var content = '<div class="rain" style="margin:0"><div class="border start">';
   content += '<form><label for="name" style="margin-left:7">What name do you want to display in the game?</label><input id="uname" name="name"  maxlength="15" type="text" style="margin-left: 25"/>';
   content += '<input type="button" value="Start" style="margin: 5 23 10 23" id="unameBtn"/><input value="Quit" type="button" id="quitBtn" style="margin: 0 23 0 23"/>';
@@ -90,7 +96,8 @@ function getUsername(type) {
     var username = $('#uname').val();
     if (username != '') {
       $("#Input-dialog").dialog("close");
-      connectServer(type, username, startGame);
+      // connectServer(type, username, startGame);
+      sendJoinMsg(forGameId, username);
       loading();
     } else {
       alert('Name can not be empty!');
@@ -107,7 +114,81 @@ function getUsername(type) {
             $("#unameBtn").click();
       }
   });
-  
+}
+
+function createGame() {
+  var content = '<div class="rain" style="margin:0"><div class="border start">';
+  content += '<form><label for="name" style="margin-left:7">What is the name of your game room?</label><input id="rname" name="rname"  maxlength="15" type="text" style="margin-left: 25"/>';
+  content += '<form><label for="name" style="margin-left:7">What name do you want to display in the game?</label><input id="uname" name="name"  maxlength="15" type="text" style="margin-left: 25"/>';
+  content += '<input type="button" value="Start" style="margin: 5 23 10 23" id="unameBtn"/><input value="Quit" type="button" id="quitBtn" style="margin: 0 23 0 23"/>';
+  content += '</form></div></div>';
+  game.getWorld().disableHotKeys();
+  $("#Input-dialog").html(content).dialog(
+  {
+    width: 400, 
+    // height: 400,
+    modal: true,
+    resizable: false,
+    dialogClass: 'name-dialog'
+  });
+  $(".ui-dialog-titlebar").hide();   
+  $(".ui-widget.name-dialog").css('width', 'auto');
+  $(".ui-widget.name-dialog").css('padding', 0);
+  $("#Input-dialog").css('padding', 0);
+  $(".rain").css('height', 240);
+  $(".border").css('height', 240);
+  $("#unameBtn").click(function() {
+    var username = $('#uname').val();
+    var gamename = $('#rname').val();
+    if (username != '' && gamename != '') {
+      sendCreateMsg(gamename, username, 2);
+      $("#Input-dialog").dialog("close");
+    } else {
+      alert('The username and gamename can not be empty');
+    }
+  });
+  $("#quitBtn").click(function() {
+    $("#Input-dialog").dialog("close");
+  });
+  $('form').on('submit', function(event){
+    event.preventDefault();
+  });
+  $('#Input-dialog').keypress(function(e) {
+      if (e.keyCode == $.ui.keyCode.ENTER) {
+            $("#unameBtn").click();
+      }
+  });
+}
+
+function listAvailableGames(games) {
+  var content = '<div class="rain" style="margin:0"><div class="border start">';
+  content += '<form><table><tr><td style="width:200">GameName</td><td>Players</td></tr>';
+  for (var t = 0; t < games.length; t++) {
+    var game = games[t];
+    content += '<tr><td class="open-game" onClick="joinGame(' + game[Info.gameId] + ')">' + game[Info.gameName] + '</td><td>' + game[Info.player] +'</td></tr>';
+  }
+  content += '</table>';
+  content += '<input type="button" value="Create Game" style="margin: 20 23 10 23" id="createGameBtn"/><input value="Quit" type="button" id="quitBtn" style="margin: 0 23 14 23"/>';
+  content += '</form></div></div>';
+  // game.getWorld().disableHotKeys();
+  $("#Input-dialog").html(content).dialog(
+  {
+    width: 400, 
+    modal: true,
+    resizable: false,
+    dialogClass: 'name-dialog'
+  });
+  $(".ui-dialog-titlebar").hide();   
+  $(".ui-widget.name-dialog").css('width', 'auto');
+  $(".ui-widget.name-dialog").css('padding', 0);
+  $("#Input-dialog").css('padding', 0);
+  $("#createGameBtn").click(function() {
+    $("#Input-dialog").dialog("close");
+    createGame();
+  });
+  $("#quitBtn").click(function() {
+    $("#Input-dialog").dialog("close");
+  });
 }
 
 $(document).ready(function() { 
@@ -116,13 +197,13 @@ $(document).ready(function() {
   $('#Loading-output').hide();
   $('#slide-container').hide();
   $('#playBtn').click(function() {
-    GameInfo.numOfTeam = 2;
-    getUsername(2);
+    connectServer();
+    sendListGameMsg();
   });
 
   $('#playBtn2').click(function() {
-    GameInfo.numOfTeam = 4;
-    getUsername(4);
+    connectServer();
+    sendListGameMsg();
   });
 
   /* Start the game locally */
