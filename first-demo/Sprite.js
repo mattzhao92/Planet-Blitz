@@ -5,12 +5,12 @@ var Sprite = Class.extend({
 	},
 
 	addSelf: function() {
-		this.sceneAddCmd(this.getRepr());
+		this.applySpriteCmd(this.sceneAddCmd);
 	},
 
 	// remove self from the world
 	removeSelf: function() {
-		this.sceneRemoveCmd(this.getRepr());		
+		this.applySpriteCmd(this.sceneRemoveCmd);
 	},
 
 	// abstract method which should be overridden

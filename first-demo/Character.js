@@ -61,18 +61,18 @@ var Character = Sprite.extend({
         var barAspectRatio = 10;
 
         this.ammoBar = new AmmoBar(this.sceneAddCmd, this.sceneRemoveCmd, this.characterSize, this.mesh.position, 10);
-        this.sceneAddCmd(this.ammoBar.getRepr());
+        this.ammoBar.addSelf();
         this.addPositionObserver(this.ammoBar);
 
         this.healthBar = new HealthBar(this.sceneAddCmd, this.sceneRemoveCmd, this.characterSize, this.mesh.position, 10, this.maximumHealth);
-        this.sceneAddCmd(this.healthBar.getRepr());
+        this.healthBar.addSelf();
         this.addPositionObserver(this.healthBar);
         this.addHealthObserver(this.healthBar);
 
         this.coolDownCount = 105;
         this.coolDownLeft = 0;
         this.cooldownBar = new CooldownBar(this.sceneAddCmd, this.sceneRemoveCmd, this.characterSize, this.mesh.position, 10, this.coolDownCount);
-        this.sceneAddCmd(this.cooldownBar.getRepr());
+        this.cooldownBar.addSelf();
         this.addPositionObserver(this.cooldownBar);
 
         this.isCharacterInRoute = false;
