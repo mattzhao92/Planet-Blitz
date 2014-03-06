@@ -633,9 +633,24 @@ var Grid = Class.extend({
     },
 
     updateCharacters: function(delta) {
+        var scope = this;
         _.forEach(this.characters, function(character) {
             character.update(delta);
         });
+
+        var inactiveChars = _.filter(this.spriteFactory.robots, function(character) {
+            return character.active == false;
+        });
+
+        _.forEach(inactiveChars, function(character) {
+            scope.scene.remove(character.getRepr());
+        });
+
+        this.spriteFactory.robots = _.filter(this.spriteFactory.robots, function(character) {
+            return character.active == true;
+        });
+
+        this.characters = this.spriteFactory.robots;
     },
 
     updateBullets: function(delta) {
