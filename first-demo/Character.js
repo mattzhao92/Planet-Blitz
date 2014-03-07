@@ -1,14 +1,3 @@
-var CharacterFactory = Class.extend({
-    init: function() {
-
-    },
-
-    createCharacter: function(sceneAddCmd, sceneRemoveCmd, world, team, characterSize) {
-        var character = new Character(sceneAddCmd, sceneRemoveCmd, world, team, characterSize);
-        return character;
-    }
-});
-
 var Character = Sprite.extend({
 
     // Class constructor
@@ -53,6 +42,7 @@ var Character = Sprite.extend({
 
         this.loader = new THREE.JSONLoader();
         this.loadFile("blendermodels/spheresoldierrolling.js");
+        // this.loadFile("blendermodels/artillery.js");
 
         this.maximumHealth = 100;
         this.health = this.maximumHealth;
@@ -134,10 +124,11 @@ var Character = Sprite.extend({
         this.loader.load(fullFilename, function(geometry, materials) {
             // TODO: key this in by name
             // set team color for "wheels"
-            materials[0].color = scope.teamColor;
-            materials[1].color = scope.teamColor;
-            // "iris"
-            materials[10].color = scope.teamColor;
+            _.forEach(materials, function(material) {
+               if (material.name == "Wheels" || material.name == "pupil") {
+                    material.color = scope.teamColor;
+               }
+            });
 
             var combinedMaterials = new THREE.MeshFaceMaterial(materials);
             mesh = new THREE.Mesh(geometry, combinedMaterials);
@@ -145,12 +136,14 @@ var Character = Sprite.extend({
             // scale to correct width / height / depth
             geometry.computeBoundingBox();
 
-            // TODO: should use this bounding box to compute correct scale
+            // use bounding box to scale model correctly to the character size
             var boundingBox = geometry.boundingBox;
             var width = geometry.boundingBox.max.x - geometry.boundingBox.min.x;
             var height = geometry.boundingBox.max.y - geometry.boundingBox.min.y;
             var depth = geometry.boundingBox.max.z - geometry.boundingBox.min.z;
-            mesh.scale.set(10, 10, 10);
+
+            var ratio = scope.characterSize / width;
+            mesh.scale.set(ratio, ratio, ratio);
 
             // link the mesh with the character owner object
             this.mesh.owner = scope;
