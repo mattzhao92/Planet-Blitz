@@ -396,7 +396,7 @@ var Character = Sprite.extend({
         this.coolDownLeft = this.coolDownCount;
     },
 
-    update: function(delta) {
+    update: function(delta, dispatcher) {
         if (this.alive == false) return;
         this.breakUpdateHere = false;
 

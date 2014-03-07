@@ -25,7 +25,17 @@ var Sprite = Class.extend({
 		spriteCmd.execute(this);
 	},
 
-	update: function(delta) {
+	update: function(delta, dispatcher) {
 
+	},
+
+	interactWith: function(otherSprite, dispatcher) {
+		if (this.interactStrategy) {
+			this.interactStrategy.interact(this, otherSprite, dispatcher);
+		}
+	},
+
+	getRadius: function() {
+		console.error("getRadius was not overridden for a derived class that requires use of getRadius!")
 	}
 })

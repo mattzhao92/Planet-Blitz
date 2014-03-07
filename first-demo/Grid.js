@@ -625,41 +625,13 @@ var Grid = Class.extend({
         var scope = this;
         this.spriteFactory.notifyAll(new SpriteCmd(
             function(sprite) {
-                sprite.update(delta);
-
-                if (sprite instanceof Bullet) {
-                    scope.checkBulletCollision(sprite);
-                }
+                // TODO: extract the dispatcher from the esprite factory
+                sprite.update(delta, scope.spriteFactory);
             }
         ));
 
         this.spriteFactory.updateCharactersContainer();
         this.spriteFactory.updateBulletsContainer();
-    },
-
-    checkOverlap: function(obj1, obj2) {
-        var combinedRadius = obj1.getRadius() + obj2.getRadius();
-        return combinedRadius * combinedRadius >= obj1.position.distanceToSquared(obj2.position);
-    },
-
-    checkBulletCollision: function(bullet) {
-        for (var i = 0; i < this.getCharacters().length; i++) {
-            var character = this.getCharacters()[i];
-            // also need to check for bullet team here
-            if (character.team != bullet.owner.team && this.checkOverlap(bullet, character)) {
-                bullet.destroy();
-                if (GameInfo.netMode) {
-                    if (bullet.owner.team == GameInfo.myTeamId) {
-                        sendHitMsg(character.team, character.id);
-                    }
-                } else {
-                    character.applyDamage(5);
-                    console.log("Applying damage");
-                }
-                // Send the server hit message.
-                break;
-            }
-        }
     },
 
     syncGameState: function(state, seq) {
