@@ -453,15 +453,6 @@ var Grid = Class.extend({
         }, false);
     },
 
-    shootBullet: function(owner, from, to) {
-        // don't shoot a bullet in-place
-        if (from.x == to.x && from.z == to.z) {
-            return;
-        }
-
-        var bullet = this.spriteFactory.createBullet(this.camera.position, owner, from, to);
-    },
-
     handleShootEvent: function() {
         var to = this.gridHelper.getMouseProjectionOnGrid();
         this.getCurrentSelectedUnit().shoot(to);
@@ -531,9 +522,6 @@ var Grid = Class.extend({
                 var unitMovedToDifferentSquare = !(deltaX == 0 && deltaZ == 0);
 
                 if (unitMovedToDifferentSquare) {
-                    // this.getCurrentSelectedUnit().setDirection(
-                    //     new THREE.Vector3(deltaX, deltaY, deltaZ));
-
                     // Put the network communication here.
                     if (this.getCurrentSelectedUnit().isCoolDown == 0) {
                         sendMoveMsg(this.getCurrentSelectedUnit().id,

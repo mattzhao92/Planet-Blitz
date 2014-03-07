@@ -79,7 +79,13 @@ var Character = Sprite.extend({
         // shoot a bullet because you can
         if (this.ammoBar.canShoot()) {
             sendShootMsg(this.id, from, to);
-            this.world.shootBullet(this, from, to);
+
+            // don't shoot a bullet in-place
+            if (from.x == to.x && from.z == to.z) {
+                return;
+            }
+
+            var bullet = this.spriteFactory.createBullet(this.world.camera.position, this, from, to);
             this.ammoBar.onShoot(from, to);
         }
     },
@@ -182,7 +188,7 @@ var Character = Sprite.extend({
     applyDamage: function(damage) {
         this.setHealth(this.getHealth() - damage);
 
-        if (this.getHealth() < 0) {
+        if (this.getHealth() <= 0) {
             this.world.handleCharacterDead(this);
         }
     },
