@@ -243,10 +243,19 @@ var Character = Sprite.extend({
         }
 
         if (GameInfo.myTeamId == null || this.team == GameInfo.myTeamId) {
-          this.unitSelectorMesh.material.color.setRGB(1.0, 0, 0);
-          this.unitSelectorMesh.visible = true;
-          this.world.markCharacterAsSelected(this);
-          this.isSelected = true;
+            this.unitSelectorMesh.material.color.setRGB(1.0, 0, 0);
+            this.unitSelectorMesh.visible = true;
+            this.world.markCharacterAsSelected(this);
+
+            var ctxSprite = this;
+            // deselect all other units
+            this.spriteFactory.notifyAll(new SpriteCmd(function(sprite) {
+                if (ctxSprite != sprite && sprite instanceof Character) {
+                    sprite.deselect();
+                }
+            }));
+
+            this.isSelected = true;
         }
     },
 

@@ -270,13 +270,6 @@ var Grid = Class.extend({
     },
 
     markCharacterAsSelected: function(character) {
-        // deselect previous character if there was one
-        if (this.getCurrentSelectedUnit()) {
-            if (this.getCurrentSelectedUnit() != character) {
-                this.getCurrentSelectedUnit().deselect();
-            }
-        }
-
         this.currentSelectedUnits[GameInfo.myTeamId] = character;
 
         // show character movement speed
