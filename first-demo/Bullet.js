@@ -71,7 +71,6 @@ var Bullet = Sprite.extend({
     this.mesh.position.add(scaledDirection);
 
     if (distance > this.maxDistance) {
-      console.log("Bullet exceeded max distance, destroy");
       this.destroy();
     }
   },
