@@ -8,6 +8,8 @@ var SpriteFactory = Class.extend({
 
 		this.robots = [];
 		this.bullets = [];
+
+		this.dispatcher = new Dispatcher();
 	},
 
 	updateContainer: function(container) {
@@ -38,35 +40,18 @@ var SpriteFactory = Class.extend({
 		this.bullets = this.updateContainer(this.bullets);
 	},
 
-	removeRobot: function(robot) {
-		var index = this.robots.indexOf(robot);
-
-		if (index > -1) {
-			this.robots.splice(index, -1);
-		}
-	},
-
-	removeBullet: function(bullet) {
-		var index = this.bullets.indexOf(bullet);
-
-		if (index > -1) {
-			this.bullets.splice(index, -1);
-		}
-	},
-
 	createRobot: function(world, team, characterSize) {
 		var scope = this;
 
-		// decorator - allow character to add itself to its container
+		// add character to its container, register for its updates
 		var postInitCmd = new SpriteCmd(function(sprite) {
 			scope.sceneAddCmd.execute(sprite);
 			scope.robots.push(sprite);
 		});
 
-		// decorator - allow character to remove itself form the container
+		// mark the sprite as destroyed
 		var postDestroyCmd = new SpriteCmd(function(sprite) {
-			scope.sceneRemoveCmd.execute(sprite);
-			scope.removeRobot(sprite);
+			sprite.active = false;
 		});
 
 		var robot = new Character(postInitCmd, postDestroyCmd, this, world, team, characterSize);
@@ -78,17 +63,15 @@ var SpriteFactory = Class.extend({
 	createBullet: function(cameraPosition, owner, from, to) {
 		var scope = this;
 
-		// duplicated code TODO - but the "more general version" doesn't work
-		// decorator - allow character to add itself to its container
+		// add character to its container, register for updates
 		var postInitCmd = new SpriteCmd(function(sprite) {
 			scope.sceneAddCmd.execute(sprite);
 			scope.bullets.push(sprite);
 		});
 
-		// decorator - allow character to remove itself form the container
+		// mark the sprite as destroyed (redundant in new API)
 		var postDestroyCmd = new SpriteCmd(function(sprite) {
-			scope.sceneRemoveCmd.execute(sprite);
-			scope.removeBullet(sprite);
+			sprite.active = false;
 		});
 
 		var bullet = new Bullet(postInitCmd, postDestroyCmd, cameraPosition, owner, from, to);

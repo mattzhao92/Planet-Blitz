@@ -13,7 +13,7 @@ var Dispatcher = Class.extend({
 		if (index > -1) {
 			this.observers.splice(index, -1);
 		}
-	}
+	},
 
 	notifyAll: function(spriteCmd) {
 		_.forEach(this.observers, function(observer) {
