@@ -229,11 +229,11 @@ var Character = Sprite.extend({
     },
 
     destroy: function() {
-        // this._super();
         this.active = false;
         this.ammoBar.destroy();
         this.healthBar.destroy();
         this.cooldownBar.destroy();
+        this.world.displayMovementArea(this);
     },
     
     // callback - called when unit is selected. Gets a reference to the game state ("world")

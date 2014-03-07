@@ -121,7 +121,7 @@ var Grid = Class.extend({
                     if (scope.hotKeysDisabled) return;
                     // TODO: replace this with a more readable line. Also, need to account for out of index errors when units get killed
                     var characterSelected = scope.getMyTeamCharacters()[parseInt(keyCombo) - 1];
-                    if (characterSelected && characterSelected.alive) {
+                    if (characterSelected && characterSelected.active) {
                         characterSelected.onSelect();
                     }
                 }
@@ -135,7 +135,7 @@ var Grid = Class.extend({
 
                 var myTeamCharacters = scope.getMyTeamCharacters();
                 var characterSelected = myTeamCharacters[scope.unitCycle];
-                if (characterSelected.alive) {
+                if (characterSelected.active) {
                     characterSelected.onSelect();
                 }
                 scope.unitCycle = (scope.unitCycle + 1) % myTeamCharacters.length;
@@ -149,7 +149,7 @@ var Grid = Class.extend({
 
                 var myTeamCharacters = scope.getMyTeamCharacters();
                 var characterSelected = myTeamCharacters[scope.unitCycle];
-                if (characterSelected.alive) {
+                if (characterSelected.active) {
                     characterSelected.onSelect();
                 }
                 if (scope.unitCycle == 0) {
@@ -166,7 +166,7 @@ var Grid = Class.extend({
                 if (scope.hotKeysDisabled) return;
 
                 var character = scope.getCurrentSelectedUnit();
-                if (character && character.alive) {
+                if (character && character.active) {
                     scope.controls.focusOnPosition(character.mesh.position);
                 }
             }
@@ -328,9 +328,7 @@ var Grid = Class.extend({
         }
 
         this.deselectHighlightedTiles();
-        if (character.isCharacterInRoute == false 
-            && character.isCoolDown == false
-            && character.alive) {
+        if (character.isCharacterInRoute == false && character.isCoolDown == false && character.active) {
             var characterMovementRange = character.getMovementRange();
             // highlight adjacent squares - collect all tiles from radius
             var tilesToHighlight = this.getTilesInArea(character, characterMovementRange);
@@ -701,7 +699,7 @@ var Grid = Class.extend({
             // Character to check.
             var charToCheck = this.getCharacterById(teamId, index);
             liveStates[teamId][index] = true;
-            if (charToCheck.alive) {
+            if (charToCheck.active) {
                 // Sync the health.
                 charToCheck.health = health;
                 var dest;
@@ -722,9 +720,9 @@ var Grid = Class.extend({
         for (var t = 0; t < GameInfo.numOfTeams; t++) {
             for (var i = 0; i < this.numOfCharacters; i++) {
                 var charToCheck = this.getCharacterById(t, i);
-                if (!liveStates[t][i] && charToCheck.alive) {
+                if (!liveStates[t][i] && charToCheck.active) {
                     console.log("Zombie character!");
-                    // Server says dead but alive locally.
+                    // Server says dead but active locally.
                     this.handleCharacterDead(charToCheck);
                     isStateGood = false;
                 }
