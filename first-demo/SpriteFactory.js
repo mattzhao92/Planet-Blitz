@@ -12,6 +12,16 @@ var SpriteFactory = Class.extend({
 		this.dispatcher = new Dispatcher();
 	},
 
+	notifyAll: function(spriteCmd) {
+		_.forEach(this.robots, function(observer) {
+			observer.applySpriteCmd(spriteCmd);
+		});
+
+		_.forEach(this.bullets, function(observer) {
+			observer.applySpriteCmd(spriteCmd);
+		});
+	},
+
 	updateContainer: function(container) {
 		var scope = this;
 

@@ -622,29 +622,18 @@ var Grid = Class.extend({
     },
 
     update: function(delta) {
-        // update characters
-        this.updateCharacters(delta);
-
-        // update bullet movements
-        this.updateBullets(delta);
-    },
-
-    updateCharacters: function(delta) {
         var scope = this;
-        _.forEach(this.getCharacters(), function(character) {
-            character.update(delta);
-        });
+        this.spriteFactory.notifyAll(new SpriteCmd(
+            function(sprite) {
+                sprite.update(delta);
+
+                if (sprite instanceof Bullet) {
+                    scope.checkBulletCollision(sprite);
+                }
+            }
+        ));
 
         this.spriteFactory.updateCharactersContainer();
-    },
-
-    updateBullets: function(delta) {
-        var scope = this;
-        _.forEach(this.spriteFactory.getBullets(), function(bullet) {
-            bullet.update(delta);
-            scope.checkBulletCollision(bullet);
-        });
-
         this.spriteFactory.updateBulletsContainer();
     },
 
