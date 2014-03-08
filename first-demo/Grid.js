@@ -99,7 +99,9 @@ var Grid = Class.extend({
     },
 
     getMyTeamCharacters: function() {
-        return this.characterList[GameInfo.myTeamId];
+        return _.filter(this.getCharacters(), function(character) {
+            return character.team == GameInfo.myTeamId;
+        });
     },
 
     disableHotKeys: function() {
@@ -195,7 +197,6 @@ var Grid = Class.extend({
         this.numOfCharacters = 3;
         // The row position.
         this.teamStartPos = [1, 18, 1, 18];
-        this.characterList = [];
 
         // Sequence number for synchornization.
         this.seq = 0;
@@ -203,8 +204,6 @@ var Grid = Class.extend({
         var scope = this;
 
         for (var team_id = 0; team_id < 4; team_id++) {
-            this.characterList.push(new Array());
-            this.currentSelectedUnits.push(null);
             for (var i = 0; i < this.numOfCharacters; i++) {
                 var characterSize = this.getTileSize();
                 var character = this.spriteFactory.createRobot(scope, team_id, characterSize);
@@ -220,13 +219,19 @@ var Grid = Class.extend({
 
                 this.markTileOccupiedByCharacter(startX, startY);
                 character.setID(i);
-                this.characterList[team_id].push(character);
             }
         }
     },
 
     getCharacterById: function(team, id) {
-        return this.characterList[team][id];
+        var characters = this.getCharacters();
+        // search through characters
+        for (var i = 0; i < characters.length; i++) {
+            var character = characters[i];
+            if (character.team == team && character.id == id) {
+                return character;
+            }
+        }
     },
 
     displayMessage: function(msg) {
@@ -399,12 +404,6 @@ var Grid = Class.extend({
             return (tile != null && !tile.isObstacle() && !tile.isCharacter());
         });
         return tiles;
-    },
-
-    deselectAll: function() {
-        this.getCharacters().forEach(function(character) {
-            character.deselect();
-        });
     },
 
     setupMouseMoveListener: function() {
@@ -690,12 +689,11 @@ var Grid = Class.extend({
     },
 
     reset: function() {
-        console.log("reset function is called ");
-        for (var i = 0; i < this.characterList.length; i++) {
-            for (var j = 0; j < this.characterList[i].length; j++) {
-                this.characterList[i][j].destroy();
-            }
-        }
+        console.log("Game reset");
+
+        _.forEach(this.getCharacters(), function(character) {
+            character.destroy();
+        });
 
         this.tiles = new THREE.Object3D();
         this.tilesArray = null;

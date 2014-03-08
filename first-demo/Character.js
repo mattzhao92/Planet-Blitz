@@ -166,10 +166,6 @@ var Character = Sprite.extend({
         return this.characterSize / 2;
     },
 
-    isInViewPort: function (target) {
-
-    },
-
     setHealth: function(health) {
         if (health <= this.maximumHealth) {
             this.health = health;
@@ -419,7 +415,7 @@ var Character = Sprite.extend({
         this.updateMovementCoolDown(delta); 
         this.updateInProgressLinearMotion(delta);
 
-        // handle deque action here
+        // handle dequeue action here
         if (this.motionQueue.length > 0 && !this.breakUpdateHere) {
             this.motionInProcess = true;
             var direction = this.motionQueue.pop();
@@ -453,7 +449,7 @@ var Character = Sprite.extend({
             }
 
             if (direction.x !== 0 || direction.z !== 0) {
-                // And, only if     we're not colliding with an obstacle or a wall ...
+                // And, only if we're not colliding with an obstacle or a wall ...
                 if (this.collide()) {
                     return false;
                 }
@@ -464,8 +460,8 @@ var Character = Sprite.extend({
                 this.prevMeshZ = this.mesh.position.z;
 
                 this.world.markTileNotOccupiedByCharacter(this.getTileXPos(), this.getTileZPos());
-                this.goalMeshX = this.mesh.position.x + direction.x * 40;
-                this.goalMeshZ = this.mesh.position.z + direction.z * 40;
+                this.goalMeshX = this.mesh.position.x + direction.x * this.characterSize;
+                this.goalMeshZ = this.mesh.position.z + direction.z * this.characterSize;
                 
                 var MOVE_VELOCITY = 100;
 
