@@ -33,7 +33,7 @@ function joinGame(gameId) {
 }
 
 function showRestartDialog(message, score) {
-  var content = '<p>' + message + '</p><br/>';
+  var content = '<h2 style="text-align:center">' + message + '</h2><br/>';
   content += '<table style="width:400px"><tr><td>Name</td><td>Kill</td><td>Death</td><td>Win</td></tr>';
   // Score the result according to win.
   var sortedUsernames = new Array();
@@ -77,7 +77,7 @@ function showRestartDialog(message, score) {
 function getUsername(forGameId) {
   var content = '<div class="rain" style="margin:0"><div class="border start">';
   content += '<form><label for="name" style="margin-left:7">What name do you want to display in the game?</label><input id="uname" name="name"  maxlength="15" type="text" style="margin-left: 25"/>';
-  content += '<input type="button" value="Start" style="margin: 5 23 10 23" id="unameBtn"/><input value="Quit" type="button" id="quitBtn" style="margin: 0 23 0 23"/>';
+  content += '<input type="button" value="Start" style="margin: 5 23 10 23" id="unameBtn"/><input value="Quit" type="button" id="quitBtn" style="margin: 0 23 14 23"/>';
   content += '</form></div></div>';
   game.getWorld().disableHotKeys();
   $("#Input-dialog").html(content).dialog(
@@ -116,11 +116,11 @@ function getUsername(forGameId) {
   });
 }
 
-function createGame() {
+function createGame(type) {
   var content = '<div class="rain" style="margin:0"><div class="border start">';
   content += '<form><label for="name" style="margin-left:7">What is the name of your game room?</label><input id="rname" name="rname"  maxlength="15" type="text" style="margin-left: 25"/>';
   content += '<form><label for="name" style="margin-left:7">What name do you want to display in the game?</label><input id="uname" name="name"  maxlength="15" type="text" style="margin-left: 25"/>';
-  content += '<input type="button" value="Start" style="margin: 5 23 10 23" id="unameBtn"/><input value="Quit" type="button" id="quitBtn" style="margin: 0 23 0 23"/>';
+  content += '<input type="button" value="Start" style="margin: 5 23 10 23" id="unameBtn"/><input value="Quit" type="button" id="quitBtn" style="margin: 0 23 14 23"/>';
   content += '</form></div></div>';
   game.getWorld().disableHotKeys();
   $("#Input-dialog").html(content).dialog(
@@ -162,10 +162,12 @@ function createGame() {
 
 function listAvailableGames(games) {
   var content = '<div class="rain" style="margin:0"><div class="border start">';
-  content += '<form><table><tr><td style="width:200">GameName</td><td>Players</td></tr>';
+  content += '<form><table><tr><td style="width:140">GameName</td><td style="padding-right:40px">Players</td><td>Status</td></tr>';
   for (var t = 0; t < games.length; t++) {
     var game = games[t];
-    content += '<tr><td class="open-game" onClick="joinGame(' + game[Info.gameId] + ')">' + game[Info.gameName] + '</td><td>' + game[Info.player] +'</td></tr>';
+    content += '<tr><td class="open-game" onClick="joinGame(' + game[Info.gameId] + ')">' + game[Info.gameName] + '</td><td style="padding-right:40px">' + game[Info.player] +'</td>';
+    var isPlaying = game[Info.gameStart] ? 'Playing' : 'Waiting';
+    content += '<td>' + isPlaying + '</td></tr>';
   }
   content += '</table>';
   content += '<input type="button" value="Create Game" style="margin: 20 23 10 23" id="createGameBtn"/><input value="Quit" type="button" id="quitBtn" style="margin: 0 23 14 23"/>';

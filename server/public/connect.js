@@ -4,7 +4,7 @@ var socket;
 var game;
 var GameInfo = new GameConfig();
 
-function connectServer(type, username) {
+function connectServer(type) {
   if (!socket) {
     socket = io.connect();  
   }
@@ -113,6 +113,10 @@ function connectServer(type, username) {
         showRestartDialog('You lose', score);
       }
     });
+
+  socket.on(Message.ERROR, function(reason) {
+    alert('Fail to join the game: ' + reason);
+  });
 
 }
 

@@ -6,6 +6,7 @@ var Message = {
   TYPE : 'TYPE',
   USERNAME : 'USERNAME',
   JOIN : 'JOIN',
+  ERROR : 'ERROR',
   PREPARE : 'PREPARE',
   START : 'START',
   FINISH : 'FINISH',
@@ -64,6 +65,7 @@ var Info = {
   // Name for the game room.
   gameId : 'gameId',
   gameName : 'gameName',
+  gameStart : 'gameStart',
   player : 'player'
 }
 

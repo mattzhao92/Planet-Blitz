@@ -80,22 +80,32 @@ io.sockets.on('connection', function(socket) {
     var gameId = parseInt(joinRequest[Message.GAME]);
     var username = joinRequest[Message.USERNAME];
     var gameToJoin = emptyGames[gameId];
-    if (gameToJoin && gameToJoin.numPlayers < gameToJoin.maxNumPlayers) {
-      gameToJoin.addPlayer(socket, username);
-      var username = joinRequest[Message.USERNAME];
-      socket.set('username', username, function() {
-        console.log('User ' + username + ' game ' + gameId);
-        socket.set('inGame', gameToJoin, function() {
-          var playerState = gameToJoin.getPlayerInfo();
-          socket.broadcast.to(gameToJoin.room).emit(Message.JOIN, playerState);
-          socket.emit(Message.JOIN, playerState);
-          if (gameToJoin.isFull()) {
-            var playerTeamInfo = gameToJoin.prepareGame();
-            socket.broadcast.to(gameToJoin.room).emit(Message.PREPARE, playerTeamInfo);
-            socket.emit(Message.PREPARE, playerTeamInfo);
-          }
+    if (gameToJoin) {
+      if (gameToJoin.numPlayers < gameToJoin.maxNumPlayers) {
+        if (gameToJoin.isStart) {
+          socket.emit(Message.ERROR, 'The selected game is already start');
+          return;
+        }
+        gameToJoin.addPlayer(socket, username);
+        var username = joinRequest[Message.USERNAME];
+        socket.set('username', username, function() {
+          console.log('User ' + username + ' game ' + gameId);
+          socket.set('inGame', gameToJoin, function() {
+            var playerState = gameToJoin.getPlayerInfo();
+            socket.broadcast.to(gameToJoin.room).emit(Message.JOIN, playerState);
+            socket.emit(Message.JOIN, playerState);
+            if (gameToJoin.isFull()) {
+              var playerTeamInfo = gameToJoin.prepareGame(false);
+              socket.broadcast.to(gameToJoin.room).emit(Message.PREPARE, playerTeamInfo);
+              socket.emit(Message.PREPARE, playerTeamInfo);
+            }
+          });
         });
-      });
+      } else {
+        socket.emit(Message.ERROR, 'The selected game is full');
+      }
+    } else {
+      socket.emit(Message.ERROR, 'The selected game does not exist');
     }
   });
 
@@ -104,6 +114,7 @@ io.sockets.on('connection', function(socket) {
     socket.get('inGame', function(error, game) {
       game.numReadyPlayers++;
       if (game.isReady()) {
+        game.isStart = true;
         var score = game.getScoreJSON();
         socket.broadcast.to(game.room).emit(Message.START, score);
         socket.emit(Message.START, score);
@@ -178,40 +189,29 @@ io.sockets.on('connection', function(socket) {
           gameStatistics[Stat.winner] = username
           var scoreStat = game.getScoreJSON();
           gameStatistics[Stat.result] = scoreStat;
-          socket.broadcast.to(game.room).emit(Message.FINISH, gameStatistics);
-          socket.emit(Message.FINISH, gameStatistics);
           // Reset the game state.
           game.restart();
+          socket.broadcast.to(game.room).emit(Message.FINISH, gameStatistics);
+          socket.emit(Message.FINISH, gameStatistics);
         });
       }
     });
   });
 
   socket.on(Message.RESTART, function(message) {
-    socket.get('gameId', function(error, gameId) {
-      var curGame = games[gameId];
+    socket.get('inGame', function(error, curGame) {
       // Send the team id to the player.
-      var randomTeamId = curGame.teamIds[curGame.numPlayers++];
-      socket.get('username', function(error, username) {
-        curGame.score[username].teamId = randomTeamId;
-      });
-      var teamMsg = {};
-      teamMsg[Message.TEAM] = randomTeamId;
-      var playerState = curGame.numPlayers + '/' + curGame.maxNumPlayers;
-      teamMsg[Message.JOIN] = playerState;
-
-      socket.emit(Message.TEAM, teamMsg);
+      curGame.numRestartPlayers++;
+      var playerState = curGame.getPlayerRestartInfo();
+      socket.emit(Message.JOIN, playerState);
       socket.broadcast.to(curGame.room).emit(Message.JOIN, playerState);
-
       console.log('cur room players ' + playerState);
       // Start the game when full, and create a new one.
-      if (curGame.numPlayers == curGame.maxNumPlayers) {
-        console.log('start game for room ' + curGame.room);
-        //io.sockets.in(curGame.room).emit(Message.Start);
-        var score = curGame.getScoreJSON();
-        socket.broadcast.to(curGame.room).emit(Message.START, score);
-        socket.emit(Message.START, score);
-      } 
+      if (curGame.isRestartReady()) {
+        var playerTeamInfo = curGame.prepareGame(true);
+        socket.broadcast.to(curGame.room).emit(Message.PREPARE, playerTeamInfo);
+        socket.emit(Message.PREPARE, playerTeamInfo);
+      }
     });
   });
 
@@ -238,6 +238,7 @@ function getAllGameInfo() {
     var game = emptyGames[gameId];
     info[Info.gameId] = gameId;
     info[Info.gameName] = game.gameName;
+    info[Info.gameStart] = game.isStart;
     info[Info.player] = game.numPlayers + '/' + game.maxNumPlayers;
     games.push(info);
   }
@@ -279,6 +280,10 @@ Game.prototype.getPlayerInfo = function() {
   return this.numPlayers + '/' + this.maxNumPlayers;
 }
 
+Game.prototype.getPlayerRestartInfo = function() {
+  return this.numRestartPlayers + '/' + this.maxNumPlayers;
+}
+
 Game.prototype.addPlayer = function(sk, username) {
   sk.join(this.room);
   this.usernames.push(username);
@@ -287,7 +292,8 @@ Game.prototype.addPlayer = function(sk, username) {
 
 Game.prototype.restart = function() {
   this.isStart = false;
-  this.numPlayers = 0;
+  this.numReadyPlayers = 0;
+  this.numRestartPlayers = 0;
   shuffle(this.teamIds);
   this.seq = 0;
   console.log(this.teamIds);
@@ -302,12 +308,18 @@ Game.prototype.isReady = function() {
   return this.numReadyPlayers == this.maxNumPlayers;
 };
 
-Game.prototype.prepareGame = function() {
+Game.prototype.isRestartReady = function() {
+  return this.numRestartPlayers == this.maxNumPlayers;
+};
+
+Game.prototype.prepareGame = function(isRestart) {
   var playerTeamInfo = {};
   // Generate the positions here.
   for (var t = 0; t < this.usernames.length; t++) {
     var username = this.usernames[t];
-    this.score[username] = new Score();
+    if (!isRestart) {
+      this.score[username] = new Score();
+    }
     this.score[username].teamId = this.teamIds[t];
     playerTeamInfo[username] = this.teamIds[t];
   }
