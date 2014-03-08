@@ -2,7 +2,7 @@ var Character = Sprite.extend({
 
     // Class constructor
     // character size refers to the diameter of the character
-    init: function(setupCmd, destroyCmd, spriteFactory, world, team, characterSize) {
+    init: function(setupCmd, destroyCmd, spriteFactory, modelName, world, team, characterSize, id) {
         'use strict';
         this._super(setupCmd, destroyCmd);
 
@@ -16,7 +16,7 @@ var Character = Sprite.extend({
 
         this.isSelected = false;
         this.active = true;
-        this.id = 0;
+        this.id = id;
 
         this.xPos = 0;
         this.zPos = 0;
@@ -41,9 +41,8 @@ var Character = Sprite.extend({
         this.isCoolDown = false;
 
         this.loader = new THREE.JSONLoader();
-        this.loadFile("blendermodels/spheresoldierrolling.js");
-        // this.loadFile("blendermodels/artillery.js");
-
+        this.loadFile("blendermodels/" + modelName);
+ 
         this.maximumHealth = 100;
         this.health = this.maximumHealth;
 
@@ -165,10 +164,6 @@ var Character = Sprite.extend({
             scope.mesh.add(mesh);
             scope.characterMesh = mesh;
         });
-    },
-
-    setID: function(id) {
-        this.id = id;
     },
 
     getRadius: function() {

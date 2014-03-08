@@ -43,7 +43,7 @@ var Grid = Class.extend({
             scope.scene.remove(sprite.getRepr());
         });
 
-        this.spriteFactory = new SpriteFactory(sceneAddCmd, sceneRemoveCmd);
+        this.spriteFactory = new SpriteFactory(this, sceneAddCmd, sceneRemoveCmd);
 
         // initialize characters
         this.setupCharacters();
@@ -205,8 +205,15 @@ var Grid = Class.extend({
 
         for (var team_id = 0; team_id < 4; team_id++) {
             for (var i = 0; i < this.numOfCharacters; i++) {
-                var characterSize = this.getTileSize();
-                var character = this.spriteFactory.createRobot(scope, team_id, characterSize);
+                var characterId = i;
+
+                var character;
+                if (i % 2 == 0) {
+                    character = this.spriteFactory.createSoldier(team_id, characterId);
+                } else {
+                    character = this.spriteFactory.createArtillerySoldier(team_id, characterId);
+                }
+
                 var startX, startY;
                 if (team_id < 2) {
                     startX = i + 9;
@@ -216,9 +223,7 @@ var Grid = Class.extend({
                     startY = i + 9;
                 }
                 character.placeAtGridPos(startX, startY);
-
                 this.markTileOccupiedByCharacter(startX, startY);
-                character.setID(i);
             }
         }
     },

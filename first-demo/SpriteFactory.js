@@ -2,7 +2,10 @@
 // also the place to access all sprite lists
 var SpriteFactory = Class.extend({
 
-	init: function(sceneAddCmd, sceneRemoveCmd) {
+	init: function(world, sceneAddCmd, sceneRemoveCmd) {
+		this.world = world;
+		this.characterSize = world.getTileSize();
+
 		this.sceneAddCmd = sceneAddCmd;
 		this.sceneRemoveCmd = sceneRemoveCmd;
 
@@ -50,7 +53,15 @@ var SpriteFactory = Class.extend({
 		this.bullets = this.updateContainer(this.bullets);
 	},
 
-	createRobot: function(world, team, characterSize) {
+	createSoldier: function(team, unitId) {
+		return this.createCharacter("soldier-regular.js", team, unitId);
+	},
+
+	createArtillerySoldier: function(team, unitId) {
+		return this.createCharacter("soldier-artillery.js", team, unitId);
+	},
+
+	createCharacter: function(modelName, team, unitId) {
 		var scope = this;
 
 		// add character to its container, register for its updates
@@ -64,7 +75,7 @@ var SpriteFactory = Class.extend({
 			sprite.active = false;
 		});
 
-		var robot = new Character(postInitCmd, postDestroyCmd, this, world, team, characterSize);
+		var robot = new Character(postInitCmd, postDestroyCmd, this, modelName, this.world, team, this.characterSize, unitId);
 		robot.setup();
 
 		return robot;
