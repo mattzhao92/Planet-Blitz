@@ -63,10 +63,8 @@ function connectServer(type, username, gameStartCallback) {
       var fromZ = parseInt(data[Shoot.fromZ]);
       var toX = parseInt(data[Shoot.toX]);
       var toZ = parseInt(data[Shoot.toZ]);
-      var target = game.getWorld().getCharacterById(team, index);
-      game.getWorld().shootBullet(target, 
-        new THREE.Vector3(fromX, 0, fromZ),
-        new THREE.Vector3(toX, 0, toZ));
+      var character = game.getWorld().getCharacterById(team, index);
+      character.shoot(new THREE.Vector3(toX, 0, toZ));
   });
 
   /* Handle the hit message */
