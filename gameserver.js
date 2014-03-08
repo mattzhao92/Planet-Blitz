@@ -61,6 +61,7 @@ io.sockets.on('connection', function(socket) {
   });
 
   socket.on(Message.CREATEGAME, function(gameRequest) {
+    console.log('*** a create request');
     var gameName = gameRequest[Message.GAMENAME];
     var username = gameRequest[Message.USERNAME];
     var gameType = parseInt(gameRequest[Message.TYPE]);
@@ -128,7 +129,6 @@ io.sockets.on('connection', function(socket) {
   socket.on(Message.MOVE, function(message) {
     socket.get('inGame', function(error, game) {
       var newState = game.gameState.toJSON();
-      // TODO: detect collision
       var validMove = game.gameState.updatePosState(message);
       if (validMove) {
         // Increase the seq for synchronization version.
@@ -209,8 +209,28 @@ io.sockets.on('connection', function(socket) {
       // Start the game when full, and create a new one.
       if (curGame.isRestartReady()) {
         var playerTeamInfo = curGame.prepareGame(true);
+        curGame.isWaitingRestart = false;
+        curGame.isStart = true;
         socket.broadcast.to(curGame.room).emit(Message.PREPARE, playerTeamInfo);
         socket.emit(Message.PREPARE, playerTeamInfo);
+      }
+    });
+  });
+
+  socket.on(Message.LEAVE, function() {
+    socket.get('inGame', function(error, game) {
+      if (game.isWaitingRestart) {
+        // TODO: Not sure....
+      } else if (!game.isFull()) {
+        game.numPlayers--;
+        socket.leave(game.room);
+        if (game.numPlayers == 0) {
+            delete emptyGames[game.gameId];
+        } else {
+          var playerState = game.getPlayerInfo();
+          socket.broadcast.to(game.room).emit(Message.JOIN, playerState);
+          socket.set('inGame', null);          
+        }
       }
     });
   });
@@ -220,9 +240,12 @@ io.sockets.on('connection', function(socket) {
       console.log('******player ' + username + ' leave');
       socket.get('inGame', function(error, game) {
         if (game) {
-          game.numPlayers--;
           if (game.numPlayers == 0) {
             delete emptyGames[game.gameId];
+          } else {
+            var playerState = game.getPlayerInfo();
+            socket.broadcast.to(game.room).emit(Message.JOIN, playerState);
+            socket.set('inGame', null);          
           }
         }
       });
@@ -253,6 +276,7 @@ function Game(gameId, gameName, maxNumPlayers) {
   this.gameId = gameId;
   this.gameName = gameName;
   this.isStart = false;
+  this.isWaitingRestart = false;
   this.numPlayers = 0;
   this.numReadyPlayers = 0;
   this.maxNumPlayers = maxNumPlayers;
@@ -292,6 +316,7 @@ Game.prototype.addPlayer = function(sk, username) {
 
 Game.prototype.restart = function() {
   this.isStart = false;
+  this.isWaitingRestart = true;
   this.numReadyPlayers = 0;
   this.numRestartPlayers = 0;
   shuffle(this.teamIds);

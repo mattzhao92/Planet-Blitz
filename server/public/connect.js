@@ -122,6 +122,7 @@ function connectServer(type) {
 
 // A wrapper class for all game parameter.
 function GameConfig() {
+  this.isStart = false;
   this.numOfTeams = 4;
   this.myTeamId = 0;
   this.netMode = true;
@@ -176,6 +177,11 @@ function sendCreateMsg(gamename, username, type) {
   createMsg[Message.TYPE] = type;
   createMsg[Message.USERNAME] = username;
   socket.emit(Message.CREATEGAME, createMsg);
+  // alert('creat req');
+}
+
+function sendLeaveMsg() {
+  socket.emit(Message.LEAVE);
 }
 
 function sendJoinMsg(gameId, username) {

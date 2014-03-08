@@ -22,12 +22,18 @@ body {
   top: 200px;
 }
 
-#playBtn2 {
+#helpBtn {
   top: 300px;
 }
 
-#helpBtn {
-  top: 400px;
+#leaveBtn {
+  left: 0;
+  bottom: 0;
+  font-size: 10px;
+  width: 50px;
+  height: 35px;
+  margin: 0px;
+  padding: 0px;
 }
 
 #Stats-output {
