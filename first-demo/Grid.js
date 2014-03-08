@@ -452,7 +452,7 @@ var Grid = Class.extend({
 
     handleShootEvent: function() {
         var to = this.gridHelper.getMouseProjectionOnGrid();
-        this.getCurrentSelectedUnit().shoot(to);
+        this.getCurrentSelectedUnit().shoot(to, true);
     },
 
     getCurrentSelectedUnit: function() {

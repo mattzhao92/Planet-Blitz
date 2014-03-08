@@ -70,7 +70,7 @@ var Character = Sprite.extend({
         this.breakUpdateHere = false;
     },
 
-    shoot: function(to) {
+    shoot: function(to, isOriginalCmd) {
         var from = this.mesh.position.clone();
         from.y = Constants.BULLET_LEVEL;
         to.y = Constants.BULLET_LEVEL;
@@ -83,19 +83,12 @@ var Character = Sprite.extend({
             }
 
             // TODO: clean up this code when socket semantics are clarified
-            sendShootMsg(this.id, from, to);
+            if (isOriginalCmd) {
+                sendShootMsg(this.id, from, to);
+            }
             var bullet = this.spriteFactory.createBullet(this.world.camera.position, this, from, to);
             this.ammoBar.onShoot();
         }
-    },
-
-    displayShoot: function(to) {
-        var from = this.mesh.position.clone();
-        from.y = Constants.BULLET_LEVEL;
-        to.y = Constants.BULLET_LEVEL;
-
-        var bullet = this.spriteFactory.createBullet(this.world.camera.position, this, from, to);
-        this.ammoBar.onShoot();
     },
 
     addPositionObserver: function(positionObserver) {
