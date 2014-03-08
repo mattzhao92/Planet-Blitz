@@ -64,7 +64,7 @@ function connectServer(type, username, gameStartCallback) {
       var toX = parseInt(data[Shoot.toX]);
       var toZ = parseInt(data[Shoot.toZ]);
       var character = game.getWorld().getCharacterById(team, index);
-      character.shoot(new THREE.Vector3(toX, 0, toZ));
+      character.displayShoot(new THREE.Vector3(toX, 0, toZ));
   });
 
   /* Handle the hit message */

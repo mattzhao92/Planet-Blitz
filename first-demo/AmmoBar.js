@@ -37,7 +37,7 @@ var AmmoBar = Sprite.extend({
 		this.ammoCountBar.scale.set(this.tileSize, this.tileSize / this.barAspectRatio, 1.0);
 	},
 
-	onShoot: function(from, to) {
+	onShoot: function() {
 		if (this.ammoCount > 1) {
 			this.setAmmoCount(this.ammoCount - 1);
 		}

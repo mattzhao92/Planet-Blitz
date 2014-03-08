@@ -78,16 +78,25 @@ var Character = Sprite.extend({
 
         // shoot a bullet because you can
         if (this.ammoBar.canShoot()) {
-            sendShootMsg(this.id, from, to);
-
             // don't shoot a bullet in-place
             if (from.x == to.x && from.z == to.z) {
                 return;
             }
 
+            // TODO: clean up this code when socket semantics are clarified
+            sendShootMsg(this.id, from, to);
             var bullet = this.spriteFactory.createBullet(this.world.camera.position, this, from, to);
-            this.ammoBar.onShoot(from, to);
+            this.ammoBar.onShoot();
         }
+    },
+
+    displayShoot: function(to) {
+        var from = this.mesh.position.clone();
+        from.y = Constants.BULLET_LEVEL;
+        to.y = Constants.BULLET_LEVEL;
+
+        var bullet = this.spriteFactory.createBullet(this.world.camera.position, this, from, to);
+        this.ammoBar.onShoot();
     },
 
     addPositionObserver: function(positionObserver) {
