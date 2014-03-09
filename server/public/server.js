@@ -10,6 +10,7 @@ function startGame() {
 }
 
 function loading() {
+  GameInfo.isStart = false;
   GameInfo.isLoading = true;
   $('#debugBtn').hide();
   $('#playBtn').hide();
@@ -50,8 +51,12 @@ function joinGame(gameId) {
   getUsername(gameId);
 }
 
-function showRestartDialog(message, score) {
-  var content = '<h2 style="text-align:center">' + message + '</h2><br/>';
+function showRestartDialog(message, additionalMsg, score) {
+  var content = '<h2 style="text-align:center">' + message + '</h2>';
+  if (additionalMsg) {
+    content += '<p style="text-align:center; margin:0">' + additionalMsg + '</p>';
+  }
+  content += '<br/>';
   content += '<table style="width:400px"><tr><td>Name</td><td>Kill</td><td>Death</td><td>Win</td></tr>';
   // Score the result according to win.
   var sortedUsernames = new Array();
@@ -71,27 +76,42 @@ function showRestartDialog(message, score) {
     content += '</tr>';
   }
   content += '</table>';
- 
-  $("#Message-dialog").html(content).dialog(
-  {
-    width: 400, 
-    height: 300,
-    modal: true,
-    resizable: false,
-    buttons: {
-      "Play again!": function() {
-        $(this).dialog("close");
+  if (additionalMsg) {
+    $("#Message-dialog").html(content).dialog(
+    {
+      width: 400, 
+      height: 300,
+      modal: true,
+      resizable: false,
+      buttons: {
+        "Close": function() {
+          $(this).dialog("close");
+          mainMenu();
+        }
+      }
+   });   
+  } else {
+    $("#Message-dialog").html(content).dialog(
+    {
+      width: 400, 
+      height: 300,
+      modal: true,
+      resizable: false,
+      buttons: {
+        "Play again!": function() {
+          $(this).dialog("close");
           game.reset();
           sendRestartMsg();
           restartLoading();
-      },
-      "NO!!": function() {
-        $(this).dialog("close");
-        mainMenu();
-        sendLeaveMsg();
+        },
+        "NO!!": function() {
+          $(this).dialog("close");
+          mainMenu();
+          sendLeaveMsg();
+        }
       }
-    }
-  });   
+    });   
+  }
 }
 
 function getUsername(forGameId) {
@@ -224,8 +244,14 @@ function listAvailableGames(games) {
   content += '<form><table><tr><td style="width:140">GameName</td><td style="padding-right:40px">Players</td><td>Status</td></tr>';
   for (var t = 0; t < games.length; t++) {
     var game = games[t];
-    content += '<tr><td class="open-game" onClick="joinGame(' + game[Info.gameId] + ')">' + game[Info.gameName] + '</td><td style="padding-right:40px">' + game[Info.player] +'</td>';
     var isPlaying = game[Info.gameStart] ? 'Playing' : 'Waiting';
+    if (game[Info.gameStart]) {
+      content += '<tr><td class="open-game">' + game[Info.gameName] + '</td><td style="padding-right:40px">' + game[Info.player] +'</td>';
+    } else {
+      content += '<tr onClick="joinGame(' + game[Info.gameId] + ')"><td class="open-game">' + game[Info.gameName] + '</td><td style="padding-right:40px">' + game[Info.player] +'</td>';
+    }
+    
+    
     content += '<td>' + isPlaying + '</td></tr>';
   }
   content += '</table>';
@@ -271,20 +297,25 @@ $(document).ready(function() {
   });
 
   $('#helpBtn').click(function() {
+    $('#debugBtn').hide();
+    $('#playBtn').hide();
+    $('#helpBtn').hide();
     $('#slide-container').fadeIn();
     $('#jms-slideshow' ).jmslideshow();
   });
 
+  // TODO: reset game state?
   $('.jms-link').click(function() {
     if (GameInfo.isLoading) {
       sendLeaveMsg();
-      mainMenu(); 
     } else if (GameInfo.isStart) {
-      sendLeaveMsg();
-      mainMenu();
+      if (GameInfo.netMode) {
+        sendLeaveMsg();
+      }
     } else {
       $('#slide-container').fadeOut();
     }
+    mainMenu();
   });
   
 });

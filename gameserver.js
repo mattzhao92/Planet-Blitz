@@ -186,11 +186,17 @@ io.sockets.on('connection', function(socket) {
         socket.get('username', function(error, username) {
           game.score[username].win++;
           gameStatistics = {};
-          gameStatistics[Stat.winner] = username
+          gameStatistics[Stat.winner] = username;
           var scoreStat = game.getScoreJSON();
           gameStatistics[Stat.result] = scoreStat;
-          // Reset the game state.
-          game.restart();
+          if (!game.isFull()) {
+            delete emptyGames[game.gameId];
+            gameStatistics[Message.LEAVE] = 'Players escaped: ' + game.playerEscaped;
+          } else {
+             // Reset the game state.
+            game.restart();           
+          }
+
           socket.broadcast.to(game.room).emit(Message.FINISH, gameStatistics);
           socket.emit(Message.FINISH, gameStatistics);
         });
@@ -219,18 +225,19 @@ io.sockets.on('connection', function(socket) {
 
   socket.on(Message.LEAVE, function() {
     socket.get('inGame', function(error, game) {
-      if (game.isWaitingRestart) {
+      if (game.isStart) {
         // TODO: Not sure....
+        game.removePlayer(socket, game);
+      } else if (game.isWaitingRestart) {
+        // Kill all?
       } else if (!game.isFull()) {
-        game.numPlayers--;
-        socket.leave(game.room);
-        if (game.numPlayers == 0) {
-            delete emptyGames[game.gameId];
-        } else {
-          var playerState = game.getPlayerInfo();
-          socket.broadcast.to(game.room).emit(Message.JOIN, playerState);
-          socket.set('inGame', null);          
-        }
+        var playerState = game.getPlayerInfo();
+        socket.broadcast.to(game.room).emit(Message.JOIN, playerState);
+        socket.set('inGame', null);          
+     } 
+     if (game.numPlayers == 0) {
+        delete emptyGames[game.gameId];
+        return;
       }
     });
   });
@@ -277,6 +284,7 @@ function Game(gameId, gameName, maxNumPlayers) {
   this.gameName = gameName;
   this.isStart = false;
   this.isWaitingRestart = false;
+  this.playerEscaped = new Array();
   this.numPlayers = 0;
   this.numReadyPlayers = 0;
   this.maxNumPlayers = maxNumPlayers;
@@ -312,6 +320,56 @@ Game.prototype.addPlayer = function(sk, username) {
   sk.join(this.room);
   this.usernames.push(username);
   this.numPlayers++;
+};
+
+Game.prototype.removePlayer = function(socket, game) {
+  console.log(this);
+  socket.get('username', function(error, username) {
+    var index = game.usernames.indexOf(username);
+    game.usernames.splice(index, 1); 
+    var leaveTeamId = game.score[username].teamId;
+    for (var t = 0; t < teamSize; t++) {
+      game.gameState.teams[leaveTeamId][t].alive = false;
+    }
+
+    var numLiveTeams = 0;
+    var winnerTeamId;
+    for (var t = 0; t < game.numPlayers; t++) {
+      for (var i = 0; i < game.gameState.teams.length; i++) {
+        if (game.gameState.teams[t][i].alive) {
+          numLiveTeams++;
+          winnerTeamId = t;
+          break;
+        }
+      }
+    }
+    console.log(numLiveTeams);
+    console.log(game.gameState.teams);
+    game.playerEscaped.push(username);
+    game.numPlayers--;
+    delete game.score[username];
+    if (numLiveTeams == 1) {
+      // Found the winning player.
+      delete emptyGames[game.gameId];
+      var winnerUsername;
+      for (var name in game.score) {
+        if (game.score[name].teamId == winnerTeamId) {
+          winnerUsername = name;
+          break;
+        }
+      }
+      game.score[winnerUsername].win++;
+      gameStatistics = {};
+      gameStatistics[Stat.winner] = winnerUsername;
+      var scoreStat = game.getScoreJSON();
+      gameStatistics[Stat.result] = scoreStat;
+      console.log(gameStatistics);
+      // Reset the game state.
+      gameStatistics[Message.LEAVE] = 'Players escaped: ' + game.playerEscaped;
+      socket.broadcast.to(game.room).emit(Message.FINISH, gameStatistics);
+      socket.leave(game.room);
+    }
+  });
 };
 
 Game.prototype.restart = function() {

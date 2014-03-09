@@ -106,11 +106,12 @@ function connectServer(type) {
       console.log(data);
       var score = data[Stat.result];
       var grid = game.getWorld();
+      var additionalMsg = data[Message.LEAVE];
       grid.onGameFinish();
       if (data[Stat.winner] == GameInfo.username) {
-        showRestartDialog('You win', score);
+        showRestartDialog('You win', additionalMsg, score);
       } else {
-        showRestartDialog('You lose', score);
+        showRestartDialog('You lose', additionalMsg, score);
       }
     });
 
