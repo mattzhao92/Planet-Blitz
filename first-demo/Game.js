@@ -9,6 +9,7 @@
         // create a render and set the size
         this.renderer = new THREE.WebGLRenderer({antialias: true});
         this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.sortObjects = false;
 
         // add the output of the renderer to the html element
         $(containerName).append(this.renderer.domElement);

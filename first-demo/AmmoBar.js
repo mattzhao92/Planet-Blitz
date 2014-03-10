@@ -16,6 +16,7 @@ var AmmoBar = Sprite.extend({
 			useScreenCoordinates: false,
 			alignment: THREE.SpriteAlignment.center
 		});
+		ammoCountBarMaterial.depthWrite = false;
 
 		this.ammoCountBarXOffset = this.tileSize / 2;
 		this.ammoCountBarZOffset = 0;

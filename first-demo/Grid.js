@@ -53,7 +53,7 @@ var Grid = Class.extend({
         this.setupHotkeys();
 
         this.unitCycle = 0;
-        this.hotKeysDisabled = true;
+        this.hotKeysDisabled = false;
         this.resetInProgress = false;
 
         this.disableHotKeys();
@@ -196,6 +196,17 @@ var Grid = Class.extend({
             }
         );
 
+        // electropulse
+        KeyboardJS.on("p",
+            function(event, keysPressed, keyCombo) {
+                if (scope.hotKeysDisabled) return;
+
+                var character = scope.getCurrentSelectedUnit();
+                if (character && character.active) {
+                    character.fireElectropulse();
+                }
+            }
+        );
     },
 
     setupCharacters: function() {

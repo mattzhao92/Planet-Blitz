@@ -78,6 +78,15 @@ var Character = Sprite.extend({
         return this.ammoBar.onShoot();
     },
 
+    fireElectropulse: function() {
+        var scope = this;
+        var shield = this.spriteFactory.createElectropulse(this.mesh.position, function(shield) {
+            scope.removePositionObserver(shield);
+        });
+
+        this.addPositionObserver(shield);
+    },
+
     shoot: function(to, isOriginalCmd) {
         var from = this.mesh.position.clone();
         from.y = Constants.BULLET_LEVEL;

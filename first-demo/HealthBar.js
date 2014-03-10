@@ -16,6 +16,7 @@ var HealthBar = Sprite.extend({
 			useScreenCoordinates: false,
 			alignment: THREE.SpriteAlignment.center
 		});
+		healthBarMaterial.depthWrite = false;
 
 		this.healthBarXOffset = this.tileSize / 2;
 		this.healthBarZOffset = 0;

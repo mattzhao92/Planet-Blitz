@@ -16,6 +16,7 @@ var CooldownBar = Sprite.extend({
 			useScreenCoordinates: false,
 			alignment: THREE.SpriteAlignment.center
 		});
+		spriteMaterial.depthWrite = false;
 
 		this.coolDownBarXOffset = this.tileSize / 2;
 		this.coolDownBarZOffset = 0;

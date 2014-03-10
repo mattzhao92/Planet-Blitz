@@ -126,6 +126,73 @@ var SpriteFactory = Class.extend({
 		return cooldownBar;
 	},
 
+	createElectropulse: function(position) {
+		var scope = this;
+
+		var material = new THREE.ShaderMaterial({
+		  uniforms: {
+		    "c": {
+		      type: "f",
+		      value: 1.0
+		    },
+		    "p": {
+		      type: "f",
+		      value: 1.4
+		    },
+		    glowColor: {
+		      type: "c",
+		      value: new THREE.Color(0x82E6FA)
+		    },
+		    viewVector: {
+		      type: "v3",
+		      value: scope.world.camera.position
+		    }
+		  },
+		  vertexShader: document.getElementById('vertexShader').textContent,
+		  fragmentShader: document.getElementById('fragmentShader').textContent,
+		  side: THREE.FrontSide,
+		  blending: THREE.AdditiveBlending,
+		  transparent: true
+		});
+
+		var multiMaterial = [material, material];
+
+		var geometry = new THREE.SphereGeometry(1, 30, 30);
+
+		var shieldMesh = THREE.SceneUtils.createMultiMaterialObject( 
+			new THREE.SphereGeometry(1, 32, 32, 0, 2 * Math.PI, 0, Math.PI / 2 ), 
+			multiMaterial );
+
+		// console.log(shieldMesh);
+		// var shieldMesh = new THREE.Mesh(geometry, material);
+		shieldMesh.position = position.clone();
+		// shieldMesh.position.y = 100;
+
+		shieldMesh.onUnitPositionChanged = function(position) {
+			shieldMesh.position.x = position.x;
+			shieldMesh.position.z = position.z;
+		};
+
+		this.world.scene.add(shieldMesh);
+
+		// console.log(material);
+		// console.log(shieldMesh.material.uniforms['p'].value);
+
+		var timeForEffect = 400;
+		var tween = new TWEEN.Tween({opacity: 1.4, radius: 10}).to({opacity: 6, radius: 100}, timeForEffect).easing(TWEEN.Easing.Linear.None).onUpdate(function() {
+			shieldMesh.children[0].material.uniforms['p'].value = this.opacity;
+			shieldMesh.children[1].material.uniforms['p'].value = this.opacity;
+
+			shieldMesh.scale.set(this.radius, this.radius, this.radius);
+		}).start();
+
+		setTimeout(function() {
+			scope.world.scene.remove(shieldMesh);
+		}, timeForEffect);
+
+		return shieldMesh;
+	},
+
 	createShieldHit: function(position) {
 		var scope = this;
 
