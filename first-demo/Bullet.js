@@ -43,7 +43,8 @@ var Bullet = Sprite.extend({
     this.speed = 500;
     this.damage = 20;
 
-    this.maxDistance = 240;
+    // this.maxDistance = 240;
+    this.maxDistance = 1000;
 
     // alias to position
     this.position = this.mesh.position;

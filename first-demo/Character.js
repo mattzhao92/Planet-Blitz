@@ -103,6 +103,14 @@ var Character = Sprite.extend({
         this.positionObservers.push(positionObserver);
     },
 
+    removePositionObserver: function(positionObserver) {
+        var index = this.positionObservers.indexOf(positionObserver);
+
+        if (index > -1) {
+            this.positionObservers.splice(positionObserver);
+        }
+    },
+
     addHealthObserver: function(healthObserver) {
         this.healthObservers.push(healthObserver);
     },
@@ -191,6 +199,13 @@ var Character = Sprite.extend({
 
         if (this.getHealth() <= 0) {
             this.world.handleCharacterDead(this);
+        } else {
+            var scope = this;
+            var shield = this.spriteFactory.createShieldHit(this.mesh.position, function(shield) {
+                scope.removePositionObserver(shield);
+            });
+
+            this.addPositionObserver(shield);
         }
     },
 

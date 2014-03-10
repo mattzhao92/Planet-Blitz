@@ -122,6 +122,62 @@ var SpriteFactory = Class.extend({
 		return cooldownBar;
 	},
 
+	createShieldHit: function(position) {
+		var scope = this;
+
+		var material = new THREE.ShaderMaterial({
+		  uniforms: {
+		    "c": {
+		      type: "f",
+		      value: 1.0
+		    },
+		    "p": {
+		      type: "f",
+		      value: 1.4
+		    },
+		    glowColor: {
+		      type: "c",
+		      value: new THREE.Color(0x82E6FA)
+		    },
+		    viewVector: {
+		      type: "v3",
+		      value: scope.world.camera.position
+		    }
+		  },
+		  vertexShader: document.getElementById('vertexShader').textContent,
+		  fragmentShader: document.getElementById('fragmentShader').textContent,
+		  side: THREE.FrontSide,
+		  blending: THREE.AdditiveBlending,
+		  transparent: true
+		});
+
+		var geometry = new THREE.SphereGeometry(40, 30, 30);
+
+		var shieldMesh = new THREE.Mesh(geometry, material);
+		shieldMesh.position = position;
+
+		shieldMesh.onUnitPositionChanged = function(position) {
+			shieldMesh.position = position;
+		};
+
+		this.world.scene.add(shieldMesh);
+
+		// console.log(material);
+		// console.log(shieldMesh.material.uniforms['p'].value);
+
+		var timeForEffect = 400;
+		var tween = new TWEEN.Tween({opacity: 1.4}).to({opacity: 6}, timeForEffect).easing(TWEEN.Easing.Linear.None).onUpdate(function() {
+			shieldMesh.material.uniforms['p'].value = this.opacity;
+
+		}).start();
+
+		setTimeout(function() {
+			scope.world.scene.remove(shieldMesh);
+		}, timeForEffect);
+
+		return shieldMesh;
+	},
+
 	createExplosion: function(position) {
 		var scope = this;
 
