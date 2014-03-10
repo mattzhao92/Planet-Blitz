@@ -4,54 +4,65 @@ var socket;
 var game;
 var GameInfo = new GameConfig();
 
-function connectServer(type, username, gameStartCallback) {
-  GameInfo.gameStartCallback = gameStartCallback;
-  console.log(Stat.kill);
-  socket = io.connect();
-  GameInfo.numOfTeams = type;
-  GameInfo.username = username;
-  var gameRequest = {};
-  gameRequest[Message.TYPE] = type;
-  gameRequest[Message.USERNAME] = username;
-  socket.emit(Message.GAME, gameRequest);
+function connectServer(type) {
+  if (!socket) {
+    socket = io.connect();  
+  }
+
+  socket.on(Message.LISTGAME, function(games) {
+    listAvailableGames(games);
+  });
+
+  socket.on(Message.GAME, function(playerInfo) {
+    updateLoadingPlayerState(playerInfo);
+    loading();
+  });
 
   /* Handle the team id message */
-  socket.on(Message.TEAM, function(data) {
-      GameInfo.myTeamId = data[Message.TEAM];
-      updateLoadingPlayerState(data[Message.JOIN]);
+  socket.on(Message.PREPARE, function(playerTeamInfo) {
+    GameInfo.myTeamId = parseInt(playerTeamInfo[GameInfo.username]);
+    var count = 0;
+    for (var key in playerTeamInfo) {
+      count++;
+    }
+    GameInfo.numOfTeams = count;
+    // Render the game here.
+    socket.emit(Message.READY);
   });
 
   socket.on(Message.JOIN, function(playerState) {
-      updateLoadingPlayerState(playerState);
+    if (!GameInfo.isLoading) {
+      loading();
+    }
+    updateLoadingPlayerState(playerState);
   });
 
   /* Handle the start message */
   socket.on(Message.START, function(score) {
-      GameInfo.gameStartCallback();
-      var grid = game.getWorld();
-      game.updateScoreBoard(score);
-      grid.onGameStart();
-
+    startGame();
+    var grid = game.getWorld();
+    game.updateScoreBoard(score);
+    grid.onGameStart();
   });
 
   /* Handle the move message */
   socket.on(Message.MOVE, function(moveData) {
-      console.log("Start move receiving");
-      var state = moveData[Message.STATE];
-      var data = moveData[Message.MOVE];
-      console.log(state);
-      console.log(data);
-      var moverTeam = parseInt(data[Move.team]);
-      var moverIndex = parseInt(data[Move.index]);
-      var deltaX = parseInt(data[Move.X]);
-      var deltaZ = parseInt(data[Move.Z]);
-      var seq = parseInt(moveData[Message.SEQ]);
-      var target = game.getWorld().getCharacterById(moverTeam, moverIndex);
-      if (game.getWorld().syncGameState(state, seq)) {
-          target.setDirection(new THREE.Vector3(deltaX, 0, deltaZ));
-          target.enqueueMotion(null);
-      }
-      console.log("Finish move receiving");
+    console.log("Start move receiving");
+    var state = moveData[Message.STATE];
+    var data = moveData[Message.MOVE];
+    console.log(state);
+    console.log(data);
+    var moverTeam = parseInt(data[Move.team]);
+    var moverIndex = parseInt(data[Move.index]);
+    var deltaX = parseInt(data[Move.X]);
+    var deltaZ = parseInt(data[Move.Z]);
+    var seq = parseInt(moveData[Message.SEQ]);
+    var target = game.getWorld().getCharacterById(moverTeam, moverIndex);
+    if (game.getWorld().syncGameState(state, seq)) {
+      target.setDirection(new THREE.Vector3(deltaX, 0, deltaZ));
+      target.enqueueMotion(null);
+    }
+    console.log("Finish move receiving");
 
   });
 
@@ -69,21 +80,21 @@ function connectServer(type, username, gameStartCallback) {
 
   /* Handle the hit message */
   socket.on(Message.HIT, function(hitData) {
-      var state = hitData[Message.STATE];
-      var data = hitData[Message.HIT];
-      console.log(data);
-      var team = parseInt(data[Hit.team]);
-      var index = parseInt(data[Hit.index]);
-      var seq = parseInt(data[Message.SEQ]);
-      var target = game.getWorld().getCharacterById(team, index);
-      game.getWorld().syncGameState(state, seq);
-      if (data[Hit.kill]) {
-        game.getWorld().handleCharacterDead(target);
-        var score = hitData[Stat.result];
-        game.updateScoreBoard(score);
-      } else{
-        target.applyDamage(30);
-      }
+    var state = hitData[Message.STATE];
+    var data = hitData[Message.HIT];
+    console.log(data);
+    var team = parseInt(data[Hit.team]);
+    var index = parseInt(data[Hit.index]);
+    var seq = parseInt(data[Message.SEQ]);
+    var target = game.getWorld().getCharacterById(team, index);
+    game.getWorld().syncGameState(state, seq);
+    if (data[Hit.kill]) {
+      game.getWorld().handleCharacterDead(target);
+      var score = hitData[Stat.result];
+      game.updateScoreBoard(score);
+    } else{
+      target.applyDamage(30);
+    }
   });
 
   socket.on(Message.FINISH, function(data) {
@@ -93,22 +104,29 @@ function connectServer(type, username, gameStartCallback) {
       console.log(data);
       var score = data[Stat.result];
       var grid = game.getWorld();
+      var additionalMsg = data[Message.LEAVE];
       grid.onGameFinish();
       if (data[Stat.winner] == GameInfo.username) {
-        showRestartDialog('You win', score);
+        showRestartDialog('You win', additionalMsg, score);
       } else {
-        showRestartDialog('You lose', score);
+        showRestartDialog('You lose', additionalMsg, score);
       }
+    });
+
+  socket.on(Message.ERROR, function(reason) {
+    alert('Fail to join the game: ' + reason);
   });
 
 }
 
 // A wrapper class for all game parameter.
 function GameConfig() {
+  this.isStart = false;
   this.numOfTeams = 4;
   this.myTeamId = 0;
   this.netMode = true;
   this.username;
+  this.isLoading = false;
 }
 
 
@@ -146,6 +164,33 @@ function sendHitMsg(team, index) {
 function sendRestartMsg() {
   socket.emit(Message.RESTART);
 }
+
+function sendListGameMsg() {
+  socket.emit(Message.LISTGAME);
+}
+
+function sendCreateMsg(gamename, username, type) {
+  GameInfo.username = username;
+  var createMsg = {};
+  createMsg[Message.GAMENAME] = gamename;
+  createMsg[Message.TYPE] = type;
+  createMsg[Message.USERNAME] = username;
+  socket.emit(Message.CREATEGAME, createMsg);
+  // alert('creat req');
+}
+
+function sendLeaveMsg() {
+  socket.emit(Message.LEAVE);
+}
+
+function sendJoinMsg(gameId, username) {
+  GameInfo.username = username;
+  var joinMsg = {};
+  joinMsg[Message.GAME] = gameId;
+  joinMsg[Message.USERNAME] = username;
+  socket.emit(Message.JOIN, joinMsg);
+}
+
 function updateLoadingPlayerState(state) {
   $('#Loading-output').html('Waiting...</br>Player: ' + state);
 }

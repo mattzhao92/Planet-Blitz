@@ -100,7 +100,7 @@ var Grid = Class.extend({
 
     getMyTeamCharacters: function() {
         return _.filter(this.getCharacters(), function(character) {
-            return character.team == GameInfo.myTeamId;
+            return character.team == GameInfo.myTeamId && character.active;
         });
     },
 
@@ -237,6 +237,8 @@ var Grid = Class.extend({
                 return character;
             }
         }
+
+        return null;
     },
 
     displayMessage: function(msg) {
@@ -331,6 +333,7 @@ var Grid = Class.extend({
         }
 
         this.deselectHighlightedTiles();
+
         if (character.isCharacterInRoute == false && character.isCoolDown == false && character.active) {
             var characterMovementRange = character.getMovementRange();
             // highlight adjacent squares - collect all tiles from radius
@@ -521,11 +524,12 @@ var Grid = Class.extend({
                 if (unitMovedToDifferentSquare) {
                     // Put the network communication here.
                     if (this.getCurrentSelectedUnit().isCoolDown == 0) {
-                        sendMoveMsg(this.getCurrentSelectedUnit().id,
-                            deltaX, deltaY, deltaZ);
-
                         if (!GameInfo.netMode) {
-                            this.currentSelectedUnits[GameInfo.myTeamId].enqueueMotion();
+                            this.getCurrentSelectedUnit().setDirection(new THREE.Vector3(deltaX, 0, deltaZ));
+                            this.getCurrentSelectedUnit().enqueueMotion();
+                        } else {
+                            sendMoveMsg(this.getCurrentSelectedUnit().id,
+                                deltaX, deltaY, deltaZ);
                         }
                     }
                 }
@@ -644,8 +648,10 @@ var Grid = Class.extend({
             var health = parseInt(state[t][State.health]);
             // Character to check.
             var charToCheck = this.getCharacterById(teamId, index);
+
+
             liveStates[teamId][index] = true;
-            if (charToCheck.active) {
+            if (charToCheck != null && charToCheck.active) {
                 // Sync the health.
                 charToCheck.health = health;
                 var dest;
@@ -666,7 +672,7 @@ var Grid = Class.extend({
         for (var t = 0; t < GameInfo.numOfTeams; t++) {
             for (var i = 0; i < this.numOfCharacters; i++) {
                 var charToCheck = this.getCharacterById(t, i);
-                if (!liveStates[t][i] && charToCheck.active) {
+                if (charToCheck !== null && !liveStates[t][i] && charToCheck.active) {
                     console.log("Zombie character!");
                     // Server says dead but active locally.
                     this.handleCharacterDead(charToCheck);

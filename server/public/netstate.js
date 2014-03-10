@@ -1,13 +1,18 @@
 // Network packet type
 var Message = {
   GAME : 'GAME',
+  LISTGAME : 'LISTGAME',
+  GAMENAME : 'GAMENAME',
   TYPE : 'TYPE',
   USERNAME : 'USERNAME',
   JOIN : 'JOIN',
+  LEAVE : "LEAVE",
+  ERROR : 'ERROR',
+  PREPARE : 'PREPARE',
   START : 'START',
   FINISH : 'FINISH',
   RESTART : 'RESTART',
-  TEAM : 'TEAM',
+  READY : 'READY',
   STATE: 'STATE',
   SEQ: 'seq',
   MOVE : 'MOVE',
@@ -57,9 +62,18 @@ var Stat = {
   win : 'win'
 }
 
+var Info = {
+  // Name for the game room.
+  gameId : 'gameId',
+  gameName : 'gameName',
+  gameStart : 'gameStart',
+  player : 'player'
+}
+
 exports.Message = Message;
 exports.Move = Move;
 exports.Hit = Hit;
 exports.Shoot = Shoot;
 exports.State = State;
 exports.Stat = Stat;
+exports.Info = Info;

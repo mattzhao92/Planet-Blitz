@@ -22,12 +22,18 @@ body {
   top: 200px;
 }
 
-#playBtn2 {
+#helpBtn {
   top: 300px;
 }
 
-#helpBtn {
-  top: 400px;
+#leaveBtn {
+  left: 0;
+  bottom: 0;
+  font-size: 10px;
+  width: 50px;
+  height: 35px;
+  margin: 0px;
+  padding: 0px;
 }
 
 #Stats-output {
@@ -205,9 +211,10 @@ body {
 
 .border,
 .rain{
-  height: 170px;
+  /*height: 170px;*/
   width: 320px;
 }
+
 
 
 /* Layout with mask */
@@ -303,6 +310,20 @@ form{
   background: -moz-radial-gradient(50% 46% 90deg,circle closest-corner, #242424, #090909);
   background: -webkit-gradient(radial, 50% 50%, 0, 50% 50%, 150, from(#242424), to(#090909));
 }
+
+form table {
+  display: block;
+  margin-left: 0px;
+  padding: 10px 10px 5px 15px;
+  font-size: 15px;
+  text-align: center;
+  color: #777;
+}
+
+form table td {
+  padding-top: 10px;
+}
+
 form label{
   display: block;
   padding: 10px 10px 5px 15px;
