@@ -229,36 +229,8 @@ var Character = Sprite.extend({
     },
 
     destroy: function() {
-        var fireball =
-            {
-                positionStyle  : Type.SPHERE,
-                positionBase   : new THREE.Vector3( 0, 50, 0 ),
-                positionRadius : 2,
-                        
-                velocityStyle : Type.SPHERE,
-                speedBase     : 40,
-                speedSpread   : 8,
-                
-                particleTexture : THREE.ImageUtils.loadTexture( 'images/smokeparticle.png' ),
-
-                sizeTween    : new Tween( [0, 0.1], [1, 150] ),
-                opacityTween : new Tween( [0.7, 1], [1, 0] ),
-                colorBase    : new THREE.Vector3(0.02, 1, 0.4),
-                blendStyle   : THREE.AdditiveBlending,  
-                
-                particlesPerSecond : 60,
-                particleDeathAge   : 1.5,       
-                emitterDeathAge    : 60
-            };
-        
-        // death animation
-        var engine = new ParticleEngine();
-        engine.setValues(fireball);
-        engine.initialize(this.world.scene);
-
-        this.engine = engine;
-
-        // this.active = false;
+        this.spriteFactory.createExplosion(this.mesh.position);
+        this.active = false;
         this.ammoBar.destroy();
         this.healthBar.destroy();
         this.cooldownBar.destroy();
@@ -446,7 +418,7 @@ var Character = Sprite.extend({
         this.breakUpdateHere = false;
 
         if (this.engine) {
-            this.engine.update(delta * 0.5);
+            this.engine.update(delta);
         }
 
         this.ammoBar.updateWeaponReload(delta);

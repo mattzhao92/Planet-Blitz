@@ -122,6 +122,54 @@ var SpriteFactory = Class.extend({
 		return cooldownBar;
 	},
 
+	createExplosion: function(position) {
+		var scope = this;
+
+		var numSecondsForExplosion = 1;
+		var fireball =
+		    {
+		        positionStyle  : Type.SPHERE,
+		        positionBase   : position,
+		        positionRadius : 2,
+		                
+		        velocityStyle : Type.SPHERE,
+		        speedBase     : 40,
+		        speedSpread   : 9,
+		        
+		        particleTexture : THREE.ImageUtils.loadTexture( 'images/smokeparticle.png' ),
+
+		        sizeTween    : new Tween( [0, 0.1], [1, 150] ),
+		        opacityTween : new Tween( [0.7, 1], [1, 0] ),
+		        colorBase    : new THREE.Vector3(0.02, 1, 0.4),
+		        blendStyle   : THREE.AdditiveBlending,  
+		        
+		        particlesPerSecond : 60,
+		        particleDeathAge   : 1,       
+		        emitterDeathAge    : numSecondsForExplosion
+		    };
+		
+		this.createParticleEffect(fireball, numSecondsForExplosion);
+	},
+
+	createParticleEffect: function(effectVals, numSeconds) {
+		var engine = new ParticleEngine();
+		engine.setValues(effectVals);
+		engine.initialize(this.world.scene);
+
+		var subscriber = function(msg, data) {
+			engine.update(data);
+		};
+
+		// register engine for updates for 'numSecondsForExplosion' seconds
+		var unsubscribeToken = PubSub.subscribe(Constants.TOPIC_DELTA, subscriber);
+
+		// destroy engine after desired time
+		setTimeout(function() {
+			PubSub.unsubscribe(unsubscribeToken);
+			engine.destroy();
+		}, numSeconds * 1000);
+	},
+
 	getCharacters: function() {
 		return this.robots;
 	},

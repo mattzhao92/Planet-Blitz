@@ -132,6 +132,8 @@ $(function () {
 
             var delta = this.clock.getDelta();
             this.controls.update(delta);
+
+            PubSub.publishSync(Constants.TOPIC_DELTA, delta);
             
             // main game render loop
             this.world.update(delta);
