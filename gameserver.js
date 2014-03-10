@@ -89,7 +89,7 @@ io.sockets.on('connection', function(socket) {
         }
         if (gameToJoin.usernames.indexOf(username) != -1) {
           socket.emit(Message.ERROR, 'Username already exits');
-          return;
+          return; 
         }
         gameToJoin.addPlayer(socket, username);
         var username = joinRequest[Message.USERNAME];
@@ -500,15 +500,18 @@ GameState.prototype.updatePosState = function(data) {
 };
 
 GameState.prototype.updateHealthState = function(data) {
+  console.log(data);
   var teamId = parseInt(data[Hit.team]);
   var index = parseInt(data[Hit.index]);
   var kill = false;
+  var damage = parseInt(data[Hit.damage]);
+  console.log(damage);
   if (!this.teams[teamId][index].alive) {
     console.log("Shot a corpus??");
     kill = true;
     return kill;
   }
-  this.teams[teamId][index].health -= 30;
+  this.teams[teamId][index].health -= damage;
   if (this.teams[teamId][index].health < 0) {
     console.log("die");
     kill = true;

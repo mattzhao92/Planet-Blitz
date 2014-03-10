@@ -8,7 +8,8 @@ var ApplyDamageStrategy = InteractStrategy.extend({
 		if (this.checkOverlap(ctxSprite, otherSprite) && otherSprite instanceof Character) {
 			if (otherSprite.team != ctxSprite.owner.team) {
 				ctxSprite.destroy();
-				otherSprite.applyDamage(this.dmgToApply);
+				// otherSprite.applyDamage(this.dmgToApply);
+				sendHitMsg(otherSprite.team, otherSprite.id, this.dmgToApply);
 			}
 		}
 	},

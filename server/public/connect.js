@@ -85,6 +85,7 @@ function connectServer(type) {
     console.log(data);
     var team = parseInt(data[Hit.team]);
     var index = parseInt(data[Hit.index]);
+    var damage = parseInt(data[Hit.damage]);
     var seq = parseInt(data[Message.SEQ]);
     var target = game.getWorld().getCharacterById(team, index);
     game.getWorld().syncGameState(state, seq);
@@ -93,7 +94,7 @@ function connectServer(type) {
       var score = hitData[Stat.result];
       game.updateScoreBoard(score);
     } else{
-      target.applyDamage(30);
+      target.applyDamage(damage);
     }
   });
 
@@ -157,10 +158,11 @@ function sendShootMsg(index, from, to) {
   }
 }
 
-function sendHitMsg(team, index) {
+function sendHitMsg(team, index, damage) {
   var hit = {};
   hit[Hit.team] = team;
   hit[Hit.index] = index;
+  hit[Hit.damage] = damage;
   socket.emit(Message.HIT, hit);
 }
 
