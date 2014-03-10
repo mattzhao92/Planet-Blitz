@@ -28,7 +28,7 @@ var Grid = Class.extend({
         this.tiles = new THREE.Object3D();
         this.tilesArray = null;
 
-        this.loadGround();
+        // this.loadGround();
         this.drawGridSquares(width, length, tileSize);
 
         this.gridHelper = new GridHelper(this.camera, this.controls);
