@@ -87,6 +87,10 @@ io.sockets.on('connection', function(socket) {
           socket.emit(Message.ERROR, 'The selected game is already start');
           return;
         }
+        if (gameToJoin.usernames.indexOf(username) != -1) {
+          socket.emit(Message.ERROR, 'Username already exits');
+          return;
+        }
         gameToJoin.addPlayer(socket, username);
         var username = joinRequest[Message.USERNAME];
         socket.set('username', username, function() {

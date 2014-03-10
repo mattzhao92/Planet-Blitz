@@ -115,6 +115,9 @@ function connectServer(type) {
 
   socket.on(Message.ERROR, function(reason) {
     alert('Fail to join the game: ' + reason);
+    if (GameInfo.isLoading) {
+      mainMenu();
+    }
   });
 
 }
