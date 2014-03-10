@@ -512,7 +512,7 @@ GameState.prototype.updateHealthState = function(data) {
     return kill;
   }
   this.teams[teamId][index].health -= damage;
-  if (this.teams[teamId][index].health < 0) {
+  if (this.teams[teamId][index].health <= 0) {
     console.log("die");
     kill = true;
     this.teams[teamId][index].alive = false;
