@@ -160,6 +160,14 @@ io.sockets.on('connection', function(socket) {
     socket.get('inGame', function(error, game) {
       var newState = game.gameState.toJSON();
       var isKill = game.gameState.updateHealthState(message);
+      if (isKill == 'error') {
+        // So he is trying to kill a dead unit, force to sync.
+        var removeDead = {};
+        removeDead[Hit.team] = message[Hit.team];
+        removeDead[Hit.index] = message[Hit.index];
+        socket.emit(Message.REMOVE, removeDead);
+        return;
+      }
       if (isKill) {
         socket.get('username', function(error, username) {
           game.score[username].kill++;
@@ -508,7 +516,7 @@ GameState.prototype.updateHealthState = function(data) {
   console.log(damage);
   if (!this.teams[teamId][index].alive) {
     console.log("Shot a corpus??");
-    kill = true;
+    kill = 'error';
     return kill;
   }
   this.teams[teamId][index].health -= damage;

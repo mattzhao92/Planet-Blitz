@@ -98,6 +98,16 @@ function connectServer(type) {
     }
   });
 
+  socket.on(Message.REMOVE, function(removeDead) {
+    var team = parseInt(removeDead[Hit.team]);
+    var index = parseInt(removeDead[Hit.index]);
+    var dead = game.getWorld().getCharacterById(team, index);
+    if (dead != null) {
+      game.getWorld().handleCharacterDead(dead);  
+    }
+    
+  });
+
   socket.on(Message.FINISH, function(data) {
       // must come first due to UI issues
       game.getWorld().onGameFinish();
