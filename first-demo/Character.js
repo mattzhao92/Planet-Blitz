@@ -70,13 +70,21 @@ var Character = Sprite.extend({
         this.breakUpdateHere = false;
     },
 
+    canShoot: function() {
+        return this.ammoBar.canShoot();
+    },
+
+    onShoot: function() {
+        return this.ammoBar.onShoot();
+    },
+
     shoot: function(to, isOriginalCmd) {
         var from = this.mesh.position.clone();
         from.y = Constants.BULLET_LEVEL;
         to.y = Constants.BULLET_LEVEL;
 
         // shoot a bullet because you can
-        if (this.ammoBar.canShoot()) {
+        if (this.canShoot()) {
             // don't shoot a bullet in-place
             if (from.x == to.x && from.z == to.z) {
                 return;
@@ -87,7 +95,7 @@ var Character = Sprite.extend({
                 sendShootMsg(this.id, from, to);
             }
             var bullet = this.spriteFactory.createBullet(this.world.camera.position, this, from, to);
-            this.ammoBar.onShoot();
+            this.onShoot();
         }
     },
 
