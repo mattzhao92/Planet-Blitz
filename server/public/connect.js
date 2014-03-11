@@ -128,7 +128,7 @@ function GameConfig() {
   this.isStart = false;
   this.numOfTeams = 4;
   this.myTeamId = 0;
-  this.netMode = true;
+  this.netMode = false;
   this.username;
   this.isLoading = false;
 }
