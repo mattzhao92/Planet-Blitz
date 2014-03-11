@@ -55,6 +55,11 @@ var Grid = Class.extend({
         this.unitCycle = 0;
         this.hotKeysDisabled = true;
         this.resetInProgress = false;
+
+        if (GameInfo.netMode === false) {
+            console.log("In single player mode");
+            this.hotKeysDisabled = false;
+        }
     },
 
     getCharacters: function() {
