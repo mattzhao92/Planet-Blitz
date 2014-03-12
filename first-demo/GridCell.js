@@ -44,7 +44,7 @@ var GridCell = Class.extend({
     highlight: function(color) {
 
         this.tileMesh.visible = true;
-        this.tileMesh.material.opacity = 0.65;
+        this.tileMesh.material.opacity = 0.6;
         var rgb;
         switch (color) {
             case "GREEN":

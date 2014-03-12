@@ -5,28 +5,28 @@ var HealthBar = Sprite.extend({
 		this.tileSize = tileSize;
 		this.barAspectRatio = barAspectRatio;
 
-		var canvas3 = document.createElement('canvas');
-		this.canvas2d3 = canvas3.getContext('2d');
+		var canvas = document.createElement('canvas');
+		this.canvas2d = canvas.getContext('2d');
 
-		this.healthBarTexture = new THREE.Texture(canvas3);
+		this.healthBarTexture = new THREE.Texture(canvas);
 		this.healthBarTexture.needsUpdate = true;
 
 		var healthBarMaterial = new THREE.SpriteMaterial({
 			map: this.healthBarTexture,
 			useScreenCoordinates: false,
-			alignment: THREE.SpriteAlignment.centerLeft
+			alignment: THREE.SpriteAlignment.center
 		});
 
-		this.healthBarXOffset = -1 * this.tileSize / 2;
+		this.healthBarXOffset = 0;
 		this.healthBarZOffset = 0;
 		this.healthBarYOffset = 65;
 		this.healthBar = new THREE.Sprite(healthBarMaterial);
 
 		this.maximumHealth = maxHealth;
 
-		this.canvas2d3.rect(0, 0, 600, 150);
-		this.canvas2d3.fillStyle = "red";
-		this.canvas2d3.fill();
+		this.canvas2d.rect(0, 0, 600, 150);
+		this.canvas2d.fillStyle = "red";
+		this.canvas2d.fill();
 		this.healthBar.position.set(position.x + this.healthBarXOffset,
 			position.y + this.healthBarYOffset,
 			position.z + this.healthBarZOffset);

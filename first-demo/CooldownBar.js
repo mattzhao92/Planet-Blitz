@@ -14,17 +14,17 @@ var CooldownBar = Sprite.extend({
 		var spriteMaterial = new THREE.SpriteMaterial({
 			map: this.coolDownBarTexture,
 			useScreenCoordinates: false,
-			alignment: THREE.SpriteAlignment.centerLeft
+			alignment: THREE.SpriteAlignment.center
 		});
 
-		this.coolDownBarXOffset = -1 * this.tileSize / 2;
+		this.coolDownBarXOffset = 0;
 		this.coolDownBarZOffset = 0;
 		this.coolDownBarYOffset = 55;
 		this.coolDownBar = new THREE.Sprite(spriteMaterial);
 		this.canvas2d.rect(0, 0, 800, 200);
-		this.canvas2d.fillStyle = "green";
+		this.canvas2d.fillStyle = "magenta";
 		this.canvas2d.fill();
-		this.coolDownBar.position.set(position.x - this.tileSize / 2 + this.coolDownBarXOffset,
+		this.coolDownBar.position.set(position.x + this.coolDownBarXOffset,
 			position.y + this.coolDownBarYOffset,
 			position.z + this.coolDownBarZOffset);
 		this.coolDownBar.scale.set(this.tileSize, this.tileSize / this.barAspectRatio, 1.0);
