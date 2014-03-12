@@ -14,10 +14,10 @@ var AmmoBar = Sprite.extend({
 		var ammoCountBarMaterial = new THREE.SpriteMaterial({
 			map: this.ammoCountBarTexture,
 			useScreenCoordinates: false,
-			alignment: THREE.SpriteAlignment.centerLeft
+			alignment: THREE.SpriteAlignment.center
 		});
 
-		this.ammoCountBarXOffset = -1 * this.tileSize / 2;
+		this.ammoCountBarXOffset = 0;
 		this.ammoCountBarZOffset = 0;
 		this.ammoCountBarYOffset = 60;
 		this.ammoCountBar = new THREE.Sprite(ammoCountBarMaterial);
@@ -28,7 +28,7 @@ var AmmoBar = Sprite.extend({
 		this.needsReload = false;
 
 		this.canvas2d.rect(0, 0, 600, 150);
-		this.canvas2d.fillStyle = "blue";
+		this.canvas2d.fillStyle = "skyblue";
 		this.canvas2d.fill();
 		this.ammoCountBar.position.set(position.x + this.ammoCountBarXOffset,
 			position.y + this.ammoCountBarYOffset,

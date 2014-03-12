@@ -55,6 +55,8 @@ var Grid = Class.extend({
         this.unitCycle = 0;
         this.hotKeysDisabled = true;
         this.resetInProgress = false;
+
+        this.disableHotKeys();
     },
 
     getCharacters: function() {
@@ -68,6 +70,8 @@ var Grid = Class.extend({
                 this.silentlyRemoveCharacter(this.getCharacterById(tm, i));
             }
         }
+
+        // TODO: temporary, because start position is not always in same place
 
         console.log("Team id " + GameInfo.myTeamId);
 
@@ -87,6 +91,7 @@ var Grid = Class.extend({
                 break;
         }
 
+        this.controls.rotateRight(this.getCameraDegreesToRotate());
         this.displayMessage(teamJoinMessage);
 
         // focus camera on start position (TODO: hardcoded)
@@ -223,9 +228,52 @@ var Grid = Class.extend({
                     startY = i + 9;
                 }
                 character.placeAtGridPos(startX, startY);
+
+                // TODO: temporary fix until initial rotation is handled properly
+                character.getRepr().rotation.y = this.getUnitDegreesToRotate(team_id);
+
                 this.markTileOccupiedByCharacter(startX, startY);
             }
         }
+    },
+
+    getUnitDegreesToRotate: function(team_id) {
+        switch (team_id) {
+            case 0:
+                degreesToRotate = 0;
+                break;
+            case 1:
+                degreesToRotate = Math.PI;
+                break;
+            case 2:
+                degreesToRotate = Math.PI / 2; 
+                break;
+            case 3:
+                degreesToRotate = 3 * Math.PI / 2;
+                break;
+        }
+
+        return degreesToRotate;
+    },
+
+
+    getCameraDegreesToRotate: function() {
+        switch (GameInfo.myTeamId) {
+            case 0:
+                degreesToRotate = Math.PI;
+                break;
+            case 1:
+                degreesToRotate = 0;
+                break;
+            case 2:
+                degreesToRotate = 3 * Math.PI / 2; 
+                break;
+            case 3:
+                degreesToRotate = Math.PI / 2;
+                break;
+        }
+
+        return degreesToRotate;
     },
 
     getCharacterById: function(team, id) {

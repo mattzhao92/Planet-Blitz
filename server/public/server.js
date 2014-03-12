@@ -119,7 +119,6 @@ function getUsername(forGameId) {
   content += '<form><label for="name" style="margin-left:7">What name do you want to display in the game?</label><input id="uname" name="name"  maxlength="15" type="text" style="margin-left: 25"/>';
   content += '<input type="button" value="Start" style="margin: 5 23 10 23" id="unameBtn"/><input value="Quit" type="button" id="quitBtn" style="margin: 0 23 14 23"/>';
   content += '</form></div></div>';
-  game.getWorld().disableHotKeys();
   $("#Input-dialog").html(content).dialog(
   {
     width: 400, 
@@ -162,7 +161,6 @@ function createGameStep2(type) {
   content += '<form><label for="uname" style="margin-left:7">What name do you want to display in the game?</label><input id="uname" name="name"  maxlength="15" type="text" style="margin-left: 25"/>';
   content += '<input type="button" value="Start" style="margin: 5 23 10 23" id="unameBtn"/><input value="Quit" type="button" id="quitBtn" style="margin: 0 23 14 23"/>';
   content += '</form></div></div>';
-  game.getWorld().disableHotKeys();
   $("#Input-dialog").html(content).dialog(
   {
     width: 400, 
@@ -208,7 +206,7 @@ function createGameStep1() {
   content += '<form><input type="button" value="4 Players" id="4p"/>';
   content += '<input value="Quit" type="button" id="quitBtn" />';
   content += '</form></div></div>';
-  game.getWorld().disableHotKeys();
+  
   $("#Input-dialog").html(content).dialog(
   {
     width: 400, 
@@ -294,6 +292,7 @@ $(document).ready(function() {
     GameInfo.netMode = false;
     loading();
     startGame();
+    game.getWorld().onGameStart();
   });
 
   $('#helpBtn').click(function() {
