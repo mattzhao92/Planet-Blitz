@@ -48,6 +48,12 @@ function connectServer(type) {
   /* Handle the move message */
   socket.on(Message.MOVE, function(moveData) {
     console.log("Start move receiving");
+    var seq = parseInt(moveData[Message.SEQ]);
+    // Old seq, discard it.
+    if (seq <= game.getWorld().seq) {
+      return;
+    }
+    game.getWorld().seq = seq;
     var state = moveData[Message.STATE];
     var data = moveData[Message.MOVE];
     console.log(state);
@@ -56,9 +62,8 @@ function connectServer(type) {
     var moverIndex = parseInt(data[Move.index]);
     var deltaX = parseInt(data[Move.X]);
     var deltaZ = parseInt(data[Move.Z]);
-    var seq = parseInt(moveData[Message.SEQ]);
     var target = game.getWorld().getCharacterById(moverTeam, moverIndex);
-    if (game.getWorld().syncGameState(state, seq)) {
+    if (game.getWorld().syncGameState(state)) {
       target.setDirection(new THREE.Vector3(deltaX, 0, deltaZ));
       target.enqueueMotion(null);
     }
@@ -80,15 +85,20 @@ function connectServer(type) {
 
   /* Handle the hit message */
   socket.on(Message.HIT, function(hitData) {
+   var seq = parseInt(hitData[Message.SEQ]);
+    // Old seq, discard it.
+    if (seq <= game.getWorld().seq) {
+      return;
+    }
+    game.getWorld().seq = seq;
     var state = hitData[Message.STATE];
     var data = hitData[Message.HIT];
     console.log(data);
     var team = parseInt(data[Hit.team]);
     var index = parseInt(data[Hit.index]);
-    var damage = parseInt(data[Hit.damage]);
-    var seq = parseInt(data[Message.SEQ]);
+    var damage = parseInt(data[Hit.damage]);  
     var target = game.getWorld().getCharacterById(team, index);
-    game.getWorld().syncGameState(state, seq);
+    game.getWorld().syncGameState(state);
     if (data[Hit.kill]) {
       game.getWorld().handleCharacterDead(target);
       var score = hitData[Stat.result];
@@ -151,6 +161,8 @@ function sendMoveMsg(index, x, y, z) {
     data[Move.index] = index;
     data[Move.X] = x;
     data[Move.Z] = z;
+    console.log('Send a move');
+    console.log(data);
     socket.emit(Message.MOVE, data);
   }
 }
@@ -168,12 +180,18 @@ function sendShootMsg(index, from, to) {
   }
 }
 
-function sendHitMsg(team, index, damage) {
-  var hit = {};
-  hit[Hit.team] = team;
-  hit[Hit.index] = index;
-  hit[Hit.damage] = damage;
-  socket.emit(Message.HIT, hit);
+function sendHitMsg(bullet, unit, damage) {
+  if (GameInfo.netMode) {
+    if (bullet.owner.team == GameInfo.myTeamId) {
+      var hit = {};
+      hit[Hit.team] = unit.team;
+      hit[Hit.index] = unit.id;
+      hit[Hit.damage] = damage;
+      socket.emit(Message.HIT, hit);
+    }
+  } else {
+    unit.applyDamage(damage);
+  }
 }
 
 function sendRestartMsg() {
