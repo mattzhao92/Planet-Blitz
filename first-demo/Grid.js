@@ -671,13 +671,9 @@ var Grid = Class.extend({
         this.spriteFactory.updateBulletsContainer();
     },
 
-    syncGameState: function(state, seq) {
+    syncGameState: function(state) {
         if (this.resetInProgress) return true;
-        // Old seq, discard it.
-        if (seq < this.seq) {
-            return false;
-        }
-        this.seq = seq;
+
         // This is usd to check ghosts.
         var liveChars = [];
         var liveStates = [];

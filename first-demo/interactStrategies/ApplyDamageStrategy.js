@@ -9,7 +9,7 @@ var ApplyDamageStrategy = InteractStrategy.extend({
 			if (otherSprite.team != ctxSprite.owner.team) {
 				ctxSprite.destroy();
 				// otherSprite.applyDamage(this.dmgToApply);
-				sendHitMsg(otherSprite.team, otherSprite.id, this.dmgToApply);
+				sendHitMsg(ctxSprite, otherSprite, this.dmgToApply);
 			}
 		}
 	},
