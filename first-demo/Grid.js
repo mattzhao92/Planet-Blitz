@@ -626,7 +626,7 @@ var Grid = Class.extend({
     syncGameState: function(state, seq) {
         if (this.resetInProgress) return true;
         // Old seq, discard it.
-        if (seq < this.seq) {
+        if (seq <= this.seq) {
             return false;
         }
         this.seq = seq;
