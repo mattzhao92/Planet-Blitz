@@ -58,7 +58,7 @@ var Character = Sprite.extend({
         this.addPositionObserver(this.healthBar);
         this.addHealthObserver(this.healthBar);
 
-        this.coolDownCount = 105;
+        this.coolDownCount = 45;
         this.coolDownLeft = 0;
 
         this.cooldownBar = this.spriteFactory.createCooldownBar(this.characterSize, this.getRepr().position, 10, this.coolDownCount);
