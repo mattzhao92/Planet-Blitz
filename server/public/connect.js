@@ -120,7 +120,6 @@ function connectServer(type) {
 
   socket.on(Message.FINISH, function(data) {
       // must come first due to UI issues
-      game.getWorld().onGameFinish();
 
       console.log(data);
       var score = data[Stat.result];
