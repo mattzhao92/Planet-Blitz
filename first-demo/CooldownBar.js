@@ -17,17 +17,17 @@ var CooldownBar = Sprite.extend({
 			alignment: THREE.SpriteAlignment.center
 		});
 
-		this.coolDownBarXOffset = 0;
+		this.coolDownBarXOffset = this.tileSize / 2;
 		this.coolDownBarZOffset = 0;
 		this.coolDownBarYOffset = 55;
 		this.coolDownBar = new THREE.Sprite(spriteMaterial);
-		this.canvas2d.rect(0, 0, 800, 200);
+		this.canvas2d.rect(150, 0, 600, 150);
 		this.canvas2d.fillStyle = "magenta";
 		this.canvas2d.fill();
 		this.coolDownBar.position.set(position.x + this.coolDownBarXOffset,
 			position.y + this.coolDownBarYOffset,
 			position.z + this.coolDownBarZOffset);
-		this.coolDownBar.scale.set(this.tileSize, this.tileSize / this.barAspectRatio, 1.0);
+		this.coolDownBar.scale.set(this.tileSize * 2, this.tileSize / this.barAspectRatio, 1.0);
 
 		this.totalCooldown = totalCooldown;
 	},
@@ -43,15 +43,12 @@ var CooldownBar = Sprite.extend({
 	},
 
 	onCooldownChanged: function(cooldownCount) {
-		var width = this.tileSize;
-		this.coolDownBar.scale.set(width * (this.totalCooldown - cooldownCount) / this.totalCooldown,
-			width / this.barAspectRatio, 1.0);
+		this.coolDownBar.scale.set(this.tileSize * 2 * (this.totalCooldown - cooldownCount) / this.totalCooldown,
+			this.tileSize / this.barAspectRatio, 1.0);
 	},
 
 	reset: function(position) {
-		this.coolDownBar.position.set(this.mesh.position.x - this.tileSize / 2 + this.coolDownBarXOffset,
-			this.mesh.position.y + this.coolDownBarYOffset,
-			this.mesh.position.z + this.coolDownBarZOffset);
-		this.coolDownBar.scale.set(this.tileSize, this.tileSize / this.barAspectRatio, 1.0);
+		this.onUnitPositionChanged(position);
+		this.coolDownBar.scale.set(this.tileSize * 2, this.tileSize / this.barAspectRatio, 1.0);
 	},
 });

@@ -17,20 +17,20 @@ var HealthBar = Sprite.extend({
 			alignment: THREE.SpriteAlignment.center
 		});
 
-		this.healthBarXOffset = 0;
+		this.healthBarXOffset = this.tileSize / 2;
 		this.healthBarZOffset = 0;
-		this.healthBarYOffset = 65;
+		this.healthBarYOffset = 69;
 		this.healthBar = new THREE.Sprite(healthBarMaterial);
 
 		this.maximumHealth = maxHealth;
 
-		this.canvas2d.rect(0, 0, 600, 150);
+		this.canvas2d.rect(150, 0, 600, 150);
 		this.canvas2d.fillStyle = "red";
 		this.canvas2d.fill();
 		this.healthBar.position.set(position.x + this.healthBarXOffset,
 			position.y + this.healthBarYOffset,
 			position.z + this.healthBarZOffset);
-		this.healthBar.scale.set(this.tileSize, this.tileSize / this.barAspectRatio, 1.0);
+		this.healthBar.scale.set(this.tileSize * 2, this.tileSize / this.barAspectRatio, 1.0);
 	},
 
 	getRepr: function() {
@@ -38,9 +38,8 @@ var HealthBar = Sprite.extend({
 	},
 
 	onUnitHealthChanged: function(health) {
-		var width = this.tileSize;
-		this.healthBar.scale.set(width * (1.0 * health) / this.maximumHealth,
-			width / this.barAspectRatio, 1.0);
+		this.healthBar.scale.set(this.tileSize * 2 * (1.0 * health) / this.maximumHealth,
+			this.tileSize / this.barAspectRatio, 1.0);
 	},
 
 	onUnitPositionChanged: function(position) {
@@ -53,7 +52,7 @@ var HealthBar = Sprite.extend({
 		this.healthBar.position.set(position.x + this.healthBarXOffset,
 			position.y + this.healthBarYOffset,
 			position.z + this.healthBarZOffset);
-		this.healthBar.scale.set(this.tileSize, this.tileSize / this.barAspectRatio, 1.0);
+		this.healthBar.scale.set(this.tileSize * 2, this.tileSize / this.barAspectRatio, 1.0);
 	},
 
 });

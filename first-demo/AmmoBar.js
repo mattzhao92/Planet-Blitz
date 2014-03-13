@@ -17,9 +17,9 @@ var AmmoBar = Sprite.extend({
 			alignment: THREE.SpriteAlignment.center
 		});
 
-		this.ammoCountBarXOffset = 0;
+		this.ammoCountBarXOffset = this.tileSize / 2;
 		this.ammoCountBarZOffset = 0;
-		this.ammoCountBarYOffset = 60;
+		this.ammoCountBarYOffset = 62;
 		this.ammoCountBar = new THREE.Sprite(ammoCountBarMaterial);
 
 		this.maximumAmmoCapacity = 3;
@@ -27,14 +27,14 @@ var AmmoBar = Sprite.extend({
 		this.ammoReplenishRate = 0.01;
 		this.needsReload = false;
 
-		this.canvas2d.rect(0, 0, 600, 150);
+		this.canvas2d.rect(150, 0, 600, 150);
 		this.canvas2d.fillStyle = "skyblue";
 		this.canvas2d.fill();
 		this.ammoCountBar.position.set(position.x + this.ammoCountBarXOffset,
 			position.y + this.ammoCountBarYOffset,
 			position.z + this.ammoCountBarZOffset);
 
-		this.ammoCountBar.scale.set(this.tileSize, this.tileSize / this.barAspectRatio, 1.0);
+		this.ammoCountBar.scale.set(this.tileSize * 2, this.tileSize / this.barAspectRatio, 1.0);
 	},
 
 	onShoot: function() {
@@ -51,7 +51,7 @@ var AmmoBar = Sprite.extend({
 	reset: function(position) {
 		this.ammoCount = this.maximumAmmoCapacity;
 		this.needsReload = false;
-		this.ammoCountBar.scale.set(this.tileSize, this.tileSize / this.barAspectRatio, 1.0);
+		this.ammoCountBar.scale.set(this.tileSize * 2, this.tileSize / this.barAspectRatio, 1.0);
 		this.onUnitPositionChanged(position);
 	},
 
@@ -62,9 +62,9 @@ var AmmoBar = Sprite.extend({
 		if (number == this.maximumAmmoCapacity) {
 			this.needsReload = false;
 		}
-		var width = this.tileSize;
-		this.ammoCountBar.scale.set(width * (1.0 * this.ammoCount) / this.maximumAmmoCapacity,
-			width / this.barAspectRatio, 1.0);
+		
+		this.ammoCountBar.scale.set(this.tileSize * 2 * (1.0 * this.ammoCount) / this.maximumAmmoCapacity,
+			this.tileSize / this.barAspectRatio, 1.0);
 	},
 
 	onUnitPositionChanged: function(position) {
