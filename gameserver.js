@@ -66,6 +66,14 @@ io.sockets.on('connection', function(socket) {
     var username = gameRequest[Message.USERNAME];
     var gameType = parseInt(gameRequest[Message.TYPE]);
     var newGame = new Game(gameIdSeq++, gameName, gameType);
+    console.log(emptyGames);
+    console.log(emptyGames[gameName]);
+    for (var gid in emptyGames) {
+      if (emptyGames[gid].gameName == gameName) {
+        socket.emit(Message.ERROR, 'Game room name already exist!');
+        return;
+      }
+    }
     emptyGames[newGame.gameId] = newGame;
     newGame.addPlayer(socket, username);
     socket.set('username', username, function() {

@@ -135,7 +135,6 @@ function getUsername(forGameId) {
     var username = $('#uname').val();
     if (username != '') {
       $("#Input-dialog").dialog("close");
-      // connectServer(type, username, startGame);
       sendJoinMsg(forGameId, username);
       loading();
     } else {
@@ -283,7 +282,6 @@ $(document).ready(function() {
   $('#slide-container').hide();
   $('#leaveBtn').hide();
   $('#playBtn').click(function() {
-    connectServer();
     sendListGameMsg();
   });
 

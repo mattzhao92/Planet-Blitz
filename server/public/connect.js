@@ -1,146 +1,139 @@
 // When not passing any argument, it automatically connects to the server
 // which serves the page.
-var socket;
+var socket = io.connect();
 var game;
 var GameInfo = new GameConfig();
 
-function connectServer(type) {
-  if (!socket) {
-    socket = io.connect();  
+socket.on(Message.LISTGAME, function(games) {
+  listAvailableGames(games);
+});
+
+socket.on(Message.GAME, function(playerInfo) {
+  updateLoadingPlayerState(playerInfo);
+  loading();
+});
+
+/* Handle the team id message */
+socket.on(Message.PREPARE, function(playerTeamInfo) {
+  GameInfo.myTeamId = parseInt(playerTeamInfo[GameInfo.username]);
+  var count = 0;
+  for (var key in playerTeamInfo) {
+    count++;
   }
+  GameInfo.numOfTeams = count;
+  // Render the game here.
+  socket.emit(Message.READY);
+});
 
-  socket.on(Message.LISTGAME, function(games) {
-    listAvailableGames(games);
-  });
-
-  socket.on(Message.GAME, function(playerInfo) {
-    updateLoadingPlayerState(playerInfo);
+socket.on(Message.JOIN, function(playerState) {
+  if (!GameInfo.isLoading) {
     loading();
-  });
+  }
+  updateLoadingPlayerState(playerState);
+});
 
-  /* Handle the team id message */
-  socket.on(Message.PREPARE, function(playerTeamInfo) {
-    GameInfo.myTeamId = parseInt(playerTeamInfo[GameInfo.username]);
-    var count = 0;
-    for (var key in playerTeamInfo) {
-      count++;
-    }
-    GameInfo.numOfTeams = count;
-    // Render the game here.
-    socket.emit(Message.READY);
-  });
+/* Handle the start message */
+socket.on(Message.START, function(score) {
+  startGame();
+  var grid = game.getWorld();
+  game.updateScoreBoard(score);
+  console.log('start game');
+  grid.onGameStart();
+});
 
-  socket.on(Message.JOIN, function(playerState) {
-    if (!GameInfo.isLoading) {
-      loading();
-    }
-    updateLoadingPlayerState(playerState);
-  });
+/* Handle the move message */
+socket.on(Message.MOVE, function(moveData) {
+  console.log("Start move receiving");
+  var seq = parseInt(moveData[Message.SEQ]);
+  // Old seq, discard it.
+  if (seq <= game.getWorld().seq) {
+    return;
+  }
+  game.getWorld().seq = seq;
+  var state = moveData[Message.STATE];
+  var data = moveData[Message.MOVE];
+  console.log(state);
+  console.log(data);
+  var moverTeam = parseInt(data[Move.team]);
+  var moverIndex = parseInt(data[Move.index]);
+  var deltaX = parseInt(data[Move.X]);
+  var deltaZ = parseInt(data[Move.Z]);
+  var target = game.getWorld().getCharacterById(moverTeam, moverIndex);
+  if (game.getWorld().syncGameState(state)) {
+    target.setDirection(new THREE.Vector3(deltaX, 0, deltaZ));
+    target.enqueueMotion(null);
+  }
+  console.log("Finish move receiving");
 
-  /* Handle the start message */
-  socket.on(Message.START, function(score) {
-    startGame();
-    var grid = game.getWorld();
+});
+
+/* Handle the shot message */
+socket.on(Message.SHOOT, function(data) {
+    var team = parseInt(data[Shoot.team]);
+    var index = parseInt(data[Shoot.index]);
+    var fromX = parseInt(data[Shoot.fromX]);
+    var fromZ = parseInt(data[Shoot.fromZ]);
+    var toX = parseInt(data[Shoot.toX]);
+    var toZ = parseInt(data[Shoot.toZ]);
+    var character = game.getWorld().getCharacterById(team, index);
+    character.shoot(new THREE.Vector3(toX, 0, toZ), false);
+});
+
+/* Handle the hit message */
+socket.on(Message.HIT, function(hitData) {
+ var seq = parseInt(hitData[Message.SEQ]);
+  // Old seq, discard it.
+  if (seq <= game.getWorld().seq) {
+    return;
+  }
+  game.getWorld().seq = seq;
+  var state = hitData[Message.STATE];
+  var data = hitData[Message.HIT];
+  console.log(data);
+  var team = parseInt(data[Hit.team]);
+  var index = parseInt(data[Hit.index]);
+  var damage = parseInt(data[Hit.damage]);  
+  var target = game.getWorld().getCharacterById(team, index);
+  game.getWorld().syncGameState(state);
+  if (data[Hit.kill]) {
+    game.getWorld().handleCharacterDead(target);
+    var score = hitData[Stat.result];
     game.updateScoreBoard(score);
-    grid.onGameStart();
-  });
+  } else{
+    target.applyDamage(damage);
+  }
+});
 
-  /* Handle the move message */
-  socket.on(Message.MOVE, function(moveData) {
-    console.log("Start move receiving");
-    var seq = parseInt(moveData[Message.SEQ]);
-    // Old seq, discard it.
-    if (seq <= game.getWorld().seq) {
-      return;
-    }
-    game.getWorld().seq = seq;
-    var state = moveData[Message.STATE];
-    var data = moveData[Message.MOVE];
-    console.log(state);
+socket.on(Message.REMOVE, function(removeDead) {
+  var team = parseInt(removeDead[Hit.team]);
+  var index = parseInt(removeDead[Hit.index]);
+  var dead = game.getWorld().getCharacterById(team, index);
+  if (dead != null) {
+    game.getWorld().handleCharacterDead(dead);  
+  }
+});
+
+socket.on(Message.FINISH, function(data) {
+    // must come first due to UI issues
+
     console.log(data);
-    var moverTeam = parseInt(data[Move.team]);
-    var moverIndex = parseInt(data[Move.index]);
-    var deltaX = parseInt(data[Move.X]);
-    var deltaZ = parseInt(data[Move.Z]);
-    var target = game.getWorld().getCharacterById(moverTeam, moverIndex);
-    if (game.getWorld().syncGameState(state)) {
-      target.setDirection(new THREE.Vector3(deltaX, 0, deltaZ));
-      target.enqueueMotion(null);
-    }
-    console.log("Finish move receiving");
-
-  });
-
-  /* Handle the shot message */
-  socket.on(Message.SHOOT, function(data) {
-      var team = parseInt(data[Shoot.team]);
-      var index = parseInt(data[Shoot.index]);
-      var fromX = parseInt(data[Shoot.fromX]);
-      var fromZ = parseInt(data[Shoot.fromZ]);
-      var toX = parseInt(data[Shoot.toX]);
-      var toZ = parseInt(data[Shoot.toZ]);
-      var character = game.getWorld().getCharacterById(team, index);
-      character.shoot(new THREE.Vector3(toX, 0, toZ), false);
-  });
-
-  /* Handle the hit message */
-  socket.on(Message.HIT, function(hitData) {
-   var seq = parseInt(hitData[Message.SEQ]);
-    // Old seq, discard it.
-    if (seq <= game.getWorld().seq) {
-      return;
-    }
-    game.getWorld().seq = seq;
-    var state = hitData[Message.STATE];
-    var data = hitData[Message.HIT];
-    console.log(data);
-    var team = parseInt(data[Hit.team]);
-    var index = parseInt(data[Hit.index]);
-    var damage = parseInt(data[Hit.damage]);  
-    var target = game.getWorld().getCharacterById(team, index);
-    game.getWorld().syncGameState(state);
-    if (data[Hit.kill]) {
-      game.getWorld().handleCharacterDead(target);
-      var score = hitData[Stat.result];
-      game.updateScoreBoard(score);
-    } else{
-      target.applyDamage(damage);
+    var score = data[Stat.result];
+    var grid = game.getWorld();
+    var additionalMsg = data[Message.LEAVE];
+    grid.onGameFinish();
+    if (data[Stat.winner] == GameInfo.username) {
+      showRestartDialog('You win', additionalMsg, score);
+    } else {
+      showRestartDialog('You lose', additionalMsg, score);
     }
   });
 
-  socket.on(Message.REMOVE, function(removeDead) {
-    var team = parseInt(removeDead[Hit.team]);
-    var index = parseInt(removeDead[Hit.index]);
-    var dead = game.getWorld().getCharacterById(team, index);
-    if (dead != null) {
-      game.getWorld().handleCharacterDead(dead);  
-    }
-    
-  });
-
-  socket.on(Message.FINISH, function(data) {
-      // must come first due to UI issues
-
-      console.log(data);
-      var score = data[Stat.result];
-      var grid = game.getWorld();
-      var additionalMsg = data[Message.LEAVE];
-      grid.onGameFinish();
-      if (data[Stat.winner] == GameInfo.username) {
-        showRestartDialog('You win', additionalMsg, score);
-      } else {
-        showRestartDialog('You lose', additionalMsg, score);
-      }
-    });
-
-  socket.on(Message.ERROR, function(reason) {
-    alert('Fail to join the game: ' + reason);
-    if (GameInfo.isLoading) {
-      mainMenu();
-    }
-  });
-
-}
+socket.on(Message.ERROR, function(reason) {
+  alert('Fail to join the game: ' + reason);
+  if (GameInfo.isLoading) {
+    mainMenu();
+  }
+});
 
 // A wrapper class for all game parameter.
 function GameConfig() {
