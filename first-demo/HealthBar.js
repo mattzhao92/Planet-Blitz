@@ -8,51 +8,73 @@ var HealthBar = Sprite.extend({
 		var canvas = document.createElement('canvas');
 		this.canvas2d = canvas.getContext('2d');
 
-		this.healthBarTexture = new THREE.Texture(canvas);
-		this.healthBarTexture.needsUpdate = true;
+		this.barTexture = new THREE.Texture(canvas);
+		this.barTexture.needsUpdate = true;
 
 		var healthBarMaterial = new THREE.SpriteMaterial({
-			map: this.healthBarTexture,
+			map: this.barTexture,
 			useScreenCoordinates: false,
 			alignment: THREE.SpriteAlignment.center
 		});
 
-		this.healthBarXOffset = this.tileSize / 2;
-		this.healthBarZOffset = 0;
-		this.healthBarYOffset = 69;
-		this.healthBar = new THREE.Sprite(healthBarMaterial);
+		this.barXOffset = 0;
+		this.barZOffset = 0;
+		this.barYOffset = 69;
+		this.bar = new THREE.Sprite(healthBarMaterial);
 
 		this.maximumHealth = maxHealth;
 
 		this.canvas2d.rect(150, 0, 600, 150);
 		this.canvas2d.fillStyle = "red";
 		this.canvas2d.fill();
-		this.healthBar.position.set(position.x + this.healthBarXOffset,
-			position.y + this.healthBarYOffset,
-			position.z + this.healthBarZOffset);
-		this.healthBar.scale.set(this.tileSize * 2, this.tileSize / this.barAspectRatio, 1.0);
+		this.bar.scale.set(this.tileSize * 2, this.tileSize / this.barAspectRatio, 1.0);
+
+		this.centerX = position.x + this.tileSize / 2;
+		this.centerZ = position.z;
+		this.rotationOffsetX = 0;
+		this.rotationOffsetZ = 0;
+
+		this.bar.position.set(this.centerX,
+			position.y + this.barYOffset,
+			this.centerZ);
+
+		var scope = this;
+		var subscriber = function(msg, cameraRotation) {
+			scope.rotationOffsetX = -Math.abs(scope.tileSize * Math.cos(cameraRotation / 2));
+			scope.bar.position.x = scope.centerX + scope.rotationOffsetX;
+			scope.rotationOffsetZ = -Math.abs(scope.tileSize / 2 * Math.cos(cameraRotation / 2));
+			scope.bar.position.z = scope.centerZ + scope.rotationOffsetZ;
+		};
+
+		var unsubscribeToken = PubSub.subscribe(Constants.TOPIC_CAMERA_ROTATION, subscriber);
+		this.unsubscribeToken = unsubscribeToken;
+	},
+
+	destroy: function() {
+		this._super();
+		PubSub.unsubscribe(this.unsubscribeToken);
 	},
 
 	getRepr: function() {
-		return this.healthBar;
+		return this.bar;
 	},
 
 	onUnitHealthChanged: function(health) {
-		this.healthBar.scale.set(this.tileSize * 2 * (1.0 * health) / this.maximumHealth,
+		this.bar.scale.set(this.tileSize * 2 * (1.0 * health) / this.maximumHealth,
 			this.tileSize / this.barAspectRatio, 1.0);
 	},
 
 	onUnitPositionChanged: function(position) {
-		this.healthBar.position.x = position.x + this.healthBarXOffset;
-		this.healthBar.position.y = position.y + this.healthBarYOffset;
-		this.healthBar.position.z = position.z + this.healthBarZOffset;
+		this.centerX = position.x + this.tileSize / 2;
+		this.bar.position.x = this.centerX + this.rotationOffsetX;
+		this.bar.position.y = position.y + this.barYOffset;
+		this.centerZ = position.z + this.barZOffset;
+		this.bar.position.z = this.centerZ + this.rotationOffsetZ;;
 	},
 
 	reset: function(position) {
-		this.healthBar.position.set(position.x + this.healthBarXOffset,
-			position.y + this.healthBarYOffset,
-			position.z + this.healthBarZOffset);
-		this.healthBar.scale.set(this.tileSize * 2, this.tileSize / this.barAspectRatio, 1.0);
+		this.onUnitPositionChanged(position);
+		this.bar.scale.set(this.tileSize * 2, this.tileSize / this.barAspectRatio, 1.0);
 	},
 
 });
