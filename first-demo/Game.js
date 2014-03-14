@@ -177,7 +177,6 @@ $(function () {
         createScoreBoard: function() {
             var scoreBoard = new ScoreBoard();
             $("#Stats-output").append(scoreBoard.domElement);
-            var exampleData = [{'name' : 'matt', 'score': 2}, {'name' : 'anderson', 'score' : 5}];
             this.scoreBoard = scoreBoard;
         },
 
