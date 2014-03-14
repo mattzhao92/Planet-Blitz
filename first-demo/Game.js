@@ -59,16 +59,14 @@ $(function () {
             this.scene.add( ambientLight );
 
             // sky color, ground color, intensity
-            // var hemiLight = new THREE.HemisphereLight( 0x0000ff, 0x00ff00, 0.6 ); 
+            // var hemiLight = new THREE.HemisphereLight( 0x0000ff, 0xffffff, 0.3 ); 
             // this.scene.add(hemiLight);
 
             // a really bright light
-            var directionalLight = new THREE.DirectionalLight( 0xffffff );
-            directionalLight.position.x = 1;
-            directionalLight.position.y = 1;
-            directionalLight.position.z = 0.75;
-            directionalLight.position.normalize();
-
+            var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.8 );
+            directionalLight.position.x = 0;
+            directionalLight.position.y = 400;
+            directionalLight.position.z = 0;
             this.scene.add( directionalLight );
         },
 
