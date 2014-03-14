@@ -7,7 +7,7 @@ $(function () {
         this.scene = new THREE.Scene();
 
         // create a render and set the size
-        this.renderer = new THREE.WebGLRenderer();
+        this.renderer = new THREE.WebGLRenderer({antialias: true});
         this.renderer.setSize(window.innerWidth, window.innerHeight);
 
         // add the output of the renderer to the html element
