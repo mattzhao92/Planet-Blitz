@@ -213,10 +213,12 @@ var Grid = Class.extend({
                 var characterId = i;
 
                 var character;
-                if (i % 2 == 0) {
+                if (i == 0) {
                     character = this.spriteFactory.createSoldier(team_id, characterId);
-                } else {
+                } else if (i == 1) {
                     character = this.spriteFactory.createArtillerySoldier(team_id, characterId);
+                } else {
+                    character = this.spriteFactory.createFlamethrowerSoldier(team_id, characterId);
                 }
 
                 var startX, startY;

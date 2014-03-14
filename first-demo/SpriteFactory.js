@@ -61,6 +61,10 @@ var SpriteFactory = Class.extend({
 		return this.createCharacter("soldier-artillery.js", team, unitId);
 	},
 
+	createFlamethrowerSoldier: function(team, unitId) {
+		return this.createCharacter("flamethrowerNEEDTEXTURE.js", team, unitId);
+	},
+
 	createCharacter: function(modelName, team, unitId) {
 		var scope = this;
 
