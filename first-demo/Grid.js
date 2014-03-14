@@ -299,12 +299,13 @@ var Grid = Class.extend({
             // deselect character
             character.deselect();
 
-            // deselect tiles.
+            // deselect tiles if there were any
             character.highlightedTiles.forEach(function(tile) {
                 tile.reset();
             });
 
             this.currentSelectedUnits[GameInfo.myTeamId] = null;
+            this.deselectHighlightedTiles();
         }
 
         // mark tile position as available
@@ -380,9 +381,9 @@ var Grid = Class.extend({
             this.currentMouseOverTile.reset();
         }
 
-        this.deselectHighlightedTiles();
-
         if (character.isCharacterInRoute == false && character.isCoolDown == false && character.active) {
+            this.deselectHighlightedTiles();
+
             var characterMovementRange = character.getMovementRange();
             // highlight adjacent squares - collect all tiles from radius
             var tilesToHighlight = this.getTilesInArea(character, characterMovementRange);

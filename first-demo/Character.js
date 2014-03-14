@@ -249,7 +249,6 @@ var Character = Sprite.extend({
         this.ammoBar.destroy();
         this.healthBar.destroy();
         this.cooldownBar.destroy();
-        this.world.displayMovementArea(this);
     },
     
     // callback - called when unit is selected. Gets a reference to the game state ("world")
@@ -268,7 +267,9 @@ var Character = Sprite.extend({
             // deselect all other units
             this.spriteFactory.notifyAll(new SpriteCmd(function(sprite) {
                 if (ctxSprite != sprite && sprite instanceof Character) {
-                    sprite.deselect();
+                    if (sprite.team == GameInfo.myTeamId) {
+                        sprite.deselect();                        
+                    }
                 }
             }));
 
