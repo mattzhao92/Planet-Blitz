@@ -764,5 +764,7 @@ var Grid = Class.extend({
         // initialize characters
         this.setupCharacters();
         this.resetInProgress = false;
+
+        this.deselectHighlightedTiles();
     },
 });
