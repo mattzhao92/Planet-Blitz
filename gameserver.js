@@ -20,6 +20,8 @@ app.configure(function() {
   app.use(express.static(__dirname + '/libs'));
   app.use(express.static(__dirname + '/css'));
   app.use(express.static(__dirname + '/assets'));
+  app.use(express.static(__dirname + '/assets/sounds'));
+
 });
 
 // Server index page.
