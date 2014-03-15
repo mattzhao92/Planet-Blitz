@@ -100,7 +100,7 @@ var Grid = Class.extend({
 
     onGameFinish: function() {
         console.log("Game finish called");
-        this.controls.reset();
+        // this.controls.reset();
     },
 
     getMyTeamCharacters: function() {
