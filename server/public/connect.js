@@ -35,6 +35,8 @@ socket.on(Message.PREPARE, function(playerTeamInfo) {
   var app = new App("#WebGL-output");
   var MAPGAME = app;
   game = app;
+  $('#WebGL-output').hide();
+  $('#Stats-output').hide();
   // Render the game here.
   socket.emit(Message.READY);
 });
