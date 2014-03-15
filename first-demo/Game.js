@@ -1,4 +1,4 @@
-$(function () {
+
 
     var App = {};
 
@@ -211,10 +211,4 @@ $(function () {
         }
 
     };
-
-    var app = new App("#WebGL-output");
-    var MAPGAME = app;
-    game = app;
-
-});
 

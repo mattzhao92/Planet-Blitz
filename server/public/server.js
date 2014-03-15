@@ -64,7 +64,7 @@ function showRestartDialog(message, additionalMsg, score) {
     sortedUsernames.push(username);
   }
   sortedUsernames.sort(function(a, b) {
-    return score[b][Stat.win]; - score[a][Stat.win];
+    return score[b][Stat.win] - score[a][Stat.win];
   });
   for (var t = 0; t < sortedUsernames.length; t++) {
     var username = sortedUsernames[t];

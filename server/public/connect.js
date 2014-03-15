@@ -21,6 +21,9 @@ socket.on(Message.PREPARE, function(playerTeamInfo) {
     count++;
   }
   GameInfo.numOfTeams = count;
+    var app = new App("#WebGL-output");
+    var MAPGAME = app;
+    game = app;
   // Render the game here.
   socket.emit(Message.READY);
 });
