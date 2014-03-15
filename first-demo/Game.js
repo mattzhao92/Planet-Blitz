@@ -207,7 +207,12 @@ App.prototype = {
     },
 
     reset: function() {
-        // this.world.reset();
+        // remove all hotkey bindings
+
+        _.forEach(Constants.HOTKEYS, function(hotkey) {
+            KeyboardJS.clear(hotkey);
+        });
+
     }
 
 };

@@ -57,6 +57,7 @@ var Grid = Class.extend({
         this.resetInProgress = false;
 
         this.disableHotKeys();
+        this.hotkeys = [];
     },
 
     getCharacters: function() {
