@@ -58,6 +58,10 @@ var Bullet = Sprite.extend({
     var moveStrategy = new StraightLineUpdateStrategy(this.direction, this.speed);
     var expireStrategy = new ExpireUpdateStrategy(this.startPosition, this.maxDistance);
     this.updateStrategy = new MultiUpdateStrategy([moveStrategy, expireStrategy]);
+
+    var sound = new Howl({
+      urls: ['laser-shoot.mp3']
+    }).play();
   },
 
   getPosition: function() {

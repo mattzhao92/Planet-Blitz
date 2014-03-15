@@ -274,6 +274,10 @@ var Character = Sprite.extend({
             }));
 
             this.isSelected = true;
+            var sound = new Howl({
+              urls: ['unit-select.mp3'],
+              volume: 0.6,
+            }).play();
         }
     },
 
