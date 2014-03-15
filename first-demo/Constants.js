@@ -12,3 +12,4 @@ Constants.BULLET_LEVEL = 15;
 
 Constants.TOPIC_DELTA = "delta";
 
+Constants.HOTKEYS = ["q", "e", "space", "r", "t", "1", "2", "3"];
