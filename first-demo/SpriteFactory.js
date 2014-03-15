@@ -62,7 +62,7 @@ var SpriteFactory = Class.extend({
 	},
 
 	createFlamethrowerSoldier: function(team, unitId) {
-		return this.createCharacter("flamethrowerNEEDTEXTURE.js", team, unitId);
+		return this.createCharacter("soldier-flamethrower.js", team, unitId);
 	},
 
 	createCharacter: function(modelName, team, unitId) {
