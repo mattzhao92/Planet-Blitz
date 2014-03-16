@@ -53,7 +53,6 @@ var Bullet = Sprite.extend({
     // store who shot the bullet
     this.owner = owner;
 
-    this.active = true;
     this.interactStrategy = new ApplyDamageStrategy(this.damage);
   },
 
@@ -66,13 +65,7 @@ var Bullet = Sprite.extend({
   },
 
   update: function(delta, dispatcher) {
-    var ctxSprite = this;
-
-    dispatcher.notifyAll(new SpriteCmd(function(other) {
-      if (ctxSprite != other) {
-        ctxSprite.interactWith(other, dispatcher);
-      }
-    }));
+    this._super(delta, dispatcher);
 
     var distance = new THREE.Vector3().subVectors(this.mesh.position, this.startPosition).length();
 
