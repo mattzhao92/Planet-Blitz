@@ -26,6 +26,10 @@ var Sprite = Class.extend({
 	},
 
 	update: function(delta, dispatcher) {
+		if (this.active == false) {
+			return;
+		}
+
 		if (this.interactStrategy) {
 			var ctxSprite = this;
 
@@ -34,6 +38,10 @@ var Sprite = Class.extend({
 					ctxSprite.interactWith(other, dispatcher);
 				}
 			}));
+		}
+
+		if (this.updateStrategy) {
+			this.updateStrategy.updateState(this, delta, dispatcher);
 		}
 	},
 

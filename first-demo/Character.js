@@ -430,12 +430,9 @@ var Character = Sprite.extend({
     },
 
     update: function(delta, dispatcher) {
-        if (this.active == false) return;
-        this.breakUpdateHere = false;
+        this._super(delta, dispatcher);
 
-        if (this.engine) {
-            this.engine.update(delta);
-        }
+        this.breakUpdateHere = false;
 
         this.ammoBar.updateWeaponReload(delta);
         this.updateMovementCoolDown(delta); 
