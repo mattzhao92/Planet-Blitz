@@ -54,6 +54,9 @@ var Bullet = Sprite.extend({
     this.owner = owner;
 
     this.interactStrategy = new ApplyDamageStrategy(this.damage);
+
+    var moveStrategy = new StraightLineUpdateStrategy(this.direction, this.speed);
+    this.updateStrategy = new MultiUpdateStrategy([moveStrategy]);
   },
 
   getPosition: function() {
@@ -68,10 +71,6 @@ var Bullet = Sprite.extend({
     this._super(delta, dispatcher);
 
     var distance = new THREE.Vector3().subVectors(this.mesh.position, this.startPosition).length();
-
-    var scaledDirection = new THREE.Vector3();
-    scaledDirection.copy(this.direction).multiplyScalar(this.speed * delta);
-    this.mesh.position.add(scaledDirection);
 
     if (distance > this.maxDistance) {
       this.destroy();
