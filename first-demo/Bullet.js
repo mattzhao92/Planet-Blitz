@@ -56,7 +56,8 @@ var Bullet = Sprite.extend({
     this.interactStrategy = new ApplyDamageStrategy(this.damage);
 
     var moveStrategy = new StraightLineUpdateStrategy(this.direction, this.speed);
-    this.updateStrategy = new MultiUpdateStrategy([moveStrategy]);
+    var expireStrategy = new ExpireUpdateStrategy(this.startPosition, this.maxDistance);
+    this.updateStrategy = new MultiUpdateStrategy([moveStrategy, expireStrategy]);
   },
 
   getPosition: function() {
@@ -65,16 +66,6 @@ var Bullet = Sprite.extend({
 
   getRadius: function() {
     return BULLET_RADIUS;
-  },
-
-  update: function(delta, dispatcher) {
-    this._super(delta, dispatcher);
-
-    var distance = new THREE.Vector3().subVectors(this.mesh.position, this.startPosition).length();
-
-    if (distance > this.maxDistance) {
-      this.destroy();
-    }
   },
 
   getRepr: function() {
