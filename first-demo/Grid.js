@@ -101,7 +101,8 @@ var Grid = Class.extend({
 
     onGameFinish: function() {
         console.log("Game finish called");
-        // this.controls.reset();
+        // reset the pointerlock
+        this.controls.reset();
     },
 
     getMyTeamCharacters: function() {
