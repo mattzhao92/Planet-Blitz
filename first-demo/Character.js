@@ -302,7 +302,7 @@ var Character = Sprite.extend({
             this.destX = gx;
             this.destZ = gz;
             this.hasPendingMove = true;
-            console.log("Set to " + gx + " and " + gz + " for id " + this.team + " i " + this.id);
+            // console.log("Set to " + gx + " and " + gz + " for id " + this.team + " i " + this.id);
             var addNewItem = true;
             var newMotions = [];
             for (var i = 1; i < path.length; i++) {
@@ -383,7 +383,6 @@ var Character = Sprite.extend({
         if (this.motionInProgress) {
             var newMeshX = this.mesh.position.x + this.velocityX * delta;
             var newMeshZ = this.mesh.position.z + this.velocityZ * delta;
-
 
             if ((newMeshX - this.goalMeshX) / (this.goalMeshX - this.prevMeshX) > 0) {
                 this.setCharacterMeshPosX(this.goalMeshX);
@@ -469,7 +468,7 @@ var Character = Sprite.extend({
                 if (this.destX == this.xPos && this.destZ == this.zPos) {
                     this.hasPendingMove = false;
                 }
-                console.log("Set pending move back");
+                // console.log("Set pending move back");
                 this.beginCooldown();
 
                 return;
