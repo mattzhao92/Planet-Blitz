@@ -53,10 +53,8 @@ var Grid = Class.extend({
         this.setupHotkeys();
 
         this.unitCycle = 0;
-        this.hotKeysDisabled = true;
         this.resetInProgress = false;
 
-        this.disableHotKeys();
         this.hotkeys = [];
     },
 
@@ -65,7 +63,6 @@ var Grid = Class.extend({
     },
 
     onGameStart: function() {
-        this.enableHotKeys();
         for (var tm = GameInfo.numOfTeams; tm < 4; tm++) {
             for (var i = 0; i < this.numOfCharacters; i++) {
                 this.silentlyRemoveCharacter(this.getCharacterById(tm, i));
@@ -109,14 +106,6 @@ var Grid = Class.extend({
         });
     },
 
-    disableHotKeys: function() {
-        this.hotKeysDisabled = true;
-    },
-
-    enableHotKeys: function() {
-        this.hotKeysDisabled = false;
-    },
-
     setupHotkeys: function() {
         var scope = this;
         var unitNumbers = [1, 2, 3];
@@ -125,7 +114,6 @@ var Grid = Class.extend({
             var hotkey = number.toString();
             KeyboardJS.on(hotkey,
                 function(event, keysPressed, keyCombo) {
-                    if (scope.hotKeysDisabled) return;
                     // TODO: replace this with a more readable line. Also, need to account for out of index errors when units get killed
                     var characterSelected = scope.getMyTeamCharacters()[parseInt(keyCombo) - 1];
                     if (characterSelected && characterSelected.active) {
@@ -138,8 +126,6 @@ var Grid = Class.extend({
         // unit toggle - cycle forwards
         KeyboardJS.on("t",
             function(event, keysPressed, keyCombo) {
-                if (scope.hotKeysDisabled) return;
-
                 var myTeamCharacters = scope.getMyTeamCharacters();
                 var characterSelected = myTeamCharacters[scope.unitCycle];
                 if (characterSelected.active) {
@@ -152,8 +138,6 @@ var Grid = Class.extend({
         // unit toggle - cycle backwards
         KeyboardJS.on("r",
             function(event, keysPressed, keyCombo) {
-                if (scope.hotKeysDisabled) return;
-
                 var myTeamCharacters = scope.getMyTeamCharacters();
                 var characterSelected = myTeamCharacters[scope.unitCycle];
                 if (characterSelected.active) {
@@ -170,8 +154,6 @@ var Grid = Class.extend({
         // focus camera on unit
         KeyboardJS.on("space",
             function(event, keysPressed, keyCombo) {
-                if (scope.hotKeysDisabled) return;
-
                 var character = scope.getCurrentSelectedUnit();
                 if (character && character.active) {
                     scope.controls.focusOnPosition(character.mesh.position);
@@ -182,16 +164,12 @@ var Grid = Class.extend({
         // rudimentary camera rotation
         KeyboardJS.on("q",
             function(event, keysPressed, keyCombo) {
-                if (scope.hotKeysDisabled) return;
-
                 scope.controls.rotateLeft(Math.PI / 30);
             }
         );
 
         KeyboardJS.on("e",
             function(event, keysPressed, keyCombo) {
-                if (scope.hotKeysDisabled) return;
-
                 scope.controls.rotateRight(Math.PI / 30);
             }
         );
