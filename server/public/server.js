@@ -290,8 +290,12 @@ $(document).ready(function() {
   $('#debugBtn').click(function() {
     GameInfo.netMode = false;
     loading();
-    startGame();
+    renderGame();
     game.getWorld().onGameStart();
+    setTimeout(function() {
+     startGame();
+    }, 800);
+    
   });
 
   $('#helpBtn').click(function() {

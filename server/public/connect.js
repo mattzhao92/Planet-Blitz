@@ -21,22 +21,9 @@ socket.on(Message.PREPARE, function(playerTeamInfo) {
     count++;
   }
   GameInfo.numOfTeams = count;
-  var outputBox = document.getElementById('WebGL-output');
-  var msgBox = document.getElementById('Stats-output');
-  outputBox.parentNode.removeChild(outputBox);
-  msgBox.parentNode.removeChild(msgBox);
-  var containerBox = document.getElementById('Loading-output-container');
-  var newDiv = document.createElement("div");
-  newDiv.id = 'WebGL-output';
-  var newScore = document.createElement("div");
-  newScore.id = 'Stats-output';
-  containerBox.parentNode.insertBefore(newScore, containerBox);
-  containerBox.parentNode.insertBefore(newDiv, containerBox);
-  var app = new App("#WebGL-output");
-  var MAPGAME = app;
-  game = app;
-  $('#WebGL-output').hide();
-  $('#Stats-output').hide();
+
+  renderGame();
+  
   // Render the game here.
   socket.emit(Message.READY);
 });
@@ -159,6 +146,25 @@ function GameConfig() {
   this.netMode = true;
   this.username;
   this.isLoading = false;
+}
+
+function renderGame() {
+  var outputBox = document.getElementById('WebGL-output');
+  var msgBox = document.getElementById('Stats-output');
+  outputBox.parentNode.removeChild(outputBox);
+  msgBox.parentNode.removeChild(msgBox);
+  var containerBox = document.getElementById('Loading-output-container');
+  var newDiv = document.createElement("div");
+  newDiv.id = 'WebGL-output';
+  var newScore = document.createElement("div");
+  newScore.id = 'Stats-output';
+  containerBox.parentNode.insertBefore(newScore, containerBox);
+  containerBox.parentNode.insertBefore(newDiv, containerBox);
+  var app = new App("#WebGL-output");
+  var MAPGAME = app;
+  game = app;
+  $('#WebGL-output').hide();
+  $('#Stats-output').hide();  
 }
 
 
