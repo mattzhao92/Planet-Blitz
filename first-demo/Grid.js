@@ -72,8 +72,6 @@ var Grid = Class.extend({
             }
         }
 
-        // TODO: temporary, because start position is not always in same place
-
         console.log("Team id " + GameInfo.myTeamId);
 
         var teamJoinMessage;
@@ -93,7 +91,7 @@ var Grid = Class.extend({
         }
 
         this.controls.rotateRight(this.getCameraDegreesToRotate());
-        this.displayMessage(teamJoinMessage);
+        // this.displayMessage(teamJoinMessage);
 
         // focus camera on start position (TODO: hardcoded)
         this.controls.focusOnPosition(this.getMyTeamCharacters()[0].mesh.position);
