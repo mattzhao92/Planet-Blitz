@@ -53,8 +53,11 @@ var Bullet = Sprite.extend({
     // store who shot the bullet
     this.owner = owner;
 
-    this.active = true;
     this.interactStrategy = new ApplyDamageStrategy(this.damage);
+
+    var moveStrategy = new StraightLineUpdateStrategy(this.direction, this.speed);
+    var expireStrategy = new ExpireUpdateStrategy(this.startPosition, this.maxDistance);
+    this.updateStrategy = new MultiUpdateStrategy([moveStrategy, expireStrategy]);
   },
 
   getPosition: function() {
@@ -63,26 +66,6 @@ var Bullet = Sprite.extend({
 
   getRadius: function() {
     return BULLET_RADIUS;
-  },
-
-  update: function(delta, dispatcher) {
-    var ctxSprite = this;
-
-    dispatcher.notifyAll(new SpriteCmd(function(other) {
-      if (ctxSprite != other) {
-        ctxSprite.interactWith(other, dispatcher);
-      }
-    }));
-
-    var distance = new THREE.Vector3().subVectors(this.mesh.position, this.startPosition).length();
-
-    var scaledDirection = new THREE.Vector3();
-    scaledDirection.copy(this.direction).multiplyScalar(this.speed * delta);
-    this.mesh.position.add(scaledDirection);
-
-    if (distance > this.maxDistance) {
-      this.destroy();
-    }
   },
 
   getRepr: function() {

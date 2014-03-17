@@ -57,6 +57,7 @@ var Grid = Class.extend({
         this.resetInProgress = false;
 
         this.disableHotKeys();
+        this.hotkeys = [];
     },
 
     getCharacters: function() {
@@ -100,6 +101,7 @@ var Grid = Class.extend({
 
     onGameFinish: function() {
         console.log("Game finish called");
+        // reset the pointerlock
         this.controls.reset();
     },
 

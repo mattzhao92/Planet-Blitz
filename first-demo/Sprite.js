@@ -26,7 +26,23 @@ var Sprite = Class.extend({
 	},
 
 	update: function(delta, dispatcher) {
+		if (this.active == false) {
+			return;
+		}
 
+		if (this.interactStrategy) {
+			var ctxSprite = this;
+
+			dispatcher.notifyAll(new SpriteCmd(function(other) {
+				if (ctxSprite != other) {
+					ctxSprite.interactWith(other, dispatcher);
+				}
+			}));
+		}
+
+		if (this.updateStrategy) {
+			this.updateStrategy.updateState(this, delta, dispatcher);
+		}
 	},
 
 	interactWith: function(otherSprite, dispatcher) {
