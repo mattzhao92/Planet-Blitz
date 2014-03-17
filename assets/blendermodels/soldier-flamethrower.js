@@ -113,7 +113,7 @@
 		"colorSpecular" : [1.0, 1.0, 1.0],
 		"depthTest" : true,
 		"depthWrite" : true,
-		"mapDiffuse" : "../../blendertextures/tank.png",
+		"mapDiffuse" : "tank.png",
 		"mapDiffuseWrap" : ["repeat", "repeat"],
 		"shading" : "Lambert",
 		"specularCoef" : 50,

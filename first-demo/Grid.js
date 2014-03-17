@@ -24,30 +24,22 @@ var Grid = Class.extend({
         this.mouseDownListenerActive = true;
         this.mouseOverListenerActive = true;
 
-        // create grid tiles
-        this.tiles = new THREE.Object3D();
-        this.tilesArray = null;
-
-        this.loadGround();
-        this.drawGridSquares(width, length, tileSize);
-
         this.gridHelper = new GridHelper(this.camera, this.controls);
 
+        // create sprite factory        
         var scope = this;
 
         var sceneAddCmd = new SpriteCmd(function(sprite) {
             scope.scene.add(sprite.getRepr());
         });
-
         var sceneRemoveCmd = new SpriteCmd(function(sprite) {
             scope.scene.remove(sprite.getRepr());
         });
-
         this.spriteFactory = new SpriteFactory(this, sceneAddCmd, sceneRemoveCmd);
 
-        // initialize characters
-        this.setupCharacters();
+        this.reset();
 
+        // nonessentials
         this.setupMouseMoveListener();
         this.setupMouseDownListener();
         this.setupHotkeys();
@@ -70,6 +62,19 @@ var Grid = Class.extend({
         }
 
         console.log("Team id " + GameInfo.myTeamId);
+
+        if (this.getCurrentSelectedUnit()) {
+            // TODO: duplicated code
+
+            this.getCurrentSelectedUnit().deselect();
+            // deselect tiles if there were any
+            this.getCurrentSelectedUnit().highlightedTiles.forEach(function(tile) {
+                tile.reset();
+            });
+
+            this.currentSelectedUnits[GameInfo.myTeamId] = null;
+            this.deselectHighlightedTiles();
+        }
 
         var teamJoinMessage;
         switch (GameInfo.myTeamId) {
@@ -96,6 +101,7 @@ var Grid = Class.extend({
 
     onGameFinish: function() {
         console.log("Game finish called");
+
         // reset the pointerlock
         this.controls.reset();
     },
@@ -727,22 +733,22 @@ var Grid = Class.extend({
     reset: function() {
         console.log("Game reset");
 
-        _.forEach(this.getCharacters(), function(character) {
-            character.destroy();
-        });
-
         this.tiles = new THREE.Object3D();
         this.tilesArray = null;
 
         this.loadGround();
         this.drawGridSquares(this.gridWidth, this.gridLength, this.tileSize);
 
-        this.gridHelper = new GridHelper(this.camera, this.controls);
-
         // initialize characters
         this.setupCharacters();
         this.resetInProgress = false;
 
         this.deselectHighlightedTiles();
+
+        this.camera.position.x = 0;
+        this.camera.position.y = 600;
+        this.camera.position.z = 400;
+
+        this.controls.reset();
     },
 });
