@@ -756,11 +756,11 @@ THREE.MapControls = function ( object, scene, domElement ) {
                        document.mozExitPointerLock ||
                        document.webkitExitPointerLock;
         document.exitPointerLock();
+
+        this.currentAngle = 0;
     }
 
     this.reset = function() {
-        // this.rotateLeft(-this.currentAngle);
-        this.currentAngle = 0;
     }
 
     function calculateInitialMousePosition(canvas, event) {

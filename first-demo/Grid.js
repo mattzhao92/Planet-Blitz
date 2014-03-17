@@ -112,10 +112,10 @@ var Grid = Class.extend({
     },
 
     onGameFinish: function() {
-        console.log("Game finish called");
+        console.log("Game finish called - exiting pointerlock");
 
         // reset the pointerlock
-        this.controls.reset();
+        this.controls.releasePointerLock();
     },
 
     getMyTeamCharacters: function() {
