@@ -570,7 +570,7 @@ var Grid = Class.extend({
 
                 if (unitMovedToDifferentSquare) {
                     // Put the network communication here.
-                    if (this.getCurrentSelectedUnit().isCoolDown == 0) {
+                    if (this.getCurrentSelectedUnit().isCoolDown == 0 && this.getCurrentSelectedUnit().canMove == true) {
                         if (!GameInfo.netMode) {
                             this.getCurrentSelectedUnit().setDirection(new THREE.Vector3(deltaX, 0, deltaZ));
                             this.getCurrentSelectedUnit().enqueueMotion();
@@ -578,6 +578,7 @@ var Grid = Class.extend({
                             sendMoveMsg(this.getCurrentSelectedUnit().id,
                                 deltaX, deltaY, deltaZ);
                         }
+                        this.getCurrentSelectedUnit().canMove = false;
                     }
                 }
             }
