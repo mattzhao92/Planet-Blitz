@@ -6,7 +6,19 @@ var Grid = Class.extend({
 
         this.gameApp = gameApp;
 
-        this.GROUND_TEXTURE = "images/Supernova.jpg"
+        var currentTime = new Date();
+
+        var whichMap = Math.floor((currentTime.getSeconds() % 20) / 4);
+
+        var groundTextureArray = [
+        "gndTexture/Supernova.jpg",
+        "gndTexture/gnd-dirty.jpg",
+        "gndTexture/gnd-bakedground.jpg",
+        "gndTexture/gnd-yellowpurp.jpg",
+        "gndTexture/gnd-oilStainedTitanium.jpg"
+        ];
+        this.GROUND_TEXTURE = groundTextureArray[whichMap];
+        console.log("Using map " + this.GROUND_TEXTURE + " at idx " + whichMap);
 
         this.gridWidth = width;
         this.gridLength = length;
