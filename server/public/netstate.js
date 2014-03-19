@@ -7,8 +7,11 @@ var Message = {
   USERNAME : 'USERNAME',
   JOIN : 'JOIN',
   REMOVE : 'REMOVE',
+  REMOVEALL : 'REMOVEALL',
   LEAVE : "LEAVE",
   ERROR : 'ERROR',
+  TEAM : 'TEAM',
+  MAXPLAYER : 'MAXPLAYER', // Max number of players
   PREPARE : 'PREPARE',
   START : 'START',
   FINISH : 'FINISH',

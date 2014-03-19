@@ -14,13 +14,19 @@ socket.on(Message.GAME, function(playerInfo) {
 });
 
 /* Handle the team id message */
-socket.on(Message.PREPARE, function(playerTeamInfo) {
+socket.on(Message.PREPARE, function(prepareInfo) {
+  var playerTeamInfo = prepareInfo[Message.TEAM];
   GameInfo.myTeamId = parseInt(playerTeamInfo[GameInfo.username]);
+  GameInfo.existingTeams.length = 0;
+  for (var uname in playerTeamInfo) {
+    GameInfo.existingTeams.push(parseInt(playerTeamInfo[uname]));
+  }
   var count = 0;
   for (var key in playerTeamInfo) {
     count++;
   }
   GameInfo.numOfTeams = count;
+  GameInfo.maxNumTeams = parseInt(prepareInfo[Message.MAXPLAYER]);
 
   renderGame();
   
@@ -116,6 +122,16 @@ socket.on(Message.REMOVE, function(removeDead) {
   }
 });
 
+socket.on(Message.REMOVEALL, function(removeTeam) {
+  var team = parseInt(removeTeam);
+  for (var charId = 0; charId < 3; charId++) {
+    var dead = game.getWorld().getCharacterById(team, charId);
+    if (dead != null) {
+      game.getWorld().handleCharacterDead(dead);  
+    }    
+  }
+});
+
 socket.on(Message.FINISH, function(data) {
     // must come first due to UI issues
 
@@ -142,10 +158,13 @@ socket.on(Message.ERROR, function(reason) {
 function GameConfig() {
   this.isStart = false;
   this.numOfTeams = 4;
+  this.maxNumTeams = 0;
   this.myTeamId = 0;
   this.netMode = true;
   this.username;
   this.isLoading = false;
+  this.existingTeams = new Array();
+  this.mapContent = null;
 }
 
 function renderGame() {

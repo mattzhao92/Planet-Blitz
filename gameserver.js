@@ -310,13 +310,13 @@ function Game(gameId, gameName, maxNumPlayers) {
   this.maxNumPlayers = maxNumPlayers;
   this.room = maxNumPlayers + 'room' + gameId;
   this.teamIds = new Array();
-  this.gameState = new GameState(maxNumPlayers, teamSize);
   this.seq = 0;
   this.score = {};
   for (var t = 0; t < maxNumPlayers; t++) {
     this.teamIds.push(t);
   }
   shuffle(this.teamIds);
+  this.gameState = new GameState(maxNumPlayers, teamSize, this.teamIds);
   console.log(this.teamIds);
 }
 
@@ -354,7 +354,7 @@ Game.prototype.removePlayer = function(socket, game) {
 
     var numLiveTeams = 0;
     var winnerTeamId;
-    for (var t = 0; t < game.numPlayers; t++) {
+    for (var t in game.gameState.teams) {
       for (var i = 0; i < game.gameState.teamSize; i++) {
         console.log(game.gameState.teams[t][i]);
         if (game.gameState.teams[t][i].alive) {
@@ -392,7 +392,8 @@ Game.prototype.removePlayer = function(socket, game) {
       gameStatistics[Message.LEAVE] = 'Players escaped: ' + game.playerEscaped;
       socket.broadcast.to(game.room).emit(Message.FINISH, gameStatistics);
     }
-    socket.leave(game.room); 
+    socket.leave(game.room);
+    socket.broadcast.to(game.room).emit(Message.REMOVEALL, leaveTeamId);
   });
 };
 
@@ -407,7 +408,7 @@ Game.prototype.restart = function() {
   this.gameState.numOfTeams = this.numPlayers;
   // Clear the escaping list.
   this.playerEscaped.length = 0;
-  this.gameState.restart();
+  this.gameState.restart(this.teamIds);
   console.log(this.teamIds);
 };
 
@@ -424,6 +425,7 @@ Game.prototype.isRestartReady = function() {
 };
 
 Game.prototype.prepareGame = function(isRestart) {
+  var prepareInfo = {};
   var playerTeamInfo = {};
   // Generate the positions here.
   for (var t = 0; t < this.usernames.length; t++) {
@@ -434,7 +436,9 @@ Game.prototype.prepareGame = function(isRestart) {
     this.score[username].teamId = this.teamIds[t];
     playerTeamInfo[username] = this.teamIds[t];
   }
-  return playerTeamInfo;
+  prepareInfo[Message.TEAM] = playerTeamInfo;
+  prepareInfo[Message.MAXPLAYER] = this.maxNumPlayers;
+  return prepareInfo;
 };
 
 Game.prototype.startGame = function(socket) {
@@ -459,42 +463,43 @@ Game.prototype.getScoreJSON = function() {
   return stat;
 }
 
-function GameState(numOfTeams, teamSize) {
+function GameState(numOfTeams, teamSize, teamIds) {
   this.teamSize = teamSize;
   this.numOfTeams = numOfTeams;
   this.numLiveTeams = numOfTeams;
-  this.teams = new Array();
-  for (var teamId = 0; teamId < numOfTeams; teamId++) {
-    this.teams.push(new Array());
-    for (var i = 0; i < teamSize; i++) {
-      var startX, startZ;
-      if (teamId < 2) {
-        startX = i + 9;
-        startZ = teamStartPos[teamId];
-      } else {
-        startX = teamStartPos[teamId];
-        startZ = i + 9;
-      }
-      this.teams[teamId].push(new CharState(startX, startZ));
-    }
-  }
+  this.restart(teamIds);
+  // this.teams = new Array();
+  // for (var teamId = 0; teamId < numOfTeams; teamId++) {
+  //   this.teams.push(new Array());
+  //   for (var i = 0; i < teamSize; i++) {
+  //     var startX, startZ;
+  //     if (teamId < 2) {
+  //       startX = i + 9;
+  //       startZ = teamStartPos[teamId];
+  //     } else {
+  //       startX = teamStartPos[teamId];
+  //       startZ = i + 9;
+  //     }
+  //     this.teams[teamId].push(new CharState(startX, startZ));
+  //   }
+  // }
 }
 
-GameState.prototype.restart = function() {
-  this.teams = new Array();
+GameState.prototype.restart = function(teamIds) {
+  this.teams = {};
   this.numLiveTeams = this.numOfTeams;
-  for (var teamId = 0; teamId < this.numOfTeams; teamId++) {
-    this.teams.push(new Array());
+  for (var teamIdIndex = 0; teamIdIndex < this.numOfTeams; teamIdIndex++) {
+    this.teams[teamIds[teamIdIndex]] = new Array();
     for (var i = 0; i < this.teamSize; i++) {
         var startX, startZ;
-        if (teamId < 2) {
+        if (teamIds[teamIdIndex] < 2) {
           startX = i + 9;
-          startZ = teamStartPos[teamId];
+          startZ = teamStartPos[teamIds[teamIdIndex]];
         } else {
-          startX = teamStartPos[teamId];
+          startX = teamStartPos[teamIds[teamIdIndex]];
           startZ = i + 9;
         }
-        this.teams[teamId].push(new CharState(startX, startZ));
+        this.teams[teamIds[teamIdIndex]].push(new CharState(startX, startZ));
     }
   }
 }
@@ -563,7 +568,7 @@ GameState.prototype.updateHealthState = function(data) {
 GameState.prototype.toJSON = function() {
   var state = {};
   var teamStates = new Array();
-  for (var teamId = 0; teamId < this.teams.length; teamId++) {
+  for (var teamId in this.teams) {
     for (var i = 0; i < this.teamSize; i++) {
       var character = this.teams[teamId][i];
       if (character.alive) {
