@@ -29,6 +29,8 @@ app.get('/', function(req, res) {
 server.listen(8080);
 
 
+var mapContent = "{\"units\":[\"{\\\"color\\\":\\\"0xc300ff\\\",\\\"teamId\\\":0,\\\"xPos\\\":0,\\\"zPos\\\":0,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\",\"{\\\"color\\\":\\\"0xc300ff\\\",\\\"teamId\\\":0,\\\"xPos\\\":1,\\\"zPos\\\":1,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\",\"{\\\"color\\\":\\\"0xc300ff\\\",\\\"teamId\\\":0,\\\"xPos\\\":2,\\\"zPos\\\":2,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\",\"{\\\"color\\\":\\\"0xc300ff\\\",\\\"teamId\\\":0,\\\"xPos\\\":3,\\\"zPos\\\":3,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\"],\"obstacles\":[],\"tiles\":[\"{\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\",\"{\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\",\"{\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\",\"{\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\"],\"board\":{\"width\":1600,\"height\":400,\"tileSize\":40,\"groundtexture\":\"Supernova.jpg\"}}";
+
 var Message = netconst.Message;
 var Move = netconst.Move;
 var State = netconst.State;
@@ -108,9 +110,10 @@ io.sockets.on('connection', function(socket) {
             socket.broadcast.to(gameToJoin.room).emit(Message.JOIN, playerState);
             socket.emit(Message.JOIN, playerState);
             if (gameToJoin.isFull()) {
-              var playerTeamInfo = gameToJoin.prepareGame(false);
-              socket.broadcast.to(gameToJoin.room).emit(Message.PREPARE, playerTeamInfo);
-              socket.emit(Message.PREPARE, playerTeamInfo);
+              var prepareInfo = gameToJoin.prepareGame(false);
+              prepareInfo[Message.MAP] = mapContent;
+              socket.broadcast.to(gameToJoin.room).emit(Message.PREPARE, prepareInfo);
+              socket.emit(Message.PREPARE, prepareInfo);
             }
           });
         });

@@ -6,6 +6,7 @@ var Message = {
   TYPE : 'TYPE',
   USERNAME : 'USERNAME',
   JOIN : 'JOIN',
+  MAP : 'MAP',
   REMOVE : 'REMOVE',
   LEAVE : "LEAVE",
   ERROR : 'ERROR',
