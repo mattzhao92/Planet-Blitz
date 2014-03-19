@@ -1,16 +1,17 @@
 /* Game world */
 var Grid = Class.extend({
     // Class constructor
-    init: function(gameApp, width, length, tileSize, scene, camera, controls) {
+      init: function(gameApp, width, length, tileSize, scene, camera, controls) {
         'use strict';
-
+        var mapContent = "{\"units\":[\"{\\\"color\\\":\\\"0xc300ff\\\",\\\"teamId\\\":0,\\\"xPos\\\":0,\\\"zPos\\\":0,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\",\"{\\\"color\\\":\\\"0xc300ff\\\",\\\"teamId\\\":0,\\\"xPos\\\":1,\\\"zPos\\\":1,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\",\"{\\\"color\\\":\\\"0xc300ff\\\",\\\"teamId\\\":0,\\\"xPos\\\":2,\\\"zPos\\\":2,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\",\"{\\\"color\\\":\\\"0xc300ff\\\",\\\"teamId\\\":0,\\\"xPos\\\":3,\\\"zPos\\\":3,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\"],\"obstacles\":[],\"tiles\":[\"{\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\",\"{\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\",\"{\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\",\"{\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\"],\"board\":{\"width\":1600,\"height\":400,\"tileSize\":40,\"groundtexture\":\"Supernova.jpg\"}}";
+        var mapJson = JSON.parse(mapContent);
         this.gameApp = gameApp;
 
         this.GROUND_TEXTURE = "images/Supernova.jpg"
 
-        this.gridWidth = width;
-        this.gridLength = length;
-        this.tileSize = tileSize;
+        this.gridWidth = mapJson.board.width;
+        this.gridLength = mapJson.board.height;
+        this.tileSize = mapJson.board.tileSize;
         this.scene = scene;
         this.camera = camera;
         this.controls = controls;
@@ -28,8 +29,9 @@ var Grid = Class.extend({
         this.tiles = new THREE.Object3D();
         this.tilesArray = null;
 
-        this.loadGround();
-        this.drawGridSquares(width, length, tileSize);
+        this.loadGroundFromMapJson(mapJson);
+        //this.drawGridSquares(width, length, tileSize);
+        this.drawGridSquaresFromMapJson(mapJson);
 
         this.gridHelper = new GridHelper(this.camera, this.controls);
 
@@ -45,8 +47,9 @@ var Grid = Class.extend({
 
         this.spriteFactory = new SpriteFactory(this, sceneAddCmd, sceneRemoveCmd);
 
+
         // initialize characters
-        this.setupCharacters();
+        this.setupCharctersFromMapJson(mapJson);
 
         this.setupMouseMoveListener();
         this.setupMouseDownListener();
@@ -58,6 +61,116 @@ var Grid = Class.extend({
 
         this.disableHotKeys();
         this.hotkeys = [];
+    },
+
+    loadGroundFromMapJson: function(mapJson) {
+        var texture = THREE.ImageUtils.loadTexture("images/"+mapJson.board.groundtexture);
+
+        var groundMaterial = new THREE.MeshLambertMaterial({
+            color: 0xffffff,
+            map: texture
+        });
+
+        var ground = new THREE.Mesh(new THREE.PlaneGeometry(this.gridWidth, this.gridLength), groundMaterial);
+        ground.rotation.x = -0.5 * Math.PI;
+
+        var Y_BUFFER = -0.5;
+        // needed because otherwise tiles will overlay directly on the grid and will cause glitching during scrolling ("z fighting")
+        ground.position.y = Y_BUFFER;
+        // offset to fit grid drawing 
+        ground.position.x -= mapJson.board.tileSize / 2;
+        ground.position.z -= mapJson.board.tileSize / 2;
+
+        this.scene.add(ground);
+    },
+
+    drawGridSquaresFromMapJson: function(mapJson) {
+        var width = mapJson.board.width;
+        var length = mapJson.board.height;
+        var size = mapJson.board.tileSize;
+
+
+        this.tileFactory = new TileFactory(this, size);
+        console.log('width '+width +' length '+length+' size '+size);
+
+        this.numberSquaresOnXAxis = width / size;
+        this.numberSquaresOnZAxis = length / size;
+
+        this.tilesArray = new Array(this.numberSquaresOnXAxis);
+        for (var i = 0; i < this.numberSquaresOnXAxis; i++) {
+            this.tilesArray[i] = new Array(this.numberSquaresOnZAxis);
+        }
+
+        for (var i = 0; i < this.numberSquaresOnXAxis; i++) {
+            for (var j = 0; j < this.numberSquaresOnZAxis; j++) {
+                var tile = this.tileFactory.createTile(i, j);
+
+                var tileMesh = tile.getTileMesh();
+                this.tilesArray[i][j] = tile;
+
+                this.tiles.add(tileMesh);
+            }
+        }
+
+        for (var i = 0; i < mapJson.tiles.length; i++) {
+            var specialTile = JSON.parse(mapJson.tiles[i]);
+            console.log('specialTile ' + specialTile);
+            if (specialTile.hasCharacter) {
+
+            }
+        }
+
+        this.PFGrid = new PF.Grid(this.numberSquaresOnXAxis, this.numberSquaresOnZAxis);
+        this.pathFinder = new PF.AStarFinder();
+
+        this.scene.add(this.tiles);
+    },
+
+
+    setupCharctersFromMapJson: function(mapJson) {
+
+        // reconstructing BlitzUnits here
+        var units_in_teams = [];
+
+        for (var i = 0; i < mapJson.units.length; i++) {
+            var unit = JSON.parse(mapJson.units[i]);
+            console.log('unit ---- '+unit.teamId);
+            while (unit.teamId > units_in_teams.length -1) {
+                units_in_teams.push([]);
+            }
+            units_in_teams[unit.teamId].push(unit);
+        }
+
+        for (var team_index = 0; team_index < units_in_teams.length; team_index++) {
+
+            for (var unit_index = 0; unit_index < units_in_teams[team_index].length; unit_index++) {
+
+                var metaData = units_in_teams[team_index][unit_index];
+                var character;
+
+                var startX = metaData.xPos;
+                var startY = metaData.zPos;
+                
+                switch (metaData["unitType"]) {
+                    case "soldier":
+                        character = this.spriteFactory.createSoldier(team_index, unit_index);
+                        break;
+                    case "artillery":
+                        character = this.spriteFactory.createArtillerySoldier(team_index, unit_index);
+                        break;
+                    case "flamethrower": 
+                        character = this.spriteFactory.createFlamethrowerSoldier(team_index, unit_index);
+                        break;
+                    default:
+                        console.log("Invalid unit type specified "+metaData["unitType"]);
+                        break;
+                }
+
+                character.placeAtGridPos(startX, startY);
+                character.getRepr().rotation.y = this.getUnitDegreesToRotate(team_index);
+                this.markTileOccupiedByCharacter(startX, startY);
+            }
+        }
     },
 
     getCharacters: function() {

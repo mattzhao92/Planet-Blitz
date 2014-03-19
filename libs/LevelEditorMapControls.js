@@ -579,7 +579,6 @@ THREE.MapControls = function ( object, scene, domElement ) {
         if ( scope.enabled === false ) return;
         if ( scope.userRotate === false ) return;
 
-        event.preventDefault();
 
         // quick hack
         // event.clientX = scope.mousePosition.x;
@@ -620,8 +619,6 @@ THREE.MapControls = function ( object, scene, domElement ) {
 
         if ( scope.enabled === false ) return;
 
-        event.preventDefault();
-        event.stopPropagation();
 
         // // quick hack
         // event.clientX = scope.mousePosition.x;
@@ -707,6 +704,7 @@ THREE.MapControls = function ( object, scene, domElement ) {
         }
     }
 
+
     this.domElement.addEventListener( 'contextmenu', function ( event ) { event.preventDefault(); }, false );
     this.domElement.addEventListener( 'mousedown', onMouseDown, false );
     this.domElement.addEventListener( 'mousewheel', onMouseWheel, false );
@@ -715,26 +713,6 @@ THREE.MapControls = function ( object, scene, domElement ) {
 
     // TODO: remove this hardcoding
     var containerName = "#WebGL-output";
-
-    $(containerName).click(
-        function() {
-            PL.requestPointerLock(document.body,
-                // on pointerlock enable
-                function(event) {
-                    scope.handleResize();
-                    document.addEventListener("mousemove", moveCallback, false);
-                }, 
-                // on pointerlock disable
-                function(event) {
-                    document.removeEventListener("mousemove", moveCallback, false);
-                    scope.resetMousePosition();
-                }, 
-                // on error
-                function(event) {
-                    console.log("Error: could not obtain pointerlock");
-                });
-        }
-    );
 
     this.reset = function() {
         // Ask the browser to release the pointer
@@ -825,7 +803,7 @@ THREE.MapControls = function ( object, scene, domElement ) {
 
     // set up mouse sprite for mouse cursor display
     this.mouseSprite = null;
-    this.setupMouseCursor();
+    //this.setupMouseCursor();
 
     // create synthetic events - allow mouse click with "corrected" mouse position (from pointerlock) on HTML DOM elements to occur correctly
     document.addEventListener("click", function(e) {
@@ -848,6 +826,38 @@ THREE.MapControls = function ( object, scene, domElement ) {
     });
 
     this.handleResize();
+
+    // hotkeys for camera movement
+    var approxDelta = 1/60;
+    KeyboardJS.on("w", 
+        function(keyEvent, keysPressed, keyCombo) {
+            scope.scrollCameraUp(approxDelta);
+        });
+    KeyboardJS.on("a", 
+        function(keyEvent, keysPressed, keyCombo) {
+            scope.scrollCameraLeft(approxDelta);
+        });
+    KeyboardJS.on("s", 
+        function(keyEvent, keysPressed, keyCombo) {
+            scope.scrollCameraDown(approxDelta);
+        });
+    KeyboardJS.on("d", 
+        function(keyEvent, keysPressed, keyCombo) {
+            scope.scrollCameraRight(approxDelta);
+        });
+
+    // rudimentary camera rotation
+    KeyboardJS.on("q",
+        function(event, keysPressed, keyCombo) {
+            scope.rotateLeft(Math.PI / 30);
+        }
+    );
+
+    KeyboardJS.on("e",
+        function(event, keysPressed, keyCombo) {
+            scope.rotateRight(Math.PI / 30);
+        }
+    );
 };
 
 THREE.MapControls.prototype = Object.create( THREE.EventDispatcher.prototype );
