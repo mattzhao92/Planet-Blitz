@@ -27,6 +27,8 @@ socket.on(Message.PREPARE, function(prepareInfo) {
   }
   GameInfo.numOfTeams = count;
   GameInfo.maxNumTeams = parseInt(prepareInfo[Message.MAXPLAYER]);
+  GameInfo.mapContent = prepareInfo[Message.MAP];
+  alert(GameInfo.mapContent);
 
   renderGame();
   
