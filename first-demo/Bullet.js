@@ -41,7 +41,7 @@ var Bullet = Sprite.extend({
     this.startPosition = from.clone();
 
     this.speed = 500;
-    this.damage = 20;
+    this.damage = 120;
 
     // this.maxDistance = 240;
     this.maxDistance = 1000;

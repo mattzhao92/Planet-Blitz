@@ -93,7 +93,7 @@ io.sockets.on('connection', function(socket) {
     var gameToJoin = emptyGames[gameId];
     if (gameToJoin) {
       if (gameToJoin.numPlayers < gameToJoin.maxNumPlayers) {
-        if (gameToJoin.isStart) {
+        if (gameToJoin.isStart && gameToJoin.isFull()) {
           socket.emit(Message.ERROR, 'The selected game is already start');
           return;
         }
@@ -129,10 +129,7 @@ io.sockets.on('connection', function(socket) {
     socket.get('inGame', function(error, game) {
       game.numReadyPlayers++;
       if (game.isReady()) {
-        game.isStart = true;
-        var score = game.getScoreJSON();
-        socket.broadcast.to(game.room).emit(Message.START, score);
-        socket.emit(Message.START, score);
+        game.startGame(socket);
       }
     });
   });
@@ -211,13 +208,12 @@ io.sockets.on('connection', function(socket) {
           gameStatistics[Stat.winner] = username;
           var scoreStat = game.getScoreJSON();
           gameStatistics[Stat.result] = scoreStat;
-          if (!game.isFull()) {
-            delete emptyGames[game.gameId];
+          if (game.playerEscaped.length != 0) {
+            // delete emptyGames[game.gameId];
             gameStatistics[Message.LEAVE] = 'Players escaped: ' + game.playerEscaped;
-          } else {
-             // Reset the game state.
-            game.restart();           
           }
+          // Reset the game state.
+          game.restart();           
 
           socket.broadcast.to(game.room).emit(Message.FINISH, gameStatistics);
           socket.emit(Message.FINISH, gameStatistics);
@@ -234,11 +230,12 @@ io.sockets.on('connection', function(socket) {
       socket.emit(Message.JOIN, playerState);
       socket.broadcast.to(curGame.room).emit(Message.JOIN, playerState);
       console.log('cur room players ' + playerState);
+      console.log(curGame.isRestartReady());
       // Start the game when full, and create a new one.
       if (curGame.isRestartReady()) {
         var playerTeamInfo = curGame.prepareGame(true);
         curGame.isWaitingRestart = false;
-        curGame.isStart = true;
+        // curGame.isStart = true;
         socket.broadcast.to(curGame.room).emit(Message.PREPARE, playerTeamInfo);
         socket.emit(Message.PREPARE, playerTeamInfo);
       }
@@ -304,8 +301,9 @@ function Game(gameId, gameName, maxNumPlayers) {
   this.usernames = new Array();
   this.gameId = gameId;
   this.gameName = gameName;
-  this.isStart = false;
+  // this.isStart = false;
   this.isWaitingRestart = false;
+  this.isPlaying = false;
   this.playerEscaped = new Array();
   this.numPlayers = 0;
   this.numReadyPlayers = 0;
@@ -335,7 +333,7 @@ Game.prototype.getPlayerInfo = function() {
 }
 
 Game.prototype.getPlayerRestartInfo = function() {
-  return this.numRestartPlayers + '/' + this.maxNumPlayers;
+  return this.numRestartPlayers + '/' + this.maxNumPlayers + '  . The game would restart as soon as ' + this.numPlayers + ' players are ready';
 }
 
 Game.prototype.addPlayer = function(sk, username) {
@@ -350,14 +348,15 @@ Game.prototype.removePlayer = function(socket, game) {
     var index = game.usernames.indexOf(username);
     game.usernames.splice(index, 1); 
     var leaveTeamId = game.score[username].teamId;
-    for (var t = 0; t < teamSize; t++) {
+    for (var t = 0; t < game.gameState.teamSize; t++) {
       game.gameState.teams[leaveTeamId][t].alive = false;
     }
 
     var numLiveTeams = 0;
     var winnerTeamId;
     for (var t = 0; t < game.numPlayers; t++) {
-      for (var i = 0; i < game.gameState.teams.length; i++) {
+      for (var i = 0; i < game.gameState.teamSize; i++) {
+        console.log(game.gameState.teams[t][i]);
         if (game.gameState.teams[t][i].alive) {
           numLiveTeams++;
           winnerTeamId = t;
@@ -367,6 +366,8 @@ Game.prototype.removePlayer = function(socket, game) {
     }
     console.log(numLiveTeams);
     console.log(game.gameState.teams);
+    // Reset the count.
+    game.gameState.numLiveTeams = numLiveTeams;
     game.playerEscaped.push(username);
     game.numPlayers--;
     delete game.score[username];
@@ -387,22 +388,27 @@ Game.prototype.removePlayer = function(socket, game) {
       gameStatistics[Stat.result] = scoreStat;
       console.log(gameStatistics);
       // Reset the game state.
+      game.restart();
       gameStatistics[Message.LEAVE] = 'Players escaped: ' + game.playerEscaped;
       socket.broadcast.to(game.room).emit(Message.FINISH, gameStatistics);
-      socket.leave(game.room);
     }
+    socket.leave(game.room); 
   });
 };
 
 Game.prototype.restart = function() {
-  this.isStart = false;
+  // this.isStart = false;
+  this.isPlaying = false;
   this.isWaitingRestart = true;
   this.numReadyPlayers = 0;
   this.numRestartPlayers = 0;
   shuffle(this.teamIds);
   this.seq = 0;
-  console.log(this.teamIds);
+  this.gameState.numOfTeams = this.numPlayers;
+  // Clear the escaping list.
+  this.playerEscaped.length = 0;
   this.gameState.restart();
+  console.log(this.teamIds);
 };
 
 Game.prototype.isFull = function() {
@@ -410,11 +416,11 @@ Game.prototype.isFull = function() {
 };
 
 Game.prototype.isReady = function() {
-  return this.numReadyPlayers == this.maxNumPlayers;
+  return this.numReadyPlayers == this.numPlayers;
 };
 
 Game.prototype.isRestartReady = function() {
-  return this.numRestartPlayers == this.maxNumPlayers;
+  return this.numRestartPlayers == this.numPlayers;
 };
 
 Game.prototype.prepareGame = function(isRestart) {
@@ -431,8 +437,13 @@ Game.prototype.prepareGame = function(isRestart) {
   return playerTeamInfo;
 };
 
-Game.prototype.startGame = function() {
+Game.prototype.startGame = function(socket) {
   // Generate the positions here.
+    this.isStart = true;
+    this.isPlaying = true;
+    var score = this.getScoreJSON();
+    socket.broadcast.to(this.room).emit(Message.START, score);
+    socket.emit(Message.START, score);
 };
 
 Game.prototype.getScoreJSON = function() {
@@ -456,20 +467,20 @@ function GameState(numOfTeams, teamSize) {
   for (var teamId = 0; teamId < numOfTeams; teamId++) {
     this.teams.push(new Array());
     for (var i = 0; i < teamSize; i++) {
-        var startX, startZ;
-        if (teamId < 2) {
-          startX = i + 9;
-          startZ = teamStartPos[teamId];
-        } else {
-          startX = teamStartPos[teamId];
-          startZ = i + 9;
-        }
-        this.teams[teamId].push(new CharState(startX, startZ));
+      var startX, startZ;
+      if (teamId < 2) {
+        startX = i + 9;
+        startZ = teamStartPos[teamId];
+      } else {
+        startX = teamStartPos[teamId];
+        startZ = i + 9;
+      }
+      this.teams[teamId].push(new CharState(startX, startZ));
     }
   }
 }
 
-GameState.prototype.restart = function(data) {
+GameState.prototype.restart = function() {
   this.teams = new Array();
   this.numLiveTeams = this.numOfTeams;
   for (var teamId = 0; teamId < this.numOfTeams; teamId++) {

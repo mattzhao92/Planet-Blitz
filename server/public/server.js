@@ -76,42 +76,43 @@ function showRestartDialog(message, additionalMsg, score) {
     content += '</tr>';
   }
   content += '</table>';
-  if (additionalMsg) {
-    $("#Message-dialog").html(content).dialog(
-    {
-      width: 400, 
-      height: 300,
-      modal: true,
-      resizable: false,
-      buttons: {
-        "Close": function() {
-          $(this).dialog("close");
-          mainMenu();
-        }
+  // if (additionalMsg) {
+  //   $("#Message-dialog").html(content).dialog(
+  //   {
+  //     width: 400, 
+  //     height: 300,
+  //     modal: true,
+  //     resizable: false,
+  //     buttons: {
+  //       "Close": function() {
+  //         $(this).dialog("close");
+  //         mainMenu();
+  //       }
+  //     }
+  //  });   
+  // } else {
+
+    
+  $("#Message-dialog").html(content).dialog(
+  {
+    width: 400, 
+    height: 300,
+    modal: true,
+    resizable: false,
+    buttons: {
+      "Play again": function() {
+        $(this).dialog("close");
+        game.reset();
+        sendRestartMsg();
+        restartLoading();
+      },
+      "Quit": function() {
+        $(this).dialog("close");
+        mainMenu();
+        sendLeaveMsg();
       }
-   });   
-  } else {
-    $("#Message-dialog").html(content).dialog(
-    {
-      width: 400, 
-      height: 300,
-      modal: true,
-      resizable: false,
-      buttons: {
-        "Play again": function() {
-          $(this).dialog("close");
-          game.reset();
-          sendRestartMsg();
-          restartLoading();
-        },
-        "Quit": function() {
-          $(this).dialog("close");
-          mainMenu();
-          sendLeaveMsg();
-        }
-      }
-    });   
-  }
+    }
+  });   
 }
 
 function getUsername(forGameId) {
