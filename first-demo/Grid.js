@@ -179,13 +179,13 @@ var Grid = Class.extend({
 
     onGameStart: function() {
         this.enableHotKeys();
-        for (var tm = GameInfo.numOfTeams; tm < 4; tm++) {
-            for (var i = 0; i < this.numOfCharacters; i++) {
-                this.silentlyRemoveCharacter(this.getCharacterById(tm, i));
+        for (var tm = 0; tm < 4; tm++) {
+            if (GameInfo.existingTeams.indexOf(tm) == -1) {
+                for (var i = 0; i < this.numOfCharacters; i++) {
+                    this.silentlyRemoveCharacter(this.getCharacterById(tm, i));
+                }               
             }
         }
-
-        // TODO: temporary, because start position is not always in same place
 
         console.log("Team id " + GameInfo.myTeamId);
 
@@ -206,7 +206,7 @@ var Grid = Class.extend({
         }
 
         this.controls.rotateRight(this.getCameraDegreesToRotate());
-        this.displayMessage(teamJoinMessage);
+        // this.displayMessage(teamJoinMessage);
 
         // focus camera on start position (TODO: hardcoded)
         this.controls.focusOnPosition(this.getMyTeamCharacters()[0].mesh.position);
@@ -795,7 +795,7 @@ var Grid = Class.extend({
         // This is usd to check ghosts.
         var liveChars = [];
         var liveStates = [];
-        for (var t = 0; t < GameInfo.numOfTeams; t++) {
+        for (var t = 0; t < GameInfo.maxNumTeams; t++) {
             liveStates.push(new Array());
             for (var i = 0; i < this.numOfCharacters; i++) {
                 liveStates[t].push(false);

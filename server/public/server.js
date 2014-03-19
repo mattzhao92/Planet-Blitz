@@ -76,48 +76,49 @@ function showRestartDialog(message, additionalMsg, score) {
     content += '</tr>';
   }
   content += '</table>';
-  if (additionalMsg) {
-    $("#Message-dialog").html(content).dialog(
-    {
-      width: 400, 
-      height: 300,
-      modal: true,
-      resizable: false,
-      buttons: {
-        "Close": function() {
-          $(this).dialog("close");
-          mainMenu();
-        }
+  // if (additionalMsg) {
+  //   $("#Message-dialog").html(content).dialog(
+  //   {
+  //     width: 400, 
+  //     height: 300,
+  //     modal: true,
+  //     resizable: false,
+  //     buttons: {
+  //       "Close": function() {
+  //         $(this).dialog("close");
+  //         mainMenu();
+  //       }
+  //     }
+  //  });   
+  // } else {
+
+    
+  $("#Message-dialog").html(content).dialog(
+  {
+    width: 400, 
+    height: 300,
+    modal: true,
+    resizable: false,
+    buttons: {
+      "Play again": function() {
+        $(this).dialog("close");
+        game.reset();
+        sendRestartMsg();
+        restartLoading();
+      },
+      "Quit": function() {
+        $(this).dialog("close");
+        mainMenu();
+        sendLeaveMsg();
       }
-   });   
-  } else {
-    $("#Message-dialog").html(content).dialog(
-    {
-      width: 400, 
-      height: 300,
-      modal: true,
-      resizable: false,
-      buttons: {
-        "Play again!": function() {
-          $(this).dialog("close");
-          game.reset();
-          sendRestartMsg();
-          restartLoading();
-        },
-        "NO!!": function() {
-          $(this).dialog("close");
-          mainMenu();
-          sendLeaveMsg();
-        }
-      }
-    });   
-  }
+    }
+  });   
 }
 
 function getUsername(forGameId) {
   var content = '<div class="rain" style="margin:0"><div class="border start">';
-  content += '<form><label for="name" style="margin-left:7">What name do you want to display in the game?</label><input id="uname" name="name"  maxlength="15" type="text" style="margin-left: 25"/>';
-  content += '<input type="button" value="Start" style="margin: 5 23 10 23" id="unameBtn"/><input value="Quit" type="button" id="quitBtn" style="margin: 0 23 14 23"/>';
+  content += '<form><label for="name" style="margin-left:7">Player name</label><input id="uname" name="name"  maxlength="15" type="text" style="margin-left: 25"/>';
+  content += '<input type="button" value="Join game" style="margin: 5 23 10 23" id="unameBtn"/><input value="Cancel" type="button" id="quitBtn" style="margin: 0 23 14 23"/>';
   content += '</form></div></div>';
   $("#Input-dialog").html(content).dialog(
   {
@@ -156,8 +157,8 @@ function getUsername(forGameId) {
 
 function createGameStep2(type) {
   var content = '<div class="rain" style="margin:0"><div class="border start">';
-  content += '<form><label for="rname" style="margin-left:7">What is the name of your game room?</label><input id="rname" name="rname"  maxlength="15" type="text" style="margin-left: 25"/>';
-  content += '<form><label for="uname" style="margin-left:7">What name do you want to display in the game?</label><input id="uname" name="name"  maxlength="15" type="text" style="margin-left: 25"/>';
+  content += '<form><label for="rname" style="margin-left:7">Game room name</label><input id="rname" name="rname"  maxlength="15" type="text" style="margin-left: 25"/>';
+  content += '<form><label for="uname" style="margin-left:7">Player name</label><input id="uname" name="name"  maxlength="15" type="text" style="margin-left: 25"/>';
   content += '<input type="button" value="Start" style="margin: 5 23 10 23" id="unameBtn"/><input value="Quit" type="button" id="quitBtn" style="margin: 0 23 14 23"/>';
   content += '</form></div></div>';
   $("#Input-dialog").html(content).dialog(
@@ -200,7 +201,7 @@ function createGameStep2(type) {
 function createGameStep1() {
   var content = '<div class="rain" style="margin:0"><div class="border start">';
   content += '<form style="padding-top:6px">';
-  content += '<label>What type of game do you want to create?</label>'; 
+  content += '<label>How many players?</label>'; 
   content += '<input type="button" value="2 Players" style="margin-top:10px" id="2p"/>';
   content += '<form><input type="button" value="4 Players" id="4p"/>';
   content += '<input value="Quit" type="button" id="quitBtn" />';
@@ -238,7 +239,8 @@ function createGameStep1() {
 
 function listAvailableGames(games) {
   var content = '<div class="rain" style="margin:0"><div class="border start">';
-  content += '<form><table><tr><td style="width:140">GameName</td><td style="padding-right:40px">Players</td><td>Status</td></tr>';
+  content += '<form><label style="text-align:center">Click on a game room to join or create your own</label>';
+  content += '<table><tr><td style="width:140">Room</td><td style="padding-right:40px">Players</td><td>Status</td></tr>';
   for (var t = 0; t < games.length; t++) {
     var game = games[t];
     var isPlaying = game[Info.gameStart] ? 'Playing' : 'Waiting';
@@ -289,8 +291,12 @@ $(document).ready(function() {
   $('#debugBtn').click(function() {
     GameInfo.netMode = false;
     loading();
-    startGame();
+    renderGame();
     game.getWorld().onGameStart();
+    setTimeout(function() {
+     startGame();
+    }, 800);
+    
   });
 
   $('#helpBtn').click(function() {
