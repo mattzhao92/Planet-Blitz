@@ -22,7 +22,7 @@ var ScoreBoard = function() {
 	// gameTextDisplay.id = 'scoreTextDisplay';
 
 	var scoreDisplay = document.createElement('table');
-	scoreDisplay.style.cssText = 'resize:none;width:150px;overflow:hidden;border: none;color:white;font-family:Helvetica,Arial,sans-serif;font-size:9px;line-height:10px;background-color:transparent';
+	scoreDisplay.style.cssText = 'resize:none;width:150px;overflow:hidden;border: none;color:white;font-family:Helvetica,Arial,sans-serif;font-size:12px;line-height:10px;background-color:transparent';
 	scoreDisplay.id = 'scoreTextDisplay';
 	// var tr = scoreDisplay.insertRow();
 	// var td = tr.insertCell();

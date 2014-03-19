@@ -19,7 +19,11 @@ app.configure(function() {
   app.use(express.static(__dirname + '/first-demo'));
   app.use(express.static(__dirname + '/libs'));
   app.use(express.static(__dirname + '/css'));
+  app.use(express.static(__dirname + '/assets/blendertextures'));
+  app.use(express.static(__dirname + '/assets/blendermodels'));
+  app.use(express.static(__dirname + '/assets/sounds'));
   app.use(express.static(__dirname + '/assets'));
+
 });
 
 // Server index page.
@@ -211,7 +215,7 @@ io.sockets.on('connection', function(socket) {
           gameStatistics[Stat.result] = scoreStat;
           if (!game.isFull()) {
             delete emptyGames[game.gameId];
-            gameStatistics[Message.LEAVE] = 'Players escaped: ' + game.playerEscaped;
+            gameStatistics[Message.LEAVE] = game.playerEscaped + " left the game";
           } else {
              // Reset the game state.
             game.restart();           
