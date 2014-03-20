@@ -66,11 +66,14 @@ var Grid = Class.extend({
 
     onGameStart: function() {
         this.enableHotKeys();
-        for (var tm = GameInfo.numOfTeams; tm < 4; tm++) {
-            for (var i = 0; i < this.numOfCharacters; i++) {
-                this.silentlyRemoveCharacter(this.getCharacterById(tm, i));
+         for (var tm = 0; tm < 4; tm++) {
+            if (GameInfo.existingTeams.indexOf(tm) == -1) {
+                for (var i = 0; i < this.numOfCharacters; i++) {
+                    this.silentlyRemoveCharacter(this.getCharacterById(tm, i));
+                }               
             }
         }
+
 
         console.log("Team id " + GameInfo.myTeamId);
 
@@ -674,13 +677,13 @@ var Grid = Class.extend({
         this.spriteFactory.updateBulletsContainer();
     },
 
-    syncGameState: function(state) {
+   syncGameState: function(state) {
         if (this.resetInProgress) return true;
 
         // This is usd to check ghosts.
         var liveChars = [];
         var liveStates = [];
-        for (var t = 0; t < GameInfo.numOfTeams; t++) {
+        for (var t = 0; t < GameInfo.maxNumTeams; t++) {
             liveStates.push(new Array());
             for (var i = 0; i < this.numOfCharacters; i++) {
                 liveStates[t].push(false);

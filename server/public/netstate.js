@@ -6,9 +6,14 @@ var Message = {
   TYPE : 'TYPE',
   USERNAME : 'USERNAME',
   JOIN : 'JOIN',
+  MAP : 'MAP',
   REMOVE : 'REMOVE',
+  REMOVEALL : 'REMOVEALL',
   LEAVE : "LEAVE",
   ERROR : 'ERROR',
+  TEAM : 'TEAM',
+  OBSERVER : 'OBSERVER',
+  MAXPLAYER : 'MAXPLAYER', // Max number of players
   PREPARE : 'PREPARE',
   START : 'START',
   FINISH : 'FINISH',
@@ -69,7 +74,8 @@ var Info = {
   gameId : 'gameId',
   gameName : 'gameName',
   gameStart : 'gameStart',
-  player : 'player'
+  player : 'player',
+  isFull : 'isFull'
 }
 
 exports.Message = Message;
