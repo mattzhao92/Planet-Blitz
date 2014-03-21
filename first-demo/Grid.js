@@ -131,6 +131,11 @@ var Grid = Class.extend({
         var scope = this;
         var unitNumbers = [1, 2, 3];
 
+        // remove previous hotkey bindings
+        _.forEach(Constants.HOTKEYS, function(hotkey) {
+            KeyboardJS.clear(hotkey);
+        });
+
         unitNumbers.forEach(function(number) {
             var hotkey = number.toString();
             KeyboardJS.on(hotkey,
