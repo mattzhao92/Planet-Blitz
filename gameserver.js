@@ -19,8 +19,10 @@ app.configure(function() {
   app.use(express.static(__dirname + '/first-demo'));
   app.use(express.static(__dirname + '/libs'));
   app.use(express.static(__dirname + '/css'));
-  app.use(express.static(__dirname + '/assets'));
+  app.use(express.static(__dirname + '/assets/blendertextures'));
+  app.use(express.static(__dirname + '/assets/blendermodels'));
   app.use(express.static(__dirname + '/assets/sounds'));
+  app.use(express.static(__dirname + '/assets'));
 
 });
 
@@ -256,6 +258,7 @@ io.sockets.on('connection', function(socket) {
           if (game.playerEscaped.length != 0) {
             // delete emptyGames[game.gameId];
             gameStatistics[Message.LEAVE] = 'Players escaped: ' + game.playerEscaped;
+
           }
           // Reset the game state.
           game.reset();

@@ -6,7 +6,19 @@ var Grid = Class.extend({
 
         this.gameApp = gameApp;
 
-        this.GROUND_TEXTURE = "images/Supernova.jpg"
+        var currentTime = new Date();
+
+        var whichMap = Math.floor((currentTime.getSeconds() % 20) / 4);
+
+        var groundTextureArray = [
+        "gndTexture/Supernova.jpg",
+        "gndTexture/gnd-dirty.jpg",
+        "gndTexture/gnd-bakedground.jpg",
+        "gndTexture/gnd-yellowpurp.jpg",
+        "gndTexture/gnd-oilStainedTitanium.jpg"
+        ];
+        this.GROUND_TEXTURE = groundTextureArray[whichMap];
+        console.log("Using map " + this.GROUND_TEXTURE + " at idx " + whichMap);
 
         this.gridWidth = width;
         this.gridLength = length;
@@ -24,39 +36,29 @@ var Grid = Class.extend({
         this.mouseDownListenerActive = true;
         this.mouseOverListenerActive = true;
 
-        // create grid tiles
-        this.tiles = new THREE.Object3D();
-        this.tilesArray = null;
-
-        this.loadGround();
-        this.drawGridSquares(width, length, tileSize);
-
         this.gridHelper = new GridHelper(this.camera, this.controls);
 
+        // create sprite factory        
         var scope = this;
 
         var sceneAddCmd = new SpriteCmd(function(sprite) {
             scope.scene.add(sprite.getRepr());
         });
-
         var sceneRemoveCmd = new SpriteCmd(function(sprite) {
             scope.scene.remove(sprite.getRepr());
         });
-
         this.spriteFactory = new SpriteFactory(this, sceneAddCmd, sceneRemoveCmd);
 
-        // initialize characters
-        this.setupCharacters();
+        this.reset();
 
+        // nonessentials
         this.setupMouseMoveListener();
         this.setupMouseDownListener();
         this.setupHotkeys();
 
         this.unitCycle = 0;
-        this.hotKeysDisabled = true;
         this.resetInProgress = false;
 
-        this.disableHotKeys();
         this.hotkeys = [];
     },
 
@@ -65,7 +67,6 @@ var Grid = Class.extend({
     },
 
     onGameStart: function() {
-        this.enableHotKeys();
          for (var tm = 0; tm < 4; tm++) {
             if (GameInfo.existingTeams.indexOf(tm) == -1) {
                 for (var i = 0; i < this.numOfCharacters; i++) {
@@ -76,6 +77,19 @@ var Grid = Class.extend({
 
 
         console.log("Team id " + GameInfo.myTeamId);
+
+        if (this.getCurrentSelectedUnit()) {
+            // TODO: duplicated code
+
+            this.getCurrentSelectedUnit().deselect();
+            // deselect tiles if there were any
+            this.getCurrentSelectedUnit().highlightedTiles.forEach(function(tile) {
+                tile.reset();
+            });
+
+            this.currentSelectedUnits[GameInfo.myTeamId] = null;
+            this.deselectHighlightedTiles();
+        }
 
         var teamJoinMessage;
         switch (GameInfo.myTeamId) {
@@ -101,23 +115,16 @@ var Grid = Class.extend({
     },
 
     onGameFinish: function() {
-        console.log("Game finish called");
+        console.log("Game finish called - exiting pointerlock");
+
         // reset the pointerlock
-        this.controls.reset();
+        this.controls.releasePointerLock();
     },
 
     getMyTeamCharacters: function() {
         return _.filter(this.getCharacters(), function(character) {
             return character.team == GameInfo.myTeamId && character.active;
         });
-    },
-
-    disableHotKeys: function() {
-        this.hotKeysDisabled = true;
-    },
-
-    enableHotKeys: function() {
-        this.hotKeysDisabled = false;
     },
 
     setupHotkeys: function() {
@@ -128,7 +135,6 @@ var Grid = Class.extend({
             var hotkey = number.toString();
             KeyboardJS.on(hotkey,
                 function(event, keysPressed, keyCombo) {
-                    if (scope.hotKeysDisabled) return;
                     // TODO: replace this with a more readable line. Also, need to account for out of index errors when units get killed
                     var characterSelected = scope.getMyTeamCharacters()[parseInt(keyCombo) - 1];
                     if (characterSelected && characterSelected.active) {
@@ -141,8 +147,6 @@ var Grid = Class.extend({
         // unit toggle - cycle forwards
         KeyboardJS.on("t",
             function(event, keysPressed, keyCombo) {
-                if (scope.hotKeysDisabled) return;
-
                 var myTeamCharacters = scope.getMyTeamCharacters();
                 var characterSelected = myTeamCharacters[scope.unitCycle];
                 if (characterSelected.active) {
@@ -155,8 +159,6 @@ var Grid = Class.extend({
         // unit toggle - cycle backwards
         KeyboardJS.on("r",
             function(event, keysPressed, keyCombo) {
-                if (scope.hotKeysDisabled) return;
-
                 var myTeamCharacters = scope.getMyTeamCharacters();
                 var characterSelected = myTeamCharacters[scope.unitCycle];
                 if (characterSelected.active) {
@@ -173,8 +175,6 @@ var Grid = Class.extend({
         // focus camera on unit
         KeyboardJS.on("space",
             function(event, keysPressed, keyCombo) {
-                if (scope.hotKeysDisabled) return;
-
                 var character = scope.getCurrentSelectedUnit();
                 if (character && character.active) {
                     scope.controls.focusOnPosition(character.mesh.position);
@@ -185,16 +185,12 @@ var Grid = Class.extend({
         // rudimentary camera rotation
         KeyboardJS.on("q",
             function(event, keysPressed, keyCombo) {
-                if (scope.hotKeysDisabled) return;
-
                 scope.controls.rotateLeft(Math.PI / 30);
             }
         );
 
         KeyboardJS.on("e",
             function(event, keysPressed, keyCombo) {
-                if (scope.hotKeysDisabled) return;
-
                 scope.controls.rotateRight(Math.PI / 30);
             }
         );
@@ -578,13 +574,8 @@ var Grid = Class.extend({
                 if (unitMovedToDifferentSquare) {
                     // Put the network communication here.
                     if (this.getCurrentSelectedUnit().isCoolDown == 0) {
-                        // if (!GameInfo.netMode) {
-                            // this.getCurrentSelectedUnit().setDirection(new THREE.Vector3(deltaX, 0, deltaZ));
-                            // this.getCurrentSelectedUnit().enqueueMotion();
-                        // } else {
                             sendMoveMsg(this.getCurrentSelectedUnit().id,
                                 deltaX, deltaY, deltaZ);
-                        // }
                     }
                 }
             }
@@ -752,22 +743,22 @@ var Grid = Class.extend({
     reset: function() {
         console.log("Game reset");
 
-        _.forEach(this.getCharacters(), function(character) {
-            character.destroy();
-        });
-
         this.tiles = new THREE.Object3D();
         this.tilesArray = null;
 
         this.loadGround();
         this.drawGridSquares(this.gridWidth, this.gridLength, this.tileSize);
 
-        this.gridHelper = new GridHelper(this.camera, this.controls);
-
         // initialize characters
         this.setupCharacters();
         this.resetInProgress = false;
 
         this.deselectHighlightedTiles();
+
+        this.camera.position.x = 0;
+        this.camera.position.y = 600;
+        this.camera.position.z = 400;
+
+        this.controls.reset();
     },
 });

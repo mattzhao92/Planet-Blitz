@@ -64,7 +64,7 @@ socket.on(Message.OBSERVER, function(obMsg) {
 
 /* Handle the move message */
 socket.on(Message.MOVE, function(moveData) {
-  console.log("Start move receiving");
+  // console.log("Start move receiving");
   var seq = parseInt(moveData[Message.SEQ]);
   // Old seq, discard it.
   if (seq <= game.getWorld().seq) {
@@ -73,8 +73,8 @@ socket.on(Message.MOVE, function(moveData) {
   game.getWorld().seq = seq;
   var state = moveData[Message.STATE];
   var data = moveData[Message.MOVE];
-  console.log(state);
-  console.log(data);
+  // console.log(state);
+  // console.log(data);
   var moverTeam = parseInt(data[Move.team]);
   var moverIndex = parseInt(data[Move.index]);
   var deltaX = parseInt(data[Move.X]);
@@ -84,7 +84,7 @@ socket.on(Message.MOVE, function(moveData) {
     target.setDirection(new THREE.Vector3(deltaX, 0, deltaZ));
     target.enqueueMotion(null);
   }
-  console.log("Finish move receiving");
+  // console.log("Finish move receiving");
 
 });
 
@@ -110,7 +110,7 @@ socket.on(Message.HIT, function(hitData) {
   game.getWorld().seq = seq;
   var state = hitData[Message.STATE];
   var data = hitData[Message.HIT];
-  console.log(data);
+  // console.log(data);
   var team = parseInt(data[Hit.team]);
   var index = parseInt(data[Hit.index]);
   var damage = parseInt(data[Hit.damage]);  
@@ -147,7 +147,7 @@ socket.on(Message.REMOVEALL, function(removeTeam) {
 socket.on(Message.FINISH, function(data) {
     // must come first due to UI issues
 
-    console.log(data);
+    // console.log(data);
     var score = data[Stat.result];
     var grid = game.getWorld();
     var additionalMsg = data[Message.LEAVE];
