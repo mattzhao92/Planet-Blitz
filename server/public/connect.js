@@ -172,7 +172,7 @@ function GameConfig() {
   this.numOfTeams = 4;
   this.maxNumTeams = 0;
   this.myTeamId = 0;
-  this.netMode = true;
+  // this.netMode = true;
   this.username;
   this.isLoading = false;
   this.existingTeams = new Array();
@@ -200,42 +200,34 @@ function renderGame() {
 
 
 function sendMoveMsg(index, x, y, z) {
-  if (GameInfo.netMode) {
-    var data = {};
-    data[Move.team] = GameInfo.myTeamId;
-    data[Move.index] = index;
-    data[Move.X] = x;
-    data[Move.Z] = z;
-    console.log('Send a move');
-    console.log(data);
-    socket.emit(Message.MOVE, data);
-  }
+  var data = {};
+  data[Move.team] = GameInfo.myTeamId;
+  data[Move.index] = index;
+  data[Move.X] = x;
+  data[Move.Z] = z;
+  console.log('Send a move');
+  console.log(data);
+  socket.emit(Message.MOVE, data);
 }
 
 function sendShootMsg(index, from, to) {
-  if (GameInfo.netMode) {
-    var shoot = {};
-    shoot[Shoot.team] = GameInfo.myTeamId;
-    shoot[Shoot.index] = index;
-    shoot[Shoot.fromX] = from.x;
-    shoot[Shoot.fromZ] = from.z;
-    shoot[Shoot.toX] = to.x;
-    shoot[Shoot.toZ] = to.z;
-    socket.emit(Message.SHOOT, shoot);
-  }
+  var shoot = {};
+  shoot[Shoot.team] = GameInfo.myTeamId;
+  shoot[Shoot.index] = index;
+  shoot[Shoot.fromX] = from.x;
+  shoot[Shoot.fromZ] = from.z;
+  shoot[Shoot.toX] = to.x;
+  shoot[Shoot.toZ] = to.z;
+  socket.emit(Message.SHOOT, shoot);
 }
 
 function sendHitMsg(bullet, unit, damage) {
-  if (GameInfo.netMode) {
-    if (bullet.owner.team == GameInfo.myTeamId) {
-      var hit = {};
-      hit[Hit.team] = unit.team;
-      hit[Hit.index] = unit.id;
-      hit[Hit.damage] = damage;
-      socket.emit(Message.HIT, hit);
-    }
-  } else {
-    unit.applyDamage(damage);
+  if (bullet.owner.team == GameInfo.myTeamId) {
+    var hit = {};
+    hit[Hit.team] = unit.team;
+    hit[Hit.index] = unit.id;
+    hit[Hit.damage] = damage;
+    socket.emit(Message.HIT, hit);
   }
 }
 
@@ -261,6 +253,11 @@ function sendLeaveMsg() {
   socket.emit(Message.LEAVE);
 }
 
+function sendSingleModeMsg() {
+  GameInfo.username = 'player';
+  socket.emit(Message.SINGLE);
+}
+
 function sendJoinMsg(gameId, username) {
   GameInfo.username = username;
   var joinMsg = {};
@@ -272,3 +269,4 @@ function sendJoinMsg(gameId, username) {
 function updateLoadingPlayerState(state) {
   $('#Loading-output').html('Waiting...</br>Player: ' + state);
 }
+

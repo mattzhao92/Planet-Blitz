@@ -51,6 +51,7 @@ var gameIdSeq = 0;
 // Room waiting for players.
 var emptyGames = {};
 var fullGames = new Array();
+var singleGames = {};
 
 
 // IO communication.
@@ -64,12 +65,28 @@ io.sockets.on('connection', function(socket) {
     socket.emit(Message.LISTGAME, getAllGameInfo());
   });
 
+  socket.on(Message.SINGLE, function() {
+    var singleId = gameIdSeq++;
+    var newGame = new Game(singleId, 'SingleMode' + singleId, 4, true);
+    socket.set('inGame', newGame, function() {
+      socket.set('username', 'player', function() {
+        newGame.addPlayer(socket, 'player');
+        for (var t = 0; t < 3; t++) {
+          newGame.addPlayer(null, 'robot' + t);
+        }
+        var playerTeamInfo = newGame.prepareGame(false);
+        newGame.numReadyPlayers = 3;
+        socket.emit(Message.PREPARE, playerTeamInfo);
+      });
+    });
+  });
+
   socket.on(Message.CREATEGAME, function(gameRequest) {
     console.log('*** a create request');
     var gameName = gameRequest[Message.GAMENAME];
     var username = gameRequest[Message.USERNAME];
     var gameType = parseInt(gameRequest[Message.TYPE]);
-    var newGame = new Game(gameIdSeq++, gameName, gameType);
+    var newGame = new Game(gameIdSeq++, gameName, gameType, false);
     console.log(emptyGames);
     console.log(emptyGames[gameName]);
     for (var gid in emptyGames) {
@@ -262,6 +279,9 @@ io.sockets.on('connection', function(socket) {
       // Start the game when full, and create a new one.
       if (curGame.isRestartReady()) {
         curGame.restart(socket); 
+      } else if (curGame.isSingleMode) {
+        curGame.numReadyPlayers = 3;
+        curGame.restart(socket);
       }
     });
   });
@@ -301,22 +321,27 @@ io.sockets.on('connection', function(socket) {
     //   });
     // });
     socket.get('inGame', function(error, game) {
-    if (game == null) {
-      return;
-    }
-    if (game.isStart) {
-      // TODO: Not sure....
-      game.removePlayer(socket, game);
-    } else if (game.isWaitingRestart) {
-      // Kill all?
-    } else if (!game.isFull()) {
-      var playerState = game.getPlayerInfo();
-      socket.broadcast.to(game.room).emit(Message.JOIN, playerState);
-      socket.set('inGame', null);          
-     } 
-     if (game.numPlayers == 0) {
-        delete emptyGames[game.gameId];
+      if (game == null) {
         return;
+      }
+      if (game.isSingleMode) {
+        socket.set('inGame', null);
+        socket.set('username', null);
+        return;
+      }
+      if (game.isStart) {
+        // TODO: Not sure....
+        game.removePlayer(socket, game);
+      } else if (game.isWaitingRestart) {
+        // Kill all?
+      } else if (!game.isFull()) {
+        var playerState = game.getPlayerInfo();
+        socket.broadcast.to(game.room).emit(Message.JOIN, playerState);
+        socket.set('inGame', null);          
+       } 
+      if (game.numPlayers == 0) {
+          delete emptyGames[game.gameId];
+          return;
       }
     });
   });
@@ -341,10 +366,11 @@ function getAllGameInfo() {
 /**
  * Class for a Game.
  */
-function Game(gameId, gameName, maxNumPlayers) {
+function Game(gameId, gameName, maxNumPlayers, isSingleMode) {
   this.usernames = new Array();
   this.gameId = gameId;
   this.gameName = gameName;
+  this.isSingleMode = isSingleMode;
   // this.isStart = false;
   this.isWaitingRestart = false;
   this.isPlaying = false;
@@ -381,7 +407,9 @@ Game.prototype.getPlayerRestartInfo = function() {
 }
 
 Game.prototype.addPlayer = function(sk, username) {
-  sk.join(this.room);
+  if (sk != null) {
+    sk.join(this.room);  
+  }
   this.usernames.push(username);
   this.numPlayers++;
 };

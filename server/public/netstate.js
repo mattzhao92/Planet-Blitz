@@ -2,6 +2,7 @@
 var Message = {
   GAME : 'GAME',
   LISTGAME : 'LISTGAME',
+  SINGLE : 'SINGLE',
   GAMENAME : 'GAMENAME',
   TYPE : 'TYPE',
   USERNAME : 'USERNAME',

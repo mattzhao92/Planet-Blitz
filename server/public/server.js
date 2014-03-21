@@ -289,14 +289,9 @@ $(document).ready(function() {
 
   /* Start the game locally */
   $('#debugBtn').click(function() {
-    GameInfo.netMode = false;
+    // GameInfo.netMode = false;
+    sendSingleModeMsg();
     loading();
-    renderGame();
-    game.getWorld().onGameStart();
-    setTimeout(function() {
-     startGame();
-    }, 800);
-    
   });
 
   $('#helpBtn').click(function() {
@@ -312,9 +307,7 @@ $(document).ready(function() {
     if (GameInfo.isLoading) {
       sendLeaveMsg();
     } else if (GameInfo.isStart) {
-      if (GameInfo.netMode) {
-        sendLeaveMsg();
-      }
+      sendLeaveMsg();
     } else {
       $('#slide-container').fadeOut();
     }

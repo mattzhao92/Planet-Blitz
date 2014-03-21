@@ -578,13 +578,13 @@ var Grid = Class.extend({
                 if (unitMovedToDifferentSquare) {
                     // Put the network communication here.
                     if (this.getCurrentSelectedUnit().isCoolDown == 0) {
-                        if (!GameInfo.netMode) {
-                            this.getCurrentSelectedUnit().setDirection(new THREE.Vector3(deltaX, 0, deltaZ));
-                            this.getCurrentSelectedUnit().enqueueMotion();
-                        } else {
+                        // if (!GameInfo.netMode) {
+                            // this.getCurrentSelectedUnit().setDirection(new THREE.Vector3(deltaX, 0, deltaZ));
+                            // this.getCurrentSelectedUnit().enqueueMotion();
+                        // } else {
                             sendMoveMsg(this.getCurrentSelectedUnit().id,
                                 deltaX, deltaY, deltaZ);
-                        }
+                        // }
                     }
                 }
             }
