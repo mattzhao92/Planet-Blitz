@@ -8,19 +8,19 @@ var AmmoBar = Sprite.extend({
 
 		var canvas = document.createElement('canvas');
 		this.canvas2d = canvas.getContext('2d');
-		this.ammoCountBarTexture = new THREE.Texture(canvas);
-		this.ammoCountBarTexture.needsUpdate = true;
+		this.barTexture = new THREE.Texture(canvas);
+		this.barTexture.needsUpdate = true;
 
 		var ammoCountBarMaterial = new THREE.SpriteMaterial({
-			map: this.ammoCountBarTexture,
+			map: this.barTexture,
 			useScreenCoordinates: false,
 			alignment: THREE.SpriteAlignment.center
 		});
 
-		this.ammoCountBarXOffset = this.tileSize / 2;
-		this.ammoCountBarZOffset = 0;
-		this.ammoCountBarYOffset = 62;
-		this.ammoCountBar = new THREE.Sprite(ammoCountBarMaterial);
+		this.barXOffset = this.tileSize / 2;
+		this.barZOffset = 0;
+		this.barYOffset = 62;
+		this.bar = new THREE.Sprite(ammoCountBarMaterial);
 
 		this.maximumAmmoCapacity = 3;
 		this.ammoCount = this.maximumAmmoCapacity;
@@ -30,11 +30,33 @@ var AmmoBar = Sprite.extend({
 		this.canvas2d.rect(150, 0, 600, 150);
 		this.canvas2d.fillStyle = "skyblue";
 		this.canvas2d.fill();
-		this.ammoCountBar.position.set(position.x + this.ammoCountBarXOffset,
-			position.y + this.ammoCountBarYOffset,
-			position.z + this.ammoCountBarZOffset);
 
-		this.ammoCountBar.scale.set(this.tileSize * 2, this.tileSize / this.barAspectRatio, 1.0);
+		this.bar.scale.set(this.tileSize * 2, this.tileSize / this.barAspectRatio, 1.0);
+	
+		this.centerX = position.x + this.tileSize / 2;
+		this.centerZ = position.z;
+		this.rotationOffsetX = 0;
+		this.rotationOffsetZ = 0;
+
+		this.bar.position.set(this.centerX,
+			position.y + this.barYOffset,
+			this.centerZ);
+
+		var scope = this;
+		var subscriber = function(msg, cameraRotation) {
+			scope.rotationOffsetX = -Math.abs(scope.tileSize * Math.cos(cameraRotation / 2));
+			scope.bar.position.x = scope.centerX + scope.rotationOffsetX;
+			scope.rotationOffsetZ = -Math.abs(scope.tileSize / 2 * Math.cos(cameraRotation / 2));
+			scope.bar.position.z = scope.centerZ + scope.rotationOffsetZ;
+		};
+
+		var unsubscribeToken = PubSub.subscribe(Constants.TOPIC_CAMERA_ROTATION, subscriber);
+		this.unsubscribeToken = unsubscribeToken;
+	},
+
+	destroy: function() {
+		this._super();
+		PubSub.unsubscribe(this.unsubscribeToken);
 	},
 
 	onShoot: function() {
@@ -45,13 +67,13 @@ var AmmoBar = Sprite.extend({
 	},
 
 	getRepr: function() {
-		return this.ammoCountBar;
+		return this.bar;
 	},
 
 	reset: function(position) {
 		this.ammoCount = this.maximumAmmoCapacity;
 		this.needsReload = false;
-		this.ammoCountBar.scale.set(this.tileSize * 2, this.tileSize / this.barAspectRatio, 1.0);
+		this.bar.scale.set(this.tileSize * 2, this.tileSize / this.barAspectRatio, 1.0);
 		this.onUnitPositionChanged(position);
 	},
 
@@ -63,14 +85,16 @@ var AmmoBar = Sprite.extend({
 			this.needsReload = false;
 		}
 		
-		this.ammoCountBar.scale.set(this.tileSize * 2 * (1.0 * this.ammoCount) / this.maximumAmmoCapacity,
+		this.bar.scale.set(this.tileSize * 2 * (1.0 * this.ammoCount) / this.maximumAmmoCapacity,
 			this.tileSize / this.barAspectRatio, 1.0);
 	},
 
 	onUnitPositionChanged: function(position) {
-		this.ammoCountBar.position.x = position.x + this.ammoCountBarXOffset;
-		this.ammoCountBar.position.y = position.y + this.ammoCountBarYOffset;
-		this.ammoCountBar.position.z = position.z + this.ammoCountBarZOffset;
+		this.centerX = position.x + this.tileSize / 2;
+		this.bar.position.x = this.centerX + this.rotationOffsetX;
+		this.bar.position.y = position.y + this.barYOffset;
+		this.centerZ = position.z + this.barZOffset;
+		this.bar.position.z = this.centerZ + this.rotationOffsetZ;;
 	},
 
 	canShoot: function() {
