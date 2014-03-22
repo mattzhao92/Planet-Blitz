@@ -4,7 +4,6 @@ var http = require('http');
 var jade = require('jade');
 var netconst = require(__dirname + '/server/public/netstate.js');
 var app = express();
-var requirejs = require('requirejs');
 
 
 
