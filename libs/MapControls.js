@@ -116,6 +116,8 @@ THREE.MapControls = function ( object, scene, domElement ) {
 
     this.CURSOR_IMAGE_PATH = "images/cursor.png";
 
+    this.currentAngle = 0;
+
     this.focusOnPosition = function(newPosition) {
         // figure out offset of camera from target
 
@@ -221,8 +223,18 @@ THREE.MapControls = function ( object, scene, domElement ) {
         _eye.applyQuaternion(quaternion);
         // _this.object.up.applyQuaternion(quaternion);
 
+        // console.log(_eye);
+        // console.log(scope.object.rotation.y);
+        // console.log(Math.cos(scope.object.rotation.y) * 40);
+
+        // console.log(theta);
 
         thetaDelta -= angle;
+        this.currentAngle += thetaDelta;
+        // console.log(this.currentAngle);
+
+        PubSub.publish(Constants.TOPIC_CAMERA_ROTATION, this.currentAngle);
+
 
     };
 
@@ -245,8 +257,9 @@ THREE.MapControls = function ( object, scene, domElement ) {
 
         }
 
-
         thetaDelta += angle;
+        this.currentAngle += thetaDelta;
+        PubSub.publish(Constants.TOPIC_CAMERA_ROTATION, this.currentAngle);
 
     };
 
@@ -546,17 +559,18 @@ THREE.MapControls = function ( object, scene, domElement ) {
             this.dispatchEvent( changeEvent );
 
             lastPosition.copy( this.object.position );
-
         }
 
+        // PubSub.publish(Constants.TOPIC_CAMERA_POSITION, this.object.position);
+
         // calculating field of view - width and height
-        var verticalFOV = this.object.fov * ( Math.PI / 180);
+        // var verticalFOV = this.object.fov * ( Math.PI / 180);
 
-        var height = 2 * Math.tan(verticalFOV / 2) * _eye.length();
+        // var height = 2 * Math.tan(verticalFOV / 2) * _eye.length();
 
-        var aspect = this.screen.width / this.screen.height;
-        // calculated 
-        var width = height * aspect;
+        // var aspect = this.screen.width / this.screen.height;
+        // // calculated 
+        // var width = height * aspect;
 
         // console.log("viewable width " + width);
     };
@@ -736,12 +750,17 @@ THREE.MapControls = function ( object, scene, domElement ) {
         }
     );
 
-    this.reset = function() {
+    this.releasePointerLock = function() {
         // Ask the browser to release the pointer
         document.exitPointerLock = document.exitPointerLock ||
                        document.mozExitPointerLock ||
                        document.webkitExitPointerLock;
         document.exitPointerLock();
+
+        this.currentAngle = 0;
+    }
+
+    this.reset = function() {
     }
 
     function calculateInitialMousePosition(canvas, event) {

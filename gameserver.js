@@ -19,8 +19,10 @@ app.configure(function() {
   app.use(express.static(__dirname + '/first-demo'));
   app.use(express.static(__dirname + '/libs'));
   app.use(express.static(__dirname + '/css'));
-  app.use(express.static(__dirname + '/assets'));
+  app.use(express.static(__dirname + '/assets/blendertextures'));
+  app.use(express.static(__dirname + '/assets/blendermodels'));
   app.use(express.static(__dirname + '/assets/sounds'));
+  app.use(express.static(__dirname + '/assets'));
 
 });
 
@@ -51,6 +53,7 @@ var gameIdSeq = 0;
 // Room waiting for players.
 var emptyGames = {};
 var fullGames = new Array();
+var singleGames = {};
 
 
 // IO communication.
@@ -64,12 +67,28 @@ io.sockets.on('connection', function(socket) {
     socket.emit(Message.LISTGAME, getAllGameInfo());
   });
 
+  socket.on(Message.SINGLE, function() {
+    var singleId = gameIdSeq++;
+    var newGame = new Game(singleId, 'SingleMode' + singleId, 4, true);
+    socket.set('inGame', newGame, function() {
+      socket.set('username', 'player', function() {
+        newGame.addPlayer(socket, 'player');
+        for (var t = 0; t < 3; t++) {
+          newGame.addPlayer(null, 'robot' + t);
+        }
+        var playerTeamInfo = newGame.prepareGame(false);
+        newGame.numReadyPlayers = 3;
+        socket.emit(Message.PREPARE, playerTeamInfo);
+      });
+    });
+  });
+
   socket.on(Message.CREATEGAME, function(gameRequest) {
     console.log('*** a create request');
     var gameName = gameRequest[Message.GAMENAME];
     var username = gameRequest[Message.USERNAME];
     var gameType = parseInt(gameRequest[Message.TYPE]);
-    var newGame = new Game(gameIdSeq++, gameName, gameType);
+    var newGame = new Game(gameIdSeq++, gameName, gameType, false);
     console.log(emptyGames);
     console.log(emptyGames[gameName]);
     for (var gid in emptyGames) {
@@ -104,21 +123,46 @@ io.sockets.on('connection', function(socket) {
           return; 
         }
         gameToJoin.addPlayer(socket, username);
+
         var username = joinRequest[Message.USERNAME];
         socket.set('username', username, function() {
           console.log('User ' + username + ' game ' + gameId);
           socket.set('inGame', gameToJoin, function() {
-            var playerState = gameToJoin.getPlayerInfo();
-            socket.broadcast.to(gameToJoin.room).emit(Message.JOIN, playerState);
-            socket.emit(Message.JOIN, playerState);
-            if (gameToJoin.isFull()) {
-              var prepareInfo = gameToJoin.prepareGame(false);
-              prepareInfo[Message.MAP] = mapContent;
-              socket.broadcast.to(gameToJoin.room).emit(Message.PREPARE, prepareInfo);
-              socket.emit(Message.PREPARE, prepareInfo);
+            if (gameToJoin.isStart) {
+
+              if (gameToJoin.isPlaying) {
+                // TODO: send the ob...
+                gameToJoin.score[username] = new Score();
+                obMsg = gameToJoin.gameState.toJSON();
+                obMsg[Stat.result] = gameToJoin.getScoreJSON();
+                socket.emit(Message.OBSERVER, obMsg);
+              } else {
+                gameToJoin.numRestartPlayers++;
+                gameToJoin.score[username] = new Score();
+                console.log(gameToJoin.numRestartPlayers + ' to rs');
+                var playerState = gameToJoin.getPlayerRestartInfo();
+                socket.emit(Message.JOIN, playerState);
+                socket.broadcast.to(gameToJoin.room).emit(Message.JOIN, playerState);
+                console.log('cur room players ' + playerState);
+                console.log(gameToJoin.isRestartReady());
+                // Start the game when full, and create a new one.
+                if (gameToJoin.isRestartReady()) {
+                  gameToJoin.restart(socket); 
+                }               
+              }
+            } else {
+              var playerState = gameToJoin.getPlayerInfo();
+              socket.broadcast.to(gameToJoin.room).emit(Message.JOIN, playerState);
+              socket.emit(Message.JOIN, playerState);
+              if (gameToJoin.isFull()) {
+                var playerTeamInfo = gameToJoin.prepareGame(false);
+                socket.broadcast.to(gameToJoin.room).emit(Message.PREPARE, playerTeamInfo);
+                socket.emit(Message.PREPARE, playerTeamInfo);
+              }
             }
           });
-        });
+        });          
+  
       } else {
         socket.emit(Message.ERROR, 'The selected game is full');
       }
@@ -214,9 +258,10 @@ io.sockets.on('connection', function(socket) {
           if (game.playerEscaped.length != 0) {
             // delete emptyGames[game.gameId];
             gameStatistics[Message.LEAVE] = 'Players escaped: ' + game.playerEscaped;
+
           }
           // Reset the game state.
-          game.restart();           
+          game.reset();
 
           socket.broadcast.to(game.room).emit(Message.FINISH, gameStatistics);
           socket.emit(Message.FINISH, gameStatistics);
@@ -236,11 +281,10 @@ io.sockets.on('connection', function(socket) {
       console.log(curGame.isRestartReady());
       // Start the game when full, and create a new one.
       if (curGame.isRestartReady()) {
-        var playerTeamInfo = curGame.prepareGame(true);
-        curGame.isWaitingRestart = false;
-        // curGame.isStart = true;
-        socket.broadcast.to(curGame.room).emit(Message.PREPARE, playerTeamInfo);
-        socket.emit(Message.PREPARE, playerTeamInfo);
+        curGame.restart(socket); 
+      } else if (curGame.isSingleMode) {
+        curGame.numReadyPlayers = 3;
+        curGame.restart(socket);
       }
     });
   });
@@ -265,19 +309,43 @@ io.sockets.on('connection', function(socket) {
   });
 
   socket.on('disconnect', function(message) {
-    socket.get('username', function(error, username) {
-      console.log('******player ' + username + ' leave');
-      socket.get('inGame', function(error, game) {
-        if (game) {
-          if (game.numPlayers == 0) {
-            delete emptyGames[game.gameId];
-          } else {
-            var playerState = game.getPlayerInfo();
-            socket.broadcast.to(game.room).emit(Message.JOIN, playerState);
-            socket.set('inGame', null);          
-          }
-        }
-      });
+    // socket.get('username', function(error, username) {
+    //   console.log('******player ' + username + ' leave');
+    //   socket.get('inGame', function(error, game) {
+    //     if (game) {
+    //       if (game.numPlayers == 0) {
+    //         delete emptyGames[game.gameId];
+    //       } else {
+    //         var playerState = game.getPlayerInfo();
+    //         socket.broadcast.to(game.room).emit(Message.JOIN, playerState);
+    //         socket.set('inGame', null);          
+    //       }
+    //     }
+    //   });
+    // });
+    socket.get('inGame', function(error, game) {
+      if (game == null) {
+        return;
+      }
+      if (game.isSingleMode) {
+        socket.set('inGame', null);
+        socket.set('username', null);
+        return;
+      }
+      if (game.isStart) {
+        // TODO: Not sure....
+        game.removePlayer(socket, game);
+      } else if (game.isWaitingRestart) {
+        // Kill all?
+      } else if (!game.isFull()) {
+        var playerState = game.getPlayerInfo();
+        socket.broadcast.to(game.room).emit(Message.JOIN, playerState);
+        socket.set('inGame', null);          
+       } 
+      if (game.numPlayers == 0) {
+          delete emptyGames[game.gameId];
+          return;
+      }
     });
   });
 
@@ -292,6 +360,7 @@ function getAllGameInfo() {
     info[Info.gameName] = game.gameName;
     info[Info.gameStart] = game.isStart;
     info[Info.player] = game.numPlayers + '/' + game.maxNumPlayers;
+    info[Info.isFull] = game.isFull();
     games.push(info);
   }
   return games;
@@ -300,10 +369,11 @@ function getAllGameInfo() {
 /**
  * Class for a Game.
  */
-function Game(gameId, gameName, maxNumPlayers) {
+function Game(gameId, gameName, maxNumPlayers, isSingleMode) {
   this.usernames = new Array();
   this.gameId = gameId;
   this.gameName = gameName;
+  this.isSingleMode = isSingleMode;
   // this.isStart = false;
   this.isWaitingRestart = false;
   this.isPlaying = false;
@@ -340,7 +410,9 @@ Game.prototype.getPlayerRestartInfo = function() {
 }
 
 Game.prototype.addPlayer = function(sk, username) {
-  sk.join(this.room);
+  if (sk != null) {
+    sk.join(this.room);  
+  }
   this.usernames.push(username);
   this.numPlayers++;
 };
@@ -349,58 +421,76 @@ Game.prototype.removePlayer = function(socket, game) {
   console.log(this);
   socket.get('username', function(error, username) {
     var index = game.usernames.indexOf(username);
-    game.usernames.splice(index, 1); 
-    var leaveTeamId = game.score[username].teamId;
-    for (var t = 0; t < game.gameState.teamSize; t++) {
-      game.gameState.teams[leaveTeamId][t].alive = false;
-    }
-
-    var numLiveTeams = 0;
-    var winnerTeamId;
-    for (var t in game.gameState.teams) {
-      for (var i = 0; i < game.gameState.teamSize; i++) {
-        console.log(game.gameState.teams[t][i]);
-        if (game.gameState.teams[t][i].alive) {
-          numLiveTeams++;
-          winnerTeamId = t;
-          break;
-        }
-      }
-    }
-    console.log(numLiveTeams);
-    console.log(game.gameState.teams);
-    // Reset the count.
-    game.gameState.numLiveTeams = numLiveTeams;
-    game.playerEscaped.push(username);
+    game.usernames.splice(index, 1);
     game.numPlayers--;
+    var leaveTeamId = game.score[username].teamId;
     delete game.score[username];
-    if (numLiveTeams == 1) {
-      // Found the winning player.
-      delete emptyGames[game.gameId];
-      var winnerUsername;
-      for (var name in game.score) {
-        if (game.score[name].teamId == winnerTeamId) {
-          winnerUsername = name;
-          break;
+    if (game.isPlaying) {
+      for (var t = 0; t < game.gameState.teamSize; t++) {
+        game.gameState.teams[leaveTeamId][t].alive = false;
+      }
+
+      var numLiveTeams = 0;
+      var winnerTeamId;
+      for (var t in game.gameState.teams) {
+        for (var i = 0; i < game.gameState.teamSize; i++) {
+          console.log(game.gameState.teams[t][i]);
+          if (game.gameState.teams[t][i].alive) {
+            numLiveTeams++;
+            winnerTeamId = t;
+            break;
+          }
         }
       }
-      game.score[winnerUsername].win++;
-      gameStatistics = {};
-      gameStatistics[Stat.winner] = winnerUsername;
-      var scoreStat = game.getScoreJSON();
-      gameStatistics[Stat.result] = scoreStat;
-      console.log(gameStatistics);
-      // Reset the game state.
-      game.restart();
-      gameStatistics[Message.LEAVE] = 'Players escaped: ' + game.playerEscaped;
-      socket.broadcast.to(game.room).emit(Message.FINISH, gameStatistics);
+      console.log(numLiveTeams);
+      console.log(game.gameState.teams);
+      // Reset the count.
+      game.gameState.numLiveTeams = numLiveTeams;
+      game.playerEscaped.push(username);
+      
+      if (numLiveTeams == 1) {
+        // Found the winning player.
+        var winnerUsername;
+        for (var name in game.score) {
+          if (game.score[name].teamId == winnerTeamId) {
+            winnerUsername = name;
+            break;
+          }
+        }
+        game.score[winnerUsername].win++;
+        gameStatistics = {};
+        gameStatistics[Stat.winner] = winnerUsername;
+        var scoreStat = game.getScoreJSON();
+        gameStatistics[Stat.result] = scoreStat;
+        console.log(gameStatistics);
+        // Reset the game state.
+        game.reset();
+        gameStatistics[Message.LEAVE] = 'Players escaped: ' + game.playerEscaped;
+        socket.broadcast.to(game.room).emit(Message.FINISH, gameStatistics);
+      } else {
+        socket.broadcast.to(game.room).emit(Message.REMOVEALL, leaveTeamId);
+      }
+    } else {
+      if (game.isRestartReady()) {
+        game.restart(socket);
+      }
     }
     socket.leave(game.room);
-    socket.broadcast.to(game.room).emit(Message.REMOVEALL, leaveTeamId);
   });
 };
 
-Game.prototype.restart = function() {
+
+Game.prototype.restart = function(socket) {
+  var playerTeamInfo = this.prepareGame(true);
+  this.isWaitingRestart = false;
+  this.gameState.numOfTeams = this.numPlayers;
+  this.gameState.restart(this.teamIds);
+  // curGame.isStart = true;
+  socket.broadcast.to(this.room).emit(Message.PREPARE, playerTeamInfo);
+  socket.emit(Message.PREPARE, playerTeamInfo);        
+};
+
+Game.prototype.reset = function() {
   // this.isStart = false;
   this.isPlaying = false;
   this.isWaitingRestart = true;
@@ -411,7 +501,6 @@ Game.prototype.restart = function() {
   this.gameState.numOfTeams = this.numPlayers;
   // Clear the escaping list.
   this.playerEscaped.length = 0;
-  this.gameState.restart(this.teamIds);
   console.log(this.teamIds);
 };
 

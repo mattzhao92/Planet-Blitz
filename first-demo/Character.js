@@ -68,6 +68,8 @@ var Character = Sprite.extend({
         this.lastRoadMap = [];
 
         this.breakUpdateHere = false;
+
+        this.canMove = true;
     },
 
     canShoot: function() {
@@ -302,7 +304,7 @@ var Character = Sprite.extend({
             this.destX = gx;
             this.destZ = gz;
             this.hasPendingMove = true;
-            console.log("Set to " + gx + " and " + gz + " for id " + this.team + " i " + this.id);
+            // console.log("Set to " + gx + " and " + gz + " for id " + this.team + " i " + this.id);
             var addNewItem = true;
             var newMotions = [];
             for (var i = 1; i < path.length; i++) {
@@ -384,7 +386,6 @@ var Character = Sprite.extend({
             var newMeshX = this.mesh.position.x + this.velocityX * delta;
             var newMeshZ = this.mesh.position.z + this.velocityZ * delta;
 
-
             if ((newMeshX - this.goalMeshX) / (this.goalMeshX - this.prevMeshX) > 0) {
                 this.setCharacterMeshPosX(this.goalMeshX);
                 this.motionInProgress = false;
@@ -405,6 +406,7 @@ var Character = Sprite.extend({
                 this.prevMeshX = newMeshX;
                 this.prevMeshZ = newMeshZ;
             }
+            
             //console.log("x: "+this.mesh.position.x);
             //console.log("z: "+this.mesh.position.z);
             this.breakUpdateHere = true;                   
@@ -469,7 +471,9 @@ var Character = Sprite.extend({
                 if (this.destX == this.xPos && this.destZ == this.zPos) {
                     this.hasPendingMove = false;
                 }
-                console.log("Set pending move back");
+                
+                // console.log("Set pending move back");
+                this.canMove = true;
                 this.beginCooldown();
 
                 return;

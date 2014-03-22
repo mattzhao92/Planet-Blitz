@@ -2,6 +2,7 @@
 var Message = {
   GAME : 'GAME',
   LISTGAME : 'LISTGAME',
+  SINGLE : 'SINGLE',
   GAMENAME : 'GAMENAME',
   TYPE : 'TYPE',
   USERNAME : 'USERNAME',
@@ -12,6 +13,7 @@ var Message = {
   LEAVE : "LEAVE",
   ERROR : 'ERROR',
   TEAM : 'TEAM',
+  OBSERVER : 'OBSERVER',
   MAXPLAYER : 'MAXPLAYER', // Max number of players
   PREPARE : 'PREPARE',
   START : 'START',
@@ -73,7 +75,8 @@ var Info = {
   gameId : 'gameId',
   gameName : 'gameName',
   gameStart : 'gameStart',
-  player : 'player'
+  player : 'player',
+  isFull : 'isFull'
 }
 
 exports.Message = Message;

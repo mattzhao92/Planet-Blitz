@@ -244,7 +244,7 @@ function listAvailableGames(games) {
   for (var t = 0; t < games.length; t++) {
     var game = games[t];
     var isPlaying = game[Info.gameStart] ? 'Playing' : 'Waiting';
-    if (game[Info.gameStart]) {
+    if (game[Info.isFull]) {
       content += '<tr><td class="open-game">' + game[Info.gameName] + '</td><td style="padding-right:40px">' + game[Info.player] +'</td>';
     } else {
       content += '<tr onClick="joinGame(' + game[Info.gameId] + ')"><td class="open-game">' + game[Info.gameName] + '</td><td style="padding-right:40px">' + game[Info.player] +'</td>';
@@ -289,14 +289,9 @@ $(document).ready(function() {
 
   /* Start the game locally */
   $('#debugBtn').click(function() {
-    GameInfo.netMode = false;
+    // GameInfo.netMode = false;
+    sendSingleModeMsg();
     loading();
-    renderGame();
-    game.getWorld().onGameStart();
-    setTimeout(function() {
-     startGame();
-    }, 800);
-    
   });
 
   $('#helpBtn').click(function() {
@@ -312,9 +307,7 @@ $(document).ready(function() {
     if (GameInfo.isLoading) {
       sendLeaveMsg();
     } else if (GameInfo.isStart) {
-      if (GameInfo.netMode) {
-        sendLeaveMsg();
-      }
+      sendLeaveMsg();
     } else {
       $('#slide-container').fadeOut();
     }

@@ -5,14 +5,12 @@ var Grid = Class.extend({
         'use strict';
 
         var mapContent = "{\"units\":[\"{\\\"color\\\":\\\"0xc300ff\\\",\\\"teamId\\\":0,\\\"xPos\\\":15,\\\"zPos\\\":5,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\",\"{\\\"color\\\":\\\"0xc300ff\\\",\\\"teamId\\\":0,\\\"xPos\\\":19,\\\"zPos\\\":6,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\",\"{\\\"color\\\":\\\"0xc300ff\\\",\\\"teamId\\\":0,\\\"xPos\\\":27,\\\"zPos\\\":5,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\",\"{\\\"color\\\":\\\"0xc300ff\\\",\\\"teamId\\\":0,\\\"xPos\\\":38,\\\"zPos\\\":1,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\"],\"obstacles\":[\"{\\\"xPos\\\":12,\\\"zPos\\\":7,\\\"obstacleType\\\":\\\"Rock\\\",\\\"obstacleSize\\\":40}\",\"{\\\"xPos\\\":15,\\\"zPos\\\":7,\\\"obstacleType\\\":\\\"Rock\\\",\\\"obstacleSize\\\":40}\",\"{\\\"xPos\\\":16,\\\"zPos\\\":3,\\\"obstacleType\\\":\\\"Rock\\\",\\\"obstacleSize\\\":40}\",\"{\\\"xPos\\\":22,\\\"zPos\\\":3,\\\"obstacleType\\\":\\\"Rock\\\",\\\"obstacleSize\\\":40}\",\"{\\\"xPos\\\":22,\\\"zPos\\\":6,\\\"obstacleType\\\":\\\"Rock\\\",\\\"obstacleSize\\\":40}\"],\"tiles\":[\"{\\\"xPos\\\":12,\\\"zPos\\\":7,\\\"hasCharacter\\\":false,\\\"hasObstacle\\\":true}\",\"{\\\"xPos\\\":15,\\\"zPos\\\":5,\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\",\"{\\\"xPos\\\":15,\\\"zPos\\\":7,\\\"hasCharacter\\\":false,\\\"hasObstacle\\\":true}\",\"{\\\"xPos\\\":16,\\\"zPos\\\":3,\\\"hasCharacter\\\":false,\\\"hasObstacle\\\":true}\",\"{\\\"xPos\\\":19,\\\"zPos\\\":6,\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\",\"{\\\"xPos\\\":22,\\\"zPos\\\":3,\\\"hasCharacter\\\":false,\\\"hasObstacle\\\":true}\",\"{\\\"xPos\\\":22,\\\"zPos\\\":6,\\\"hasCharacter\\\":false,\\\"hasObstacle\\\":true}\",\"{\\\"xPos\\\":27,\\\"zPos\\\":5,\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\",\"{\\\"xPos\\\":38,\\\"zPos\\\":1,\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\"],\"board\":{\"width\":1600,\"height\":400,\"tileSize\":40,\"groundtexture\":\"Supernova.jpg\"}}"
-        var mapJson = JSON.parse(mapContent);
+        this.mapJson = JSON.parse(mapContent);
         this.gameApp = gameApp;
 
-        this.GROUND_TEXTURE = "images/Supernova.jpg"
-
-        this.gridWidth = mapJson.board.width;
-        this.gridLength = mapJson.board.height;
-        this.tileSize = mapJson.board.tileSize;
+        this.gridWidth = this.mapJson.board.width;
+        this.gridLength = this.mapJson.board.height;
+        this.tileSize = this.mapJson.board.tileSize;
         this.scene = scene;
         this.camera = camera;
         this.controls = controls;
@@ -26,47 +24,33 @@ var Grid = Class.extend({
         this.mouseDownListenerActive = true;
         this.mouseOverListenerActive = true;
 
-        // create grid tiles
-        this.tiles = new THREE.Object3D();
-        this.tilesArray = null;
-
-        this.loadGroundFromMapJson(mapJson);
-        //this.drawGridSquares(width, length, tileSize);
-        this.drawGridSquaresFromMapJson(mapJson);
-
         this.gridHelper = new GridHelper(this.camera, this.controls);
 
+        // create sprite factory        
         var scope = this;
 
         var sceneAddCmd = new SpriteCmd(function(sprite) {
             scope.scene.add(sprite.getRepr());
         });
-
         var sceneRemoveCmd = new SpriteCmd(function(sprite) {
             scope.scene.remove(sprite.getRepr());
         });
-
         this.spriteFactory = new SpriteFactory(this, sceneAddCmd, sceneRemoveCmd);
+        this.reset();
 
-
-        // initialize characters
-        this.setupCharctersFromMapJson(mapJson);
-        this.setupObstaclesFromMapJson(mapJson);
-
+        // nonessentials
         this.setupMouseMoveListener();
         this.setupMouseDownListener();
         this.setupHotkeys();
 
         this.unitCycle = 0;
-        this.hotKeysDisabled = true;
         this.resetInProgress = false;
 
-        this.disableHotKeys();
         this.hotkeys = [];
     },
 
     loadGroundFromMapJson: function(mapJson) {
-        var texture = THREE.ImageUtils.loadTexture("images/"+mapJson.board.groundtexture);
+        var texture = THREE.ImageUtils.loadTexture("gndTexture/"+mapJson.board.groundtexture);
 
         var groundMaterial = new THREE.MeshLambertMaterial({
             color: 0xffffff,
@@ -141,18 +125,18 @@ var Grid = Class.extend({
         for (var i = 0; i < obstacles.length; i++) {
             var obj = JSON.parse(obstacles[i]);
             var obstacle = new Obstacle("rock", 0, 40);
-            //var objMesh = obstacle.getMesh();
-            //objMesh.position.x = this.convertXPosToWorldX(obj.xPos);
-            //objMesh.position.z = this.convertZPosToWorldZ(obj.zPos);
+            var objMesh = obstacle.getMesh();
+            objMesh.position.x = this.convertXPosToWorldX(obj.xPos);
+            objMesh.position.z = this.convertZPosToWorldZ(obj.zPos);
 
-            var cube = new THREE.Mesh(new THREE.CubeGeometry(40, 40, 40), new THREE.MeshNormalMaterial());
-            cube.position.x = this.convertXPosToWorldX(obj.xPos);
-            cube.position.y = 20;
-            cube.position.z = this.convertZPosToWorldZ(obj.zPos);
+            // var cube = new THREE.Mesh(new THREE.CubeGeometry(40, 40, 40), new THREE.MeshNormalMaterial());
+            // cube.position.x = this.convertXPosToWorldX(obj.xPos);
+            // cube.position.y = 20;
+            // cube.position.z = this.convertZPosToWorldZ(obj.zPos);
 
-            //console.log(objMesh.position);
+            console.log(objMesh.position);
 
-            this.scene.add(cube);
+            this.scene.add(objMesh);
             console.log(obj);
         }
     },
@@ -207,8 +191,7 @@ var Grid = Class.extend({
     },
 
     onGameStart: function() {
-        this.enableHotKeys();
-        for (var tm = 0; tm < 4; tm++) {
+         for (var tm = 0; tm < 4; tm++) {
             if (GameInfo.existingTeams.indexOf(tm) == -1) {
                 for (var i = 0; i < this.numOfCharacters; i++) {
                     this.silentlyRemoveCharacter(this.getCharacterById(tm, i));
@@ -216,7 +199,21 @@ var Grid = Class.extend({
             }
         }
 
+
         console.log("Team id " + GameInfo.myTeamId);
+
+        if (this.getCurrentSelectedUnit()) {
+            // TODO: duplicated code
+
+            this.getCurrentSelectedUnit().deselect();
+            // deselect tiles if there were any
+            this.getCurrentSelectedUnit().highlightedTiles.forEach(function(tile) {
+                tile.reset();
+            });
+
+            this.currentSelectedUnits[GameInfo.myTeamId] = null;
+            this.deselectHighlightedTiles();
+        }
 
         var teamJoinMessage;
         switch (GameInfo.myTeamId) {
@@ -242,9 +239,10 @@ var Grid = Class.extend({
     },
 
     onGameFinish: function() {
-        console.log("Game finish called");
+        console.log("Game finish called - exiting pointerlock");
+
         // reset the pointerlock
-        this.controls.reset();
+        this.controls.releasePointerLock();
     },
 
     getMyTeamCharacters: function() {
@@ -253,23 +251,19 @@ var Grid = Class.extend({
         });
     },
 
-    disableHotKeys: function() {
-        this.hotKeysDisabled = true;
-    },
-
-    enableHotKeys: function() {
-        this.hotKeysDisabled = false;
-    },
-
     setupHotkeys: function() {
         var scope = this;
         var unitNumbers = [1, 2, 3];
+
+        // remove previous hotkey bindings
+        _.forEach(Constants.HOTKEYS, function(hotkey) {
+            KeyboardJS.clear(hotkey);
+        });
 
         unitNumbers.forEach(function(number) {
             var hotkey = number.toString();
             KeyboardJS.on(hotkey,
                 function(event, keysPressed, keyCombo) {
-                    if (scope.hotKeysDisabled) return;
                     // TODO: replace this with a more readable line. Also, need to account for out of index errors when units get killed
                     var characterSelected = scope.getMyTeamCharacters()[parseInt(keyCombo) - 1];
                     if (characterSelected && characterSelected.active) {
@@ -282,8 +276,6 @@ var Grid = Class.extend({
         // unit toggle - cycle forwards
         KeyboardJS.on("t",
             function(event, keysPressed, keyCombo) {
-                if (scope.hotKeysDisabled) return;
-
                 var myTeamCharacters = scope.getMyTeamCharacters();
                 var characterSelected = myTeamCharacters[scope.unitCycle];
                 if (characterSelected.active) {
@@ -296,8 +288,6 @@ var Grid = Class.extend({
         // unit toggle - cycle backwards
         KeyboardJS.on("r",
             function(event, keysPressed, keyCombo) {
-                if (scope.hotKeysDisabled) return;
-
                 var myTeamCharacters = scope.getMyTeamCharacters();
                 var characterSelected = myTeamCharacters[scope.unitCycle];
                 if (characterSelected.active) {
@@ -314,8 +304,6 @@ var Grid = Class.extend({
         // focus camera on unit
         KeyboardJS.on("space",
             function(event, keysPressed, keyCombo) {
-                if (scope.hotKeysDisabled) return;
-
                 var character = scope.getCurrentSelectedUnit();
                 if (character && character.active) {
                     scope.controls.focusOnPosition(character.mesh.position);
@@ -326,16 +314,12 @@ var Grid = Class.extend({
         // rudimentary camera rotation
         KeyboardJS.on("q",
             function(event, keysPressed, keyCombo) {
-                if (scope.hotKeysDisabled) return;
-
                 scope.controls.rotateLeft(Math.PI / 30);
             }
         );
 
         KeyboardJS.on("e",
             function(event, keysPressed, keyCombo) {
-                if (scope.hotKeysDisabled) return;
-
                 scope.controls.rotateRight(Math.PI / 30);
             }
         );
@@ -726,13 +710,8 @@ var Grid = Class.extend({
                 if (unitMovedToDifferentSquare) {
                     // Put the network communication here.
                     if (this.getCurrentSelectedUnit().isCoolDown == 0) {
-                        if (!GameInfo.netMode) {
-                            this.getCurrentSelectedUnit().setDirection(new THREE.Vector3(deltaX, 0, deltaZ));
-                            this.getCurrentSelectedUnit().enqueueMotion();
-                        } else {
                             sendMoveMsg(this.getCurrentSelectedUnit().id,
                                 deltaX, deltaY, deltaZ);
-                        }
                     }
                 }
             }
@@ -825,7 +804,7 @@ var Grid = Class.extend({
         this.spriteFactory.updateBulletsContainer();
     },
 
-    syncGameState: function(state) {
+   syncGameState: function(state) {
         if (this.resetInProgress) return true;
 
         // This is usd to check ghosts.
@@ -900,22 +879,26 @@ var Grid = Class.extend({
     reset: function() {
         console.log("Game reset");
 
-        _.forEach(this.getCharacters(), function(character) {
-            character.destroy();
-        });
-
         this.tiles = new THREE.Object3D();
         this.tilesArray = null;
 
-        this.loadGround();
-        this.drawGridSquares(this.gridWidth, this.gridLength, this.tileSize);
-
-        this.gridHelper = new GridHelper(this.camera, this.controls);
+        // create grid tiles
+        this.loadGroundFromMapJson(this.mapJson);
+        //this.drawGridSquares(width, length, tileSize);
+        this.drawGridSquaresFromMapJson(this.mapJson);
 
         // initialize characters
-        this.setupCharacters();
+        this.setupCharctersFromMapJson(this.mapJson);
+        this.setupObstaclesFromMapJson(this.mapJson);
+        
         this.resetInProgress = false;
 
         this.deselectHighlightedTiles();
+
+        this.camera.position.x = 0;
+        this.camera.position.y = 600;
+        this.camera.position.z = 400;
+
+        this.controls.reset();
     },
 });
