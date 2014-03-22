@@ -177,8 +177,10 @@ var EditorModel = Class.extend({
 		});
 
 		var newTeamId = addTeamFolder.add(addTeamParams, 'onCreate').name("Team Create");
+		var newTeamIdCount = 1;
 		newTeamId.onChange(function() {
-			scope.onTeamCreation();
+			scope.onTeamCreation(newTeamIdCount);
+			newTeamIdCount = newTeamIdCount + 1;
 		});
 		//addTeamFolder.open();
 

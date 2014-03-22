@@ -124,7 +124,9 @@ var Unit = Class.extend({
     clone : function(opacity) {
         if (opacity == null)
             opacity = 0.0
-    	return new Unit(this.unitType, this.color, opacity, this.unitSize, this.teamId);
+    	var myclone = new Unit(this.unitType, this.color, opacity, this.unitSize, this.teamId);
+        console.log("clone unit teamid "+this.teamId);
+        return myclone;
     }
 
 });
