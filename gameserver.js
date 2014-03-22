@@ -4,6 +4,9 @@ var http = require('http');
 var jade = require('jade');
 var netconst = require(__dirname + '/server/public/netstate.js');
 var app = express();
+var requirejs = require('requirejs');
+
+
 
 // IO socket.
 var server = http.createServer(app);
@@ -23,8 +26,8 @@ app.configure(function() {
   app.use(express.static(__dirname + '/assets/blendermodels'));
   app.use(express.static(__dirname + '/assets/sounds'));
   app.use(express.static(__dirname + '/assets'));
-
 });
+
 
 // Server index page.
 app.get('/', function(req, res) {

@@ -79,10 +79,13 @@ var Info = {
   isFull : 'isFull'
 }
 
-exports.Message = Message;
-exports.Move = Move;
-exports.Hit = Hit;
-exports.Shoot = Shoot;
-exports.State = State;
-exports.Stat = Stat;
-exports.Info = Info;
+if (typeof(exports) !== 'undefined' && exports != null) {
+  exports.Message = Message;
+  exports.Move = Move;
+  exports.Hit = Hit;
+  exports.Shoot = Shoot;
+  exports.State = State;
+  exports.Stat = Stat;
+  exports.Info = Info;
+}
+
