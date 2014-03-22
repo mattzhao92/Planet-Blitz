@@ -3,7 +3,8 @@ var Grid = Class.extend({
     // Class constructor
       init: function(gameApp, width, length, tileSize, scene, camera, controls) {
         'use strict';
-        var mapContent = "{\"units\":[\"{\\\"color\\\":\\\"0xc300ff\\\",\\\"teamId\\\":0,\\\"xPos\\\":0,\\\"zPos\\\":0,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\",\"{\\\"color\\\":\\\"0xc300ff\\\",\\\"teamId\\\":0,\\\"xPos\\\":1,\\\"zPos\\\":1,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\",\"{\\\"color\\\":\\\"0xc300ff\\\",\\\"teamId\\\":0,\\\"xPos\\\":2,\\\"zPos\\\":2,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\",\"{\\\"color\\\":\\\"0xc300ff\\\",\\\"teamId\\\":0,\\\"xPos\\\":3,\\\"zPos\\\":3,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\"],\"obstacles\":[],\"tiles\":[\"{\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\",\"{\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\",\"{\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\",\"{\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\"],\"board\":{\"width\":1600,\"height\":400,\"tileSize\":40,\"groundtexture\":\"Supernova.jpg\"}}";
+
+        var mapContent = "{\"units\":[\"{\\\"color\\\":\\\"0xc300ff\\\",\\\"teamId\\\":0,\\\"xPos\\\":15,\\\"zPos\\\":5,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\",\"{\\\"color\\\":\\\"0xc300ff\\\",\\\"teamId\\\":0,\\\"xPos\\\":19,\\\"zPos\\\":6,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\",\"{\\\"color\\\":\\\"0xc300ff\\\",\\\"teamId\\\":0,\\\"xPos\\\":27,\\\"zPos\\\":5,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\",\"{\\\"color\\\":\\\"0xc300ff\\\",\\\"teamId\\\":0,\\\"xPos\\\":38,\\\"zPos\\\":1,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\"],\"obstacles\":[\"{\\\"xPos\\\":12,\\\"zPos\\\":7,\\\"obstacleType\\\":\\\"Rock\\\",\\\"obstacleSize\\\":40}\",\"{\\\"xPos\\\":15,\\\"zPos\\\":7,\\\"obstacleType\\\":\\\"Rock\\\",\\\"obstacleSize\\\":40}\",\"{\\\"xPos\\\":16,\\\"zPos\\\":3,\\\"obstacleType\\\":\\\"Rock\\\",\\\"obstacleSize\\\":40}\",\"{\\\"xPos\\\":22,\\\"zPos\\\":3,\\\"obstacleType\\\":\\\"Rock\\\",\\\"obstacleSize\\\":40}\",\"{\\\"xPos\\\":22,\\\"zPos\\\":6,\\\"obstacleType\\\":\\\"Rock\\\",\\\"obstacleSize\\\":40}\"],\"tiles\":[\"{\\\"xPos\\\":12,\\\"zPos\\\":7,\\\"hasCharacter\\\":false,\\\"hasObstacle\\\":true}\",\"{\\\"xPos\\\":15,\\\"zPos\\\":5,\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\",\"{\\\"xPos\\\":15,\\\"zPos\\\":7,\\\"hasCharacter\\\":false,\\\"hasObstacle\\\":true}\",\"{\\\"xPos\\\":16,\\\"zPos\\\":3,\\\"hasCharacter\\\":false,\\\"hasObstacle\\\":true}\",\"{\\\"xPos\\\":19,\\\"zPos\\\":6,\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\",\"{\\\"xPos\\\":22,\\\"zPos\\\":3,\\\"hasCharacter\\\":false,\\\"hasObstacle\\\":true}\",\"{\\\"xPos\\\":22,\\\"zPos\\\":6,\\\"hasCharacter\\\":false,\\\"hasObstacle\\\":true}\",\"{\\\"xPos\\\":27,\\\"zPos\\\":5,\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\",\"{\\\"xPos\\\":38,\\\"zPos\\\":1,\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\"],\"board\":{\"width\":1600,\"height\":400,\"tileSize\":40,\"groundtexture\":\"Supernova.jpg\"}}"
         var mapJson = JSON.parse(mapContent);
         this.gameApp = gameApp;
 
@@ -50,6 +51,7 @@ var Grid = Class.extend({
 
         // initialize characters
         this.setupCharctersFromMapJson(mapJson);
+        this.setupObstaclesFromMapJson(mapJson);
 
         this.setupMouseMoveListener();
         this.setupMouseDownListener();
@@ -89,12 +91,16 @@ var Grid = Class.extend({
         var length = mapJson.board.height;
         var size = mapJson.board.tileSize;
 
-
         this.tileFactory = new TileFactory(this, size);
         console.log('width '+width +' length '+length+' size '+size);
 
         this.numberSquaresOnXAxis = width / size;
         this.numberSquaresOnZAxis = length / size;
+
+
+        this.PFGrid = new PF.Grid(this.numberSquaresOnXAxis, this.numberSquaresOnZAxis);
+        this.pathFinder = new PF.AStarFinder();
+
 
         this.tilesArray = new Array(this.numberSquaresOnXAxis);
         for (var i = 0; i < this.numberSquaresOnXAxis; i++) {
@@ -114,18 +120,42 @@ var Grid = Class.extend({
 
         for (var i = 0; i < mapJson.tiles.length; i++) {
             var specialTile = JSON.parse(mapJson.tiles[i]);
-            console.log('specialTile ' + specialTile);
+            var xPos = specialTile.xPos;
+            var zPos = specialTile.zPos;
+            
             if (specialTile.hasCharacter) {
+                this.markTileOccupiedByCharacter(xPos, zPos);
+            }
 
+            if (specialTile.hasObstacle) {
+                this.markTileOccupiedByObstacle(xPos, zPos);
             }
         }
-
-        this.PFGrid = new PF.Grid(this.numberSquaresOnXAxis, this.numberSquaresOnZAxis);
-        this.pathFinder = new PF.AStarFinder();
 
         this.scene.add(this.tiles);
     },
 
+    setupObstaclesFromMapJson: function(mapJson) {
+
+        var obstacles = mapJson.obstacles;
+        for (var i = 0; i < obstacles.length; i++) {
+            var obj = JSON.parse(obstacles[i]);
+            var obstacle = new Obstacle("rock", 0, 40);
+            //var objMesh = obstacle.getMesh();
+            //objMesh.position.x = this.convertXPosToWorldX(obj.xPos);
+            //objMesh.position.z = this.convertZPosToWorldZ(obj.zPos);
+
+            var cube = new THREE.Mesh(new THREE.CubeGeometry(40, 40, 40), new THREE.MeshNormalMaterial());
+            cube.position.x = this.convertXPosToWorldX(obj.xPos);
+            cube.position.y = 20;
+            cube.position.z = this.convertZPosToWorldZ(obj.zPos);
+
+            //console.log(objMesh.position);
+
+            this.scene.add(cube);
+            console.log(obj);
+        }
+    },
 
     setupCharctersFromMapJson: function(mapJson) {
 
@@ -134,7 +164,6 @@ var Grid = Class.extend({
 
         for (var i = 0; i < mapJson.units.length; i++) {
             var unit = JSON.parse(mapJson.units[i]);
-            console.log('unit ---- '+unit.teamId);
             while (unit.teamId > units_in_teams.length -1) {
                 units_in_teams.push([]);
             }
@@ -313,6 +342,9 @@ var Grid = Class.extend({
 
     },
 
+
+
+
     setupCharacters: function() {
         this.numOfCharacters = 3;
         // The row position.
@@ -484,8 +516,12 @@ var Grid = Class.extend({
         }
     },
 
-    markTileOccupiedByObstacle: function() {
-
+    markTileOccupiedByObstacle: function(xPos, zPos) {
+        var tile = this.getTileAtTilePos(xPos, zPos);
+        if (tile) {
+            tile.hasObstacle = true;
+            this.setPFGridCellAccessibility(xPos, zPos, false);
+        }
     },
 
     findPath: function(oldXPos, oldZPos, newXPos, newZPos) {

@@ -19,8 +19,8 @@ var GridCell = Class.extend({
     toJson: function(unit) {
         if (unit == null)
             unit = this;
-        exportObject = {'xPos': unit.color,
-                        'zPos': unit.teamId,
+        exportObject = {'xPos': this.xPos,
+                        'zPos': this.zPos,
                         'hasCharacter': this.hasCharacter,
                         'hasObstacle':  this.hasObstacle
         };
