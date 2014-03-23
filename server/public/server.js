@@ -97,7 +97,7 @@ function showRestartDialog(message, additionalMsg, score) {
         sendLeaveMsg();
       }
     }
-  });   
+  });
 }
 
 function getUsername(forGameId) {
@@ -144,6 +144,12 @@ function createGameStep2(type) {
   var content = '<div class="rain" style="margin:0"><div class="border start">';
   content += '<form><label for="rname" style="margin-left:7">Game room name</label><input id="rname" name="rname"  maxlength="15" type="text" style="margin-left: 25"/>';
   content += '<form><label for="uname" style="margin-left:7">Player name</label><input id="uname" name="name"  maxlength="15" type="text" style="margin-left: 25"/>';
+  content += '<label for="map" style="margin-left:7">Map</label>';
+  content += '<div class="styled-select"><select name="map" id="choosemap">';
+  for (var t = 0; t < GameInfo.maps.length; t++) {
+    content += '<option value=' + t + '>' + GameInfo.maps[t] + '</option>';
+  }
+  content += '</select></div>';
   content += '<input type="button" value="Start" style="margin: 5 23 10 23" id="unameBtn"/><input value="Quit" type="button" id="quitBtn" style="margin: 0 23 14 23"/>';
   content += '</form></div></div>';
   $("#Input-dialog").html(content).dialog(
@@ -158,12 +164,12 @@ function createGameStep2(type) {
   $(".ui-widget.name-dialog").css('width', 'auto');
   $(".ui-widget.name-dialog").css('padding', 0);
   $("#Input-dialog").css('padding', 0);
-  $(".rain").css('height', 240);
-  $(".border").css('height', 240);
   $("#unameBtn").click(function() {
     var username = $('#uname').val();
     var gamename = $('#rname').val();
     if (username != '' && gamename != '') {
+      var map = $('#choosemap :selected').text();
+      alert(map);
       sendCreateMsg(gamename, username, type);
       $("#Input-dialog").dialog("close");
     } else {
@@ -204,8 +210,6 @@ function createGameStep1() {
   $(".ui-widget.name-dialog").css('width', 'auto');
   $(".ui-widget.name-dialog").css('padding', 0);
   $("#Input-dialog").css('padding', 0);
-  // $(".rain").css('height', 240);
-  // $(".border").css('height', 240);
   $("#2p").click(function() {
     $("#Input-dialog").dialog("close");
     createGameStep2(2);
@@ -255,7 +259,7 @@ function listAvailableGames(games) {
   $("#Input-dialog").css('padding', 0);
   $("#createGameBtn").click(function() {
     $("#Input-dialog").dialog("close");
-    createGameStep1();
+    createGameStep2(2);
   });
   $("#quitBtn").click(function() {
     $("#Input-dialog").dialog("close");
