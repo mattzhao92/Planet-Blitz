@@ -4,8 +4,9 @@ var socket = io.connect();
 var game;
 var GameInfo = new GameConfig();
 
-socket.on(Message.LISTGAME, function(games) {
-  listAvailableGames(games);
+socket.on(Message.LISTGAME, function(info) {
+  GameInfo.maps = info[Message.MAPS];
+  listAvailableGames(info[Message.ROOMS]);
 });
 
 socket.on(Message.GAME, function(playerInfo) {

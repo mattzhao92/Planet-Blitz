@@ -8,6 +8,8 @@ var Message = {
   USERNAME : 'USERNAME',
   JOIN : 'JOIN',
   MAP : 'MAP',
+  ROOMS : 'ROOMS',
+  MAPS : 'MAPS',
   REMOVE : 'REMOVE',
   REMOVEALL : 'REMOVEALL',
   LEAVE : "LEAVE",
