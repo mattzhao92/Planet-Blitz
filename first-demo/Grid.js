@@ -229,11 +229,12 @@ var Grid = Class.extend({
                 break;
         }
 
-        this.controls.rotateRight(this.getCameraDegreesToRotate());
+        //this.controls.rotateRight(this.getCameraDegreesToRotate());
         // this.displayMessage(teamJoinMessage);
 
         // focus camera on start position (TODO: hardcoded)
         this.controls.focusOnPosition(this.getMyTeamCharacters()[0].mesh.position);
+        this.getMyTeamCharacters()[0].onSelect();
     },
 
     onGameFinish: function() {
