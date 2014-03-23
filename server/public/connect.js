@@ -134,8 +134,9 @@ socket.on(Message.REMOVE, function(removeDead) {
 });
 
 socket.on(Message.REMOVEALL, function(removeTeam) {
-  var team = parseInt(removeTeam);
-  for (var charId = 0; charId < 3; charId++) {
+  var team = parseInt(removeTeam[Message.REMOVEALL]);
+  var size = parseInt(removeTeam[Message.MAXPLAYER]);
+  for (var charId = 0; charId < size; charId++) {
     var dead = game.getWorld().getCharacterById(team, charId);
     if (dead != null) {
       game.getWorld().handleCharacterDead(dead);  

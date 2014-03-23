@@ -423,16 +423,18 @@ Game.prototype.removePlayer = function(socket, game) {
     var leaveTeamId = game.score[username].teamId;
     delete game.score[username];
     if (game.isPlaying) {
-      for (var t = 0; t < game.gameState.teamSize; t++) {
-        game.gameState.teams[leaveTeamId][t].alive = false;
+      var lvTm = game.gameState.teams[leaveTeamId];
+      for (var t = 0; t < lvTm.length; t++) {
+        lvTm[t].alive = false;
       }
 
       var numLiveTeams = 0;
       var winnerTeamId;
       for (var t in game.gameState.teams) {
-        for (var i = 0; i < game.gameState.teamSize; i++) {
-          console.log(game.gameState.teams[t][i]);
-          if (game.gameState.teams[t][i].alive) {
+        var team = game.gameState.teams[t];
+        for (var i = 0; i < team.length; i++) {
+          // console.log(game.gameState.teams[t][i]);
+          if (team[i].alive) {
             numLiveTeams++;
             winnerTeamId = t;
             break;
@@ -465,7 +467,10 @@ Game.prototype.removePlayer = function(socket, game) {
         gameStatistics[Message.LEAVE] = 'Players escaped: ' + game.playerEscaped;
         socket.broadcast.to(game.room).emit(Message.FINISH, gameStatistics);
       } else {
-        socket.broadcast.to(game.room).emit(Message.REMOVEALL, leaveTeamId);
+        var removeMsg = {};
+        removeMsg[Message.REMOVEALL] = leaveTeamId;
+        removeMsg[Message.MAXPLAYER] = game.gameState.teams[leaveTeamId].length;
+        socket.broadcast.to(game.room).emit(Message.REMOVEALL, removeMsg);
       }
     } else {
       if (game.isRestartReady()) {
@@ -527,6 +532,7 @@ Game.prototype.prepareGame = function(isRestart) {
   }
   prepareInfo[Message.TEAM] = playerTeamInfo;
   prepareInfo[Message.MAXPLAYER] = this.maxNumPlayers;
+  prepareInfo[Message.MAP] = this.mapContent;
   return prepareInfo;
 };
 
@@ -619,8 +625,9 @@ GameState.prototype.updateHealthState = function(data) {
     kill = true;
     this.teams[teamId][index].alive = false;
     var isTeamLive = false;
-    for (var i = 0; i < this.teamSize; i++) {
-      if (this.teams[teamId][i].alive) {
+    var team = this.teams[teamId];
+    for (var i = 0; i < team.length; i++) {
+      if (team[i].alive) {
         isTeamLive = true;
         break;
       }
