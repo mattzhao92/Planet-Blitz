@@ -690,7 +690,7 @@ var Grid = Class.extend({
                 var clickedObject = intersects[0].object.owner;
 
                 // done so that you can click on a tile behind a character easily
-                if (clickedObject != this.getCurrentSelectedUnit()) {
+                if (clickedObject != this.getCurrentSelectedUnit() && clickedObject instanceof Character) {
                     clickedObject.onSelect();
                 } else {
                     continueClickHandler = true;
