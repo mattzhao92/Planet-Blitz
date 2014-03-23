@@ -33,7 +33,16 @@ app.get('/', function(req, res) {
 server.listen(8080);
 
 
-var mapContent = "{\"units\":[\"{\\\"color\\\":\\\"0xc300ff\\\",\\\"teamId\\\":0,\\\"xPos\\\":0,\\\"zPos\\\":0,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\",\"{\\\"color\\\":\\\"0xc300ff\\\",\\\"teamId\\\":0,\\\"xPos\\\":1,\\\"zPos\\\":1,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\",\"{\\\"color\\\":\\\"0xc300ff\\\",\\\"teamId\\\":0,\\\"xPos\\\":2,\\\"zPos\\\":2,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\",\"{\\\"color\\\":\\\"0xc300ff\\\",\\\"teamId\\\":0,\\\"xPos\\\":3,\\\"zPos\\\":3,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\"],\"obstacles\":[],\"tiles\":[\"{\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\",\"{\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\",\"{\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\",\"{\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\"],\"board\":{\"width\":1600,\"height\":400,\"tileSize\":40,\"groundtexture\":\"Supernova.jpg\"}}";
+// var mapContent = "{\"units\":[\"{\\\"color\\\":\\\"0xc300ff\\\",\\\"teamId\\\":0,\\\"xPos\\\":0,\\\"zPos\\\":0,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\",\"{\\\"color\\\":\\\"0xc300ff\\\",\\\"teamId\\\":0,\\\"xPos\\\":1,\\\"zPos\\\":1,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\",\"{\\\"color\\\":\\\"0xc300ff\\\",\\\"teamId\\\":0,\\\"xPos\\\":2,\\\"zPos\\\":2,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\",\"{\\\"color\\\":\\\"0xc300ff\\\",\\\"teamId\\\":0,\\\"xPos\\\":3,\\\"zPos\\\":3,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\"],\"obstacles\":[],\"tiles\":[\"{\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\",\"{\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\",\"{\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\",\"{\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\"],\"board\":{\"width\":1600,\"height\":400,\"tileSize\":40,\"groundtexture\":\"Supernova.jpg\"}}";
+var mapContent = "{\"units\":[\"{\\\"color\\\":\\\"0xc300ff\\\",\\\"teamId\\\":0,\\\"xPos\\\":14,\\\"zPos\\\":3,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\",\"{\\\"color\\\":\\\"0xc300ff\\\",\\\"teamId\\\":0,\\\"xPos\\\":14,\\\"zPos\\\":5,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\",\"{\\\"color\\\":\\\"0xc300ff\\\",\\\"teamId\\\":0,\\\"xPos\\\":15,\\\"zPos\\\":1,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\",\"{\\\"color\\\":\\\"0xc300ff\\\",\\\"teamId\\\":0,\\\"xPos\\\":15,\\\"zPos\\\":2,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\",\"{\\\"color\\\":\\\"0xc300ff\\\",\\\"teamId\\\":0,\\\"xPos\\\":16,\\\"zPos\\\":3,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\",\"{\\\"color\\\":\\\"0xc300ff\\\",\\\"teamId\\\":0,\\\"xPos\\\":16,\\\"zPos\\\":5,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\",\"{\\\"color\\\":\\\"0xefff00\\\",\\\"teamId\\\":1,\\\"xPos\\\":21,\\\"zPos\\\":1,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\",\"{\\\"color\\\":\\\"0xefff00\\\",\\\"teamId\\\":1,\\\"xPos\\\":21,\\\"zPos\\\":3,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\",\"{\\\"color\\\":\\\"0xefff00\\\",\\\"teamId\\\":1,\\\"xPos\\\":21,\\\"zPos\\\":5,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\",\"{\\\"color\\\":\\\"0xefff00\\\",\\\"teamId\\\":1,\\\"xPos\\\":23,\\\"zPos\\\":3,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\",\"{\\\"color\\\":\\\"0xefff00\\\",\\\"teamId\\\":1,\\\"xPos\\\":23,\\\"zPos\\\":5,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\",\"{\\\"color\\\":\\\"0xefff00\\\",\\\"teamId\\\":1,\\\"xPos\\\":24,\\\"zPos\\\":6,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\",\"{\\\"color\\\":\\\"0xc300ff\\\",\\\"teamId\\\":0,\\\"xPos\\\":33,\\\"zPos\\\":9,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\",\"{\\\"color\\\":\\\"0xc300ff\\\",\\\"teamId\\\":0,\\\"xPos\\\":35,\\\"zPos\\\":8,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\",\"{\\\"color\\\":\\\"0xc300ff\\\",\\\"teamId\\\":0,\\\"xPos\\\":37,\\\"zPos\\\":6,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\",\"{\\\"color\\\":\\\"0xc300ff\\\",\\\"teamId\\\":0,\\\"xPos\\\":37,\\\"zPos\\\":7,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\"],\"obstacles\":[\"{\\\"xPos\\\":10,\\\"zPos\\\":2,\\\"obstacleType\\\":\\\"Rock\\\",\\\"obstacleSize\\\":40}\",\"{\\\"xPos\\\":10,\\\"zPos\\\":3,\\\"obstacleType\\\":\\\"Rock\\\",\\\"obstacleSize\\\":40}\",\"{\\\"xPos\\\":10,\\\"zPos\\\":4,\\\"obstacleType\\\":\\\"Rock\\\",\\\"obstacleSize\\\":40}\",\"{\\\"xPos\\\":10,\\\"zPos\\\":5,\\\"obstacleType\\\":\\\"Rock\\\",\\\"obstacleSize\\\":40}\",\"{\\\"xPos\\\":10,\\\"zPos\\\":6,\\\"obstacleType\\\":\\\"Rock\\\",\\\"obstacleSize\\\":40}\",\"{\\\"xPos\\\":10,\\\"zPos\\\":7,\\\"obstacleType\\\":\\\"Rock\\\",\\\"obstacleSize\\\":40}\",\"{\\\"xPos\\\":10,\\\"zPos\\\":8,\\\"obstacleType\\\":\\\"Rock\\\",\\\"obstacleSize\\\":40}\",\"{\\\"xPos\\\":11,\\\"zPos\\\":8,\\\"obstacleType\\\":\\\"Rock\\\",\\\"obstacleSize\\\":40}\",\"{\\\"xPos\\\":12,\\\"zPos\\\":8,\\\"obstacleType\\\":\\\"Rock\\\",\\\"obstacleSize\\\":40}\",\"{\\\"xPos\\\":13,\\\"zPos\\\":8,\\\"obstacleType\\\":\\\"Rock\\\",\\\"obstacleSize\\\":40}\",\"{\\\"xPos\\\":18,\\\"zPos\\\":1,\\\"obstacleType\\\":\\\"Rock\\\",\\\"obstacleSize\\\":40}\",\"{\\\"xPos\\\":18,\\\"zPos\\\":2,\\\"obstacleType\\\":\\\"Rock\\\",\\\"obstacleSize\\\":40}\",\"{\\\"xPos\\\":18,\\\"zPos\\\":3,\\\"obstacleType\\\":\\\"Rock\\\",\\\"obstacleSize\\\":40}\",\"{\\\"xPos\\\":18,\\\"zPos\\\":4,\\\"obstacleType\\\":\\\"Rock\\\",\\\"obstacleSize\\\":40}\",\"{\\\"xPos\\\":18,\\\"zPos\\\":5,\\\"obstacleType\\\":\\\"Rock\\\",\\\"obstacleSize\\\":40}\",\"{\\\"xPos\\\":18,\\\"zPos\\\":6,\\\"obstacleType\\\":\\\"Rock\\\",\\\"obstacleSize\\\":40}\",\"{\\\"xPos\\\":18,\\\"zPos\\\":8,\\\"obstacleType\\\":\\\"Rock\\\",\\\"obstacleSize\\\":40}\",\"{\\\"xPos\\\":28,\\\"zPos\\\":0,\\\"obstacleType\\\":\\\"Rock\\\",\\\"obstacleSize\\\":40}\",\"{\\\"xPos\\\":28,\\\"zPos\\\":1,\\\"obstacleType\\\":\\\"Rock\\\",\\\"obstacleSize\\\":40}\",\"{\\\"xPos\\\":29,\\\"zPos\\\":0,\\\"obstacleType\\\":\\\"Rock\\\",\\\"obstacleSize\\\":40}\",\"{\\\"xPos\\\":29,\\\"zPos\\\":2,\\\"obstacleType\\\":\\\"Rock\\\",\\\"obstacleSize\\\":40}\",\"{\\\"xPos\\\":29,\\\"zPos\\\":5,\\\"obstacleType\\\":\\\"Rock\\\",\\\"obstacleSize\\\":40}\",\"{\\\"xPos\\\":29,\\\"zPos\\\":7,\\\"obstacleType\\\":\\\"Rock\\\",\\\"obstacleSize\\\":40}\",\"{\\\"xPos\\\":29,\\\"zPos\\\":9,\\\"obstacleType\\\":\\\"Rock\\\",\\\"obstacleSize\\\":40}\",\"{\\\"xPos\\\":30,\\\"zPos\\\":2,\\\"obstacleType\\\":\\\"Rock\\\",\\\"obstacleSize\\\":40}\"],\"tiles\":[\"{\\\"xPos\\\":10,\\\"zPos\\\":2,\\\"hasCharacter\\\":false,\\\"hasObstacle\\\":true}\",\"{\\\"xPos\\\":10,\\\"zPos\\\":3,\\\"hasCharacter\\\":false,\\\"hasObstacle\\\":true}\",\"{\\\"xPos\\\":10,\\\"zPos\\\":4,\\\"hasCharacter\\\":false,\\\"hasObstacle\\\":true}\",\"{\\\"xPos\\\":10,\\\"zPos\\\":5,\\\"hasCharacter\\\":false,\\\"hasObstacle\\\":true}\",\"{\\\"xPos\\\":10,\\\"zPos\\\":6,\\\"hasCharacter\\\":false,\\\"hasObstacle\\\":true}\",\"{\\\"xPos\\\":10,\\\"zPos\\\":7,\\\"hasCharacter\\\":false,\\\"hasObstacle\\\":true}\",\"{\\\"xPos\\\":10,\\\"zPos\\\":8,\\\"hasCharacter\\\":false,\\\"hasObstacle\\\":true}\",\"{\\\"xPos\\\":11,\\\"zPos\\\":8,\\\"hasCharacter\\\":false,\\\"hasObstacle\\\":true}\",\"{\\\"xPos\\\":12,\\\"zPos\\\":8,\\\"hasCharacter\\\":false,\\\"hasObstacle\\\":true}\",\"{\\\"xPos\\\":13,\\\"zPos\\\":8,\\\"hasCharacter\\\":false,\\\"hasObstacle\\\":true}\",\"{\\\"xPos\\\":14,\\\"zPos\\\":3,\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\",\"{\\\"xPos\\\":14,\\\"zPos\\\":5,\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\",\"{\\\"xPos\\\":15,\\\"zPos\\\":1,\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\",\"{\\\"xPos\\\":15,\\\"zPos\\\":2,\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\",\"{\\\"xPos\\\":16,\\\"zPos\\\":3,\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\",\"{\\\"xPos\\\":16,\\\"zPos\\\":5,\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\",\"{\\\"xPos\\\":18,\\\"zPos\\\":1,\\\"hasCharacter\\\":false,\\\"hasObstacle\\\":true}\",\"{\\\"xPos\\\":18,\\\"zPos\\\":2,\\\"hasCharacter\\\":false,\\\"hasObstacle\\\":true}\",\"{\\\"xPos\\\":18,\\\"zPos\\\":3,\\\"hasCharacter\\\":false,\\\"hasObstacle\\\":true}\",\"{\\\"xPos\\\":18,\\\"zPos\\\":4,\\\"hasCharacter\\\":false,\\\"hasObstacle\\\":true}\",\"{\\\"xPos\\\":18,\\\"zPos\\\":5,\\\"hasCharacter\\\":false,\\\"hasObstacle\\\":true}\",\"{\\\"xPos\\\":18,\\\"zPos\\\":6,\\\"hasCharacter\\\":false,\\\"hasObstacle\\\":true}\",\"{\\\"xPos\\\":18,\\\"zPos\\\":8,\\\"hasCharacter\\\":false,\\\"hasObstacle\\\":true}\",\"{\\\"xPos\\\":21,\\\"zPos\\\":1,\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\",\"{\\\"xPos\\\":21,\\\"zPos\\\":3,\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\",\"{\\\"xPos\\\":21,\\\"zPos\\\":5,\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\",\"{\\\"xPos\\\":23,\\\"zPos\\\":3,\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\",\"{\\\"xPos\\\":23,\\\"zPos\\\":5,\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\",\"{\\\"xPos\\\":24,\\\"zPos\\\":6,\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\",\"{\\\"xPos\\\":28,\\\"zPos\\\":0,\\\"hasCharacter\\\":false,\\\"hasObstacle\\\":true}\",\"{\\\"xPos\\\":28,\\\"zPos\\\":1,\\\"hasCharacter\\\":false,\\\"hasObstacle\\\":true}\",\"{\\\"xPos\\\":29,\\\"zPos\\\":0,\\\"hasCharacter\\\":false,\\\"hasObstacle\\\":true}\",\"{\\\"xPos\\\":29,\\\"zPos\\\":2,\\\"hasCharacter\\\":false,\\\"hasObstacle\\\":true}\",\"{\\\"xPos\\\":29,\\\"zPos\\\":5,\\\"hasCharacter\\\":false,\\\"hasObstacle\\\":true}\",\"{\\\"xPos\\\":29,\\\"zPos\\\":7,\\\"hasCharacter\\\":false,\\\"hasObstacle\\\":true}\",\"{\\\"xPos\\\":29,\\\"zPos\\\":9,\\\"hasCharacter\\\":false,\\\"hasObstacle\\\":true}\",\"{\\\"xPos\\\":30,\\\"zPos\\\":2,\\\"hasCharacter\\\":false,\\\"hasObstacle\\\":true}\",\"{\\\"xPos\\\":33,\\\"zPos\\\":9,\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\",\"{\\\"xPos\\\":35,\\\"zPos\\\":8,\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\",\"{\\\"xPos\\\":37,\\\"zPos\\\":6,\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\",\"{\\\"xPos\\\":37,\\\"zPos\\\":7,\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\"],\"board\":{\"width\":1600,\"height\":400,\"tileSize\":40,\"groundtexture\":\"Supernova.jpg\"}}";
+
+var MapLoader = require('./level-editor/ServerMapLoader.js');
+
+var j = new MapLoader(mapContent);
+
+console.log(j.getNumberOfTeams());
+console.log(j.getUnitsInTeam(0));
+
 
 var Message = netconst.Message;
 var Move = netconst.Move;
@@ -45,7 +54,7 @@ var games = new Array();
 var numPlayers = 0;
 var curGameId = 0
 var teamStartPos = [1, 18, 1, 18];
-var teamSize = 3;
+// var teamSize = 3;
 
 // Increase for each new created game.
 var gameIdSeq = 0;
@@ -69,7 +78,7 @@ io.sockets.on('connection', function(socket) {
 
   socket.on(Message.SINGLE, function() {
     var singleId = gameIdSeq++;
-    var newGame = new Game(singleId, 'SingleMode' + singleId, 4, true);
+    var newGame = new Game(singleId, 'SingleMode' + singleId, 4, true, mapContent);
     socket.set('inGame', newGame, function() {
       socket.set('username', 'player', function() {
         newGame.addPlayer(socket, 'player');
@@ -88,7 +97,7 @@ io.sockets.on('connection', function(socket) {
     var gameName = gameRequest[Message.GAMENAME];
     var username = gameRequest[Message.USERNAME];
     var gameType = parseInt(gameRequest[Message.TYPE]);
-    var newGame = new Game(gameIdSeq++, gameName, gameType, false);
+    var newGame = new Game(gameIdSeq++, gameName, false, mapContent);
     console.log(emptyGames);
     console.log(emptyGames[gameName]);
     for (var gid in emptyGames) {
@@ -309,20 +318,6 @@ io.sockets.on('connection', function(socket) {
   });
 
   socket.on('disconnect', function(message) {
-    // socket.get('username', function(error, username) {
-    //   console.log('******player ' + username + ' leave');
-    //   socket.get('inGame', function(error, game) {
-    //     if (game) {
-    //       if (game.numPlayers == 0) {
-    //         delete emptyGames[game.gameId];
-    //       } else {
-    //         var playerState = game.getPlayerInfo();
-    //         socket.broadcast.to(game.room).emit(Message.JOIN, playerState);
-    //         socket.set('inGame', null);          
-    //       }
-    //     }
-    //   });
-    // });
     socket.get('inGame', function(error, game) {
       if (game == null) {
         return;
@@ -369,27 +364,29 @@ function getAllGameInfo() {
 /**
  * Class for a Game.
  */
-function Game(gameId, gameName, maxNumPlayers, isSingleMode) {
+function Game(gameId, gameName, isSingleMode, mapContent) {
   this.usernames = new Array();
   this.gameId = gameId;
   this.gameName = gameName;
   this.isSingleMode = isSingleMode;
+  this.mapContent = mapContent;
+  this.mapLoader = new MapLoader(mapContent);
   // this.isStart = false;
   this.isWaitingRestart = false;
   this.isPlaying = false;
   this.playerEscaped = new Array();
   this.numPlayers = 0;
   this.numReadyPlayers = 0;
-  this.maxNumPlayers = maxNumPlayers;
-  this.room = maxNumPlayers + 'room' + gameId;
+  this.maxNumPlayers = this.mapLoader.getNumberOfTeams();
+  this.room = this.maxNumPlayers + 'room' + gameId;
   this.teamIds = new Array();
   this.seq = 0;
   this.score = {};
-  for (var t = 0; t < maxNumPlayers; t++) {
+  for (var t = 0; t < this.maxNumPlayers; t++) {
     this.teamIds.push(t);
   }
   shuffle(this.teamIds);
-  this.gameState = new GameState(maxNumPlayers, teamSize, this.teamIds);
+  this.gameState = new GameState(this.maxNumPlayers, this.teamIds, this.mapLoader);
   console.log(this.teamIds);
 }
 
@@ -487,7 +484,7 @@ Game.prototype.restart = function(socket) {
   this.gameState.restart(this.teamIds);
   // curGame.isStart = true;
   socket.broadcast.to(this.room).emit(Message.PREPARE, playerTeamInfo);
-  socket.emit(Message.PREPARE, playerTeamInfo);        
+  socket.emit(Message.PREPARE, playerTeamInfo);
 };
 
 Game.prototype.reset = function() {
@@ -555,26 +552,11 @@ Game.prototype.getScoreJSON = function() {
   return stat;
 }
 
-function GameState(numOfTeams, teamSize, teamIds) {
-  this.teamSize = teamSize;
+function GameState(numOfTeams, teamIds, mapLoader) {
   this.numOfTeams = numOfTeams;
   this.numLiveTeams = numOfTeams;
+  this.mapLoader = mapLoader;
   this.restart(teamIds);
-  // this.teams = new Array();
-  // for (var teamId = 0; teamId < numOfTeams; teamId++) {
-  //   this.teams.push(new Array());
-  //   for (var i = 0; i < teamSize; i++) {
-  //     var startX, startZ;
-  //     if (teamId < 2) {
-  //       startX = i + 9;
-  //       startZ = teamStartPos[teamId];
-  //     } else {
-  //       startX = teamStartPos[teamId];
-  //       startZ = i + 9;
-  //     }
-  //     this.teams[teamId].push(new CharState(startX, startZ));
-  //   }
-  // }
 }
 
 GameState.prototype.restart = function(teamIds) {
@@ -582,16 +564,10 @@ GameState.prototype.restart = function(teamIds) {
   this.numLiveTeams = this.numOfTeams;
   for (var teamIdIndex = 0; teamIdIndex < this.numOfTeams; teamIdIndex++) {
     this.teams[teamIds[teamIdIndex]] = new Array();
-    for (var i = 0; i < this.teamSize; i++) {
-        var startX, startZ;
-        if (teamIds[teamIdIndex] < 2) {
-          startX = i + 9;
-          startZ = teamStartPos[teamIds[teamIdIndex]];
-        } else {
-          startX = teamStartPos[teamIds[teamIdIndex]];
-          startZ = i + 9;
-        }
-        this.teams[teamIds[teamIdIndex]].push(new CharState(startX, startZ));
+    var teamUnits = this.mapLoader.getUnitsInTeam(teamIds[teamIdIndex]);
+    for (var i = 0; i < teamUnits.length; i++) {
+        var unit = teamUnits[i];
+        this.teams[teamIds[teamIdIndex]].push(new CharState(unit.xPos, unit.zPos));
     }
   }
 }
