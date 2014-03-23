@@ -147,7 +147,7 @@ function createGameStep2(type) {
   content += '<label for="map" style="margin-left:7">Map</label>';
   content += '<div class="styled-select"><select name="map" id="choosemap">';
   for (var t = 0; t < GameInfo.maps.length; t++) {
-    content += '<option value=' + t + '>' + GameInfo.maps[t] + '</option>';
+    content += '<option>' + GameInfo.maps[t] + '</option>';
   }
   content += '</select></div>';
   content += '<input type="button" value="Start" style="margin: 5 23 10 23" id="unameBtn"/><input value="Quit" type="button" id="quitBtn" style="margin: 0 23 14 23"/>';
@@ -169,8 +169,8 @@ function createGameStep2(type) {
     var gamename = $('#rname').val();
     if (username != '' && gamename != '') {
       var map = $('#choosemap :selected').text();
-      alert(map);
-      sendCreateMsg(gamename, username, type);
+      // alert(map);
+      sendCreateMsg(gamename, username, map);
       $("#Input-dialog").dialog("close");
     } else {
       alert('The username and gamename can not be empty');

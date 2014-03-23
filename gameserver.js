@@ -98,7 +98,8 @@ io.sockets.on('connection', function(socket) {
     var gameName = gameRequest[Message.GAMENAME];
     var username = gameRequest[Message.USERNAME];
     var gameType = parseInt(gameRequest[Message.TYPE]);
-    var newGame = new Game(gameIdSeq++, gameName, false, mapContent);
+    var mapname = gameRequest[Message.MAP];
+    var newGame = new Game(gameIdSeq++, gameName, false, maps[mapname]);
     console.log(emptyGames);
     console.log(emptyGames[gameName]);
     for (var gid in emptyGames) {

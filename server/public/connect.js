@@ -240,11 +240,11 @@ function sendListGameMsg() {
   socket.emit(Message.LISTGAME);
 }
 
-function sendCreateMsg(gamename, username, type) {
+function sendCreateMsg(gamename, username, map) {
   GameInfo.username = username;
   var createMsg = {};
   createMsg[Message.GAMENAME] = gamename;
-  createMsg[Message.TYPE] = type;
+  createMsg[Message.MAP] = map;
   createMsg[Message.USERNAME] = username;
   socket.emit(Message.CREATEGAME, createMsg);
   // alert('creat req');
