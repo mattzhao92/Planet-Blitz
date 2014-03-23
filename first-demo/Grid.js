@@ -125,11 +125,13 @@ var Grid = Class.extend({
         var obstacles = mapJson.obstacles;
         for (var i = 0; i < obstacles.length; i++) {
             var obj = JSON.parse(obstacles[i]);
-            var obstacle = new Obstacle("rock", 0, 40);
+            var obstacle =  this.spriteFactory.createObstacle('rock');
             
             var objMesh = obstacle.getMesh();
             objMesh.position.x = this.convertXPosToWorldX(obj.xPos);
             objMesh.position.z = this.convertZPosToWorldZ(obj.zPos);
+
+            obstacle.position = objMesh.position;
 
             // var cube = new THREE.Mesh(new THREE.CubeGeometry(40, 40, 40), new THREE.MeshNormalMaterial());
             // cube.position.x = this.convertXPosToWorldX(obj.xPos);

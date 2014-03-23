@@ -1,33 +1,24 @@
-var Obstacle = Class.extend({
+var Obstacle = Sprite.extend({
 
-    init: function(type, opacity, size) {
+    init: function(setupCmd, destroyCmd, spriteFactory, modelName, opacity, size) {
+        this._super(setupCmd, destroyCmd);
+
         this.xPos = 0;
         this.zPos = 0;
         this.obstacleSize = size;
-        this.obstacleType = type;
+        this.obstacleType = modelName;
         this.opacity = opacity;
         this.initBoundBoxAndMesh();
         this.setSize(size);
     },
 
-    toJson: function(obstacle) {
-        if (obstacle == null)
-            obstacle = this;
-        exportObject = {'xPos': obstacle.xPos,
-                        'zPos': obstacle.zPos,
-                        'obstacleType': obstacle.obstacleType,
-                        'obstacleSize' : obstacle.obstacleSize
-        };
-        return JSON.stringify(exportObject);
-    },
-
     initBoundBoxAndMesh: function() {
     	var size = Constants.ORIGINAL_TILESIZE;
     	var obstacle_bounding_cube = new THREE.CubeGeometry(size,size,size);
-		var obstacle_bounding_cube_material = new THREE.MeshLambertMaterial({opacity: this.opacity, transparent:true});
+		  var obstacle_bounding_cube_material = new THREE.MeshLambertMaterial({opacity: this.opacity, transparent:true});
 
-        var combinedMaterials = new THREE.MeshNormalMaterial();
-        this.box_mesh = new THREE.Mesh(new THREE.CubeGeometry(40, 40, 40), combinedMaterials)
+      var combinedMaterials = new THREE.MeshNormalMaterial();
+      this.box_mesh = new THREE.Mesh(new THREE.CubeGeometry(40, 40, 40), combinedMaterials)
 
 		// var path_to_mesh = "";
 		
@@ -120,8 +111,8 @@ var Obstacle = Class.extend({
     	return this.box_mesh;
     }, 
 
-    clone : function() {
-    	return new Obstacle(this.obstacleType, 0.0, this.obstacleSize);
+    update: function() {
+
     }
 
 });

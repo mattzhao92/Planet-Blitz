@@ -11,6 +11,7 @@ var SpriteFactory = Class.extend({
 
 		this.robots = [];
 		this.bullets = [];
+		this.obstacles = [];
 
 		this.dispatcher = new Dispatcher();
 	},
@@ -21,6 +22,10 @@ var SpriteFactory = Class.extend({
 		});
 
 		_.forEach(this.bullets, function(observer) {
+			observer.applySpriteCmd(spriteCmd);
+		});
+
+		_.forEach(this.obstacles, function(observer) {
 			observer.applySpriteCmd(spriteCmd);
 		});
 	},
@@ -84,6 +89,25 @@ var SpriteFactory = Class.extend({
 
 		return robot;
 	},
+
+	createObstacle: function(modelName) {
+		var scope = this;
+
+		// add character to its container, register for its updates
+		var postInitCmd = new SpriteCmd(function(sprite) {
+			scope.sceneAddCmd.execute(sprite);
+			scope.obstacles.push(sprite);
+		});
+
+		// mark the sprite as destroyed
+		var postDestroyCmd = new SpriteCmd(function(sprite) {
+			sprite.active = false;
+		});
+
+		var obstacle = new Obstacle(postInitCmd, postDestroyCmd, modelName, 1.0, this.characterSize);
+		return obstacle;
+	},
+
 
 	createBullet: function(cameraPosition, owner, from, to) {
 		var scope = this;
@@ -236,6 +260,10 @@ var SpriteFactory = Class.extend({
 
 	getBullets: function() {
 		return this.bullets;
+	},
+
+	getObstacles: function() {
+		return this.obstacles;
 	},
 
 	removeFromContainer: function(sprite, container) {
