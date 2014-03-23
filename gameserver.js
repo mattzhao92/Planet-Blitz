@@ -40,8 +40,8 @@ var MapLoader = require('./level-editor/ServerMapLoader.js');
 
 var j = new MapLoader(mapContent);
 
-console.log(j.getNumberOfTeams());
-console.log(j.getUnitsInTeam(0));
+// console.log(j.getNumberOfTeams());
+// console.log(j.getUnitsInTeam(0));
 
 
 var Message = netconst.Message;
