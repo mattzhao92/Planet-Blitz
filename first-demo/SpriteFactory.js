@@ -103,7 +103,6 @@ var SpriteFactory = Class.extend({
 		var postDestroyCmd = new SpriteCmd(function(sprite) {
 			sprite.active = false;
 		});
-
 		var obstacle = new Obstacle(postInitCmd, postDestroyCmd, modelName, 1.0, this.characterSize);
 		obstacle.setup();
 		return obstacle;

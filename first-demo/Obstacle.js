@@ -1,6 +1,6 @@
 var Obstacle = Sprite.extend({
 
-    init: function(setupCmd, destroyCmd, spriteFactory, modelName, opacity, size) {
+    init: function(setupCmd, destroyCmd, modelName, opacity, size) {
         this._super(setupCmd, destroyCmd);
 
         this.xPos = 0;
@@ -9,7 +9,6 @@ var Obstacle = Sprite.extend({
         this.obstacleType = modelName;
         this.opacity = opacity;
         this.initBoundBoxAndMesh();
-        this.setSize(size);
     },
 
     initBoundBoxAndMesh: function() {
@@ -43,17 +42,6 @@ var Obstacle = Sprite.extend({
 
     setZPos: function(zPos) {
     	this.zPos = zPos;
-    },
-
-    setSize: function(newSize) {
-    	var scale = newSize / Constants.ORIGINAL_TILESIZE;
-    	if (newSize != this.obstacleSize) {
-    		this.box_mesh.scale.x = scale;
-    		this.box_mesh.scale.y = scale;
-    		this.box_mesh.scale.z = scale;
-    		this.box_mesh.position.y = newSize / 2;
-    	}
-    	this.obstacleSize = newSize;
     },
 
     getXPos: function() {

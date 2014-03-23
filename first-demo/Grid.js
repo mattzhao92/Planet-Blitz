@@ -78,8 +78,6 @@ var Grid = Class.extend({
         var size = mapJson.board.tileSize;
 
         this.tileFactory = new TileFactory(this, size);
-        console.log('width '+width +' length '+length+' size '+size);
-
         this.numberSquaresOnXAxis = width / size;
         this.numberSquaresOnZAxis = length / size;
 
@@ -140,10 +138,7 @@ var Grid = Class.extend({
             // cube.position.y = 20;
             // cube.position.z = this.convertZPosToWorldZ(obj.zPos);
 
-            console.log(objMesh.position);
-
             this.scene.add(objMesh);
-            console.log(obj);
         }
     },
 
@@ -157,9 +152,6 @@ var Grid = Class.extend({
             while (unit.teamId > units_in_teams.length -1) {
                 units_in_teams.push([]);
             }
-            console.log(units_in_teams.length);
-            console.log("unit team id "+unit.teamId); 
-            console.log("unit object "+unit);
             units_in_teams[unit.teamId].push(unit);
         }
 
@@ -201,7 +193,6 @@ var Grid = Class.extend({
 
     onGameStart: function() {
 
-        console.log(">>>>>>>>> onGameStart starts");
          for (var tm = 0; tm < 4; tm++) {
             if (GameInfo.existingTeams.indexOf(tm) == -1) {
                 for (var i = 0; i < this.numOfCharacters; i++) {
@@ -209,9 +200,6 @@ var Grid = Class.extend({
                 }               
             }
         }
-
-        console.log("Team id " + GameInfo.myTeamId);
-
         if (this.getCurrentSelectedUnit()) {
             // TODO: duplicated code
 
@@ -246,8 +234,6 @@ var Grid = Class.extend({
 
         // focus camera on start position (TODO: hardcoded)
         this.controls.focusOnPosition(this.getMyTeamCharacters()[0].mesh.position);
-
-        console.log(">>>>>>>>> onGameStart ends");
     },
 
     onGameFinish: function() {
@@ -259,8 +245,6 @@ var Grid = Class.extend({
 
     getMyTeamCharacters: function() {
         return _.filter(this.getCharacters(), function(character) {
-            console.log("character.team "+character.team);
-            console.log("GameInfo.myTeamId "+GameInfo.myTeamId)
             return character.team == GameInfo.myTeamId && character.active;
         });
     },
@@ -853,7 +837,6 @@ var Grid = Class.extend({
                 }
                 if (dest.x != x || dest.z != z) {
                     // Inconsistent with auth state, adjust position.
-                    console.log("Inconsi pos ");
                     charToCheck.placeAtGridPos(x, z);
                 }
             }
@@ -891,8 +874,6 @@ var Grid = Class.extend({
     },
 
     reset: function() {
-        console.log(">>>>>>>>> reset starts");
-
         this.tiles = new THREE.Object3D();
         this.tilesArray = null;
 
@@ -914,6 +895,5 @@ var Grid = Class.extend({
         this.camera.position.z = 400;
 
         this.controls.reset();
-        console.log(">>>>>>>>> reset ends");
     },
 });
