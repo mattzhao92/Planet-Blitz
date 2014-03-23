@@ -38,12 +38,6 @@ var mapContent = "{\"units\":[\"{\\\"color\\\":\\\"0xc300ff\\\",\\\"teamId\\\":0
 
 var MapLoader = require('./level-editor/ServerMapLoader.js');
 
-var j = new MapLoader(mapContent);
-
-// console.log(j.getNumberOfTeams());
-// console.log(j.getUnitsInTeam(0));
-
-
 var Message = netconst.Message;
 var Move = netconst.Move;
 var State = netconst.State;
