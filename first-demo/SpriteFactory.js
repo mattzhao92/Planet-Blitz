@@ -105,6 +105,7 @@ var SpriteFactory = Class.extend({
 		});
 
 		var obstacle = new Obstacle(postInitCmd, postDestroyCmd, modelName, 1.0, this.characterSize);
+		obstacle.setup();
 		return obstacle;
 	},
 

@@ -107,12 +107,16 @@ var Obstacle = Sprite.extend({
   //   	});
     },
 
-    getMesh: function() {
-    	return this.box_mesh;
-    }, 
+    getRepr: function() {
+        return this.box_mesh;
+    },
 
     update: function() {
 
+    },
+
+    getRadius: function() {
+      return this.obstacleSize/2;
     }
 
 });

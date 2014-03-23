@@ -128,8 +128,9 @@ var Grid = Class.extend({
             var obj = JSON.parse(obstacles[i]);
             var obstacle =  this.spriteFactory.createObstacle('rock');
             
-            var objMesh = obstacle.getMesh();
+            var objMesh = obstacle.getRepr();
             objMesh.position.x = this.convertXPosToWorldX(obj.xPos);
+            objMesh.position.y = 20;
             objMesh.position.z = this.convertZPosToWorldZ(obj.zPos);
 
             obstacle.position = objMesh.position;

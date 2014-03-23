@@ -19,6 +19,6 @@ var ApplyDamageStrategy = InteractStrategy.extend({
 
 	checkOverlap: function(obj1, obj2) {
 	    var combinedRadius = obj1.getRadius() + obj2.getRadius();
-	    return combinedRadius * combinedRadius >= obj1.position.distanceToSquared(obj2.position);
+	    return combinedRadius * combinedRadius >= obj1.getRepr().position.distanceToSquared(obj2.getRepr().position);
 	}
 });
