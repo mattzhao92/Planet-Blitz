@@ -277,9 +277,21 @@ var Grid = Class.extend({
             function(event, keysPressed, keyCombo) {
                 var myTeamCharacters = scope.getMyTeamCharacters();
                 var characterSelected = myTeamCharacters[scope.unitCycle];
-                if (characterSelected.active) {
-                    characterSelected.onSelect();
+
+                // handle case where some characters have been killed in meantime
+                if (scope.unitCycle >= myTeamCharacters.length) {
+                    scope.unitCycle = 0;
                 }
+
+                // need to cycle until the next "defined character". If character became dead, then the unitCycle concept ceases to become valid
+                for (var i = scope.unitCycle; i < myTeamCharacters.length; i++) {
+                    if (characterSelected !== undefined && characterSelected.active) {
+                        characterSelected.onSelect();
+                        break;
+                    }
+                    scope.unitCycle = i;
+                }
+
                 scope.unitCycle = (scope.unitCycle + 1) % myTeamCharacters.length;
             }
         );
