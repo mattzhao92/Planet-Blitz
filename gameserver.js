@@ -515,7 +515,7 @@ Game.prototype.isReady = function() {
 };
 
 Game.prototype.isRestartReady = function() {
-  return this.numRestartPlayers == this.numPlayers;
+  return this.numRestartPlayers == this.numPlayers && this.numRestartPlayers != 1;
 };
 
 Game.prototype.prepareGame = function(isRestart) {
