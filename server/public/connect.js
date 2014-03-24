@@ -4,8 +4,9 @@ var socket = io.connect();
 var game;
 var GameInfo = new GameConfig();
 
-socket.on(Message.LISTGAME, function(games) {
-  listAvailableGames(games);
+socket.on(Message.LISTGAME, function(info) {
+  GameInfo.maps = info[Message.MAPS];
+  listAvailableGames(info[Message.ROOMS]);
 });
 
 socket.on(Message.GAME, function(playerInfo) {
@@ -28,7 +29,6 @@ socket.on(Message.PREPARE, function(prepareInfo) {
   GameInfo.numOfTeams = count;
   GameInfo.maxNumTeams = parseInt(prepareInfo[Message.MAXPLAYER]);
   GameInfo.mapContent = prepareInfo[Message.MAP];
-
   renderGame();
   
   // Render the game here.
@@ -135,8 +135,9 @@ socket.on(Message.REMOVE, function(removeDead) {
 });
 
 socket.on(Message.REMOVEALL, function(removeTeam) {
-  var team = parseInt(removeTeam);
-  for (var charId = 0; charId < 3; charId++) {
+  var team = parseInt(removeTeam[Message.REMOVEALL]);
+  var size = parseInt(removeTeam[Message.MAXPLAYER]);
+  for (var charId = 0; charId < size; charId++) {
     var dead = game.getWorld().getCharacterById(team, charId);
     if (dead != null) {
       game.getWorld().handleCharacterDead(dead);  
@@ -205,8 +206,8 @@ function sendMoveMsg(index, x, y, z) {
   data[Move.index] = index;
   data[Move.X] = x;
   data[Move.Z] = z;
-  console.log('Send a move');
-  console.log(data);
+  // console.log('Send a move');
+  // console.log(data);
   socket.emit(Message.MOVE, data);
 }
 
@@ -239,11 +240,11 @@ function sendListGameMsg() {
   socket.emit(Message.LISTGAME);
 }
 
-function sendCreateMsg(gamename, username, type) {
+function sendCreateMsg(gamename, username, map) {
   GameInfo.username = username;
   var createMsg = {};
   createMsg[Message.GAMENAME] = gamename;
-  createMsg[Message.TYPE] = type;
+  createMsg[Message.MAP] = map;
   createMsg[Message.USERNAME] = username;
   socket.emit(Message.CREATEGAME, createMsg);
   // alert('creat req');

@@ -2006,6 +2006,12 @@ THREE.Vector3.prototype = {
 
 	},
 
+    isZero: function () {
+
+        return ( this.lengthSq() < 0.0001 /* almostZero */ );
+
+    },
+
 	fromArray: function ( array ) {
 
 		this.x = array[ 0 ];

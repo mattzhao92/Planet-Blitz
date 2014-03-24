@@ -1,0 +1,33 @@
+
+<!DOCTYPE html>
+<html lang="en">
+	    <script type="text/javascript" src="../libs/three.js"></script>
+	    <script type="text/javascript" src="../libs/jquery-1.9.0.js"></script>
+	    <script type="text/javascript" src="../libs/stats.js"></script>
+	    <script type="text/javascript" src="../libs/dat.gui.js"></script>
+	    <script type="text/javascript" src="../libs/class.js"></script>
+	    <script type="text/javascript" src="../libs/underscore-min.js"></script>
+	    <script type="text/javascript" src="./Constants.js"></script>
+	    <script type="text/javascript" src="../libs/BlitzLoader.js"></script>
+	    <script type="text/javascript" src="../libs/keyboard.js"></script>
+
+	    <script type="text/javascript" src="../libs/LevelEditorMapControls.js"></script>
+	    <script type="text/javascript" src="../libs/pubsub.js"></script>
+	    <script type="text/javascript" src="../libs/pointerlock.js"></script>
+    	<script type="text/javascript" src="../libs/keyboard.js"></script>
+
+		<script type="text/javascript" src="./ServerMapLoader.js"></script>
+
+		<script>
+ 		var mapContent = "{\"units\":[\"{\\\"color\\\":\\\"0xc300ff\\\",\\\"teamId\\\":0,\\\"xPos\\\":0,\\\"zPos\\\":0,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\",\"{\\\"color\\\":\\\"0xc300ff\\\",\\\"teamId\\\":0,\\\"xPos\\\":1,\\\"zPos\\\":1,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\",\"{\\\"color\\\":\\\"0xc300ff\\\",\\\"teamId\\\":0,\\\"xPos\\\":2,\\\"zPos\\\":2,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\",\"{\\\"color\\\":\\\"0xc300ff\\\",\\\"teamId\\\":0,\\\"xPos\\\":3,\\\"zPos\\\":3,\\\"unitType\\\":\\\"soldier\\\",\\\"opacity\\\":0,\\\"unitSize\\\":40}\"],\"obstacles\":[],\"tiles\":[\"{\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\",\"{\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\",\"{\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\",\"{\\\"hasCharacter\\\":true,\\\"hasObstacle\\\":false}\"],\"board\":{\"width\":1600,\"height\":400,\"tileSize\":40,\"groundtexture\":\"Supernova.jpg\"}}";
+
+		var loader = new ServerMapLoader(mapContent);
+		console.log(loader.getNumberOfTeams());
+		console.log(loader.getUnitsInTeam(0));
+		console.log(loader.getObstacles());
+		console.log(loader.getPowerUps());
+		console.log(loader.getBoardDimension());
+		</script>
+
+	</body>
+</html>

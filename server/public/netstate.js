@@ -8,6 +8,8 @@ var Message = {
   USERNAME : 'USERNAME',
   JOIN : 'JOIN',
   MAP : 'MAP',
+  ROOMS : 'ROOMS',
+  MAPS : 'MAPS',
   REMOVE : 'REMOVE',
   REMOVEALL : 'REMOVEALL',
   LEAVE : "LEAVE",
@@ -76,7 +78,8 @@ var Info = {
   gameName : 'gameName',
   gameStart : 'gameStart',
   player : 'player',
-  isFull : 'isFull'
+  isFull : 'isFull',
+  mapName : 'mapName'
 }
 
 if (typeof(exports) !== 'undefined' && exports != null) {
@@ -88,4 +91,3 @@ if (typeof(exports) !== 'undefined' && exports != null) {
   exports.Stat = Stat;
   exports.Info = Info;
 }
-

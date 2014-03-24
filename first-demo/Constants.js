@@ -13,7 +13,9 @@ Constants.BULLET_LEVEL = 15;
 // used to listen for clock updates
 Constants.TOPIC_DELTA = "delta";
 
-Constants.HOTKEYS = ["q", "e", "space", "r", "t", "1", "2", "3"];
+Constants.HOTKEYS = ["q", "e", "space", "r", "t", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "ctrl", "command"];
+
+Constants.ACTIVE_KEYBINDINGS = {};
 
 // used to listen for camera position
 Constants.TOPIC_CAMERA_POSITION = "cameraPosition";
