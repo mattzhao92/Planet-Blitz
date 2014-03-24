@@ -16,8 +16,13 @@ var Obstacle = Sprite.extend({
     	var obstacle_bounding_cube = new THREE.CubeGeometry(size,size,size);
 		  var obstacle_bounding_cube_material = new THREE.MeshLambertMaterial({opacity: this.opacity, transparent:true});
 
-      var combinedMaterials = new THREE.MeshNormalMaterial();
-      this.box_mesh = new THREE.Mesh(new THREE.CubeGeometry(40, 40, 40), combinedMaterials)
+      var material = new THREE.MeshLambertMaterial({
+        map: THREE.ImageUtils.loadTexture('blendertextures/crate.png')
+      });
+
+      var materials = [material,material,material,material,material,material];
+
+      this.box_mesh = new THREE.Mesh(new THREE.CubeGeometry(40, 40, 40, 1, 1, 1), new THREE.MeshFaceMaterial(materials))
 
 		// var path_to_mesh = "";
 		
