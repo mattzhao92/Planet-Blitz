@@ -84,17 +84,21 @@ io.sockets.on('connection', function(socket) {
     socket.emit(Message.LISTGAME, info);
   });
 
-  socket.on(Message.SINGLE, function() {
+  socket.on(Message.LISTMAP, function() {
+    socket.emit(Message.LISTMAP, Object.keys(maps));
+  });
+
+  socket.on(Message.SINGLE, function(mapname) {
     var singleId = gameIdSeq++;
-    var newGame = new Game(singleId, 'SingleMode' + singleId, 4, true, mapContent);
+    var newGame = new Game(singleId, 'SingleMode' + singleId, true, maps[mapname]);
     socket.set('inGame', newGame, function() {
       socket.set('username', 'player', function() {
         newGame.addPlayer(socket, 'player');
-        for (var t = 0; t < 3; t++) {
+        for (var t = 0; t < newGame.maxNumPlayers - 1; t++) {
           newGame.addPlayer(null, 'robot' + t);
         }
         var playerTeamInfo = newGame.prepareGame(false);
-        newGame.numReadyPlayers = 3;
+        newGame.numReadyPlayers = newGame.maxNumPlayers - 1;
         socket.emit(Message.PREPARE, playerTeamInfo);
       });
     });
@@ -302,7 +306,7 @@ io.sockets.on('connection', function(socket) {
       if (curGame.isRestartReady()) {
         curGame.restart(socket); 
       } else if (curGame.isSingleMode) {
-        curGame.numReadyPlayers = 3;
+        curGame.numReadyPlayers = curGame.maxNumPlayers - 1;
         curGame.restart(socket);
       }
     });

@@ -9,6 +9,11 @@ socket.on(Message.LISTGAME, function(info) {
   listAvailableGames(info[Message.ROOMS]);
 });
 
+socket.on(Message.LISTMAP, function(maps) {
+  GameInfo.maps = maps;
+  createSingleGame();
+});
+
 socket.on(Message.GAME, function(playerInfo) {
   updateLoadingPlayerState(playerInfo);
   loading();
@@ -254,9 +259,9 @@ function sendLeaveMsg() {
   socket.emit(Message.LEAVE);
 }
 
-function sendSingleModeMsg() {
+function sendSingleModeMsg(map) {
   GameInfo.username = 'player';
-  socket.emit(Message.SINGLE);
+  socket.emit(Message.SINGLE, map);
 }
 
 function sendJoinMsg(gameId, username) {
@@ -265,6 +270,10 @@ function sendJoinMsg(gameId, username) {
   joinMsg[Message.GAME] = gameId;
   joinMsg[Message.USERNAME] = username;
   socket.emit(Message.JOIN, joinMsg);
+}
+
+function sendListMapMsg() {
+  socket.emit(Message.LISTMAP);
 }
 
 function updateLoadingPlayerState(state) {

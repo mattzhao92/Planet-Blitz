@@ -142,7 +142,7 @@ function getUsername(forGameId) {
   });
 }
 
-function createGameStep2(type) {
+function createGameStep() {
   var content = '<div class="rain" style="margin:0"><div class="border start">';
   content += '<form><label for="rname" style="margin-left:7">Game room name</label><input id="rname" name="rname"  maxlength="15" type="text" style="margin-left: 25"/>';
   content += '<form><label for="uname" style="margin-left:7">Player name</label><input id="uname" name="name"  maxlength="15" type="text" style="margin-left: 25"/>';
@@ -191,15 +191,20 @@ function createGameStep2(type) {
   });
 }
 
-function createGameStep1() {
+function createSingleGame() {
   var content = '<div class="rain" style="margin:0"><div class="border start">';
-  content += '<form style="padding-top:6px">';
-  content += '<label>How many players?</label>'; 
-  content += '<input type="button" value="2 Players" style="margin-top:10px" id="2p"/>';
-  content += '<form><input type="button" value="4 Players" id="4p"/>';
-  content += '<input value="Quit" type="button" id="quitBtn" />';
-  content += '</form></div></div>';
+  // content += '<form><label for="rname" style="margin-left:7">Game room name</label><input id="rname" name="rname"  maxlength="15" type="text" style="margin-left: 25"/>';
+  // content += '<form><label for="uname" style="margin-left:7">Player name</label><input id="uname" name="name"  maxlength="15" type="text" style="margin-left: 25"/>';
   
+  content += '<form>';
+  content += '<label for="map" style="margin-left:7; font-size:15">Map</label>';
+  content += '<div class="styled-select"><select name="map" id="choosemap">';
+  for (var t = 0; t < GameInfo.maps.length; t++) {
+    content += '<option>' + GameInfo.maps[t] + '</option>';
+  }
+  content += '</select></div>';
+  content += '<input type="button" value="Start" style="margin: 5 23 10 29" id="unameBtn"/><input value="Quit" type="button" id="quitBtn" style="margin: 0 23 14 29"/>';
+  content += '</form></div></div>';
   $("#Input-dialog").html(content).dialog(
   {
     width: 400, 
@@ -212,19 +217,21 @@ function createGameStep1() {
   $(".ui-widget.name-dialog").css('width', 'auto');
   $(".ui-widget.name-dialog").css('padding', 0);
   $("#Input-dialog").css('padding', 0);
-  $("#2p").click(function() {
+  $("#unameBtn").click(function() {
+    var map = $('#choosemap :selected').text();
+    sendSingleModeMsg(map);
     $("#Input-dialog").dialog("close");
-    createGameStep2(2);
-  });
-  $("#4p").click(function() {
-    $("#Input-dialog").dialog("close");
-    createGameStep2(4);
   });
   $("#quitBtn").click(function() {
     $("#Input-dialog").dialog("close");
   });
   $('form').on('submit', function(event){
     event.preventDefault();
+  });
+  $('#Input-dialog').keypress(function(e) {
+      if (e.keyCode == $.ui.keyCode.ENTER) {
+        $("#unameBtn").click();
+      }
   });
 }
 
@@ -261,7 +268,7 @@ function listAvailableGames(games) {
   $("#Input-dialog").css('padding', 0);
   $("#createGameBtn").click(function() {
     $("#Input-dialog").dialog("close");
-    createGameStep2(2);
+    createGameStep();
   });
   $("#quitBtn").click(function() {
     $("#Input-dialog").dialog("close");
@@ -280,8 +287,7 @@ $(document).ready(function() {
 
   /* Start the game locally */
   $('#debugBtn').click(function() {
-    // GameInfo.netMode = false;
-    sendSingleModeMsg();
+    sendListMapMsg();
     loading();
   });
 
