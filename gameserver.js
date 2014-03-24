@@ -105,6 +105,7 @@ io.sockets.on('connection', function(socket) {
     var gameType = parseInt(gameRequest[Message.TYPE]);
     var mapname = gameRequest[Message.MAP];
     var newGame = new Game(gameIdSeq++, gameName, false, maps[mapname]);
+    newGame.mapName = mapname;
     console.log(emptyGames);
     console.log(emptyGames[gameName]);
     for (var gid in emptyGames) {
@@ -363,6 +364,7 @@ function getAllGameInfo() {
     info[Info.gameStart] = game.isStart;
     info[Info.player] = game.numPlayers + '/' + game.maxNumPlayers;
     info[Info.isFull] = game.isFull();
+    info[Info.mapName] = game.mapName;
     games.push(info);
   }
   return games;
