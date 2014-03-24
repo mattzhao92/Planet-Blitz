@@ -66,6 +66,7 @@ function showRestartDialog(message, additionalMsg, score) {
   sortedUsernames.sort(function(a, b) {
     return score[b][Stat.win] - score[a][Stat.win];
   });
+  for (var a = 0; a < 3; a++)
   for (var t = 0; t < sortedUsernames.length; t++) {
     var username = sortedUsernames[t];
     content += '<tr>';
@@ -81,7 +82,7 @@ function showRestartDialog(message, additionalMsg, score) {
   $("#Message-dialog").html(content).dialog(
   {
     width: 400, 
-    height: 300,
+    // height: 300,
     modal: true,
     resizable: false,
     buttons: {
@@ -98,6 +99,8 @@ function showRestartDialog(message, additionalMsg, score) {
       }
     }
   });
+  $('#Message-dialog').css('height', 'auto');
+  $('#Message-dialog').css('overflow', 'visible');
 }
 
 function getUsername(forGameId) {
