@@ -49,6 +49,7 @@ var Grid = Class.extend({
         this.resetInProgress = false;
 
         this.hotkeys = [];
+        this.hotkeyToUnitMap = {};
     },
 
     loadGroundFromMapJson: function(mapJson) {
@@ -252,21 +253,36 @@ var Grid = Class.extend({
 
     setupHotkeys: function() {
         var scope = this;
-        var unitNumbers = [1, 2, 3];
+        var unitNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0];
 
         // remove previous hotkey bindings
         _.forEach(Constants.HOTKEYS, function(hotkey) {
             KeyboardJS.clear(hotkey);
+            // remove all bindings that use given key inside the combo
+            KeyboardJS.clear.key(hotkey);
         });
 
+        // dynamic hotkey mapping to characters
         unitNumbers.forEach(function(number) {
             var hotkey = number.toString();
-            KeyboardJS.on(hotkey,
+            KeyboardJS.on("ctrl, command > " + hotkey,
                 function(event, keysPressed, keyCombo) {
-                    // TODO: replace this with a more readable line. Also, need to account for out of index errors when units get killed
-                    var characterSelected = scope.getMyTeamCharacters()[parseInt(keyCombo) - 1];
-                    if (characterSelected && characterSelected.active) {
-                        characterSelected.onSelect();
+                    var currentSelectedUnit = scope.getCurrentSelectedUnit();
+                    if (currentSelectedUnit && currentSelectedUnit.active) {
+
+                        var previousKeybinding = scope.hotkeyToUnitMap[number];
+                        if (previousKeybinding) {
+                            previousKeybinding.clear();
+                        }
+
+                        // assign new hotkey number to this unit
+                        var keyBinding = KeyboardJS.on(hotkey, function(event, keysPressed, keyCombo) {
+                            if (currentSelectedUnit && currentSelectedUnit.active) {
+                                currentSelectedUnit.onSelect();
+                            }
+                        });
+
+                        scope.hotkeyToUnitMap[number] = keyBinding;
                     }
                 }
             );
