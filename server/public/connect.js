@@ -206,8 +206,8 @@ function sendMoveMsg(index, x, y, z) {
   data[Move.index] = index;
   data[Move.X] = x;
   data[Move.Z] = z;
-  console.log('Send a move');
-  console.log(data);
+  // console.log('Send a move');
+  // console.log(data);
   socket.emit(Message.MOVE, data);
 }
 
