@@ -229,7 +229,7 @@ function createGameStep1() {
 function listAvailableGames(games) {
   var content = '<div class="rain" style="margin:0"><div class="border start">';
   content += '<form><label style="text-align:center">Click on a game room to join or create your own</label>';
-  content += '<table><tr><td style="width:140">Room</td><td style="padding-right:40px">Players</td><td>Status</td></tr>';
+  content += '<table><tr><td style="width:140">Room</td><td>Map</td><td style="padding-right:40px">Players</td><td>Status</td></tr>';
   for (var t = 0; t < games.length; t++) {
     var game = games[t];
     var isPlaying = game[Info.gameStart] ? 'Playing' : 'Waiting';
