@@ -78,7 +78,8 @@ var Info = {
   gameName : 'gameName',
   gameStart : 'gameStart',
   player : 'player',
-  isFull : 'isFull'
+  isFull : 'isFull',
+  mapName : 'mapName'
 }
 
 if (typeof(exports) !== 'undefined' && exports != null) {

@@ -103,7 +103,7 @@ function showRestartDialog(message, additionalMsg, score) {
 function getUsername(forGameId) {
   var content = '<div class="rain" style="margin:0"><div class="border start">';
   content += '<form><label for="name" style="margin-left:7">Player name</label><input id="uname" name="name"  maxlength="15" type="text" style="margin-left: 25"/>';
-  content += '<input type="button" value="Join game" style="margin: 5 23 10 23" id="unameBtn"/><input value="Cancel" type="button" id="quitBtn" style="margin: 0 23 14 23"/>';
+  content += '<input type="button" value="Join game" style="margin: 5 23 10 29" id="unameBtn"/><input value="Cancel" type="button" id="quitBtn" style="margin: 0 23 14 29"/>';
   content += '</form></div></div>';
   $("#Input-dialog").html(content).dialog(
   {
@@ -150,7 +150,7 @@ function createGameStep2(type) {
     content += '<option>' + GameInfo.maps[t] + '</option>';
   }
   content += '</select></div>';
-  content += '<input type="button" value="Start" style="margin: 5 23 10 23" id="unameBtn"/><input value="Quit" type="button" id="quitBtn" style="margin: 0 23 14 23"/>';
+  content += '<input type="button" value="Start" style="margin: 5 23 10 29" id="unameBtn"/><input value="Quit" type="button" id="quitBtn" style="margin: 0 23 14 29"/>';
   content += '</form></div></div>';
   $("#Input-dialog").html(content).dialog(
   {
@@ -229,21 +229,21 @@ function createGameStep1() {
 function listAvailableGames(games) {
   var content = '<div class="rain" style="margin:0"><div class="border start">';
   content += '<form><label style="text-align:center">Click on a game room to join or create your own</label>';
-  content += '<table><tr><td style="width:140">Room</td><td>Map</td><td style="padding-right:40px">Players</td><td>Status</td></tr>';
+  content += '<table><tr><td style="padding-left:32">Room</td><td style="width:140">Map</td><td style="padding-right:40px">Players</td><td>Status</td></tr>';
   for (var t = 0; t < games.length; t++) {
     var game = games[t];
     var isPlaying = game[Info.gameStart] ? 'Playing' : 'Waiting';
     if (game[Info.isFull]) {
-      content += '<tr><td class="open-game">' + game[Info.gameName] + '</td><td style="padding-right:40px">' + game[Info.player] +'</td>';
+      content += '<tr><td class="open-game" style="padding-left:32">' + game[Info.mapName] + '</td><td>' + game[Info.mapName] + '</td><td style="padding-right:40px">' + game[Info.player] +'</td>';
     } else {
-      content += '<tr onClick="joinGame(' + game[Info.gameId] + ')"><td class="open-game">' + game[Info.gameName] + '</td><td style="padding-right:40px">' + game[Info.player] +'</td>';
+      content += '<tr onClick="joinGame(' + game[Info.gameId] + ')"><td class="open-game" style="padding-left:32">' + game[Info.gameName] + '</td><td>' + game[Info.mapName] + '</td><td style="padding-right:40px">' + game[Info.player] +'</td>';
     }
     
     
     content += '<td>' + isPlaying + '</td></tr>';
   }
   content += '</table>';
-  content += '<input type="button" value="Create Game" style="margin: 20 23 10 23" id="createGameBtn"/><input value="Quit" type="button" id="quitBtn" style="margin: 0 23 14 23"/>';
+  content += '<input type="button" value="Create Game" style="margin: 20 23 10 29" id="createGameBtn"/><input value="Quit" type="button" id="quitBtn" style="margin: 0 23 14 29"/>';
   content += '</form></div></div>';
   // game.getWorld().disableHotKeys();
   $("#Input-dialog").html(content).dialog(
