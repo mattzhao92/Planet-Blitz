@@ -14,6 +14,8 @@ var SpriteFactory = Class.extend({
 		this.obstacles = [];
 
 		this.dispatcher = new Dispatcher();
+
+		this.materialFactory = new MaterialFactory();
 	},
 
 	notifyAll: function(spriteCmd) {
@@ -58,19 +60,43 @@ var SpriteFactory = Class.extend({
 		this.bullets = this.updateContainer(this.bullets);
 	},
 
-	createSoldier: function(team, unitId) {
-		return this.createCharacter("soldier-regular.js", team, unitId);
+	createSoldier: function(team, id) {
+		var shootStrategy = new PelletShootStrategy(this, this.materialFactory);
+
+		var soldierArgs = {
+			team: team,
+			id: id,
+			modelName: "soldier-regular.js",
+			shootStrategy: shootStrategy
+		};
+		return this.createCharacter(soldierArgs);
 	},
 
-	createArtillerySoldier: function(team, unitId) {
-		return this.createCharacter("soldier-artillery.js", team, unitId);
+	createArtillerySoldier: function(team, id) {
+		var shootStrategy = new LaserShootStrategy(this, this.materialFactory);
+
+		var soldierArgs = {
+			team: team,
+			id: id,
+			modelName: "soldier-artillery.js",
+			shootStrategy: shootStrategy
+		};
+		return this.createCharacter(soldierArgs);
 	},
 
-	createFlamethrowerSoldier: function(team, unitId) {
-		return this.createCharacter("soldier-flamethrower.js", team, unitId);
+	createFlamethrowerSoldier: function(team, id) {
+		var shootStrategy = new PelletShootStrategy(this, this.materialFactory);
+
+		var soldierArgs = {
+			team: team,
+			id: id,
+			modelName: "soldier-flamethrower.js",
+			shootStrategy: shootStrategy
+		};
+		return this.createCharacter(soldierArgs);
 	},
 
-	createCharacter: function(modelName, team, unitId) {
+	createCharacter: function(soldierArgs) {
 		var scope = this;
 
 		// add character to its container, register for its updates
@@ -84,7 +110,17 @@ var SpriteFactory = Class.extend({
 			sprite.active = false;
 		});
 
-		var robot = new Character(postInitCmd, postDestroyCmd, this, modelName, this.world, team, this.characterSize, unitId);
+		var characterArgs = {
+			spriteFactory: scope,
+			world: scope.world,
+			team: soldierArgs.team,
+			characterSize: scope.characterSize,
+			id: soldierArgs.id, 
+			modelName: soldierArgs.modelName,
+			shootStrategy: soldierArgs.shootStrategy
+		};
+
+		var robot = new Character(postInitCmd, postDestroyCmd, characterArgs);
 		robot.setup();
 
 		return robot;
@@ -108,8 +144,7 @@ var SpriteFactory = Class.extend({
 		return obstacle;
 	},
 
-
-	createBullet: function(cameraPosition, owner, from, to) {
+	createShot: function(bulletArgs) {
 		var scope = this;
 
 		// add character to its container, register for updates
@@ -123,7 +158,7 @@ var SpriteFactory = Class.extend({
 			sprite.active = false;
 		});
 
-		var bullet = new Bullet(postInitCmd, postDestroyCmd, cameraPosition, owner, from, to);
+		var bullet = new Bullet(postInitCmd, postDestroyCmd, bulletArgs);
 		bullet.setup();
 
 		return bullet;
@@ -153,31 +188,7 @@ var SpriteFactory = Class.extend({
 	createShieldHit: function(position) {
 		var scope = this;
 
-		var material = new THREE.ShaderMaterial({
-		  uniforms: {
-		    "c": {
-		      type: "f",
-		      value: 1.0
-		    },
-		    "p": {
-		      type: "f",
-		      value: 1.4
-		    },
-		    glowColor: {
-		      type: "c",
-		      value: new THREE.Color(0x82E6FA)
-		    },
-		    viewVector: {
-		      type: "v3",
-		      value: scope.world.camera.position
-		    }
-		  },
-		  vertexShader: document.getElementById('vertexShader').textContent,
-		  fragmentShader: document.getElementById('fragmentShader').textContent,
-		  side: THREE.FrontSide,
-		  blending: THREE.AdditiveBlending,
-		  transparent: true
-		});
+		var material = this.materialFactory.createTransparentGlowMaterial(this.world.camera.position);
 
 		var geometry = new THREE.SphereGeometry(40, 30, 30);
 
@@ -189,9 +200,6 @@ var SpriteFactory = Class.extend({
 		};
 
 		this.world.scene.add(shieldMesh);
-
-		// console.log(material);
-		// console.log(shieldMesh.material.uniforms['p'].value);
 
 		var timeForEffect = 400;
 		var tween = new TWEEN.Tween({opacity: 1.4}).to({opacity: 6}, timeForEffect).easing(TWEEN.Easing.Linear.None).onUpdate(function() {
