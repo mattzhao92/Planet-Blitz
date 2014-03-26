@@ -61,7 +61,7 @@ var SpriteFactory = Class.extend({
 	},
 
 	createSoldier: function(team, id) {
-		var shootStrategy = new PelletShootStrategy(this);
+		var shootStrategy = new PelletShootStrategy(this, this.materialFactory);
 
 		var soldierArgs = {
 			team: team,
@@ -73,7 +73,7 @@ var SpriteFactory = Class.extend({
 	},
 
 	createArtillerySoldier: function(team, id) {
-		var shootStrategy = new PelletShootStrategy(this);
+		var shootStrategy = new LaserShootStrategy(this, this.materialFactory);
 
 		var soldierArgs = {
 			team: team,
@@ -85,7 +85,7 @@ var SpriteFactory = Class.extend({
 	},
 
 	createFlamethrowerSoldier: function(team, id) {
-		var shootStrategy = new PelletShootStrategy(this);
+		var shootStrategy = new PelletShootStrategy(this, this.materialFactory);
 
 		var soldierArgs = {
 			team: team,
@@ -144,11 +144,7 @@ var SpriteFactory = Class.extend({
 		return obstacle;
 	},
 
-	// createShot: function(bulletArgs) {
-
-	// },
-
-	createLaser: function(owner, from, to) {
+	createShot: function(bulletArgs) {
 		var scope = this;
 
 		// add character to its container, register for updates
@@ -161,68 +157,6 @@ var SpriteFactory = Class.extend({
 		var postDestroyCmd = new SpriteCmd(function(sprite) {
 			sprite.active = false;
 		});
-
-		// need to extract into some mesh factory
-		var material = this.materialFactory.createTransparentGlowMaterial(this.world.camera.position);
-
-		var bulletRadius = 5;
-
-		var geometry = new THREE.CylinderGeometry( bulletRadius, bulletRadius, 15, 15, 15, false );
-
-		var pelletMesh = new THREE.Mesh(geometry, material);
-
-		var bulletArgs = {
-			radius: 5,
-			mesh: pelletMesh,
-			damage: 20, 
-			speed: 500,
- 			range: 1000,
- 			from: from,
- 			to: to,
-			owner: owner,
-			sound: 'laser-shoot.mp3'
-		};
-
-		var bullet = new Bullet(postInitCmd, postDestroyCmd, bulletArgs);
-		bullet.setup();
-
-		return bullet;
-	},
-
-	createBullet: function(owner, from, to) {
-		var scope = this;
-
-		// add character to its container, register for updates
-		var postInitCmd = new SpriteCmd(function(sprite) {
-			scope.sceneAddCmd.execute(sprite);
-			scope.bullets.push(sprite);
-		});
-
-		// mark the sprite as destroyed (redundant in new API)
-		var postDestroyCmd = new SpriteCmd(function(sprite) {
-			sprite.active = false;
-		});
-
-		// need to extract into some mesh factory
-		var material = this.materialFactory.createTransparentGlowMaterial(this.world.camera.position);
-
-		var bulletRadius = 5;
-
-		var geometry = new THREE.SphereGeometry(bulletRadius, 12, 12);
-
-		var pelletMesh = new THREE.Mesh(geometry, material);
-
-		var bulletArgs = {
-			radius: 5,
-			mesh: pelletMesh,
-			damage: 20, 
-			speed: 500,
- 			range: 1000,
- 			from: from,
- 			to: to,
-			owner: owner,
-			sound: 'laser-shoot.mp3'
-		};
 
 		var bullet = new Bullet(postInitCmd, postDestroyCmd, bulletArgs);
 		bullet.setup();
