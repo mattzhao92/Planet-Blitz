@@ -2,21 +2,22 @@ var Character = Sprite.extend({
 
     // Class constructor
     // character size refers to the diameter of the character
-    init: function(setupCmd, destroyCmd, spriteFactory, modelName, world, team, characterSize, id) {
+    init: function(setupCmd, destroyCmd, args) {
         'use strict';
         this._super(setupCmd, destroyCmd);
 
-        this.spriteFactory = spriteFactory;
-
-        this.world = world;
-        this.team = team;
-        this.characterSize = characterSize;
+        // all character arguments
+        this.spriteFactory = args.spriteFactory;
+        this.world = args.world;
+        this.team = args.team;
+        this.characterSize = args.characterSize;
+        this.id = args.id;
+        this.modelName = args.modelName;
 
         this.teamColor = new THREE.Color(Constants.TEAM_COLORS[this.team]);
 
         this.isSelected = false;
         this.active = true;
-        this.id = id;
 
         this.xPos = 0;
         this.zPos = 0;
@@ -41,7 +42,7 @@ var Character = Sprite.extend({
         this.isCoolDown = false;
 
         this.loader = new THREE.JSONLoader();
-        this.loadFile("blendermodels/" + modelName);
+        this.loadFile("blendermodels/" + args.modelName);
  
         this.maximumHealth = 100;
         this.health = this.maximumHealth;

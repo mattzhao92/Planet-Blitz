@@ -86,7 +86,16 @@ var SpriteFactory = Class.extend({
 			sprite.active = false;
 		});
 
-		var robot = new Character(postInitCmd, postDestroyCmd, this, modelName, this.world, team, this.characterSize, unitId);
+		var characterArgs = {
+			spriteFactory: scope,
+			world: scope.world,
+			team: team,
+			characterSize: scope.characterSize,
+			id: unitId, 
+			modelName: modelName
+		};
+		
+		var robot = new Character(postInitCmd, postDestroyCmd, characterArgs);
 		robot.setup();
 
 		return robot;
