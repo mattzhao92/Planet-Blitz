@@ -68,7 +68,7 @@ var CooldownBar = Sprite.extend({
 	},
 
 	onCooldownChanged: function(cooldownCount) {
-		this.bar.scale.set(this.tileSize * 2 * (this.totalCooldown - cooldownCount) / this.totalCooldown,
+		this.bar.scale.set(this.tileSize * 2 * (cooldownCount) / this.totalCooldown,
 			this.tileSize / this.barAspectRatio, 1.0);
 	},
 
