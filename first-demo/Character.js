@@ -13,6 +13,7 @@ var Character = Sprite.extend({
         this.characterSize = args.characterSize;
         this.id = args.id;
         this.modelName = args.modelName;
+        this.shootStrategy = args.shootStrategy;
 
         this.teamColor = new THREE.Color(Constants.TEAM_COLORS[this.team]);
 
@@ -71,8 +72,6 @@ var Character = Sprite.extend({
         this.breakUpdateHere = false;
 
         this.canMove = true;
-
-        this.shootStrategy = new PelletShootStrategy(this.spriteFactory, this.world.camera.position);
     },
 
     canShoot: function() {

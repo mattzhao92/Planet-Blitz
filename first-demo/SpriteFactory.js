@@ -86,15 +86,18 @@ var SpriteFactory = Class.extend({
 			sprite.active = false;
 		});
 
+		var shootStrategy = new PelletShootStrategy(this);
+
 		var characterArgs = {
 			spriteFactory: scope,
 			world: scope.world,
 			team: team,
 			characterSize: scope.characterSize,
 			id: unitId, 
-			modelName: modelName
+			modelName: modelName,
+			shootStrategy: shootStrategy
 		};
-		
+
 		var robot = new Character(postInitCmd, postDestroyCmd, characterArgs);
 		robot.setup();
 

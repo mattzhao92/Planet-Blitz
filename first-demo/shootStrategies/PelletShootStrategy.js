@@ -1,7 +1,6 @@
 var PelletShootStrategy = ShootStrategy.extend({
-	init: function(spriteFactory, worldCameraPosition) {
+	init: function(spriteFactory) {
 		this.spriteFactory = spriteFactory;
-		this.worldCameraPosition = worldCameraPosition;
 	}, 
 
 	shoot: function(ownerSprite, from, to) {
