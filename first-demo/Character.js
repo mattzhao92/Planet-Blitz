@@ -70,6 +70,8 @@ var Character = Sprite.extend({
         this.breakUpdateHere = false;
 
         this.canMove = true;
+
+        this.shootStrategy = new PelletShootStrategy(this.spriteFactory, this.world.camera.position);
     },
 
     canShoot: function() {
@@ -96,7 +98,7 @@ var Character = Sprite.extend({
             if (isOriginalCmd) {
                 sendShootMsg(this.id, from, to);
             }
-            var bullet = this.spriteFactory.createBullet(this.world.camera.position, this, from, to);
+            this.shootStrategy.shoot(this, from, to);
             this.onShoot();
         }
     },
