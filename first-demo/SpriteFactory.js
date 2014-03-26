@@ -109,7 +109,7 @@ var SpriteFactory = Class.extend({
 	},
 
 
-	createBullet: function(cameraPosition, owner, from, to) {
+	createBullet: function(owner, from, to) {
 		var scope = this;
 
 		// add character to its container, register for updates
@@ -123,7 +123,7 @@ var SpriteFactory = Class.extend({
 			sprite.active = false;
 		});
 
-		var bullet = new Bullet(postInitCmd, postDestroyCmd, cameraPosition, owner, from, to);
+		var bullet = new Bullet(postInitCmd, postDestroyCmd, this.world.camera.position, owner, from, to);
 		bullet.setup();
 
 		return bullet;

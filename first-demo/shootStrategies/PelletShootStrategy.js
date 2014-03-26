@@ -5,7 +5,7 @@ var PelletShootStrategy = ShootStrategy.extend({
 	}, 
 
 	shoot: function(ownerSprite, from, to) {
-		this.spriteFactory.createBullet(this.worldCameraPosition, ownerSprite, from, to);
+		this.spriteFactory.createBullet(ownerSprite, from, to);
 	}
 
 });
