@@ -123,7 +123,52 @@ var SpriteFactory = Class.extend({
 			sprite.active = false;
 		});
 
-		var bullet = new Bullet(postInitCmd, postDestroyCmd, this.world.camera.position, owner, from, to);
+		// need to extract into some mesh factory
+		var material = new THREE.ShaderMaterial({
+		  uniforms: {
+		    "c": {
+		      type: "f",
+		      value: 1.0
+		    },
+		    "p": {
+		      type: "f",
+		      value: 1.4
+		    },
+		    glowColor: {
+		      type: "c",
+		      value: new THREE.Color(0x82E6FA)
+		    },
+		    viewVector: {
+		      type: "v3",
+		      value: scope.world.camera.position
+		    }
+		  },
+		  vertexShader: document.getElementById('vertexShader').textContent,
+		  fragmentShader: document.getElementById('fragmentShader').textContent,
+		  side: THREE.FrontSide,
+		  blending: THREE.AdditiveBlending,
+		  transparent: true
+		});
+
+		var bulletRadius = 5;
+
+		var geometry = new THREE.SphereGeometry(bulletRadius, 12, 12);
+
+		var pelletMesh = new THREE.Mesh(geometry, material);
+
+		var bulletArgs = {
+			radius: 5,
+			mesh: pelletMesh,
+			damage: 20, 
+			speed: 500,
+ 			range: 1000,
+ 			from: from,
+ 			to: to,
+			owner: owner,
+			sound: 'laser-shoot.mp3'
+		};
+
+		var bullet = new Bullet(postInitCmd, postDestroyCmd, bulletArgs);
 		bullet.setup();
 
 		return bullet;
