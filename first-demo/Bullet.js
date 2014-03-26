@@ -1,6 +1,4 @@
-
 var Bullet = Sprite.extend({
-  // requires two Vector3 denoting start and end
   init: function(setupCmd, destroyCmd, args) {
     this._super(setupCmd, destroyCmd);
 

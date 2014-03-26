@@ -60,19 +60,43 @@ var SpriteFactory = Class.extend({
 		this.bullets = this.updateContainer(this.bullets);
 	},
 
-	createSoldier: function(team, unitId) {
-		return this.createCharacter("soldier-regular.js", team, unitId);
+	createSoldier: function(team, id) {
+		var shootStrategy = new PelletShootStrategy(this);
+
+		var soldierArgs = {
+			team: team,
+			id: id,
+			modelName: "soldier-regular.js",
+			shootStrategy: shootStrategy
+		};
+		return this.createCharacter(soldierArgs);
 	},
 
-	createArtillerySoldier: function(team, unitId) {
-		return this.createCharacter("soldier-artillery.js", team, unitId);
+	createArtillerySoldier: function(team, id) {
+		var shootStrategy = new PelletShootStrategy(this);
+
+		var soldierArgs = {
+			team: team,
+			id: id,
+			modelName: "soldier-artillery.js",
+			shootStrategy: shootStrategy
+		};
+		return this.createCharacter(soldierArgs);
 	},
 
-	createFlamethrowerSoldier: function(team, unitId) {
-		return this.createCharacter("soldier-flamethrower.js", team, unitId);
+	createFlamethrowerSoldier: function(team, id) {
+		var shootStrategy = new PelletShootStrategy(this);
+
+		var soldierArgs = {
+			team: team,
+			id: id,
+			modelName: "soldier-flamethrower.js",
+			shootStrategy: shootStrategy
+		};
+		return this.createCharacter(soldierArgs);
 	},
 
-	createCharacter: function(modelName, team, unitId) {
+	createCharacter: function(soldierArgs) {
 		var scope = this;
 
 		// add character to its container, register for its updates
@@ -86,16 +110,14 @@ var SpriteFactory = Class.extend({
 			sprite.active = false;
 		});
 
-		var shootStrategy = new PelletShootStrategy(this);
-
 		var characterArgs = {
 			spriteFactory: scope,
 			world: scope.world,
-			team: team,
+			team: soldierArgs.team,
 			characterSize: scope.characterSize,
-			id: unitId, 
-			modelName: modelName,
-			shootStrategy: shootStrategy
+			id: soldierArgs.id, 
+			modelName: soldierArgs.modelName,
+			shootStrategy: soldierArgs.shootStrategy
 		};
 
 		var robot = new Character(postInitCmd, postDestroyCmd, characterArgs);
@@ -122,6 +144,50 @@ var SpriteFactory = Class.extend({
 		return obstacle;
 	},
 
+	// createShot: function(bulletArgs) {
+
+	// },
+
+	createLaser: function(owner, from, to) {
+		var scope = this;
+
+		// add character to its container, register for updates
+		var postInitCmd = new SpriteCmd(function(sprite) {
+			scope.sceneAddCmd.execute(sprite);
+			scope.bullets.push(sprite);
+		});
+
+		// mark the sprite as destroyed (redundant in new API)
+		var postDestroyCmd = new SpriteCmd(function(sprite) {
+			sprite.active = false;
+		});
+
+		// need to extract into some mesh factory
+		var material = this.materialFactory.createTransparentGlowMaterial(this.world.camera.position);
+
+		var bulletRadius = 5;
+
+		var geometry = new THREE.CylinderGeometry( bulletRadius, bulletRadius, 15, 15, 15, false );
+
+		var pelletMesh = new THREE.Mesh(geometry, material);
+
+		var bulletArgs = {
+			radius: 5,
+			mesh: pelletMesh,
+			damage: 20, 
+			speed: 500,
+ 			range: 1000,
+ 			from: from,
+ 			to: to,
+			owner: owner,
+			sound: 'laser-shoot.mp3'
+		};
+
+		var bullet = new Bullet(postInitCmd, postDestroyCmd, bulletArgs);
+		bullet.setup();
+
+		return bullet;
+	},
 
 	createBullet: function(owner, from, to) {
 		var scope = this;
