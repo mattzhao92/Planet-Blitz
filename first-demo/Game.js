@@ -142,7 +142,7 @@ App.prototype = {
 
         // standard: render using requestAnimationFrame
         var me = this;
-        requestAnimationFrame(function() {
+        window.requestAnimFrame(function() {
             me.animate();
         });
 
