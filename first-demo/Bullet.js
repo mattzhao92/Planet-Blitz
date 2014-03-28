@@ -25,6 +25,12 @@ var Bullet = Sprite.extend({
 
     this.interactStrategy = new ApplyDamageStrategy(this.damage);
 
+    var light = new THREE.PointLight(0x33CCFF, 3.0, 150);
+    this.mesh.add(light);
+
+    // update scene
+    PubSub.publish(Constants.REFRESH_MATERIALS, null);
+
     var moveStrategy = new StraightLineUpdateStrategy(this.direction, this.speed);
     var expireStrategy = new ExpireUpdateStrategy(this.startPosition, this.range);
     this.updateStrategy = new MultiUpdateStrategy([moveStrategy, expireStrategy]);

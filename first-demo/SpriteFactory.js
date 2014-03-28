@@ -159,16 +159,15 @@ var SpriteFactory = Class.extend({
 	createShot: function(bulletArgs) {
 		var scope = this;
 
-		var light = this.createLight();
+		var light = this.createBulletLight();
 
 		// add character to its container, register for updates
 		var postInitCmd = new SpriteCmd(function(sprite) {
 			scope.sceneAddCmd.execute(sprite);
 			scope.bullets.push(sprite);
 
-			sprite.getRepr().add(light);
-			light.position.y = 1;
-		
+			// sprite.getRepr().add(light);
+			// light.position.y += 40;
 		});
 
 		// mark the sprite as destroyed
@@ -282,6 +281,14 @@ var SpriteFactory = Class.extend({
 
 	createLight: function() {
 		var light = new THREE.PointLight(0xffffff, 1.5, 300);
+		// light.castShadow = true;
+		// light.shadowDarkness = 0.95;
+
+		return light;
+	},
+
+	createBulletLight: function() {
+		var light = new THREE.PointLight(0x33CCFF, 2.0, 200);
 		// light.castShadow = true;
 		// light.shadowDarkness = 0.95;
 

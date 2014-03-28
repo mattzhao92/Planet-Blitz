@@ -7,7 +7,7 @@ App = function(containerName) {
     this.scene = new THREE.Scene();
 
     // create a render and set the size
-    this.renderer = new THREE.WebGLRenderer({antialias: true});
+    this.renderer = new THREE.WebGLRenderer({antialias: true, maxLights: 50});
 
     this.renderer.gammaInput = true;
     this.renderer.gammaOutput = true;
@@ -62,6 +62,7 @@ App.prototype = {
         // var ambientLight = new THREE.AmbientLight( 0x191919 );
         // this.scene.add( ambientLight );
 
+        // this.scene.remove( ambientLight );
         // // sky color, ground color, intensity
         // // var hemiLight = new THREE.HemisphereLight( 0x0000ff, 0xffffff, 0.3 ); 
         // // this.scene.add(hemiLight);

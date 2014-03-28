@@ -49,6 +49,29 @@ var Grid = Class.extend({
 
         this.hotkeys = [];
         this.hotkeyToUnitMap = {};
+
+        this.setupMaterialRefresher();
+    },
+
+    setupMaterialRefresher: function() {
+        var scope = this;
+
+        var subscriber = function(msg, data) {
+            scope.refreshMaterials();
+        }
+
+        PubSub.subscribe(Constants.REFRESH_MATERIALS, subscriber);
+    },
+
+    refreshMaterials: function() {
+        this.scene.traverse(function(object) {
+            if (object instanceof THREE.Mesh) {
+                if (object.material) {
+                    var material = object.material;
+                    material.needsUpdate = true;
+                }
+            }
+        });
     },
 
     loadGroundFromMapJson: function(mapJson) {

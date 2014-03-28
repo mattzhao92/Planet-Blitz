@@ -4,7 +4,7 @@
   "scripts": {
     "start": "gameserver.js"
   },
-  "version": "0.0.19-0",
+  "version": "0.0.20-0",
   "engines": {
     "node": "0.10.x"
   },
