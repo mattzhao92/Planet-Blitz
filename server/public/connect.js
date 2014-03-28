@@ -186,6 +186,7 @@ function GameConfig() {
 }
 
 function renderGame() {
+  $('#game-container').unwrap();
   var outputBox = document.getElementById('WebGL-output');
   var msgBox = document.getElementById('Stats-output');
   outputBox.parentNode.removeChild(outputBox);
@@ -203,7 +204,6 @@ function renderGame() {
   $('#WebGL-output').hide();
   $('#Stats-output').hide();  
 }
-
 
 function sendMoveMsg(index, x, y, z) {
   var data = {};
