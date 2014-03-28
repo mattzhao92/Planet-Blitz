@@ -4,6 +4,8 @@ var GridHelper = Class.extend({
 		this.camera = camera;
 		this.projector = new THREE.Projector();
 		this.mouseVector = new THREE.Vector3();
+
+		this.mouseProjectionVector = new THREE.Vector3();
 	},
 
 	updateMouseVector: function() {
@@ -25,9 +27,9 @@ var GridHelper = Class.extend({
 		this.updateMouseVector();
 
 	    // experimental - be able to fire at points outside of space
-	    var vector = new THREE.Vector3(this.mouseVector.x, this.mouseVector.y, 0.5);
-	    this.projector.unprojectVector(vector, this.camera);
-	    var dir = vector.sub(this.camera.position).normalize();
+	    this.mouseProjectionVector.set(this.mouseVector.x, this.mouseVector.y, 0.5);
+	    this.projector.unprojectVector(this.mouseProjectionVector, this.camera);
+	    var dir = this.mouseProjectionVector.sub(this.camera.position).normalize();
 
 	    // calculate distance to the plane
 	    var distance = -this.camera.position.y / dir.y;
