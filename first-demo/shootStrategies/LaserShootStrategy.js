@@ -16,7 +16,7 @@ var LaserShootStrategy = ShootStrategy.extend({
 			mesh: mesh,
 			damage: 40, 
 			speed: 300,
- 			range: 1000,
+ 			range: 400,
  			from: from,
  			to: to,
 			owner: owner,

@@ -49,6 +49,29 @@ var Grid = Class.extend({
 
         this.hotkeys = [];
         this.hotkeyToUnitMap = {};
+
+        this.setupMaterialRefresher();
+    },
+
+    setupMaterialRefresher: function() {
+        var scope = this;
+
+        var subscriber = function(msg, data) {
+            scope.refreshMaterials();
+        }
+
+        PubSub.subscribe(Constants.REFRESH_MATERIALS, subscriber);
+    },
+
+    refreshMaterials: function() {
+        this.scene.traverse(function(object) {
+            if (object instanceof THREE.Mesh) {
+                if (object.material) {
+                    var material = object.material;
+                    material.needsUpdate = true;
+                }
+            }
+        });
     },
 
     loadGroundFromMapJson: function(mapJson) {
@@ -62,8 +85,8 @@ var Grid = Class.extend({
         var texture = THREE.ImageUtils.loadTexture("gndTexture/" + mapJson.board.groundtexture);
 
         var groundMaterial = new THREE.MeshLambertMaterial({
-            color: 0xffffff,
-            map: texture
+            map: texture,
+            side: THREE.DoubleSide
         });
 
         var ground = new THREE.Mesh(new THREE.PlaneGeometry(this.gridWidth, this.gridLength, this.gridWidth / 5, this.gridLength / 5), groundMaterial);
@@ -82,17 +105,12 @@ var Grid = Class.extend({
     },
 
     drawGridSquaresFromMapJson: function(mapJson) {
-        var width = mapJson.board.width;
-        var length = mapJson.board.height;
         var size = mapJson.board.tileSize;
 
         this.tileFactory = new TileFactory(this, size);
-        this.numberSquaresOnXAxis = width / size;
-        this.numberSquaresOnZAxis = length / size;
-
 
         this.PFGrid = new PF.Grid(this.numberSquaresOnXAxis, this.numberSquaresOnZAxis);
-        this.pathFinder = new PF.AStarFinder();
+        this.pathFinder = new PF.BreadthFirstFinder({allowDiagonal: false, dontCrossCorners: true});
 
 
         this.tilesArray = new Array(this.numberSquaresOnXAxis);
@@ -141,11 +159,6 @@ var Grid = Class.extend({
             objMesh.position.z = this.convertZPosToWorldZ(obj.zPos);
 
             obstacle.position = objMesh.position;
-
-            // var cube = new THREE.Mesh(new THREE.CubeGeometry(40, 40, 40), new THREE.MeshNormalMaterial());
-            // cube.position.x = this.convertXPosToWorldX(obj.xPos);
-            // cube.position.y = 20;
-            // cube.position.z = this.convertZPosToWorldZ(obj.zPos);
 
             this.scene.add(objMesh);
         }
@@ -222,7 +235,6 @@ var Grid = Class.extend({
             });
 
             this.currentSelectedUnits[GameInfo.myTeamId] = null;
-            this.deselectHighlightedTiles();
         }
 
         var teamJoinMessage;
@@ -432,7 +444,6 @@ var Grid = Class.extend({
             });
 
             this.currentSelectedUnits[GameInfo.myTeamId] = null;
-            this.deselectHighlightedTiles();
         }
 
         // mark tile position as available
@@ -449,6 +460,14 @@ var Grid = Class.extend({
         this.silentlyRemoveCharacter(character);
     },
 
+    convertMeshXToXPos: function(meshX) {
+        return Math.floor((meshX + this.gridWidth/2) / this.tileSize);
+    },
+
+    convertMeshZToZPos: function(meshZ) {
+        return Math.floor((meshZ + this.gridLength / 2) / this.tileSize);
+    },
+
     convertXPosToWorldX: function(tileXPos) {
         return -((this.gridWidth) / 2) + (tileXPos * this.tileSize);
     },
@@ -459,9 +478,6 @@ var Grid = Class.extend({
 
     markCharacterAsSelected: function(character) {
         this.currentSelectedUnits[GameInfo.myTeamId] = character;
-
-        // show character movement speed
-        this.displayMovementArea(character);
     },
 
     markTileAsSelected: function(tile) {
@@ -506,78 +522,9 @@ var Grid = Class.extend({
         return this.pathFinder.findPath(oldXPos, oldZPos, newXPos, newZPos, this.PFGrid.clone());
     },
 
-    displayMovementArea: function(character) {
-        // deselect any previously highlighted tiles
-        if (this.currentMouseOverTile) {
-            this.currentMouseOverTile.reset();
-        }
-
-        if (character.isCharacterInRoute == false && character.isCoolDown == false && character.active) {
-            this.deselectHighlightedTiles();
-
-            var characterMovementRange = character.getMovementRange();
-            // highlight adjacent squares - collect all tiles from radius
-            var tilesToHighlight = this.getTilesInArea(character, characterMovementRange);
-            this.highlightTiles(tilesToHighlight);
-        }
-    },
-
-    deselectHighlightedTiles: function() {
-        // deselect tiles.
-        if (this.highlightedTiles) {
-            this.highlightedTiles.forEach(function(tile) {
-                tile.reset();
-            });
-        }
-    },
-
-    highlightTiles: function(tilesToHighlight) {
-        tilesToHighlight.forEach(function(tile) {
-            tile.setSelectable(true);
-            tile.setMovable(true);
-            tile.markAsMovable();
-        });
-        this.highlightedTiles = tilesToHighlight;
-    },
 
     setPFGridCellAccessibility: function(x, z, hasObstacleOnCell) {
         this.PFGrid.setWalkableAt(x, z, hasObstacleOnCell);
-    },
-
-    getTilesInArea: function(character, radius) {
-        // DO A BFS here
-        var tilesToHighlight = [];
-        var startTile = this.getTileAtTilePos(character.getTileXPos(), character.getTileZPos());
-        if (!startTile) return tilesToHighlight;
-
-        startTile.isObstacle();
-        var visited = [];
-        var nodesInCurrentLevel = [];
-        var nodesInNextLevel = [];
-        tilesToHighlight.push(startTile);
-        nodesInCurrentLevel.push(startTile);
-
-        while (nodesInCurrentLevel.length > 0 && radius > 0) {
-            var currentTile = nodesInCurrentLevel.pop();
-
-            var validNeighbors = this.getNeighborTiles(currentTile.xPos, currentTile.zPos);
-            for (var i = 0; i < validNeighbors.length; i++) {
-                var neighbor = validNeighbors[i];
-                if (_.indexOf(visited, neighbor) == -1 && _.indexOf(nodesInNextLevel, neighbor) == -1) {
-                    tilesToHighlight.push(neighbor);
-                    nodesInNextLevel.push(neighbor);
-                }
-            }
-
-            if (nodesInCurrentLevel.length == 0) {
-                nodesInCurrentLevel = nodesInNextLevel;
-                nodesInNextLevel = [];
-                radius = radius - 1;
-            }
-            visited.push(currentTile);
-        }
-
-        return tilesToHighlight;
     },
 
     getNeighborTiles: function(originTileXPos, originTileZPos) {
@@ -724,34 +671,6 @@ var Grid = Class.extend({
         return this.tilesArray[xPos][zPos];
     },
 
-    drawGridSquares: function(width, length, size) {
-        this.tileFactory = new TileFactory(this, size);
-
-        this.numberSquaresOnXAxis = width / size;
-        this.numberSquaresOnZAxis = length / size;
-
-        this.tilesArray = new Array(this.numberSquaresOnXAxis);
-        for (var i = 0; i < this.numberSquaresOnXAxis; i++) {
-            this.tilesArray[i] = new Array(this.numberSquaresOnZAxis);
-        }
-
-        for (var i = 0; i < this.numberSquaresOnXAxis; i++) {
-            for (var j = 0; j < this.numberSquaresOnZAxis; j++) {
-                var tile = this.tileFactory.createTile(i, j);
-
-                var tileMesh = tile.getTileMesh();
-                this.tilesArray[i][j] = tile;
-
-                this.tiles.add(tileMesh);
-            }
-        }
-
-        this.PFGrid = new PF.Grid(this.numberSquaresOnXAxis, this.numberSquaresOnZAxis);
-        this.pathFinder = new PF.AStarFinder();
-
-        this.scene.add(this.tiles);
-    },
-
     getTileSize: function() {
         return this.tileSize;
     },
@@ -861,9 +780,6 @@ var Grid = Class.extend({
         this.setupObstaclesFromMapJson(this.mapJson);
         
         this.resetInProgress = false;
-
-        this.deselectHighlightedTiles();
-
         this.camera.position.x = 0;
         this.camera.position.y = 600;
         this.camera.position.z = 400;

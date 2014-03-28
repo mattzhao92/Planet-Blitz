@@ -99,10 +99,21 @@ var SpriteFactory = Class.extend({
 	createCharacter: function(soldierArgs) {
 		var scope = this;
 
+		var light = this.createLight();
+
 		// add character to its container, register for its updates
 		var postInitCmd = new SpriteCmd(function(sprite) {
 			scope.sceneAddCmd.execute(sprite);
 			scope.robots.push(sprite);
+			
+			if (sprite.team === GameInfo.myTeamId) {
+				sprite.getRepr().add(light);
+				light.position.y += 40;
+			} else {
+				// hide indicator information
+				sprite.ammoBar.getRepr().visible = false;
+				sprite.healthBar.getRepr().visible = false;
+			}
 		});
 
 		// mark the sprite as destroyed
@@ -147,13 +158,18 @@ var SpriteFactory = Class.extend({
 	createShot: function(bulletArgs) {
 		var scope = this;
 
+		var light = this.createBulletLight();
+
 		// add character to its container, register for updates
 		var postInitCmd = new SpriteCmd(function(sprite) {
 			scope.sceneAddCmd.execute(sprite);
 			scope.bullets.push(sprite);
+
+			// sprite.getRepr().add(light);
+			// light.position.y += 40;
 		});
 
-		// mark the sprite as destroyed (redundant in new API)
+		// mark the sprite as destroyed
 		var postDestroyCmd = new SpriteCmd(function(sprite) {
 			sprite.active = false;
 		});
@@ -260,6 +276,22 @@ var SpriteFactory = Class.extend({
 			PubSub.unsubscribe(unsubscribeToken);
 			engine.destroy();
 		}, numSeconds * 1000);
+	},
+
+	createLight: function() {
+		var light = new THREE.PointLight(0xffffff, 1.5, 300);
+		// light.castShadow = true;
+		// light.shadowDarkness = 0.95;
+
+		return light;
+	},
+
+	createBulletLight: function() {
+		var light = new THREE.PointLight(0x33CCFF, 2.0, 200);
+		// light.castShadow = true;
+		// light.shadowDarkness = 0.95;
+
+		return light;
 	},
 
 	getCharacters: function() {

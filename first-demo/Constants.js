@@ -21,3 +21,5 @@ Constants.ACTIVE_KEYBINDINGS = {};
 Constants.TOPIC_CAMERA_POSITION = "cameraPosition";
 
 Constants.TOPIC_CAMERA_ROTATION = "cameraRotation";
+
+Constants.REFRESH_MATERIALS = "refreshMaterials";
