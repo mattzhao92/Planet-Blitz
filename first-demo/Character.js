@@ -523,12 +523,8 @@ var Character = Sprite.extend({
     },
 
     onMouseMovement: function(mouseLocation) {
-        var from = this.mesh.position;
-
-        var direction = new THREE.Vector3(mouseLocation.x - from.x, mouseLocation.y - from.y, mouseLocation.z - from.z)
-
         // Set the direction's angle, and the difference between it and our Object3D's current rotation
-        this.mesh.rotation.y = Math.atan2(direction.x, direction.z);
+        this.mesh.rotation.y = Math.atan2(mouseLocation.x - this.mesh.position.x, mouseLocation.z - this.mesh.position.z);
     },
 
     collide: function() {
