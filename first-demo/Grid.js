@@ -186,6 +186,9 @@ var Grid = Class.extend({
                 this.markTileOccupiedByCharacter(startX, startY);
             }
         }
+
+        // handle initial case where you need to publish the current initial angle of 0
+        PubSub.publish(Constants.TOPIC_CAMERA_ROTATION, this.controls.currentAngle);
     },
 
     getCharacters: function() {
@@ -352,9 +355,6 @@ var Grid = Class.extend({
         );
 
     },
-
-
-
 
     setupCharacters: function() {
         this.numOfCharacters = 3;

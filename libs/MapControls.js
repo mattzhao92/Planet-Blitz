@@ -234,8 +234,6 @@ THREE.MapControls = function ( object, scene, domElement ) {
         // console.log(this.currentAngle);
 
         PubSub.publish(Constants.TOPIC_CAMERA_ROTATION, this.currentAngle);
-
-
     };
 
     this.getMouseOnScreen = function ( clientX, clientY ) {
