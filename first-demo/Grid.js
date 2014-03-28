@@ -52,14 +52,23 @@ var Grid = Class.extend({
     },
 
     loadGroundFromMapJson: function(mapJson) {
-        var texture = THREE.ImageUtils.loadTexture("gndTexture/"+mapJson.board.groundtexture);
+        var width = mapJson.board.width;
+        var length = mapJson.board.height;
+        var size = mapJson.board.tileSize;
+
+        this.numberSquaresOnXAxis = width / size;
+        this.numberSquaresOnZAxis = length / size;
+
+        var texture = THREE.ImageUtils.loadTexture("gndTexture/" + mapJson.board.groundtexture);
 
         var groundMaterial = new THREE.MeshLambertMaterial({
-            color: 0xffffff,
-            map: texture
+            map: texture,
+            side: THREE.DoubleSide
         });
 
-        var ground = new THREE.Mesh(new THREE.PlaneGeometry(this.gridWidth, this.gridLength), groundMaterial);
+        var ground = new THREE.Mesh(new THREE.PlaneGeometry(this.gridWidth, this.gridLength, this.numberSquaresOnXAxis, this.numberSquaresOnZAxis), groundMaterial);
+        ground.receiveShadow = true;
+
         ground.rotation.x = -0.5 * Math.PI;
 
         var Y_BUFFER = -0.5;
@@ -73,14 +82,9 @@ var Grid = Class.extend({
     },
 
     drawGridSquaresFromMapJson: function(mapJson) {
-        var width = mapJson.board.width;
-        var length = mapJson.board.height;
         var size = mapJson.board.tileSize;
 
         this.tileFactory = new TileFactory(this, size);
-        this.numberSquaresOnXAxis = width / size;
-        this.numberSquaresOnZAxis = length / size;
-
 
         this.PFGrid = new PF.Grid(this.numberSquaresOnXAxis, this.numberSquaresOnZAxis);
         this.pathFinder = new PF.AStarFinder();
@@ -132,11 +136,6 @@ var Grid = Class.extend({
             objMesh.position.z = this.convertZPosToWorldZ(obj.zPos);
 
             obstacle.position = objMesh.position;
-
-            // var cube = new THREE.Mesh(new THREE.CubeGeometry(40, 40, 40), new THREE.MeshNormalMaterial());
-            // cube.position.x = this.convertXPosToWorldX(obj.xPos);
-            // cube.position.y = 20;
-            // cube.position.z = this.convertZPosToWorldZ(obj.zPos);
 
             this.scene.add(objMesh);
         }
@@ -712,34 +711,6 @@ var Grid = Class.extend({
         return this.tilesArray[xPos][zPos];
     },
 
-    drawGridSquares: function(width, length, size) {
-        this.tileFactory = new TileFactory(this, size);
-
-        this.numberSquaresOnXAxis = width / size;
-        this.numberSquaresOnZAxis = length / size;
-
-        this.tilesArray = new Array(this.numberSquaresOnXAxis);
-        for (var i = 0; i < this.numberSquaresOnXAxis; i++) {
-            this.tilesArray[i] = new Array(this.numberSquaresOnZAxis);
-        }
-
-        for (var i = 0; i < this.numberSquaresOnXAxis; i++) {
-            for (var j = 0; j < this.numberSquaresOnZAxis; j++) {
-                var tile = this.tileFactory.createTile(i, j);
-
-                var tileMesh = tile.getTileMesh();
-                this.tilesArray[i][j] = tile;
-
-                this.tiles.add(tileMesh);
-            }
-        }
-
-        this.PFGrid = new PF.Grid(this.numberSquaresOnXAxis, this.numberSquaresOnZAxis);
-        this.pathFinder = new PF.AStarFinder();
-
-        this.scene.add(this.tiles);
-    },
-
     getTileSize: function() {
         return this.tileSize;
     },
@@ -842,7 +813,6 @@ var Grid = Class.extend({
 
         // create grid tiles
         this.loadGroundFromMapJson(this.mapJson);
-        //this.drawGridSquares(width, length, tileSize);
         this.drawGridSquaresFromMapJson(this.mapJson);
 
         // initialize characters
