@@ -32,6 +32,7 @@ var Bullet = Sprite.extend({
     var sound = new Howl({
       urls: [args.sound]
     }).play();
+
   },
 
   getPosition: function() {

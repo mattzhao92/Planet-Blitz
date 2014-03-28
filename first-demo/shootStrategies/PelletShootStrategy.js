@@ -16,7 +16,7 @@ var PelletShootStrategy = ShootStrategy.extend({
 			mesh: mesh,
 			damage: 20, 
 			speed: 500,
- 			range: 1000,
+ 			range: 300,
  			from: from,
  			to: to,
 			owner: owner,

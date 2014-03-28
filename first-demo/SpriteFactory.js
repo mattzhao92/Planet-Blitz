@@ -106,9 +106,15 @@ var SpriteFactory = Class.extend({
 			scope.sceneAddCmd.execute(sprite);
 			scope.robots.push(sprite);
 			
-			// this.world.scene.add(light);
-			sprite.getRepr().add(light);
-			light.position.y += 40;
+			if (sprite.team === GameInfo.myTeamId) {
+				sprite.getRepr().add(light);
+				light.position.y += 40;
+			} else {
+				// hide indicator information
+				sprite.ammoBar.getRepr().visible = false;
+				sprite.healthBar.getRepr().visible = false;
+				sprite.cooldownBar.getRepr().visible = false;
+			}
 		});
 
 		// mark the sprite as destroyed
@@ -159,8 +165,10 @@ var SpriteFactory = Class.extend({
 		var postInitCmd = new SpriteCmd(function(sprite) {
 			scope.sceneAddCmd.execute(sprite);
 			scope.bullets.push(sprite);
+
 			sprite.getRepr().add(light);
-			light.position.y += 15;
+			light.position.y = 1;
+		
 		});
 
 		// mark the sprite as destroyed
@@ -273,7 +281,7 @@ var SpriteFactory = Class.extend({
 	},
 
 	createLight: function() {
-		var light = new THREE.PointLight(0xffffff, 2, 200);
+		var light = new THREE.PointLight(0xffffff, 1.5, 300);
 		// light.castShadow = true;
 		// light.shadowDarkness = 0.95;
 

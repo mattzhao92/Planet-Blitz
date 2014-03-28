@@ -307,7 +307,6 @@ var Character = Sprite.extend({
             var path = this.world.findPath(this.getTileXPos(), this.getTileZPos(), this.getTileXPos() + this.direction.x,
                 this.getTileZPos() + this.direction.z);
 
-            console.log(">>> PATH " + path);
             var gx = this.getTileXPos() + this.direction.x;
             var gz = this.getTileZPos() + this.direction.z;
             this.destX = gx;
