@@ -8,6 +8,7 @@ App = function(containerName) {
 
     // create a render and set the size
     this.renderer = new THREE.WebGLRenderer({antialias: true});
+    // this.renderer.shadowMapEnabled = true;
     this.renderer.setSize(window.innerWidth, window.innerHeight);
 
     // add the output of the renderer to the html element
@@ -54,20 +55,20 @@ App.prototype = {
     },
 
     addLighting: function() {
-        // really subtle ambient lighting
-        var ambientLight = new THREE.AmbientLight( 0x191919 );
-        this.scene.add( ambientLight );
+        // // really subtle ambient lighting
+        // var ambientLight = new THREE.AmbientLight( 0x191919 );
+        // this.scene.add( ambientLight );
 
-        // sky color, ground color, intensity
-        // var hemiLight = new THREE.HemisphereLight( 0x0000ff, 0xffffff, 0.3 ); 
-        // this.scene.add(hemiLight);
+        // // sky color, ground color, intensity
+        // // var hemiLight = new THREE.HemisphereLight( 0x0000ff, 0xffffff, 0.3 ); 
+        // // this.scene.add(hemiLight);
 
-        // a really bright light
-        var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.8 );
-        directionalLight.position.x = 0;
-        directionalLight.position.y = 400;
-        directionalLight.position.z = 0;
-        this.scene.add( directionalLight );
+        // // a really bright light
+        // var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.8 );
+        // directionalLight.position.x = 0;
+        // directionalLight.position.y = 400;
+        // directionalLight.position.z = 0;
+        // this.scene.add( directionalLight );
     },
 
     addSkybox: function() {
