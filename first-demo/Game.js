@@ -8,7 +8,6 @@ App = function(containerName) {
 
     // create a render and set the size
     this.renderer = new THREE.WebGLRenderer({antialias: true});
-    // this.renderer.shadowMapEnabled = true;
     this.renderer.setSize(window.innerWidth, window.innerHeight);
 
     // add the output of the renderer to the html element

@@ -66,7 +66,7 @@ var Grid = Class.extend({
             side: THREE.DoubleSide
         });
 
-        var ground = new THREE.Mesh(new THREE.PlaneGeometry(this.gridWidth, this.gridLength, this.numberSquaresOnXAxis, this.numberSquaresOnZAxis), groundMaterial);
+        var ground = new THREE.Mesh(new THREE.PlaneGeometry(this.gridWidth, this.gridLength, this.gridWidth / 5, this.gridLength / 5), groundMaterial);
         ground.receiveShadow = true;
 
         ground.rotation.x = -0.5 * Math.PI;

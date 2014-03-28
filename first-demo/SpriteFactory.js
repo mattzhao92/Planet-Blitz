@@ -105,18 +105,15 @@ var SpriteFactory = Class.extend({
 		var postInitCmd = new SpriteCmd(function(sprite) {
 			scope.sceneAddCmd.execute(sprite);
 			scope.robots.push(sprite);
+			
 			// this.world.scene.add(light);
 			sprite.getRepr().add(light);
 			light.position.y += 40;
-
-			light.target = sprite.getRepr();
 		});
-
 
 		// mark the sprite as destroyed
 		var postDestroyCmd = new SpriteCmd(function(sprite) {
 			sprite.active = false;
-			this.world.scene.remove(light);
 		});
 
 		var characterArgs = {
@@ -131,8 +128,6 @@ var SpriteFactory = Class.extend({
 
 		var robot = new Character(postInitCmd, postDestroyCmd, characterArgs);
 		robot.setup();
-
-
 
 		return robot;
 	},
@@ -158,13 +153,17 @@ var SpriteFactory = Class.extend({
 	createShot: function(bulletArgs) {
 		var scope = this;
 
+		var light = this.createLight();
+
 		// add character to its container, register for updates
 		var postInitCmd = new SpriteCmd(function(sprite) {
 			scope.sceneAddCmd.execute(sprite);
 			scope.bullets.push(sprite);
+			sprite.getRepr().add(light);
+			light.position.y += 15;
 		});
 
-		// mark the sprite as destroyed (redundant in new API)
+		// mark the sprite as destroyed
 		var postDestroyCmd = new SpriteCmd(function(sprite) {
 			sprite.active = false;
 		});
@@ -274,16 +273,9 @@ var SpriteFactory = Class.extend({
 	},
 
 	createLight: function() {
-		// var spotlight = new THREE.SpotLight(0xffffff);
-		// spotlight.shadowCameraVisible = true;
-		// spotlight.shadowDarkness = 0.95;
-		// spotlight.intensity = 2;
-		// // must enable shadow casting ability for the light
-		// spotlight.castShadow = true;
-
 		var light = new THREE.PointLight(0xffffff, 2, 200);
-		light.castShadow = true;
-		light.shadowDarkness = 0.95;
+		// light.castShadow = true;
+		// light.shadowDarkness = 0.95;
 
 		return light;
 	},
