@@ -220,6 +220,7 @@ function createSingleGame() {
   $("#unameBtn").click(function() {
     var map = $('#choosemap :selected').text();
     sendSingleModeMsg(map);
+    loading();
     $("#Input-dialog").dialog("close");
   });
   $("#quitBtn").click(function() {
@@ -288,7 +289,6 @@ $(document).ready(function() {
   /* Start the game locally */
   $('#debugBtn').click(function() {
     sendListMapMsg();
-    loading();
   });
 
   $('#helpBtn').click(function() {
