@@ -63,9 +63,6 @@ var Character = Sprite.extend({
         this.coolDownCount = 55;
         this.coolDownLeft = this.coolDownCount;
 
-        this.cooldownBar = this.spriteFactory.createCooldownBar(this.characterSize, this.getRepr().position, 10, this.coolDownCount);
-        this.addPositionObserver(this.cooldownBar);
-
         this.isCharacterInRoute = false;
         this.lastRoadMap = [];
 
@@ -117,30 +114,6 @@ var Character = Sprite.extend({
 
     addHealthObserver: function(healthObserver) {
         this.healthObservers.push(healthObserver);
-    },
-
-    reset : function() {
-        this.direction = new THREE.Vector3(0, 0, 0);
-
-        this.setup();
-
-        this.mesh.position = this.originalPosition;
-
-        this.breakUpdateHere = false;
-
-        this.isSelected = true;
-        this.hasPendingMove = false;
-        this.highlightedTiles = [];
-        this.motionQueue.length = 0;
-
-        this.healthBar.reset(this.mesh.position);
-        this.ammoBar.reset(this.mesh.position);
-        
-        this.isCoolDown = false;
-        this.coolDownLeft = 0;
-        this.coolDownCount = 105;
-
-        this.cooldownBar.reset(this.mesh.position);
     },
 
     loadFile: function(filename, onLoad) {
@@ -381,8 +354,6 @@ var Character = Sprite.extend({
                 this.lockMovement = true;
                 return;
             }
-            //this.coolDownLeft -= 0;0.01 * this.coolDownCount;
-            this.cooldownBar.onCooldownChanged(this.coolDownLeft);
 
             var newMeshX = this.mesh.position.x + this.velocityX * delta;
             var newMeshZ = this.mesh.position.z + this.velocityZ * delta;
@@ -431,8 +402,6 @@ var Character = Sprite.extend({
         if (this.coolDownLeft >= 0.5 * this.coolDownCount && this.lockMovement) {
             this.lockMovement = false;
         }
-
-        this.cooldownBar.onCooldownChanged(this.coolDownLeft);
 
         // handle dequeue action here
         if (this.motionQueue.length > 0 && !this.breakUpdateHere) {

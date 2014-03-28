@@ -113,7 +113,6 @@ var SpriteFactory = Class.extend({
 				// hide indicator information
 				sprite.ammoBar.getRepr().visible = false;
 				sprite.healthBar.getRepr().visible = false;
-				sprite.cooldownBar.getRepr().visible = false;
 			}
 		});
 
