@@ -60,7 +60,7 @@ var Grid = Class.extend({
             scope.refreshMaterials();
         }
 
-        PubSub.subscribe(Constants.REFRESH_MATERIALS, subscriber);
+        PubSub.subscribe(Constants.TOPIC_REFRESH_MATERIALS, subscriber);
     },
 
     refreshMaterials: function() {

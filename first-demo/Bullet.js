@@ -29,7 +29,7 @@ var Bullet = Sprite.extend({
     this.mesh.add(light);
 
     // update scene
-    PubSub.publish(Constants.REFRESH_MATERIALS, null);
+    PubSub.publish(Constants.TOPIC_REFRESH_MATERIALS, null);
 
     var moveStrategy = new StraightLineUpdateStrategy(this.direction, this.speed);
     var expireStrategy = new ExpireUpdateStrategy(this.startPosition, this.range);
