@@ -114,7 +114,7 @@ THREE.MapControls = function ( object, scene, domElement ) {
     var ARBITRARY_MOUSE_POS = 50;
     this.mousePosition = {x: ARBITRARY_MOUSE_POS, y: ARBITRARY_MOUSE_POS};
 
-    this.CURSOR_IMAGE_PATH = "images/cursor.png";
+    this.CURSOR_IMAGE_PATH = "images/pointer.cur";
 
     this.currentAngle = 0;
 
@@ -145,6 +145,7 @@ THREE.MapControls = function ( object, scene, domElement ) {
     this.resetMousePosition = function() {
         scope.mousePosition.x = ARBITRARY_MOUSE_POS;
         scope.mousePosition.y = ARBITRARY_MOUSE_POS;
+        scope.mouseSprite.visible = false;
     }
 
     this.handleEvent = function ( event ) {
@@ -789,6 +790,7 @@ THREE.MapControls = function ( object, scene, domElement ) {
 
         if (scope.mousePosition.x == ARBITRARY_MOUSE_POS && scope.mousePosition.y == ARBITRARY_MOUSE_POS) {
             scope.mousePosition = calculateInitialMousePosition(canvas, event);
+            scope.mouseSprite.visible = true;
         }
 
         var movementX = event.movementX;
@@ -831,8 +833,9 @@ THREE.MapControls = function ( object, scene, domElement ) {
             alignment: THREE.SpriteAlignment.topLeft
         });
         this.mouseSprite = new THREE.Sprite(cursorMaterial);
-        this.mouseSprite.scale.set(40, 40, 1.0);
+        this.mouseSprite.scale.set(34, 34, 1.0);
         this.mouseSprite.position.set(this.mousePosition.x, this.mousePosition.y, 0);
+        this.mouseSprite.visible = false;
         this.scene.add(this.mouseSprite);
     }
 

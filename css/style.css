@@ -3,6 +3,10 @@
   padding: 0;
 }
 
+#WebGL-output {
+  cursor:url(images/pointer.cur), auto;
+}
+
 body {
   overflow: hidden;
 }
@@ -15,7 +19,6 @@ h1 {
   text-shadow: 1px 1px 1px #fff;
   font-weight: normal;
   font-family: Helvetica, Arial, sans;
-
 }
 
 a {
@@ -39,10 +42,6 @@ a {
   margin: 0 auto;
   border: 0;
 }
-
-
-
-
 
 .jms-slideshow {
   position: relative;
