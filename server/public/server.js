@@ -244,9 +244,9 @@ function listAvailableGames(games) {
     var game = games[t];
     var isPlaying = game[Info.gameStart] ? 'Playing' : 'Waiting';
     if (game[Info.isFull]) {
-      content += '<tr><td class="open-game" style="padding-left:32">' + game[Info.mapName] + '</td><td>' + game[Info.mapName] + '</td><td style="padding-right:40px">' + game[Info.player] +'</td>';
+      content += '<tr class="list-game"><td class="open-game" style="padding-left:32">' + game[Info.mapName] + '</td><td>' + game[Info.mapName] + '</td><td style="padding-right:40px">' + game[Info.player] +'</td>';
     } else {
-      content += '<tr onClick="joinGame(' + game[Info.gameId] + ')"><td class="open-game" style="padding-left:32">' + game[Info.gameName] + '</td><td>' + game[Info.mapName] + '</td><td style="padding-right:40px">' + game[Info.player] +'</td>';
+      content += '<tr class="list-game" onClick="joinGame(' + game[Info.gameId] + ')"><td class="open-game" style="padding-left:32">' + game[Info.gameName] + '</td><td>' + game[Info.mapName] + '</td><td style="padding-right:40px">' + game[Info.player] +'</td>';
     }
     
     

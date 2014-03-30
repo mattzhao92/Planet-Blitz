@@ -54,6 +54,10 @@ body {
   
 }
 
+.list-game:hover {
+  color: red;
+}
+
 .span, .span_large{
   background-color: rgba(0,0,0, 0.02);
   vertical-align: middle;
