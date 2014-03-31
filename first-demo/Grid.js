@@ -44,7 +44,7 @@ var Grid = Class.extend({
         this.setupMouseDownListener();
         this.setupHotkeys();
 
-        this.unitCycle = 0;
+        this.unitCycle = 1;
         this.resetInProgress = false;
 
         this.hotkeys = [];
