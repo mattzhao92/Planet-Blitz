@@ -23,3 +23,11 @@ Constants.TOPIC_CAMERA_POSITION = "cameraPosition";
 Constants.TOPIC_CAMERA_ROTATION = "cameraRotation";
 
 Constants.TOPIC_REFRESH_MATERIALS = "refreshMaterials";
+
+function Colors() {
+
+}
+
+// light-orange
+Colors.EXPLOSION = 0xFF8929;
+

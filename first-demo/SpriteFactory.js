@@ -252,6 +252,32 @@ var SpriteFactory = Class.extend({
 		    };
 		
 		this.createParticleEffect(fireball, numSecondsForExplosion);
+
+		// create light for
+
+		var initialLightRadius = 220;
+		var initialIntensity = 3.0;
+
+		var light = new THREE.PointLight(Colors.EXPLOSION, initialIntensity, initialLightRadius);
+		scope.world.scene.add(light);
+		light.position = position;
+		light.position.y += this.characterSize / 2;
+
+		var timeForEffect = numSecondsForExplosion * 1000;
+
+		// update scene
+		PubSub.publish(Constants.TOPIC_REFRESH_MATERIALS, null);
+
+		// explosion fade out
+		var tween = new TWEEN.Tween({intensity: initialIntensity, lightRadius: initialLightRadius}).to({intensity: 0, lightRadius: 0}, timeForEffect * 1.5)
+			.easing(TWEEN.Easing.Cubic.In).onUpdate(function() {
+				light.intensity = this.intensity;
+				light.distance = this.lightRadius;
+			}).start();
+
+		setTimeout(function() {
+			scope.world.scene.remove(light);
+		}, timeForEffect);
 	},
 
 	createParticleEffect: function(effectVals, numSeconds) {
