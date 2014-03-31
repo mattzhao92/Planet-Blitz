@@ -290,6 +290,8 @@ var Grid = Class.extend({
             var hotkey = number.toString();
             KeyboardJS.on("ctrl, command > " + hotkey,
                 function(event, keysPressed, keyCombo) {
+                    event.preventDefault();
+
                     var currentSelectedUnit = scope.getCurrentSelectedUnit();
                     if (currentSelectedUnit && currentSelectedUnit.active) {
 
@@ -312,8 +314,10 @@ var Grid = Class.extend({
         });
 
         // unit toggle - cycle forwards
-        KeyboardJS.on("t",
+        KeyboardJS.on("t, tab",
             function(event, keysPressed, keyCombo) {
+                event.preventDefault();
+
                 var myTeamCharacters = scope.getMyTeamCharacters();
                 var characterSelected = myTeamCharacters[scope.unitCycle];
 
