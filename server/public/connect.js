@@ -185,6 +185,7 @@ function GameConfig() {
   this.isLoading = false;
   this.existingTeams = new Array();
   this.mapContent = null;
+  this.inPostGame = false;
 }
 
 function renderGame() {

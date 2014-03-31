@@ -52,6 +52,7 @@ function joinGame(gameId) {
 }
 
 function showRestartDialog(message, additionalMsg, score) {
+  GameInfo.inPostGame = true;
   var content = '<h2 style="text-align:center">' + message + '</h2>';
   if (additionalMsg) {
     content += '<p style="text-align:center; margin:0">' + additionalMsg + '</p>';
@@ -86,12 +87,14 @@ function showRestartDialog(message, additionalMsg, score) {
     resizable: false,
     buttons: {
       "Play again": function() {
+        GameInfo.inPostGame = false;
         $(this).dialog("close");
         game.reset();
         sendRestartMsg();
         restartLoading();
       },
       "Quit": function() {
+        GameInfo.inPostGame = false;
         $(this).dialog("close");
         mainMenu();
         sendLeaveMsg();
@@ -286,6 +289,7 @@ $(document).ready(function() {
     sendListGameMsg();
   });
 
+
   /* Start the game locally */
   $('#debugBtn').click(function() {
     sendListMapMsg();
@@ -312,4 +316,11 @@ $(document).ready(function() {
   });
   
 });
+
+window.oncontextmenu = function () {
+  if (GameInfo.inPostGame) {
+    return false;
+  }
+  return true;
+}
 
