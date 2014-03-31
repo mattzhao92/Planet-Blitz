@@ -34,8 +34,9 @@ function restartLoading() {
 function mainMenu() {
   GameInfo.isLoading = false;
   GameInfo.isStart = false;
-  $('#WebGL-output').hide();
-  $('#Stats-output').hide();
+  removeGameCanvas();
+  // $('#WebGL-output').hide();
+  // $('#Stats-output').hide();
   $('body').css('background-image', 'url(images/PlanetBlitz.jpg)');
   $('#Loading-output').hide();
   $('.span').hide();

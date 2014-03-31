@@ -34,6 +34,7 @@ socket.on(Message.PREPARE, function(prepareInfo) {
   GameInfo.numOfTeams = count;
   GameInfo.maxNumTeams = parseInt(prepareInfo[Message.MAXPLAYER]);
   GameInfo.mapContent = prepareInfo[Message.MAP];
+  removeGameCanvas();
   renderGame();
   
   // Render the game here.
@@ -59,6 +60,7 @@ socket.on(Message.START, function(score) {
 socket.on(Message.OBSERVER, function(obMsg) {
   var state = obMsg[Message.STATE];
   var score = obMsg[Stat.result];
+  removeGameCanvas();
   renderGame();
   startGame();
   var grid = game.getWorld();
@@ -188,11 +190,18 @@ function GameConfig() {
   this.inPostGame = false;
 }
 
-function renderGame() {
+function removeGameCanvas() {
   var outputBox = document.getElementById('WebGL-output');
   var msgBox = document.getElementById('Stats-output');
-  outputBox.parentNode.removeChild(outputBox);
-  msgBox.parentNode.removeChild(msgBox);
+  if (outputBox) {
+    outputBox.parentNode.removeChild(outputBox);
+  }
+  if (msgBox) {
+    msgBox.parentNode.removeChild(msgBox);
+  }
+}
+
+function renderGame() {
   var containerBox = document.getElementById('Loading-output-container');
   var newDiv = document.createElement("div");
   newDiv.id = 'WebGL-output';
