@@ -9,6 +9,7 @@ var Bullet = Sprite.extend({
     this.damage = args.damage;
     this.speed = args.speed;
     this.range = args.range;
+    this.addons = args.addons;
 
     // store who shot the bullet
     this.owner = args.owner;
@@ -25,8 +26,10 @@ var Bullet = Sprite.extend({
 
     this.interactStrategy = new ApplyDamageStrategy(this.damage);
 
-    var light = new THREE.PointLight(0x33CCFF, 3.0, 150);
-    this.mesh.add(light);
+    var scope = this;
+    _.forEach(this.addons, function(addon) {
+      scope.mesh.add(addon);
+    });
 
     // update scene
     PubSub.publish(Constants.TOPIC_REFRESH_MATERIALS, null);

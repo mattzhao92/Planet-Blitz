@@ -1,4 +1,4 @@
-var LaserShootStrategy = ShootStrategy.extend({
+var FlameShootStrategy = ShootStrategy.extend({
 	init: function(spriteFactory, materialFactory) {
 		this.spriteFactory = spriteFactory;
 		this.materialFactory = materialFactory;
@@ -7,17 +7,17 @@ var LaserShootStrategy = ShootStrategy.extend({
 	shoot: function(owner, from, to) {
 		var material = this.materialFactory.createTransparentGlowMaterial(this.spriteFactory.world.camera.position);
 
-		var radius = 15;
-		var geometry = new THREE.SphereGeometry(radius, 30, 30);
+		var radius = 12;
+		var geometry = new THREE.SphereGeometry(radius, 15, 15);
 		var mesh = new THREE.Mesh(geometry, material);
 
-		var light = new THREE.PointLight(0x33CC33, 5.0, 200);
+		var light = new THREE.PointLight(0xED4A1C, 4.0, 200);
 
 		var bulletArgs = {
 			radius: radius,
 			mesh: mesh,
 			addons: [light],
-			damage: 40, 
+			damage: 20, 
 			speed: 300,
  			range: 400,
  			from: from,
