@@ -455,8 +455,6 @@ var Grid = Class.extend({
     },
 
     handleCharacterDead: function(character) {
-        this.displayMessage("A robot was destroyed!");
-
         this.silentlyRemoveCharacter(character);
     },
 
