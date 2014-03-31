@@ -26,8 +26,8 @@ var Character = Sprite.extend({
         this.highlightedTiles = [];
 
         this.hasPendingMove = false;
-        this.destX;
-        this.destZ;
+        this.destX = 0;
+        this.destZ = 0;
 
         // Set the character modelisation object
         this.mesh = new THREE.Object3D();
@@ -36,7 +36,6 @@ var Character = Sprite.extend({
         this.mesh.owner = this;
 
         // Set the vector of the current motion
-        this.direction = new THREE.Vector3(0, 0, 0);
         this.motionQueue = [];
 
         this.addUnitSelector();
@@ -266,24 +265,18 @@ var Character = Sprite.extend({
         }
     },
 
-    setDirection: function(direction) {
+    emptyMotionQueue: function() {
         this.motionQueue.length = 0;
-        this.direction = direction;
         this.lockMovement = false;
         this.motionInProgress = false;
     },
 
-    enqueueMotion: function() {
+    enqueueMotion: function(destX, destZ) {
         // if (this.isCoolDown == 0) {
-            var path = this.world.findPath(this.getTileXPos(), this.getTileZPos(), this.getTileXPos() + this.direction.x,
-                this.getTileZPos() + this.direction.z);
-
-            var gx = this.getTileXPos() + this.direction.x;
-            var gz = this.getTileZPos() + this.direction.z;
-            this.destX = gx;
-            this.destZ = gz;
+            var path = this.world.findPath(this.getTileXPos(), this.getTileZPos(), destX, destZ);
+            this.destX = destX;
+            this.destZ = destZ;
             this.hasPendingMove = true;
-            // console.log("Set to " + gx + " and " + gz + " for id " + this.team + " i " + this.id);
             var addNewItem = true;
             var newMotions = [];
             for (var i = 1; i < path.length; i++) {
@@ -294,13 +287,13 @@ var Character = Sprite.extend({
                             (path[i][1] - path[i - 1][1]) == 0)) {
                         // if they are on the same, line, expand the last element in the motionQueue
                         var lastMotion = newMotions[newMotions.length - 1];
-                        lastMotion.x += (path[i][0] - path[i - 1][0]);
-                        lastMotion.z += (path[i][1] - path[i - 1][1]);
+                        lastMotion.x = path[i][0];
+                        lastMotion.z = path[i][1];
                         addNewItem = false;
                     }
                 }
                 if (addNewItem) {
-                    newMotions.push(new THREE.Vector3(path[i][0] - path[i - 1][0], 0, path[i][1] - path[i - 1][1]));
+                    newMotions.push(new THREE.Vector3(path[i][0], 0, path[i][1]));
                 }
                 addNewItem = true;
             }
@@ -406,20 +399,20 @@ var Character = Sprite.extend({
             this.motionInProcess = true;
             var direction = this.motionQueue.pop();
             if (direction.sentinel == 'start') {
-                var path = direction.highlightTiles;
                 this.isCharacterInRoute = true;
                 if (this.team == GameInfo.myTeamId) {
                 }
                 return;
             } else if (direction.sentinel == 'end') {
                 this.isCharacterInRoute = false;
-                if (this.destX == this.xPos && this.destZ == this.zPos) {
+                if (direction.x == this.xPos && direction.z == this.zPos) {
                     this.hasPendingMove = false;
                 }
                 return;
             }
 
-            if (direction.x !== 0 || direction.z !== 0) {
+            if (this.xPos !== direction.x || this.zPos !== direction.z) {
+       
                 // And, only if we're not colliding with an obstacle or a wall ...
                 if (this.collide()) {
                     return false;
@@ -430,22 +423,23 @@ var Character = Sprite.extend({
                 this.prevMeshZ = this.mesh.position.z;
 
                 this.world.markTileNotOccupiedByCharacter(this.getTileXPos(), this.getTileZPos());
-                this.goalMeshX = this.mesh.position.x + direction.x * this.characterSize;
-                this.goalMeshZ = this.mesh.position.z + direction.z * this.characterSize;
+                
+                this.goalMeshX = this.world.convertXPosToWorldX(direction.x);
+                this.goalMeshZ = this.world.convertZPosToWorldZ(direction.z);
                 
                 var MOVE_VELOCITY = 100;
 
-                if (direction.x < 0) {
+                if (direction.x < this.xPos) {
                     this.velocityX = -MOVE_VELOCITY;
-                } else if(direction.x > 0) {
+                } else if(direction.x > this.xPos) {
                     this.velocityX = MOVE_VELOCITY;
                 } else {
                     this.velocityX = 0;
                 }
 
-                if (direction.z < 0) {
+                if (direction.z < this.zPos) {
                     this.velocityZ = -MOVE_VELOCITY;
-                } else if (direction.z > 0) {
+                } else if (direction.z > this.zPos) {
                     this.velocityZ = MOVE_VELOCITY;
                 } else {
                     this.velocityZ = 0;

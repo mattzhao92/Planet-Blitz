@@ -84,12 +84,12 @@ socket.on(Message.MOVE, function(moveData) {
   // console.log(data);
   var moverTeam = parseInt(data[Move.team]);
   var moverIndex = parseInt(data[Move.index]);
-  var deltaX = parseInt(data[Move.X]);
-  var deltaZ = parseInt(data[Move.Z]);
+  var destX = parseInt(data[Move.X]);
+  var destZ = parseInt(data[Move.Z]);
   var target = game.getWorld().getCharacterById(moverTeam, moverIndex);
   if (game.getWorld().syncGameState(state)) {
-    target.setDirection(new THREE.Vector3(deltaX, 0, deltaZ));
-    target.enqueueMotion(null);
+    target.emptyMotionQueue();
+    target.enqueueMotion(destX, destZ);
   }
   // console.log("Finish move receiving");
 

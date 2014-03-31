@@ -516,6 +516,7 @@ var Grid = Class.extend({
         var tile = this.getTileAtTilePos(xPos, zPos);
         if (tile) {
             tile.hasObstacle = true;
+
             this.setPFGridCellAccessibility(xPos, zPos, false);
         }
     },
@@ -643,7 +644,6 @@ var Grid = Class.extend({
         if (intersectsWithTiles.length > 0) {
             var tileSelected = intersectsWithTiles[0].object.owner;
             var coordinate = tileSelected.onMouseOver();
-
             if (this.getCurrentSelectedUnit() && coordinate) {
                 var deltaX = coordinate.x - this.getCurrentSelectedUnit().getTileXPos();
                 var deltaY = 0;
@@ -655,7 +655,7 @@ var Grid = Class.extend({
                     // Put the network communication here.
                     if (this.getCurrentSelectedUnit().isCoolDown == 0) {
                             sendMoveMsg(this.getCurrentSelectedUnit().id,
-                                deltaX, deltaY, deltaZ);
+                                coordinate.x, 0, coordinate.z);
                     }
                 }
             }

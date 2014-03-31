@@ -92,6 +92,7 @@ var GridCell = Class.extend({
 
 var TileFactory = Class.extend({
     init: function(world, tileSize) {
+        this.tileSize = tileSize;
         this.tileGeom = new THREE.PlaneGeometry(tileSize, tileSize, tileSize / 5, tileSize / 5);
         this.world = world;
     },
