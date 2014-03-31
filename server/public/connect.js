@@ -120,9 +120,11 @@ socket.on(Message.HIT, function(hitData) {
   var index = parseInt(data[Hit.index]);
   var damage = parseInt(data[Hit.damage]);  
   var target = game.getWorld().getCharacterById(team, index);
-  game.getWorld().syncGameState(state);
+  // game.getWorld().syncGameState(state);
   if (data[Hit.kill]) {
     game.getWorld().handleCharacterDead(target);
+    var killMsg = hitData[Hit.killer] + ' just killed ' + hitData[Hit.killed];
+    game.displayMessage(killMsg);
     var score = hitData[Stat.result];
     game.updateScoreBoard(score);
   } else{

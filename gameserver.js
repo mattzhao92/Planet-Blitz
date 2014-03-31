@@ -255,8 +255,16 @@ io.sockets.on('connection', function(socket) {
               break;
             }
           }
+          message[Hit.killer] = username;
         });
         message[Hit.kill] = true;
+        var killedTeamId = parseInt(message[Hit.team]);
+        for (var uname in game.score) {
+          if (game.score[uname].teamId == killedTeamId) {
+            message[Hit.killed] = uname;
+            break;
+          }
+        }
       }
       game.seq++;
       newState[Message.HIT] = message;
@@ -265,6 +273,8 @@ io.sockets.on('connection', function(socket) {
       if (isKill) {
         newState[Stat.result] = gameScore;
       }
+
+
       
       socket.broadcast.to(game.room).emit(Message.HIT, newState);
       socket.emit(Message.HIT, newState);

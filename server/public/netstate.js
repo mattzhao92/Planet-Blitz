@@ -48,6 +48,8 @@ var Shoot = {
 };
 
 var Hit = {
+  killer : 'killer',
+  killed : 'killed',
   team: 'team',
   index : 'index',
   kill : 'kill',
@@ -56,7 +58,7 @@ var Hit = {
 
 // Game state for sync.
 var State = {
-  team: 'team',
+  team : 'team',
   index : 'index',
   X : 'X',
   Z : 'Z',
