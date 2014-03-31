@@ -227,7 +227,6 @@ var Character = Sprite.extend({
         this.active = false;
         this.ammoBar.destroy();
         this.healthBar.destroy();
-        this.cooldownBar.destroy();
     },
     
     // callback - called when unit is selected. Gets a reference to the game state ("world")
