@@ -79,8 +79,7 @@ var Character = Sprite.extend({
         return this.ammoBar.onShoot();
     },
 
-    shoot: function(to, isOriginalCmd) {
-        var from = this.mesh.position.clone();
+    shoot: function(from, to, isOriginalCmd) {
         from.y = Constants.BULLET_LEVEL;
         to.y = Constants.BULLET_LEVEL;
 
