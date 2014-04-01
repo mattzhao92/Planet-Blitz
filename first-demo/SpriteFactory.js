@@ -277,7 +277,7 @@ var SpriteFactory = Class.extend({
 
 		setTimeout(function() {
 			scope.world.scene.remove(light);
-		}, timeForEffect);
+		}, timeForEffect * 1.5);
 	},
 
 	createParticleEffect: function(effectVals, numSeconds) {
