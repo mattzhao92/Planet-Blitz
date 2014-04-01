@@ -607,16 +607,16 @@ GameState.prototype.restart = function(teamIds) {
 GameState.prototype.updatePosState = function(data) {
   var teamId = parseInt(data[Move.team]);
   var index = parseInt(data[Move.index]);
-  var deltaX = parseInt(data[Move.X]);
-  var deltaZ = parseInt(data[Move.Z]);
+  var destX = parseInt(data[Move.X]);
+  var destZ = parseInt(data[Move.Z]);
   var mover = this.teams[teamId][index];
   // Already dead?
   if (!mover.alive) {
     console.log("Dead move...");
     return false;
   }
-  var nextX = mover.x + deltaX;
-  var nextZ = mover.z + deltaZ;
+  var nextX = destX;
+  var nextZ = destZ;
   for (var teamId = 0; teamId < this.teams.length; teamId++) {
     for (var i = 0; i < this.mapLoader.getUnitsInTeam(teamId).length; i++) {
       var character = this.teams[teamId][i];

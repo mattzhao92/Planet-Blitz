@@ -655,7 +655,7 @@ var Grid = Class.extend({
                     // Put the network communication here.
                     if (this.getCurrentSelectedUnit().isCoolDown == 0) {
                             sendMoveMsg(this.getCurrentSelectedUnit().id,
-                                deltaX, 0, deltaZ);
+                                coordinate.x, 0, coordinate.z);
                     }
                 }
             }
