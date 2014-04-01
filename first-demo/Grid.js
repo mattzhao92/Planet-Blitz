@@ -655,7 +655,7 @@ var Grid = Class.extend({
                     // Put the network communication here.
                     if (this.getCurrentSelectedUnit().isCoolDown == 0) {
                             sendMoveMsg(this.getCurrentSelectedUnit().id,
-                                coordinate.x, 0, coordinate.z);
+                                deltaX, 0, deltaZ);
                     }
                 }
             }
@@ -734,6 +734,7 @@ var Grid = Class.extend({
                 }
                 if (dest.x != x || dest.z != z) {
                     // Inconsistent with auth state, adjust position.
+                    console.log('Inconsitent shoud be at ' + x + ' ' + z + ' but was at ' + dest.x + ' ' + dest.z);
                     charToCheck.placeAtGridPos(x, z);
                 }
             }

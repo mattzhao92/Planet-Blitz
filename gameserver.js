@@ -58,8 +58,6 @@ var Info = netconst.Info;
 var games = new Array();
 var numPlayers = 0;
 var curGameId = 0
-var teamStartPos = [1, 18, 1, 18];
-// var teamSize = 3;
 
 // Increase for each new created game.
 var gameIdSeq = 0;
@@ -235,6 +233,9 @@ io.sockets.on('connection', function(socket) {
 
   socket.on(Message.HIT, function(message) {
     socket.get('inGame', function(error, game) {
+      if (game == null || !game.isPlaying) {
+        return;
+      }
       var newState = game.gameState.toJSON();
       var isKill = game.gameState.updateHealthState(message);
       if (isKill == 'error') {
@@ -617,7 +618,7 @@ GameState.prototype.updatePosState = function(data) {
   var nextX = mover.x + deltaX;
   var nextZ = mover.z + deltaZ;
   for (var teamId = 0; teamId < this.teams.length; teamId++) {
-    for (var i = 0; i < this.teamSize; i++) {
+    for (var i = 0; i < this.mapLoader.getUnitsInTeam(teamId).length; i++) {
       var character = this.teams[teamId][i];
       if (character.alive) {
         if (character.x == nextX && character.z == nextZ) {
@@ -669,7 +670,8 @@ GameState.prototype.toJSON = function() {
   var state = {};
   var teamStates = new Array();
   for (var teamId in this.teams) {
-    for (var i = 0; i < this.teamSize; i++) {
+    console.log(teamId);
+    for (var i = 0; i < this.mapLoader.getUnitsInTeam(teamId).length; i++) {
       var character = this.teams[teamId][i];
       if (character.alive) {
         var characterState = {};
@@ -683,6 +685,7 @@ GameState.prototype.toJSON = function() {
     }
   }
   state[Message.STATE] = teamStates;
+  console.log(state);
   return state;
 };
 
