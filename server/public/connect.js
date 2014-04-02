@@ -190,6 +190,7 @@ function GameConfig() {
   this.inPostGame = false;
 }
 
+
 function removeGameCanvas() {
   var outputBox = document.getElementById('WebGL-output');
   var msgBox = document.getElementById('Stats-output');
@@ -202,6 +203,7 @@ function removeGameCanvas() {
 }
 
 function renderGame() {
+  $('#game-container').unwrap();
   var containerBox = document.getElementById('Loading-output-container');
   var newDiv = document.createElement("div");
   newDiv.id = 'WebGL-output';
@@ -215,7 +217,6 @@ function renderGame() {
   $('#WebGL-output').hide();
   $('#Stats-output').hide();  
 }
-
 
 function sendMoveMsg(index, x, y, z) {
   var data = {};
