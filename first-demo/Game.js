@@ -68,11 +68,11 @@ App.prototype = {
         // // this.scene.add(hemiLight);
 
         // // a really bright light
-        var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.8 );
-        directionalLight.position.x = 0;
-        directionalLight.position.y = 400;
-        directionalLight.position.z = 0;
-        this.scene.add( directionalLight );
+        // var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.8 );
+        // directionalLight.position.x = 0;
+        // directionalLight.position.y = 400;
+        // directionalLight.position.z = 0;
+        // this.scene.add( directionalLight );
     },
 
     addSkybox: function() {

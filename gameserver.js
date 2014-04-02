@@ -5,7 +5,7 @@ var jade = require('jade');
 var netconst = require(__dirname + '/server/public/netstate.js');
 var app = express();
 
-
+// console.log = function(){};
 
 // IO socket.
 var server = http.createServer(app);
