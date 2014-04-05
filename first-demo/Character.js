@@ -147,6 +147,8 @@ var Character = Sprite.extend({
             this.mesh.owner = scope;
             scope.mesh.add(mesh);
             scope.characterMesh = mesh;
+
+            mesh.position.y += scope.characterSize / 2;
         });
     },
 
