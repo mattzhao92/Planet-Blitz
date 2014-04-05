@@ -2,21 +2,23 @@ var Character = Sprite.extend({
 
     // Class constructor
     // character size refers to the diameter of the character
-    init: function(setupCmd, destroyCmd, spriteFactory, modelName, world, team, characterSize, id) {
+    init: function(setupCmd, destroyCmd, args) {
         'use strict';
         this._super(setupCmd, destroyCmd);
 
-        this.spriteFactory = spriteFactory;
-
-        this.world = world;
-        this.team = team;
-        this.characterSize = characterSize;
+        // all character arguments
+        this.spriteFactory = args.spriteFactory;
+        this.world = args.world;
+        this.team = args.team;
+        this.characterSize = args.characterSize;
+        this.id = args.id;
+        this.modelName = args.modelName;
+        this.shootStrategy = args.shootStrategy;
 
         this.teamColor = new THREE.Color(Constants.TEAM_COLORS[this.team]);
 
         this.isSelected = false;
         this.active = true;
-        this.id = id;
 
         this.xPos = 0;
         this.zPos = 0;
@@ -24,8 +26,8 @@ var Character = Sprite.extend({
         this.highlightedTiles = [];
 
         this.hasPendingMove = false;
-        this.destX;
-        this.destZ;
+        this.destX = 0;
+        this.destZ = 0;
 
         // Set the character modelisation object
         this.mesh = new THREE.Object3D();
@@ -34,14 +36,13 @@ var Character = Sprite.extend({
         this.mesh.owner = this;
 
         // Set the vector of the current motion
-        this.direction = new THREE.Vector3(0, 0, 0);
         this.motionQueue = [];
 
         this.addUnitSelector();
         this.isCoolDown = false;
 
         this.loader = new THREE.JSONLoader();
-        this.loadFile("blendermodels/" + modelName);
+        this.loadFile("blendermodels/" + args.modelName);
  
         this.maximumHealth = 100;
         this.health = this.maximumHealth;
@@ -59,17 +60,14 @@ var Character = Sprite.extend({
         this.addHealthObserver(this.healthBar);
 
         this.coolDownCount = 55;
-        this.coolDownLeft = 0;
-
-        this.cooldownBar = this.spriteFactory.createCooldownBar(this.characterSize, this.getRepr().position, 10, this.coolDownCount);
-        this.addPositionObserver(this.cooldownBar);
+        this.coolDownLeft = this.coolDownCount;
 
         this.isCharacterInRoute = false;
         this.lastRoadMap = [];
 
         this.breakUpdateHere = false;
-
-        this.canMove = true;
+        this.lockMovement = false;
+        this.motionInProgress = false;
     },
 
     canShoot: function() {
@@ -80,8 +78,7 @@ var Character = Sprite.extend({
         return this.ammoBar.onShoot();
     },
 
-    shoot: function(to, isOriginalCmd) {
-        var from = this.mesh.position.clone();
+    shoot: function(from, to, isOriginalCmd) {
         from.y = Constants.BULLET_LEVEL;
         to.y = Constants.BULLET_LEVEL;
 
@@ -96,7 +93,7 @@ var Character = Sprite.extend({
             if (isOriginalCmd) {
                 sendShootMsg(this.id, from, to);
             }
-            var bullet = this.spriteFactory.createBullet(this.world.camera.position, this, from, to);
+            this.shootStrategy.shoot(this, from, to);
             this.onShoot();
         }
     },
@@ -115,30 +112,6 @@ var Character = Sprite.extend({
 
     addHealthObserver: function(healthObserver) {
         this.healthObservers.push(healthObserver);
-    },
-
-    reset : function() {
-        this.direction = new THREE.Vector3(0, 0, 0);
-
-        this.setup();
-
-        this.mesh.position = this.originalPosition;
-
-        this.breakUpdateHere = false;
-
-        this.isSelected = true;
-        this.hasPendingMove = false;
-        this.highlightedTiles = [];
-        this.motionQueue.length = 0;
-
-        this.healthBar.reset(this.mesh.position);
-        this.ammoBar.reset(this.mesh.position);
-        
-        this.isCoolDown = false;
-        this.coolDownLeft = 0;
-        this.coolDownCount = 105;
-
-        this.cooldownBar.reset(this.mesh.position);
     },
 
     loadFile: function(filename, onLoad) {
@@ -227,10 +200,12 @@ var Character = Sprite.extend({
     },
 
     placeAtGridPos: function(xPos, zPos) {
+        this.world.markTileNotOccupiedByCharacter(this.getTileXPos(), this.getTileZPos());
         this.xPos = xPos;
         this.zPos = zPos;
         this.setCharacterMeshPosX(this.world.convertXPosToWorldX(xPos));
         this.setCharacterMeshPosZ(this.world.convertZPosToWorldZ(zPos));
+        this.world.markTileOccupiedByCharacter(this.getTileXPos(), this.getTileZPos());
     },
 
     getTileXPos: function() {
@@ -250,7 +225,6 @@ var Character = Sprite.extend({
         this.active = false;
         this.ammoBar.destroy();
         this.healthBar.destroy();
-        this.cooldownBar.destroy();
     },
     
     // callback - called when unit is selected. Gets a reference to the game state ("world")
@@ -291,20 +265,18 @@ var Character = Sprite.extend({
         }
     },
 
-    setDirection: function(direction) {
-        this.direction = direction;
+    emptyMotionQueue: function() {
+        this.motionQueue.length = 0;
+        this.lockMovement = false;
+        this.motionInProgress = false;
     },
 
-    enqueueMotion: function() {
+    enqueueMotion: function(destX, destZ) {
         // if (this.isCoolDown == 0) {
-            var path = this.world.findPath(this.getTileXPos(), this.getTileZPos(), this.getTileXPos() + this.direction.x,
-                this.getTileZPos() + this.direction.z);
-            var gx = this.getTileXPos() + this.direction.x;
-            var gz = this.getTileZPos() + this.direction.z;
-            this.destX = gx;
-            this.destZ = gz;
+            var path = this.world.findPath(this.getTileXPos(), this.getTileZPos(), destX, destZ);
+            this.destX = destX;
+            this.destZ = destZ;
             this.hasPendingMove = true;
-            // console.log("Set to " + gx + " and " + gz + " for id " + this.team + " i " + this.id);
             var addNewItem = true;
             var newMotions = [];
             for (var i = 1; i < path.length; i++) {
@@ -315,13 +287,13 @@ var Character = Sprite.extend({
                             (path[i][1] - path[i - 1][1]) == 0)) {
                         // if they are on the same, line, expand the last element in the motionQueue
                         var lastMotion = newMotions[newMotions.length - 1];
-                        lastMotion.x += (path[i][0] - path[i - 1][0]);
-                        lastMotion.z += (path[i][1] - path[i - 1][1]);
+                        lastMotion.x = path[i][0];
+                        lastMotion.z = path[i][1];
                         addNewItem = false;
                     }
                 }
                 if (addNewItem) {
-                    newMotions.push(new THREE.Vector3(path[i][0] - path[i - 1][0], 0, path[i][1] - path[i - 1][1]));
+                    newMotions.push(new THREE.Vector3(path[i][0], 0, path[i][1]));
                 }
                 addNewItem = true;
             }
@@ -340,7 +312,7 @@ var Character = Sprite.extend({
 
     setCharacterMeshPosX: function(x) {
         this.mesh.position.x = x;
-
+        this.xPos = this.world.convertMeshXToXPos(x);
         var scope = this;
         _.forEach(scope.positionObservers, function(positionObserver) {
             positionObserver.onUnitPositionChanged(scope.mesh.position);
@@ -358,58 +330,40 @@ var Character = Sprite.extend({
 
     setCharacterMeshPosZ: function(z) {
         this.mesh.position.z = z;
-
+        this.zPos = this.world.convertMeshZToZPos(z);
         var scope = this;
         _.forEach(this.positionObservers, function(positionObserver) {
             positionObserver.onUnitPositionChanged(scope.mesh.position);
         });
     },
 
-    updateMovementCoolDown: function(delta) {
-        if (this.breakUpdateHere) return;
-        if (this.isCoolDown) {
-            this.coolDownLeft--;
-            // update cooldown timer
-            if (this.coolDownLeft == 0) {
-                this.isCoolDown = false;
-                if (this.world.currentSelectedUnits[this.team] == this)
-                    this.world.displayMovementArea(this);
-            }
-        }
-
-        this.cooldownBar.onCooldownChanged(this.coolDownLeft);
-    },
-
     updateInProgressLinearMotion: function(delta) {
         if (this.breakUpdateHere) return;
         if (this.motionInProgress) {
+            this.breakUpdateHere = true;
+            if (this.coolDownLeft < 0.1 * this.coolDownCount || this.lockMovement) {
+                this.lockMovement = true;
+                return;
+            }
+
             var newMeshX = this.mesh.position.x + this.velocityX * delta;
             var newMeshZ = this.mesh.position.z + this.velocityZ * delta;
 
-            if ((newMeshX - this.goalMeshX) / (this.goalMeshX - this.prevMeshX) > 0) {
+    
+            if (((newMeshX - this.goalMeshX) / (this.goalMeshX - this.prevMeshX) > 0 || this.velocityX == 0) &&
+                ((newMeshZ - this.goalMeshZ) / (this.goalMeshZ - this.prevMeshZ) > 0 || this.velocityZ == 0)) {
+                this.setCharacterMeshPosZ(this.goalMeshZ);
                 this.setCharacterMeshPosX(this.goalMeshX);
+                this.prevMeshX = this.goalMeshX;
+                this.prevMeshZ = this.goalMeshZ;
                 this.motionInProgress = false;
-                this.xPos = this.goalXPos;
             } else {
                 this.setCharacterMeshPosX(newMeshX);
-            }
-
-            if ((newMeshZ - this.goalMeshZ) / (this.goalMeshZ - this.prevMeshZ) > 0) {
-                this.setCharacterMeshPosZ(this.goalMeshZ);
-                this.motionInProgress = false;
-                this.zPos = this.goalZPos;
-            } else {
                 this.setCharacterMeshPosZ(newMeshZ);
-            }
-
-            if (this.motionInProgress) {
                 this.prevMeshX = newMeshX;
                 this.prevMeshZ = newMeshZ;
             }
-            
-            //console.log("x: "+this.mesh.position.x);
-            //console.log("z: "+this.mesh.position.z);
-            this.breakUpdateHere = true;                   
+                 
         } 
     },
 
@@ -425,108 +379,78 @@ var Character = Sprite.extend({
         return {'x': this.xPos, 'y':0, 'z':this.zPos};
     },
 
-    beginCooldown: function() {
-        this.isCoolDown = true;
-
-        this.coolDownLeft = this.coolDownCount;
-    },
-
-    resetCooldown: function() {
-        this.coolDownLeft = this.coolDownCount;
-    },
-
     update: function(delta, dispatcher) {
         this._super(delta, dispatcher);
 
         this.breakUpdateHere = false;
-
         this.ammoBar.updateWeaponReload(delta);
-        this.updateMovementCoolDown(delta); 
         this.updateInProgressLinearMotion(delta);
+
+        this.coolDownLeft += 0.005 * this.coolDownCount;
+        if (this.coolDownLeft >= this.coolDownCount) {
+            this.coolDownLeft = this.coolDownCount;
+        }
+        if (this.coolDownLeft >= 0.5 * this.coolDownCount && this.lockMovement) {
+            this.lockMovement = false;
+        }
 
         // handle dequeue action here
         if (this.motionQueue.length > 0 && !this.breakUpdateHere) {
             this.motionInProcess = true;
             var direction = this.motionQueue.pop();
             if (direction.sentinel == 'start') {
-                var path = direction.highlightTiles;
                 this.isCharacterInRoute = true;
                 if (this.team == GameInfo.myTeamId) {
-                    this.world.deselectHighlightedTiles();
-
-                    this.lastRoadMap.length = 0;
-                    for (var i = 0; i < path.length; i++) {
-                        var roadTile = this.world.getTileAtTilePos(path[i][0], path[i][1]);
-                        roadTile.markAsRoadMap();
-                        this.lastRoadMap.push(roadTile);
-                    }
                 }
-                this.resetCooldown();
                 return;
             } else if (direction.sentinel == 'end') {
-                for (var i = 0; i < this.lastRoadMap.length; i++) {
-                    this.lastRoadMap[i].reset();
-                }
                 this.isCharacterInRoute = false;
-                if (this.destX == this.xPos && this.destZ == this.zPos) {
+                if (direction.x == this.xPos && direction.z == this.zPos) {
                     this.hasPendingMove = false;
                 }
-                
-                // console.log("Set pending move back");
-                this.canMove = true;
-                this.beginCooldown();
-
                 return;
             }
 
-            if (direction.x !== 0 || direction.z !== 0) {
+            if (this.xPos !== direction.x || this.zPos !== direction.z) {
+       
                 // And, only if we're not colliding with an obstacle or a wall ...
                 if (this.collide()) {
                     return false;
                 }
-
                 this.motionInProgress = true;
                 // ... we move the character
                 this.prevMeshX = this.mesh.position.x;
                 this.prevMeshZ = this.mesh.position.z;
 
                 this.world.markTileNotOccupiedByCharacter(this.getTileXPos(), this.getTileZPos());
-                this.goalMeshX = this.mesh.position.x + direction.x * this.characterSize;
-                this.goalMeshZ = this.mesh.position.z + direction.z * this.characterSize;
+                
+                this.goalMeshX = this.world.convertXPosToWorldX(direction.x);
+                this.goalMeshZ = this.world.convertZPosToWorldZ(direction.z);
                 
                 var MOVE_VELOCITY = 100;
 
-                if (direction.x < 0) {
+                if (direction.x < this.xPos) {
                     this.velocityX = -MOVE_VELOCITY;
-                } else if(direction.x > 0) {
+                } else if(direction.x > this.xPos) {
                     this.velocityX = MOVE_VELOCITY;
                 } else {
                     this.velocityX = 0;
                 }
 
-                if (direction.z < 0) {
+                if (direction.z < this.zPos) {
                     this.velocityZ = -MOVE_VELOCITY;
-                } else if (direction.z > 0) {
+                } else if (direction.z > this.zPos) {
                     this.velocityZ = MOVE_VELOCITY;
                 } else {
                     this.velocityZ = 0;
                 }
-
-                //this.velocityZ = direction.z?direction.z<0?-10:10:0;
-                this.goalXPos = this.xPos + direction.x;
-                this.goalZPos = this.zPos + direction.z;
-                this.world.markTileOccupiedByCharacter(this.goalXPos, this.goalZPos);
             }
         }
     },
 
     onMouseMovement: function(mouseLocation) {
-        var from = this.mesh.position;
-
-        var direction = new THREE.Vector3(mouseLocation.x - from.x, mouseLocation.y - from.y, mouseLocation.z - from.z)
-
         // Set the direction's angle, and the difference between it and our Object3D's current rotation
-        this.mesh.rotation.y = Math.atan2(direction.x, direction.z);
+        this.mesh.rotation.y = Math.atan2(mouseLocation.x - this.mesh.position.x, mouseLocation.z - this.mesh.position.z);
     },
 
     collide: function() {

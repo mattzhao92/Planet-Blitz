@@ -11,8 +11,11 @@ var SpriteFactory = Class.extend({
 
 		this.robots = [];
 		this.bullets = [];
+		this.obstacles = [];
 
 		this.dispatcher = new Dispatcher();
+
+		this.materialFactory = new MaterialFactory();
 	},
 
 	notifyAll: function(spriteCmd) {
@@ -21,6 +24,10 @@ var SpriteFactory = Class.extend({
 		});
 
 		_.forEach(this.bullets, function(observer) {
+			observer.applySpriteCmd(spriteCmd);
+		});
+
+		_.forEach(this.obstacles, function(observer) {
 			observer.applySpriteCmd(spriteCmd);
 		});
 	},
@@ -53,25 +60,60 @@ var SpriteFactory = Class.extend({
 		this.bullets = this.updateContainer(this.bullets);
 	},
 
-	createSoldier: function(team, unitId) {
-		return this.createCharacter("soldier-regular.js", team, unitId);
+	createSoldier: function(team, id) {
+		var shootStrategy = new PelletShootStrategy(this, this.materialFactory);
+
+		var soldierArgs = {
+			team: team,
+			id: id,
+			modelName: "soldier-regular.js",
+			shootStrategy: shootStrategy
+		};
+		return this.createCharacter(soldierArgs);
 	},
 
-	createArtillerySoldier: function(team, unitId) {
-		return this.createCharacter("soldier-artillery.js", team, unitId);
+	createArtillerySoldier: function(team, id) {
+		var shootStrategy = new LaserShootStrategy(this, this.materialFactory);
+
+		var soldierArgs = {
+			team: team,
+			id: id,
+			modelName: "soldier-artillery.js",
+			shootStrategy: shootStrategy
+		};
+		return this.createCharacter(soldierArgs);
 	},
 
-	createFlamethrowerSoldier: function(team, unitId) {
-		return this.createCharacter("soldier-flamethrower.js", team, unitId);
+	createFlamethrowerSoldier: function(team, id) {
+		var shootStrategy = new FlameShootStrategy(this, this.materialFactory);
+
+		var soldierArgs = {
+			team: team,
+			id: id,
+			modelName: "soldier-flamethrower.js",
+			shootStrategy: shootStrategy
+		};
+		return this.createCharacter(soldierArgs);
 	},
 
-	createCharacter: function(modelName, team, unitId) {
+	createCharacter: function(soldierArgs) {
 		var scope = this;
+
+		var light = this.createLight();
 
 		// add character to its container, register for its updates
 		var postInitCmd = new SpriteCmd(function(sprite) {
 			scope.sceneAddCmd.execute(sprite);
 			scope.robots.push(sprite);
+			
+			if (sprite.team === GameInfo.myTeamId) {
+				sprite.getRepr().add(light);
+				light.position.y += 40;
+			} else {
+				// hide indicator information
+				sprite.ammoBar.getRepr().visible = false;
+				sprite.healthBar.getRepr().visible = false;
+			}
 		});
 
 		// mark the sprite as destroyed
@@ -79,13 +121,41 @@ var SpriteFactory = Class.extend({
 			sprite.active = false;
 		});
 
-		var robot = new Character(postInitCmd, postDestroyCmd, this, modelName, this.world, team, this.characterSize, unitId);
+		var characterArgs = {
+			spriteFactory: scope,
+			world: scope.world,
+			team: soldierArgs.team,
+			characterSize: scope.characterSize,
+			id: soldierArgs.id, 
+			modelName: soldierArgs.modelName,
+			shootStrategy: soldierArgs.shootStrategy
+		};
+
+		var robot = new Character(postInitCmd, postDestroyCmd, characterArgs);
 		robot.setup();
 
 		return robot;
 	},
 
-	createBullet: function(cameraPosition, owner, from, to) {
+	createObstacle: function(modelName) {
+		var scope = this;
+
+		// add character to its container, register for its updates
+		var postInitCmd = new SpriteCmd(function(sprite) {
+			scope.sceneAddCmd.execute(sprite);
+			scope.obstacles.push(sprite);
+		});
+
+		// mark the sprite as destroyed
+		var postDestroyCmd = new SpriteCmd(function(sprite) {
+			sprite.active = false;
+		});
+		var obstacle = new Obstacle(postInitCmd, postDestroyCmd, modelName, 1.0, this.characterSize);
+		obstacle.setup();
+		return obstacle;
+	},
+
+	createShot: function(bulletArgs) {
 		var scope = this;
 
 		// add character to its container, register for updates
@@ -94,12 +164,12 @@ var SpriteFactory = Class.extend({
 			scope.bullets.push(sprite);
 		});
 
-		// mark the sprite as destroyed (redundant in new API)
+		// mark the sprite as destroyed
 		var postDestroyCmd = new SpriteCmd(function(sprite) {
 			sprite.active = false;
 		});
 
-		var bullet = new Bullet(postInitCmd, postDestroyCmd, cameraPosition, owner, from, to);
+		var bullet = new Bullet(postInitCmd, postDestroyCmd, bulletArgs);
 		bullet.setup();
 
 		return bullet;
@@ -129,31 +199,7 @@ var SpriteFactory = Class.extend({
 	createShieldHit: function(position) {
 		var scope = this;
 
-		var material = new THREE.ShaderMaterial({
-		  uniforms: {
-		    "c": {
-		      type: "f",
-		      value: 1.0
-		    },
-		    "p": {
-		      type: "f",
-		      value: 1.4
-		    },
-		    glowColor: {
-		      type: "c",
-		      value: new THREE.Color(0x82E6FA)
-		    },
-		    viewVector: {
-		      type: "v3",
-		      value: scope.world.camera.position
-		    }
-		  },
-		  vertexShader: document.getElementById('vertexShader').textContent,
-		  fragmentShader: document.getElementById('fragmentShader').textContent,
-		  side: THREE.FrontSide,
-		  blending: THREE.AdditiveBlending,
-		  transparent: true
-		});
+		var material = this.materialFactory.createTransparentGlowMaterial(this.world.camera.position);
 
 		var geometry = new THREE.SphereGeometry(40, 30, 30);
 
@@ -165,9 +211,6 @@ var SpriteFactory = Class.extend({
 		};
 
 		this.world.scene.add(shieldMesh);
-
-		// console.log(material);
-		// console.log(shieldMesh.material.uniforms['p'].value);
 
 		var timeForEffect = 400;
 		var tween = new TWEEN.Tween({opacity: 1.4}).to({opacity: 6}, timeForEffect).easing(TWEEN.Easing.Linear.None).onUpdate(function() {
@@ -209,6 +252,32 @@ var SpriteFactory = Class.extend({
 		    };
 		
 		this.createParticleEffect(fireball, numSecondsForExplosion);
+
+		// create light for
+
+		var initialLightRadius = 220;
+		var initialIntensity = 3.0;
+
+		var light = new THREE.PointLight(Colors.EXPLOSION, initialIntensity, initialLightRadius);
+		scope.world.scene.add(light);
+		light.position = position;
+		light.position.y += this.characterSize / 2;
+
+		var timeForEffect = numSecondsForExplosion * 1000;
+
+		// update scene
+		PubSub.publish(Constants.TOPIC_REFRESH_MATERIALS, null);
+
+		// explosion fade out
+		var tween = new TWEEN.Tween({intensity: initialIntensity, lightRadius: initialLightRadius}).to({intensity: 0, lightRadius: 0}, timeForEffect * 1.5)
+			.easing(TWEEN.Easing.Cubic.In).onUpdate(function() {
+				light.intensity = this.intensity;
+				light.distance = this.lightRadius;
+			}).start();
+
+		setTimeout(function() {
+			scope.world.scene.remove(light);
+		}, timeForEffect * 1.5);
 	},
 
 	createParticleEffect: function(effectVals, numSeconds) {
@@ -230,12 +299,24 @@ var SpriteFactory = Class.extend({
 		}, numSeconds * 1000);
 	},
 
+	createLight: function() {
+		var light = new THREE.PointLight(0xffffff, 1.5, 300);
+		// light.castShadow = true;
+		// light.shadowDarkness = 0.95;
+
+		return light;
+	},
+
 	getCharacters: function() {
 		return this.robots;
 	},
 
 	getBullets: function() {
 		return this.bullets;
+	},
+
+	getObstacles: function() {
+		return this.obstacles;
 	},
 
 	removeFromContainer: function(sprite, container) {

@@ -53,5 +53,9 @@ var Sprite = Class.extend({
 
 	getRadius: function() {
 		console.error("getRadius was not overridden for a derived class that requires use of getRadius!")
+	},
+
+	onSelect: function() {
+		// default no-op
 	}
 })

@@ -2,13 +2,22 @@
 var Message = {
   GAME : 'GAME',
   LISTGAME : 'LISTGAME',
+  LISTMAP : 'LISTMAP',
+  SINGLE : 'SINGLE',
   GAMENAME : 'GAMENAME',
   TYPE : 'TYPE',
   USERNAME : 'USERNAME',
   JOIN : 'JOIN',
+  MAP : 'MAP',
+  ROOMS : 'ROOMS',
+  MAPS : 'MAPS',
   REMOVE : 'REMOVE',
+  REMOVEALL : 'REMOVEALL',
   LEAVE : "LEAVE",
   ERROR : 'ERROR',
+  TEAM : 'TEAM',
+  OBSERVER : 'OBSERVER',
+  MAXPLAYER : 'MAXPLAYER', // Max number of players
   PREPARE : 'PREPARE',
   START : 'START',
   FINISH : 'FINISH',
@@ -39,6 +48,8 @@ var Shoot = {
 };
 
 var Hit = {
+  killer : 'killer',
+  killed : 'killed',
   team: 'team',
   index : 'index',
   kill : 'kill',
@@ -47,7 +58,7 @@ var Hit = {
 
 // Game state for sync.
 var State = {
-  team: 'team',
+  team : 'team',
   index : 'index',
   X : 'X',
   Z : 'Z',
@@ -69,13 +80,17 @@ var Info = {
   gameId : 'gameId',
   gameName : 'gameName',
   gameStart : 'gameStart',
-  player : 'player'
+  player : 'player',
+  isFull : 'isFull',
+  mapName : 'mapName'
 }
 
-exports.Message = Message;
-exports.Move = Move;
-exports.Hit = Hit;
-exports.Shoot = Shoot;
-exports.State = State;
-exports.Stat = Stat;
-exports.Info = Info;
+if (typeof(exports) !== 'undefined' && exports != null) {
+  exports.Message = Message;
+  exports.Move = Move;
+  exports.Hit = Hit;
+  exports.Shoot = Shoot;
+  exports.State = State;
+  exports.Stat = Stat;
+  exports.Info = Info;
+}

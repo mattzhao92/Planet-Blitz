@@ -1,75 +1,55 @@
-var BULLET_RADIUS = 5;
-
-
 var Bullet = Sprite.extend({
-  // requires two Vector3 denoting start and end
-  init: function(setupCmd, destroyCmd, cameraPosition, owner, from, to) {
+  init: function(setupCmd, destroyCmd, args) {
     this._super(setupCmd, destroyCmd);
 
-    this.radius = BULLET_RADIUS;
+    // cameraPosition, owner, from, to
 
-    var material = new THREE.ShaderMaterial({
-      uniforms: {
-        "c": {
-          type: "f",
-          value: 1.0
-        },
-        "p": {
-          type: "f",
-          value: 1.4
-        },
-        glowColor: {
-          type: "c",
-          value: new THREE.Color(0x82E6FA)
-        },
-        viewVector: {
-          type: "v3",
-          value: cameraPosition
-        }
-      },
-      vertexShader: document.getElementById('vertexShader').textContent,
-      fragmentShader: document.getElementById('fragmentShader').textContent,
-      side: THREE.FrontSide,
-      blending: THREE.AdditiveBlending,
-      transparent: true
-    });
-
-    var geometry = new THREE.SphereGeometry(BULLET_RADIUS, 12, 12);
-
-    this.mesh = new THREE.Mesh(geometry, material);
-    this.mesh.position = from.clone();
-    this.startPosition = from.clone();
-
-    this.speed = 500;
-    this.damage = 20;
-
-    // this.maxDistance = 240;
-    this.maxDistance = 1000;
-
-    // alias to position
-    this.position = this.mesh.position;
-    this.direction = to.clone().sub(from).normalize();
+    this.radius = args.radius;
+    this.mesh = args.mesh;
+    this.damage = args.damage;
+    this.speed = args.speed;
+    this.range = args.range;
+    this.addons = args.addons;
 
     // store who shot the bullet
-    this.owner = owner;
+    this.owner = args.owner;
+
+    // are this many clones really needed?
+    this.from = (args.from).clone();
+    this.to = (args.to).clone();
+
+    // rest of setup, now that arguments are initialized
+    this.mesh.position = this.from.clone();
+    this.startPosition = this.from.clone();
+
+    this.direction = (args.to).clone().sub(this.from).normalize();
 
     this.interactStrategy = new ApplyDamageStrategy(this.damage);
 
+    var scope = this;
+    _.forEach(this.addons, function(addon) {
+      scope.mesh.add(addon);
+    });
+
+    // update scene
+    PubSub.publish(Constants.TOPIC_REFRESH_MATERIALS, null);
+
     var moveStrategy = new StraightLineUpdateStrategy(this.direction, this.speed);
-    var expireStrategy = new ExpireUpdateStrategy(this.startPosition, this.maxDistance);
+    var expireStrategy = new ExpireUpdateStrategy(this.startPosition, this.range);
     this.updateStrategy = new MultiUpdateStrategy([moveStrategy, expireStrategy]);
 
     var sound = new Howl({
-      urls: ['laser-shoot.mp3']
+      urls: [args.sound]
     }).play();
+
   },
 
   getPosition: function() {
-    return this.position;
+    return this.getRepr().position;
   },
 
   getRadius: function() {
-    return BULLET_RADIUS;
+    return this.radius;
   },
 
   getRepr: function() {

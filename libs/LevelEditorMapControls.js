@@ -114,9 +114,7 @@ THREE.MapControls = function ( object, scene, domElement ) {
     var ARBITRARY_MOUSE_POS = 50;
     this.mousePosition = {x: ARBITRARY_MOUSE_POS, y: ARBITRARY_MOUSE_POS};
 
-    this.CURSOR_IMAGE_PATH = "images/pointer.cur";
-
-    this.currentAngle = 0;
+    this.CURSOR_IMAGE_PATH = "images/cursor.png";
 
     this.focusOnPosition = function(newPosition) {
         // figure out offset of camera from target
@@ -145,7 +143,6 @@ THREE.MapControls = function ( object, scene, domElement ) {
     this.resetMousePosition = function() {
         scope.mousePosition.x = ARBITRARY_MOUSE_POS;
         scope.mousePosition.y = ARBITRARY_MOUSE_POS;
-        scope.mouseSprite.visible = false;
     }
 
     this.handleEvent = function ( event ) {
@@ -224,17 +221,9 @@ THREE.MapControls = function ( object, scene, domElement ) {
         _eye.applyQuaternion(quaternion);
         // _this.object.up.applyQuaternion(quaternion);
 
-        // console.log(_eye);
-        // console.log(scope.object.rotation.y);
-        // console.log(Math.cos(scope.object.rotation.y) * 40);
-
-        // console.log(theta);
 
         thetaDelta -= angle;
-        this.currentAngle += thetaDelta;
-        // console.log(this.currentAngle);
 
-        PubSub.publish(Constants.TOPIC_CAMERA_ROTATION, this.currentAngle);
     };
 
     this.getMouseOnScreen = function ( clientX, clientY ) {
@@ -256,9 +245,8 @@ THREE.MapControls = function ( object, scene, domElement ) {
 
         }
 
+
         thetaDelta += angle;
-        this.currentAngle += thetaDelta;
-        PubSub.publish(Constants.TOPIC_CAMERA_ROTATION, this.currentAngle);
 
     };
 
@@ -558,18 +546,17 @@ THREE.MapControls = function ( object, scene, domElement ) {
             this.dispatchEvent( changeEvent );
 
             lastPosition.copy( this.object.position );
+
         }
 
-        // PubSub.publish(Constants.TOPIC_CAMERA_POSITION, this.object.position);
-
         // calculating field of view - width and height
-        // var verticalFOV = this.object.fov * ( Math.PI / 180);
+        var verticalFOV = this.object.fov * ( Math.PI / 180);
 
-        // var height = 2 * Math.tan(verticalFOV / 2) * _eye.length();
+        var height = 2 * Math.tan(verticalFOV / 2) * _eye.length();
 
-        // var aspect = this.screen.width / this.screen.height;
-        // // calculated 
-        // var width = height * aspect;
+        var aspect = this.screen.width / this.screen.height;
+        // calculated 
+        var width = height * aspect;
 
         // console.log("viewable width " + width);
     };
@@ -592,7 +579,6 @@ THREE.MapControls = function ( object, scene, domElement ) {
         if ( scope.enabled === false ) return;
         if ( scope.userRotate === false ) return;
 
-        event.preventDefault();
 
         // quick hack
         // event.clientX = scope.mousePosition.x;
@@ -633,8 +619,6 @@ THREE.MapControls = function ( object, scene, domElement ) {
 
         if ( scope.enabled === false ) return;
 
-        event.preventDefault();
-        event.stopPropagation();
 
         // // quick hack
         // event.clientX = scope.mousePosition.x;
@@ -720,6 +704,7 @@ THREE.MapControls = function ( object, scene, domElement ) {
         }
     }
 
+
     this.domElement.addEventListener( 'contextmenu', function ( event ) { event.preventDefault(); }, false );
     this.domElement.addEventListener( 'mousedown', onMouseDown, false );
     this.domElement.addEventListener( 'mousewheel', onMouseWheel, false );
@@ -729,37 +714,12 @@ THREE.MapControls = function ( object, scene, domElement ) {
     // TODO: remove this hardcoding
     var containerName = "#WebGL-output";
 
-    $(containerName).click(
-        function() {
-            PL.requestPointerLock(document.body,
-                // on pointerlock enable
-                function(event) {
-                    scope.handleResize();
-                    document.addEventListener("mousemove", moveCallback, false);
-                }, 
-                // on pointerlock disable
-                function(event) {
-                    document.removeEventListener("mousemove", moveCallback, false);
-                    scope.resetMousePosition();
-                }, 
-                // on error
-                function(event) {
-                    console.log("Error: could not obtain pointerlock");
-                });
-        }
-    );
-
-    this.releasePointerLock = function() {
+    this.reset = function() {
         // Ask the browser to release the pointer
         document.exitPointerLock = document.exitPointerLock ||
                        document.mozExitPointerLock ||
                        document.webkitExitPointerLock;
         document.exitPointerLock();
-
-        this.currentAngle = 0;
-    }
-
-    this.reset = function() {
     }
 
     function calculateInitialMousePosition(canvas, event) {
@@ -790,7 +750,6 @@ THREE.MapControls = function ( object, scene, domElement ) {
 
         if (scope.mousePosition.x == ARBITRARY_MOUSE_POS && scope.mousePosition.y == ARBITRARY_MOUSE_POS) {
             scope.mousePosition = calculateInitialMousePosition(canvas, event);
-            scope.mouseSprite.visible = true;
         }
 
         var movementX = event.movementX;
@@ -833,9 +792,8 @@ THREE.MapControls = function ( object, scene, domElement ) {
             alignment: THREE.SpriteAlignment.topLeft
         });
         this.mouseSprite = new THREE.Sprite(cursorMaterial);
-        this.mouseSprite.scale.set(34, 34, 1.0);
+        this.mouseSprite.scale.set(40, 40, 1.0);
         this.mouseSprite.position.set(this.mousePosition.x, this.mousePosition.y, 0);
-        this.mouseSprite.visible = false;
         this.scene.add(this.mouseSprite);
     }
 
@@ -845,7 +803,7 @@ THREE.MapControls = function ( object, scene, domElement ) {
 
     // set up mouse sprite for mouse cursor display
     this.mouseSprite = null;
-    this.setupMouseCursor();
+    //this.setupMouseCursor();
 
     // create synthetic events - allow mouse click with "corrected" mouse position (from pointerlock) on HTML DOM elements to occur correctly
     document.addEventListener("click", function(e) {
@@ -868,6 +826,38 @@ THREE.MapControls = function ( object, scene, domElement ) {
     });
 
     this.handleResize();
+
+    // hotkeys for camera movement
+    var approxDelta = 1/60;
+    KeyboardJS.on("w", 
+        function(keyEvent, keysPressed, keyCombo) {
+            scope.scrollCameraUp(approxDelta);
+        });
+    KeyboardJS.on("a", 
+        function(keyEvent, keysPressed, keyCombo) {
+            scope.scrollCameraLeft(approxDelta);
+        });
+    KeyboardJS.on("s", 
+        function(keyEvent, keysPressed, keyCombo) {
+            scope.scrollCameraDown(approxDelta);
+        });
+    KeyboardJS.on("d", 
+        function(keyEvent, keysPressed, keyCombo) {
+            scope.scrollCameraRight(approxDelta);
+        });
+
+    // rudimentary camera rotation
+    KeyboardJS.on("q",
+        function(event, keysPressed, keyCombo) {
+            scope.rotateLeft(Math.PI / 30);
+        }
+    );
+
+    KeyboardJS.on("e",
+        function(event, keysPressed, keyCombo) {
+            scope.rotateRight(Math.PI / 30);
+        }
+    );
 };
 
 THREE.MapControls.prototype = Object.create( THREE.EventDispatcher.prototype );

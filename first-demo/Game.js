@@ -7,7 +7,11 @@ App = function(containerName) {
     this.scene = new THREE.Scene();
 
     // create a render and set the size
-    this.renderer = new THREE.WebGLRenderer({antialias: true});
+    this.renderer = new THREE.WebGLRenderer({antialias: true, maxLights: 50});
+
+    this.renderer.gammaInput = true;
+    this.renderer.gammaOutput = true;
+
     this.renderer.setSize(window.innerWidth, window.innerHeight);
 
     // add the output of the renderer to the html element
@@ -54,20 +58,21 @@ App.prototype = {
     },
 
     addLighting: function() {
-        // really subtle ambient lighting
-        var ambientLight = new THREE.AmbientLight( 0x191919 );
-        this.scene.add( ambientLight );
+        // // really subtle ambient lighting
+        // var ambientLight = new THREE.AmbientLight( 0x191919 );
+        // this.scene.add( ambientLight );
 
-        // sky color, ground color, intensity
-        // var hemiLight = new THREE.HemisphereLight( 0x0000ff, 0xffffff, 0.3 ); 
-        // this.scene.add(hemiLight);
+        // this.scene.remove( ambientLight );
+        // // sky color, ground color, intensity
+        // // var hemiLight = new THREE.HemisphereLight( 0x0000ff, 0xffffff, 0.3 ); 
+        // // this.scene.add(hemiLight);
 
-        // a really bright light
-        var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.8 );
-        directionalLight.position.x = 0;
-        directionalLight.position.y = 400;
-        directionalLight.position.z = 0;
-        this.scene.add( directionalLight );
+        // // a really bright light
+        // var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.8 );
+        // directionalLight.position.x = 0;
+        // directionalLight.position.y = 400;
+        // directionalLight.position.z = 0;
+        // this.scene.add( directionalLight );
     },
 
     addSkybox: function() {
@@ -131,7 +136,7 @@ App.prototype = {
         var delta = this.clock.getDelta();
         this.controls.update(delta);
 
-        PubSub.publishSync(Constants.TOPIC_DELTA, delta);
+        PubSub.publish(Constants.TOPIC_DELTA, delta);
         
         // main game render loop
         this.world.update(delta);
@@ -142,7 +147,7 @@ App.prototype = {
 
         // standard: render using requestAnimationFrame
         var me = this;
-        requestAnimationFrame(function() {
+        window.requestAnimFrame(function() {
             me.animate();
         });
 

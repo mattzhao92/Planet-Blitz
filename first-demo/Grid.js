@@ -1,31 +1,20 @@
 /* Game world */
 var Grid = Class.extend({
     // Class constructor
-    init: function(gameApp, width, length, tileSize, scene, camera, controls) {
+      init: function(gameApp, width, length, tileSize, scene, camera, controls) {
         'use strict';
 
+        var mapContent = GameInfo.mapContent;
+        this.mapJson = JSON.parse(mapContent);
         this.gameApp = gameApp;
 
-        var currentTime = new Date();
-
-        var whichMap = Math.floor((currentTime.getSeconds() % 20) / 4);
-
-        var groundTextureArray = [
-        "gndTexture/Supernova.jpg",
-        "gndTexture/gnd-dirty.jpg",
-        "gndTexture/gnd-bakedground.jpg",
-        "gndTexture/gnd-yellowpurp.jpg",
-        "gndTexture/gnd-oilStainedTitanium.jpg"
-        ];
-        this.GROUND_TEXTURE = groundTextureArray[whichMap];
-        console.log("Using map " + this.GROUND_TEXTURE + " at idx " + whichMap);
-
-        this.gridWidth = width;
-        this.gridLength = length;
-        this.tileSize = tileSize;
+        this.gridWidth = this.mapJson.board.width;
+        this.gridLength = this.mapJson.board.height;
+        this.tileSize = this.mapJson.board.tileSize;
         this.scene = scene;
         this.camera = camera;
         this.controls = controls;
+
 
         // information about what's being selected
         this.highlightedTiles = null;
@@ -48,7 +37,6 @@ var Grid = Class.extend({
             scope.scene.remove(sprite.getRepr());
         });
         this.spriteFactory = new SpriteFactory(this, sceneAddCmd, sceneRemoveCmd);
-
         this.reset();
 
         // nonessentials
@@ -56,10 +44,172 @@ var Grid = Class.extend({
         this.setupMouseDownListener();
         this.setupHotkeys();
 
-        this.unitCycle = 0;
+        this.unitCycle = 1;
         this.resetInProgress = false;
 
         this.hotkeys = [];
+        this.hotkeyToUnitMap = {};
+
+        this.setupMaterialRefresher();
+    },
+
+    setupMaterialRefresher: function() {
+        var scope = this;
+
+        var subscriber = function(msg, data) {
+            scope.refreshMaterials();
+        }
+
+        PubSub.subscribe(Constants.TOPIC_REFRESH_MATERIALS, subscriber);
+    },
+
+    refreshMaterials: function() {
+        this.scene.traverse(function(object) {
+            if (object instanceof THREE.Mesh) {
+                if (object.material) {
+                    var material = object.material;
+                    material.needsUpdate = true;
+                }
+            }
+        });
+    },
+
+    loadGroundFromMapJson: function(mapJson) {
+        var width = mapJson.board.width;
+        var length = mapJson.board.height;
+        var size = mapJson.board.tileSize;
+
+        this.numberSquaresOnXAxis = width / size;
+        this.numberSquaresOnZAxis = length / size;
+
+        var texture = THREE.ImageUtils.loadTexture("gndTexture/" + mapJson.board.groundtexture);
+
+        var groundMaterial = new THREE.MeshLambertMaterial({
+            map: texture,
+            side: THREE.DoubleSide
+        });
+
+        var ground = new THREE.Mesh(new THREE.PlaneGeometry(this.gridWidth, this.gridLength, this.gridWidth / 5, this.gridLength / 5), groundMaterial);
+        ground.receiveShadow = true;
+
+        ground.rotation.x = -0.5 * Math.PI;
+
+        var Y_BUFFER = -0.5;
+        // needed because otherwise tiles will overlay directly on the grid and will cause glitching during scrolling ("z fighting")
+        ground.position.y = Y_BUFFER;
+        // offset to fit grid drawing 
+        ground.position.x -= mapJson.board.tileSize / 2;
+        ground.position.z -= mapJson.board.tileSize / 2;
+
+        this.scene.add(ground);
+    },
+
+    drawGridSquaresFromMapJson: function(mapJson) {
+        var size = mapJson.board.tileSize;
+
+        this.tileFactory = new TileFactory(this, size);
+
+        this.PFGrid = new PF.Grid(this.numberSquaresOnXAxis, this.numberSquaresOnZAxis);
+        this.pathFinder = new PF.BreadthFirstFinder({allowDiagonal: false, dontCrossCorners: true});
+
+
+        this.tilesArray = new Array(this.numberSquaresOnXAxis);
+        for (var i = 0; i < this.numberSquaresOnXAxis; i++) {
+            this.tilesArray[i] = new Array(this.numberSquaresOnZAxis);
+        }
+
+        for (var i = 0; i < this.numberSquaresOnXAxis; i++) {
+            for (var j = 0; j < this.numberSquaresOnZAxis; j++) {
+                var tile = this.tileFactory.createTile(i, j);
+
+                var tileMesh = tile.getTileMesh();
+                this.tilesArray[i][j] = tile;
+
+                this.tiles.add(tileMesh);
+            }
+        }
+
+        for (var i = 0; i < mapJson.tiles.length; i++) {
+            var specialTile = JSON.parse(mapJson.tiles[i]);
+            var xPos = specialTile.xPos;
+            var zPos = specialTile.zPos;
+            
+            if (specialTile.hasCharacter) {
+                this.markTileOccupiedByCharacter(xPos, zPos);
+            }
+
+            if (specialTile.hasObstacle) {
+                this.markTileOccupiedByObstacle(xPos, zPos);
+            }
+        }
+
+        this.scene.add(this.tiles);
+    },
+
+    setupObstaclesFromMapJson: function(mapJson) {
+
+        var obstacles = mapJson.obstacles;
+        for (var i = 0; i < obstacles.length; i++) {
+            var obj = JSON.parse(obstacles[i]);
+            var obstacle =  this.spriteFactory.createObstacle('rock');
+            
+            var objMesh = obstacle.getRepr();
+            objMesh.position.x = this.convertXPosToWorldX(obj.xPos);
+            objMesh.position.y = 20;
+            objMesh.position.z = this.convertZPosToWorldZ(obj.zPos);
+
+            obstacle.position = objMesh.position;
+
+            this.scene.add(objMesh);
+        }
+    },
+
+    setupCharctersFromMapJson: function(mapJson) {
+
+        // reconstructing BlitzUnits here
+        var units_in_teams = [];
+
+        for (var i = 0; i < mapJson.units.length; i++) {
+            var unit = JSON.parse(mapJson.units[i]);
+            while (unit.teamId > units_in_teams.length -1) {
+                units_in_teams.push([]);
+            }
+            units_in_teams[unit.teamId].push(unit);
+        }
+
+        for (var team_index = 0; team_index < units_in_teams.length; team_index++) {
+
+            for (var unit_index = 0; unit_index < units_in_teams[team_index].length; unit_index++) {
+
+                var metaData = units_in_teams[team_index][unit_index];
+                var character;
+
+                var startX = metaData.xPos;
+                var startY = metaData.zPos;
+                
+                switch (metaData["unitType"]) {
+                    case "soldier":
+                        character = this.spriteFactory.createSoldier(team_index, unit_index);
+                        break;
+                    case "artillery":
+                        character = this.spriteFactory.createArtillerySoldier(team_index, unit_index);
+                        break;
+                    case "flamethrower": 
+                        character = this.spriteFactory.createFlamethrowerSoldier(team_index, unit_index);
+                        break;
+                    default:
+                        console.log("Invalid unit type specified "+metaData["unitType"]);
+                        break;
+                }
+
+                character.placeAtGridPos(startX, startY);
+                character.getRepr().rotation.y = this.getUnitDegreesToRotate(team_index);
+                this.markTileOccupiedByCharacter(startX, startY);
+            }
+        }
+
+        // handle initial case where you need to publish the current initial angle of 0
+        PubSub.publish(Constants.TOPIC_CAMERA_ROTATION, this.controls.currentAngle);
     },
 
     getCharacters: function() {
@@ -67,14 +217,14 @@ var Grid = Class.extend({
     },
 
     onGameStart: function() {
-        for (var tm = GameInfo.numOfTeams; tm < 4; tm++) {
-            for (var i = 0; i < this.numOfCharacters; i++) {
-                this.silentlyRemoveCharacter(this.getCharacterById(tm, i));
+
+         for (var tm = 0; tm < 4; tm++) {
+            if (GameInfo.existingTeams.indexOf(tm) == -1) {
+                for (var i = 0; i < this.numOfCharacters; i++) {
+                    this.silentlyRemoveCharacter(this.getCharacterById(tm, i));
+                }               
             }
         }
-
-        console.log("Team id " + GameInfo.myTeamId);
-
         if (this.getCurrentSelectedUnit()) {
             // TODO: duplicated code
 
@@ -85,7 +235,6 @@ var Grid = Class.extend({
             });
 
             this.currentSelectedUnits[GameInfo.myTeamId] = null;
-            this.deselectHighlightedTiles();
         }
 
         var teamJoinMessage;
@@ -104,11 +253,12 @@ var Grid = Class.extend({
                 break;
         }
 
-        this.controls.rotateRight(this.getCameraDegreesToRotate());
+        //this.controls.rotateRight(this.getCameraDegreesToRotate());
         // this.displayMessage(teamJoinMessage);
 
         // focus camera on start position (TODO: hardcoded)
         this.controls.focusOnPosition(this.getMyTeamCharacters()[0].mesh.position);
+        this.getMyTeamCharacters()[0].onSelect();
     },
 
     onGameFinish: function() {
@@ -126,29 +276,65 @@ var Grid = Class.extend({
 
     setupHotkeys: function() {
         var scope = this;
-        var unitNumbers = [1, 2, 3];
+        var unitNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0];
 
+        // remove previous hotkey bindings
+        _.forEach(Constants.HOTKEYS, function(hotkey) {
+            KeyboardJS.clear(hotkey);
+            // remove all bindings that use given key inside the combo
+            KeyboardJS.clear.key(hotkey);
+        });
+
+        // dynamic hotkey mapping to characters
         unitNumbers.forEach(function(number) {
             var hotkey = number.toString();
-            KeyboardJS.on(hotkey,
+            KeyboardJS.on("ctrl, command > " + hotkey,
                 function(event, keysPressed, keyCombo) {
-                    // TODO: replace this with a more readable line. Also, need to account for out of index errors when units get killed
-                    var characterSelected = scope.getMyTeamCharacters()[parseInt(keyCombo) - 1];
-                    if (characterSelected && characterSelected.active) {
-                        characterSelected.onSelect();
+                    event.preventDefault();
+
+                    var currentSelectedUnit = scope.getCurrentSelectedUnit();
+                    if (currentSelectedUnit && currentSelectedUnit.active) {
+
+                        var previousKeybinding = scope.hotkeyToUnitMap[number];
+                        if (previousKeybinding) {
+                            previousKeybinding.clear();
+                        }
+
+                        // assign new hotkey number to this unit
+                        var keyBinding = KeyboardJS.on(hotkey, function(event, keysPressed, keyCombo) {
+                            if (currentSelectedUnit && currentSelectedUnit.active) {
+                                currentSelectedUnit.onSelect();
+                            }
+                        });
+
+                        scope.hotkeyToUnitMap[number] = keyBinding;
                     }
                 }
             );
         });
 
         // unit toggle - cycle forwards
-        KeyboardJS.on("t",
+        KeyboardJS.on("t, tab",
             function(event, keysPressed, keyCombo) {
+                event.preventDefault();
+
                 var myTeamCharacters = scope.getMyTeamCharacters();
                 var characterSelected = myTeamCharacters[scope.unitCycle];
-                if (characterSelected.active) {
-                    characterSelected.onSelect();
+
+                // handle case where some characters have been killed in meantime
+                if (scope.unitCycle >= myTeamCharacters.length) {
+                    scope.unitCycle = 0;
                 }
+
+                // need to cycle until the next "defined character". If character became dead, then the unitCycle concept ceases to become valid
+                for (var i = scope.unitCycle; i < myTeamCharacters.length; i++) {
+                    if (characterSelected !== undefined && characterSelected.active) {
+                        characterSelected.onSelect();
+                        break;
+                    }
+                    scope.unitCycle = i;
+                }
+
                 scope.unitCycle = (scope.unitCycle + 1) % myTeamCharacters.length;
             }
         );
@@ -192,47 +378,6 @@ var Grid = Class.extend({
             }
         );
 
-    },
-
-    setupCharacters: function() {
-        this.numOfCharacters = 3;
-        // The row position.
-        this.teamStartPos = [1, 18, 1, 18];
-
-        // Sequence number for synchornization.
-        this.seq = 0;
-
-        var scope = this;
-
-        for (var team_id = 0; team_id < 4; team_id++) {
-            for (var i = 0; i < this.numOfCharacters; i++) {
-                var characterId = i;
-
-                var character;
-                if (i == 0) {
-                    character = this.spriteFactory.createSoldier(team_id, characterId);
-                } else if (i == 1) {
-                    character = this.spriteFactory.createArtillerySoldier(team_id, characterId);
-                } else {
-                    character = this.spriteFactory.createFlamethrowerSoldier(team_id, characterId);
-                }
-
-                var startX, startY;
-                if (team_id < 2) {
-                    startX = i + 9;
-                    startY = this.teamStartPos[team_id];
-                } else {
-                    startX = this.teamStartPos[team_id];
-                    startY = i + 9;
-                }
-                character.placeAtGridPos(startX, startY);
-
-                // TODO: temporary fix until initial rotation is handled properly
-                character.getRepr().rotation.y = this.getUnitDegreesToRotate(team_id);
-
-                this.markTileOccupiedByCharacter(startX, startY);
-            }
-        }
     },
 
     getUnitDegreesToRotate: function(team_id) {
@@ -303,7 +448,6 @@ var Grid = Class.extend({
             });
 
             this.currentSelectedUnits[GameInfo.myTeamId] = null;
-            this.deselectHighlightedTiles();
         }
 
         // mark tile position as available
@@ -315,9 +459,15 @@ var Grid = Class.extend({
     },
 
     handleCharacterDead: function(character) {
-        this.displayMessage("A robot was destroyed!");
-
         this.silentlyRemoveCharacter(character);
+    },
+
+    convertMeshXToXPos: function(meshX) {
+        return Math.floor((meshX + this.gridWidth/2) / this.tileSize);
+    },
+
+    convertMeshZToZPos: function(meshZ) {
+        return Math.floor((meshZ + this.gridLength / 2) / this.tileSize);
     },
 
     convertXPosToWorldX: function(tileXPos) {
@@ -330,9 +480,6 @@ var Grid = Class.extend({
 
     markCharacterAsSelected: function(character) {
         this.currentSelectedUnits[GameInfo.myTeamId] = character;
-
-        // show character movement speed
-        this.displayMovementArea(character);
     },
 
     markTileAsSelected: function(tile) {
@@ -365,86 +512,22 @@ var Grid = Class.extend({
         }
     },
 
-    markTileOccupiedByObstacle: function() {
+    markTileOccupiedByObstacle: function(xPos, zPos) {
+        var tile = this.getTileAtTilePos(xPos, zPos);
+        if (tile) {
+            tile.hasObstacle = true;
 
+            this.setPFGridCellAccessibility(xPos, zPos, false);
+        }
     },
 
     findPath: function(oldXPos, oldZPos, newXPos, newZPos) {
         return this.pathFinder.findPath(oldXPos, oldZPos, newXPos, newZPos, this.PFGrid.clone());
     },
 
-    displayMovementArea: function(character) {
-        // deselect any previously highlighted tiles
-        if (this.currentMouseOverTile) {
-            this.currentMouseOverTile.reset();
-        }
-
-        if (character.isCharacterInRoute == false && character.isCoolDown == false && character.active) {
-            this.deselectHighlightedTiles();
-
-            var characterMovementRange = character.getMovementRange();
-            // highlight adjacent squares - collect all tiles from radius
-            var tilesToHighlight = this.getTilesInArea(character, characterMovementRange);
-            this.highlightTiles(tilesToHighlight);
-        }
-    },
-
-    deselectHighlightedTiles: function() {
-        // deselect tiles.
-        if (this.highlightedTiles) {
-            this.highlightedTiles.forEach(function(tile) {
-                tile.reset();
-            });
-        }
-    },
-
-    highlightTiles: function(tilesToHighlight) {
-        tilesToHighlight.forEach(function(tile) {
-            tile.setSelectable(true);
-            tile.setMovable(true);
-            tile.markAsMovable();
-        });
-        this.highlightedTiles = tilesToHighlight;
-    },
 
     setPFGridCellAccessibility: function(x, z, hasObstacleOnCell) {
         this.PFGrid.setWalkableAt(x, z, hasObstacleOnCell);
-    },
-
-    getTilesInArea: function(character, radius) {
-        // DO A BFS here
-        var tilesToHighlight = [];
-        var startTile = this.getTileAtTilePos(character.getTileXPos(), character.getTileZPos());
-        if (!startTile) return tilesToHighlight;
-
-        startTile.isObstacle();
-        var visited = [];
-        var nodesInCurrentLevel = [];
-        var nodesInNextLevel = [];
-        tilesToHighlight.push(startTile);
-        nodesInCurrentLevel.push(startTile);
-
-        while (nodesInCurrentLevel.length > 0 && radius > 0) {
-            var currentTile = nodesInCurrentLevel.pop();
-
-            var validNeighbors = this.getNeighborTiles(currentTile.xPos, currentTile.zPos);
-            for (var i = 0; i < validNeighbors.length; i++) {
-                var neighbor = validNeighbors[i];
-                if (_.indexOf(visited, neighbor) == -1 && _.indexOf(nodesInNextLevel, neighbor) == -1) {
-                    tilesToHighlight.push(neighbor);
-                    nodesInNextLevel.push(neighbor);
-                }
-            }
-
-            if (nodesInCurrentLevel.length == 0) {
-                nodesInCurrentLevel = nodesInNextLevel;
-                nodesInNextLevel = [];
-                radius = radius - 1;
-            }
-            visited.push(currentTile);
-        }
-
-        return tilesToHighlight;
     },
 
     getNeighborTiles: function(originTileXPos, originTileZPos) {
@@ -501,8 +584,9 @@ var Grid = Class.extend({
     },
 
     handleShootEvent: function() {
+        var from = this.getCurrentSelectedUnit().position.clone();
         var to = this.gridHelper.getMouseProjectionOnGrid();
-        this.getCurrentSelectedUnit().shoot(to, true);
+        this.getCurrentSelectedUnit().shoot(from, to, true);
     },
 
     getCurrentSelectedUnit: function() {
@@ -560,7 +644,6 @@ var Grid = Class.extend({
         if (intersectsWithTiles.length > 0) {
             var tileSelected = intersectsWithTiles[0].object.owner;
             var coordinate = tileSelected.onMouseOver();
-
             if (this.getCurrentSelectedUnit() && coordinate) {
                 var deltaX = coordinate.x - this.getCurrentSelectedUnit().getTileXPos();
                 var deltaY = 0;
@@ -570,15 +653,9 @@ var Grid = Class.extend({
 
                 if (unitMovedToDifferentSquare) {
                     // Put the network communication here.
-                    if (this.getCurrentSelectedUnit().isCoolDown == 0 && this.getCurrentSelectedUnit().canMove == true) {
-                        if (!GameInfo.netMode) {
-                            this.getCurrentSelectedUnit().setDirection(new THREE.Vector3(deltaX, 0, deltaZ));
-                            this.getCurrentSelectedUnit().enqueueMotion();
-                        } else {
+                    if (this.getCurrentSelectedUnit().isCoolDown == 0) {
                             sendMoveMsg(this.getCurrentSelectedUnit().id,
-                                deltaX, deltaY, deltaZ);
-                        }
-                        this.getCurrentSelectedUnit().canMove = false;
+                                coordinate.x, 0, coordinate.z);
                     }
                 }
             }
@@ -595,55 +672,6 @@ var Grid = Class.extend({
         }
 
         return this.tilesArray[xPos][zPos];
-    },
-
-    loadGround: function() {
-        var texture = THREE.ImageUtils.loadTexture(this.GROUND_TEXTURE);
-
-        var groundMaterial = new THREE.MeshLambertMaterial({
-            color: 0xffffff,
-            map: texture
-        });
-
-        var ground = new THREE.Mesh(new THREE.PlaneGeometry(this.gridWidth, this.gridLength), groundMaterial);
-        ground.rotation.x = -0.5 * Math.PI;
-
-        var Y_BUFFER = -0.5;
-        // needed because otherwise tiles will overlay directly on the grid and will cause glitching during scrolling ("z fighting")
-        ground.position.y = Y_BUFFER;
-        // offset to fit grid drawing 
-        ground.position.x -= this.tileSize / 2;
-        ground.position.z -= this.tileSize / 2;
-
-        this.scene.add(ground);
-    },
-
-    drawGridSquares: function(width, length, size) {
-        this.tileFactory = new TileFactory(this, size);
-
-        this.numberSquaresOnXAxis = width / size;
-        this.numberSquaresOnZAxis = length / size;
-
-        this.tilesArray = new Array(this.numberSquaresOnXAxis);
-        for (var i = 0; i < this.numberSquaresOnXAxis; i++) {
-            this.tilesArray[i] = new Array(this.numberSquaresOnZAxis);
-        }
-
-        for (var i = 0; i < this.numberSquaresOnXAxis; i++) {
-            for (var j = 0; j < this.numberSquaresOnZAxis; j++) {
-                var tile = this.tileFactory.createTile(i, j);
-
-                var tileMesh = tile.getTileMesh();
-                this.tilesArray[i][j] = tile;
-
-                this.tiles.add(tileMesh);
-            }
-        }
-
-        this.PFGrid = new PF.Grid(this.numberSquaresOnXAxis, this.numberSquaresOnZAxis);
-        this.pathFinder = new PF.AStarFinder();
-
-        this.scene.add(this.tiles);
     },
 
     getTileSize: function() {
@@ -671,13 +699,13 @@ var Grid = Class.extend({
         this.spriteFactory.updateBulletsContainer();
     },
 
-    syncGameState: function(state) {
+   syncGameState: function(state) {
         if (this.resetInProgress) return true;
 
         // This is usd to check ghosts.
         var liveChars = [];
         var liveStates = [];
-        for (var t = 0; t < GameInfo.numOfTeams; t++) {
+        for (var t = 0; t < GameInfo.maxNumTeams; t++) {
             liveStates.push(new Array());
             for (var i = 0; i < this.numOfCharacters; i++) {
                 liveStates[t].push(false);
@@ -706,7 +734,7 @@ var Grid = Class.extend({
                 }
                 if (dest.x != x || dest.z != z) {
                     // Inconsistent with auth state, adjust position.
-                    console.log("Inconsi pos ");
+                    console.log('Inconsitent shoud be at ' + x + ' ' + z + ' but was at ' + dest.x + ' ' + dest.z);
                     charToCheck.placeAtGridPos(x, z);
                 }
             }
@@ -744,20 +772,18 @@ var Grid = Class.extend({
     },
 
     reset: function() {
-        console.log("Game reset");
-
         this.tiles = new THREE.Object3D();
         this.tilesArray = null;
 
-        this.loadGround();
-        this.drawGridSquares(this.gridWidth, this.gridLength, this.tileSize);
+        // create grid tiles
+        this.loadGroundFromMapJson(this.mapJson);
+        this.drawGridSquaresFromMapJson(this.mapJson);
 
         // initialize characters
-        this.setupCharacters();
+        this.setupCharctersFromMapJson(this.mapJson);
+        this.setupObstaclesFromMapJson(this.mapJson);
+        
         this.resetInProgress = false;
-
-        this.deselectHighlightedTiles();
-
         this.camera.position.x = 0;
         this.camera.position.y = 600;
         this.camera.position.z = 400;

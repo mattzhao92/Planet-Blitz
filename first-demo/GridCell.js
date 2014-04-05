@@ -6,7 +6,7 @@ var GridCell = Class.extend({
         this.xPos = xPos;
         this.zPos = zPos;
 
-        this.isSelectable = false;
+        this.isSelectable = true;
         this.isMovable = false;
 
         this.hasObstacle = false;
@@ -74,8 +74,6 @@ var GridCell = Class.extend({
 
     onMouseOver: function(scope) {
         if (this.isSelectable) {
-            // this.highlight("RED");
-            this.highlight("YELLOW");
             this.world.markTileAsSelected(this);
             return {
                 x: this.xPos,
@@ -89,16 +87,13 @@ var GridCell = Class.extend({
         if (this.isMovable) {
             this.highlight("GREEN");
         }
-    },
-
-    markAsRoadMap: function() {
-        this.highlight("YELLOW");
     }
 });
 
 var TileFactory = Class.extend({
     init: function(world, tileSize) {
-        this.tileGeom = new THREE.PlaneGeometry(tileSize, tileSize);
+        this.tileSize = tileSize;
+        this.tileGeom = new THREE.PlaneGeometry(tileSize, tileSize, tileSize / 5, tileSize / 5);
         this.world = world;
     },
 

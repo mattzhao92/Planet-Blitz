@@ -1,7 +1,7 @@
 function startGame() {
   GameInfo.isStart = true;
   GameInfo.isLoading = false;
-  $('body').css('background-image', 'none');
+  // $('body').css('background-image', 'none');
   $('#Loading-output').hide();
   $('.span').hide();
   $('.cloud').hide();
@@ -25,7 +25,8 @@ function restartLoading() {
   GameInfo.isLoading = true;
   $('#WebGL-output').hide();
   $('#Stats-output').hide();
-  $('body').css('background-image', 'url(images/PlanetBlitz.jpg)');
+  // $('body').css('background-image', 'url(images/PlanetBlitz.jpg)');
+  $('#game-container').wrap('<div id="background-3d"></div>');
   $('#Loading-output').show();
   $('.span').show();
   $('.cloud').show();
@@ -34,9 +35,17 @@ function restartLoading() {
 function mainMenu() {
   GameInfo.isLoading = false;
   GameInfo.isStart = false;
+
+  removeGameCanvas();
+  // $('#WebGL-output').hide();
+  // $('#Stats-output').hide();
+  $('body').css('background-image', 'url(images/PlanetBlitz.jpg)');
+
+  $('#game-container').wrap('<div id="background-3d"></div>');
   $('#WebGL-output').hide();
   $('#Stats-output').hide();
-  $('body').css('background-image', 'url(images/PlanetBlitz.jpg)');
+  // $('body').css('background-image', 'url(images/PlanetBlitz.jpg)');
+
   $('#Loading-output').hide();
   $('.span').hide();
   $('.cloud').hide();
@@ -52,6 +61,7 @@ function joinGame(gameId) {
 }
 
 function showRestartDialog(message, additionalMsg, score) {
+  GameInfo.inPostGame = true;
   var content = '<h2 style="text-align:center">' + message + '</h2>';
   if (additionalMsg) {
     content += '<p style="text-align:center; margin:0">' + additionalMsg + '</p>';
@@ -76,48 +86,38 @@ function showRestartDialog(message, additionalMsg, score) {
     content += '</tr>';
   }
   content += '</table>';
-  if (additionalMsg) {
-    $("#Message-dialog").html(content).dialog(
-    {
-      width: 400, 
-      height: 300,
-      modal: true,
-      resizable: false,
-      buttons: {
-        "Close": function() {
-          $(this).dialog("close");
-          mainMenu();
-        }
+
+    
+  $("#Message-dialog").html(content).dialog(
+  {
+    width: 400, 
+    // height: 300,
+    modal: true,
+    resizable: false,
+    buttons: {
+      "Play again": function() {
+        GameInfo.inPostGame = false;
+        $(this).dialog("close");
+        game.reset();
+        sendRestartMsg();
+        restartLoading();
+      },
+      "Quit": function() {
+        GameInfo.inPostGame = false;
+        $(this).dialog("close");
+        mainMenu();
+        sendLeaveMsg();
       }
-   });   
-  } else {
-    $("#Message-dialog").html(content).dialog(
-    {
-      width: 400, 
-      height: 300,
-      modal: true,
-      resizable: false,
-      buttons: {
-        "Play again": function() {
-          $(this).dialog("close");
-          game.reset();
-          sendRestartMsg();
-          restartLoading();
-        },
-        "Quit": function() {
-          $(this).dialog("close");
-          mainMenu();
-          sendLeaveMsg();
-        }
-      }
-    });   
-  }
+    }
+  });
+  $('#Message-dialog').css('height', 'auto');
+  $('#Message-dialog').css('overflow', 'visible');
 }
 
 function getUsername(forGameId) {
   var content = '<div class="rain" style="margin:0"><div class="border start">';
   content += '<form><label for="name" style="margin-left:7">Player name</label><input id="uname" name="name"  maxlength="15" type="text" style="margin-left: 25"/>';
-  content += '<input type="button" value="Join game" style="margin: 5 23 10 23" id="unameBtn"/><input value="Cancel" type="button" id="quitBtn" style="margin: 0 23 14 23"/>';
+  content += '<input type="button" value="Join game" style="margin: 5 23 10 29" id="unameBtn"/><input value="Cancel" type="button" id="quitBtn" style="margin: 0 23 14 29"/>';
   content += '</form></div></div>';
   $("#Input-dialog").html(content).dialog(
   {
@@ -154,11 +154,17 @@ function getUsername(forGameId) {
   });
 }
 
-function createGameStep2(type) {
+function createGameStep() {
   var content = '<div class="rain" style="margin:0"><div class="border start">';
   content += '<form><label for="rname" style="margin-left:7">Game room name</label><input id="rname" name="rname"  maxlength="15" type="text" style="margin-left: 25"/>';
   content += '<form><label for="uname" style="margin-left:7">Player name</label><input id="uname" name="name"  maxlength="15" type="text" style="margin-left: 25"/>';
-  content += '<input type="button" value="Start" style="margin: 5 23 10 23" id="unameBtn"/><input value="Quit" type="button" id="quitBtn" style="margin: 0 23 14 23"/>';
+  content += '<label for="map" style="margin-left:7">Map</label>';
+  content += '<div class="styled-select"><select name="map" id="choosemap">';
+  for (var t = 0; t < GameInfo.maps.length; t++) {
+    content += '<option>' + GameInfo.maps[t] + '</option>';
+  }
+  content += '</select></div>';
+  content += '<input type="button" value="Start" style="margin: 5 23 10 29" id="unameBtn"/><input value="Quit" type="button" id="quitBtn" style="margin: 0 23 14 29"/>';
   content += '</form></div></div>';
   $("#Input-dialog").html(content).dialog(
   {
@@ -172,13 +178,13 @@ function createGameStep2(type) {
   $(".ui-widget.name-dialog").css('width', 'auto');
   $(".ui-widget.name-dialog").css('padding', 0);
   $("#Input-dialog").css('padding', 0);
-  $(".rain").css('height', 240);
-  $(".border").css('height', 240);
   $("#unameBtn").click(function() {
     var username = $('#uname').val();
     var gamename = $('#rname').val();
     if (username != '' && gamename != '') {
-      sendCreateMsg(gamename, username, type);
+      var map = $('#choosemap :selected').text();
+      // alert(map);
+      sendCreateMsg(gamename, username, map);
       $("#Input-dialog").dialog("close");
     } else {
       alert('The username and gamename can not be empty');
@@ -197,15 +203,20 @@ function createGameStep2(type) {
   });
 }
 
-function createGameStep1() {
+function createSingleGame() {
   var content = '<div class="rain" style="margin:0"><div class="border start">';
-  content += '<form style="padding-top:6px">';
-  content += '<label>How many players?</label>'; 
-  content += '<input type="button" value="2 Players" style="margin-top:10px" id="2p"/>';
-  content += '<form><input type="button" value="4 Players" id="4p"/>';
-  content += '<input value="Quit" type="button" id="quitBtn" />';
-  content += '</form></div></div>';
+  // content += '<form><label for="rname" style="margin-left:7">Game room name</label><input id="rname" name="rname"  maxlength="15" type="text" style="margin-left: 25"/>';
+  // content += '<form><label for="uname" style="margin-left:7">Player name</label><input id="uname" name="name"  maxlength="15" type="text" style="margin-left: 25"/>';
   
+  content += '<form>';
+  content += '<label for="map" style="margin-left:7; font-size:15">Map</label>';
+  content += '<div class="styled-select"><select name="map" id="choosemap">';
+  for (var t = 0; t < GameInfo.maps.length; t++) {
+    content += '<option>' + GameInfo.maps[t] + '</option>';
+  }
+  content += '</select></div>';
+  content += '<input type="button" value="Start" style="margin: 5 23 10 29" id="unameBtn"/><input value="Quit" type="button" id="quitBtn" style="margin: 0 23 14 29"/>';
+  content += '</form></div></div>';
   $("#Input-dialog").html(content).dialog(
   {
     width: 400, 
@@ -218,15 +229,11 @@ function createGameStep1() {
   $(".ui-widget.name-dialog").css('width', 'auto');
   $(".ui-widget.name-dialog").css('padding', 0);
   $("#Input-dialog").css('padding', 0);
-  // $(".rain").css('height', 240);
-  // $(".border").css('height', 240);
-  $("#2p").click(function() {
+  $("#unameBtn").click(function() {
+    var map = $('#choosemap :selected').text();
+    sendSingleModeMsg(map);
+    loading();
     $("#Input-dialog").dialog("close");
-    createGameStep2(2);
-  });
-  $("#4p").click(function() {
-    $("#Input-dialog").dialog("close");
-    createGameStep2(4);
   });
   $("#quitBtn").click(function() {
     $("#Input-dialog").dialog("close");
@@ -234,26 +241,31 @@ function createGameStep1() {
   $('form').on('submit', function(event){
     event.preventDefault();
   });
+  $('#Input-dialog').keypress(function(e) {
+      if (e.keyCode == $.ui.keyCode.ENTER) {
+        $("#unameBtn").click();
+      }
+  });
 }
 
 function listAvailableGames(games) {
   var content = '<div class="rain" style="margin:0"><div class="border start">';
   content += '<form><label style="text-align:center">Click on a game room to join or create your own</label>';
-  content += '<table><tr><td style="width:140">Room</td><td style="padding-right:40px">Players</td><td>Status</td></tr>';
+  content += '<table><tr><td style="padding-left:32">Room</td><td style="width:140">Map</td><td style="padding-right:40px">Players</td><td>Status</td></tr>';
   for (var t = 0; t < games.length; t++) {
     var game = games[t];
     var isPlaying = game[Info.gameStart] ? 'Playing' : 'Waiting';
-    if (game[Info.gameStart]) {
-      content += '<tr><td class="open-game">' + game[Info.gameName] + '</td><td style="padding-right:40px">' + game[Info.player] +'</td>';
+    if (game[Info.isFull]) {
+      content += '<tr class="list-game"><td class="open-game" style="padding-left:32">' + game[Info.mapName] + '</td><td>' + game[Info.mapName] + '</td><td style="padding-right:40px">' + game[Info.player] +'</td>';
     } else {
-      content += '<tr onClick="joinGame(' + game[Info.gameId] + ')"><td class="open-game">' + game[Info.gameName] + '</td><td style="padding-right:40px">' + game[Info.player] +'</td>';
+      content += '<tr class="list-game" onClick="joinGame(' + game[Info.gameId] + ')"><td class="open-game" style="padding-left:32">' + game[Info.gameName] + '</td><td>' + game[Info.mapName] + '</td><td style="padding-right:40px">' + game[Info.player] +'</td>';
     }
     
     
     content += '<td>' + isPlaying + '</td></tr>';
   }
   content += '</table>';
-  content += '<input type="button" value="Create Game" style="margin: 20 23 10 23" id="createGameBtn"/><input value="Quit" type="button" id="quitBtn" style="margin: 0 23 14 23"/>';
+  content += '<input type="button" value="Create Game" style="margin: 20 23 10 29" id="createGameBtn"/><input value="Quit" type="button" id="quitBtn" style="margin: 0 23 14 29"/>';
   content += '</form></div></div>';
   // game.getWorld().disableHotKeys();
   $("#Input-dialog").html(content).dialog(
@@ -269,7 +281,7 @@ function listAvailableGames(games) {
   $("#Input-dialog").css('padding', 0);
   $("#createGameBtn").click(function() {
     $("#Input-dialog").dialog("close");
-    createGameStep1();
+    createGameStep();
   });
   $("#quitBtn").click(function() {
     $("#Input-dialog").dialog("close");
@@ -286,16 +298,10 @@ $(document).ready(function() {
     sendListGameMsg();
   });
 
+
   /* Start the game locally */
   $('#debugBtn').click(function() {
-    GameInfo.netMode = false;
-    loading();
-    renderGame();
-    game.getWorld().onGameStart();
-    setTimeout(function() {
-     startGame();
-    }, 800);
-    
+    sendListMapMsg();
   });
 
   $('#helpBtn').click(function() {
@@ -311,9 +317,7 @@ $(document).ready(function() {
     if (GameInfo.isLoading) {
       sendLeaveMsg();
     } else if (GameInfo.isStart) {
-      if (GameInfo.netMode) {
-        sendLeaveMsg();
-      }
+      sendLeaveMsg();
     } else {
       $('#slide-container').fadeOut();
     }
@@ -321,4 +325,11 @@ $(document).ready(function() {
   });
   
 });
+
+window.oncontextmenu = function () {
+  if (GameInfo.inPostGame) {
+    return false;
+  }
+  return true;
+}
 
