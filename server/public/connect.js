@@ -1,8 +1,19 @@
+function showBackground() {
+  console.log("Entering game menu");
+}
+
+function destroyBackground() {
+  console.log("Exiting game menu");
+}
+
 // When not passing any argument, it automatically connects to the server
 // which serves the page.
 var socket = io.connect();
 var game;
 var GameInfo = new GameConfig();
+
+// show the background
+showBackground();
 
 socket.on(Message.LISTGAME, function(info) {
   GameInfo.maps = info[Message.MAPS];

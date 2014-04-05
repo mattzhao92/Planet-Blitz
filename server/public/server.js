@@ -1,7 +1,9 @@
 function startGame() {
+  destroyBackground();
+
   GameInfo.isStart = true;
   GameInfo.isLoading = false;
-  // $('body').css('background-image', 'none');
+
   $('#Loading-output').hide();
   $('.span').hide();
   $('.cloud').hide();
@@ -25,8 +27,10 @@ function restartLoading() {
   GameInfo.isLoading = true;
   $('#WebGL-output').hide();
   $('#Stats-output').hide();
-  // $('body').css('background-image', 'url(images/PlanetBlitz.jpg)');
+
   $('#game-container').wrap('<div id="background-3d"></div>');
+  showBackground();
+
   $('#Loading-output').show();
   $('.span').show();
   $('.cloud').show();
@@ -37,14 +41,13 @@ function mainMenu() {
   GameInfo.isStart = false;
 
   removeGameCanvas();
-  // $('#WebGL-output').hide();
-  // $('#Stats-output').hide();
   $('body').css('background-image', 'url(images/PlanetBlitz.jpg)');
 
   $('#game-container').wrap('<div id="background-3d"></div>');
+  showBackground();
+
   $('#WebGL-output').hide();
   $('#Stats-output').hide();
-  // $('body').css('background-image', 'url(images/PlanetBlitz.jpg)');
 
   $('#Loading-output').hide();
   $('.span').hide();
