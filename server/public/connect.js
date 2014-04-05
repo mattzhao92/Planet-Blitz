@@ -1,5 +1,5 @@
 function showBackground() {
-  // console.log("Entering game menu");
+  console.log("Entering game menu");
   var app = new MenuBackground("#background-3d");
   var elem = document.getElementById("background-3d");
   console.log(elem);
@@ -14,9 +14,6 @@ function destroyBackground() {
 var socket = io.connect();
 var game;
 var GameInfo = new GameConfig();
-
-// show the background
-showBackground();
 
 socket.on(Message.LISTGAME, function(info) {
   GameInfo.maps = info[Message.MAPS];

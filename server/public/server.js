@@ -335,4 +335,3 @@ window.oncontextmenu = function () {
   }
   return true;
 }
-
