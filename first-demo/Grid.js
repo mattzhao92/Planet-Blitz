@@ -1,7 +1,7 @@
 /* Game world */
 var Grid = Class.extend({
     // Class constructor
-      init: function(gameApp, width, length, tileSize, scene, camera, controls) {
+    init: function(gameApp, width, length, tileSize, scene, camera, controls) {
         'use strict';
 
         var mapContent = GameInfo.mapContent;
@@ -110,7 +110,10 @@ var Grid = Class.extend({
         this.tileFactory = new TileFactory(this, size);
 
         this.PFGrid = new PF.Grid(this.numberSquaresOnXAxis, this.numberSquaresOnZAxis);
-        this.pathFinder = new PF.BreadthFirstFinder({allowDiagonal: false, dontCrossCorners: true});
+        this.pathFinder = new PF.BreadthFirstFinder({
+            allowDiagonal: false,
+            dontCrossCorners: true
+        });
 
 
         this.tilesArray = new Array(this.numberSquaresOnXAxis);
@@ -133,7 +136,7 @@ var Grid = Class.extend({
             var specialTile = JSON.parse(mapJson.tiles[i]);
             var xPos = specialTile.xPos;
             var zPos = specialTile.zPos;
-            
+
             if (specialTile.hasCharacter) {
                 this.markTileOccupiedByCharacter(xPos, zPos);
             }
@@ -151,8 +154,8 @@ var Grid = Class.extend({
         var obstacles = mapJson.obstacles;
         for (var i = 0; i < obstacles.length; i++) {
             var obj = JSON.parse(obstacles[i]);
-            var obstacle =  this.spriteFactory.createObstacle('rock');
-            
+            var obstacle = this.spriteFactory.createObstacle('rock');
+
             var objMesh = obstacle.getRepr();
             objMesh.position.x = this.convertXPosToWorldX(obj.xPos);
             objMesh.position.y = 20;
@@ -171,7 +174,7 @@ var Grid = Class.extend({
 
         for (var i = 0; i < mapJson.units.length; i++) {
             var unit = JSON.parse(mapJson.units[i]);
-            while (unit.teamId > units_in_teams.length -1) {
+            while (unit.teamId > units_in_teams.length - 1) {
                 units_in_teams.push([]);
             }
             units_in_teams[unit.teamId].push(unit);
@@ -186,7 +189,7 @@ var Grid = Class.extend({
 
                 var startX = metaData.xPos;
                 var startY = metaData.zPos;
-                
+
                 switch (metaData["unitType"]) {
                     case "soldier":
                         character = this.spriteFactory.createSoldier(team_index, unit_index);
@@ -194,11 +197,11 @@ var Grid = Class.extend({
                     case "artillery":
                         character = this.spriteFactory.createArtillerySoldier(team_index, unit_index);
                         break;
-                    case "flamethrower": 
+                    case "flamethrower":
                         character = this.spriteFactory.createFlamethrowerSoldier(team_index, unit_index);
                         break;
                     default:
-                        console.log("Invalid unit type specified "+metaData["unitType"]);
+                        console.log("Invalid unit type specified " + metaData["unitType"]);
                         break;
                 }
 
@@ -218,11 +221,11 @@ var Grid = Class.extend({
 
     onGameStart: function() {
 
-         for (var tm = 0; tm < 4; tm++) {
+        for (var tm = 0; tm < 4; tm++) {
             if (GameInfo.existingTeams.indexOf(tm) == -1) {
                 for (var i = 0; i < this.numOfCharacters; i++) {
                     this.silentlyRemoveCharacter(this.getCharacterById(tm, i));
-                }               
+                }
             }
         }
         if (this.getCurrentSelectedUnit()) {
@@ -389,7 +392,7 @@ var Grid = Class.extend({
                 degreesToRotate = Math.PI;
                 break;
             case 2:
-                degreesToRotate = Math.PI / 2; 
+                degreesToRotate = Math.PI / 2;
                 break;
             case 3:
                 degreesToRotate = 3 * Math.PI / 2;
@@ -409,7 +412,7 @@ var Grid = Class.extend({
                 degreesToRotate = 0;
                 break;
             case 2:
-                degreesToRotate = 3 * Math.PI / 2; 
+                degreesToRotate = 3 * Math.PI / 2;
                 break;
             case 3:
                 degreesToRotate = Math.PI / 2;
@@ -463,7 +466,7 @@ var Grid = Class.extend({
     },
 
     convertMeshXToXPos: function(meshX) {
-        return Math.floor((meshX + this.gridWidth/2) / this.tileSize);
+        return Math.floor((meshX + this.gridWidth / 2) / this.tileSize);
     },
 
     convertMeshZToZPos: function(meshZ) {
@@ -654,8 +657,8 @@ var Grid = Class.extend({
                 if (unitMovedToDifferentSquare) {
                     // Put the network communication here.
                     if (this.getCurrentSelectedUnit().isCoolDown == 0) {
-                            sendMoveMsg(this.getCurrentSelectedUnit().id,
-                                coordinate.x, 0, coordinate.z);
+                        sendMoveMsg(this.getCurrentSelectedUnit().id,
+                            coordinate.x, 0, coordinate.z);
                     }
                 }
             }
@@ -699,7 +702,7 @@ var Grid = Class.extend({
         this.spriteFactory.updateBulletsContainer();
     },
 
-   syncGameState: function(state) {
+    syncGameState: function(state) {
         if (this.resetInProgress) return true;
 
         // This is usd to check ghosts.
@@ -782,7 +785,7 @@ var Grid = Class.extend({
         // initialize characters
         this.setupCharctersFromMapJson(this.mapJson);
         this.setupObstaclesFromMapJson(this.mapJson);
-        
+
         this.resetInProgress = false;
         this.camera.position.x = 0;
         this.camera.position.y = 600;

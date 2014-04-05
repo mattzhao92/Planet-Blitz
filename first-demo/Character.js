@@ -43,7 +43,7 @@ var Character = Sprite.extend({
 
         this.loader = new THREE.JSONLoader();
         this.loadFile("blendermodels/" + args.modelName);
- 
+
         this.maximumHealth = 100;
         this.health = this.maximumHealth;
 
@@ -123,9 +123,9 @@ var Character = Sprite.extend({
             // TODO: key this in by name
             // set team color for "wheels"
             _.forEach(materials, function(material) {
-               if (material.name == "Wheels" || material.name == "pupil") {
+                if (material.name == "Wheels" || material.name == "pupil") {
                     material.color = scope.teamColor;
-               }
+                }
             });
 
             var combinedMaterials = new THREE.MeshFaceMaterial(materials);
@@ -226,7 +226,7 @@ var Character = Sprite.extend({
         this.ammoBar.destroy();
         this.healthBar.destroy();
     },
-    
+
     // callback - called when unit is selected. Gets a reference to the game state ("world")
     onSelect: function() {
         // don't do anything if this unit was already selected
@@ -244,15 +244,15 @@ var Character = Sprite.extend({
             this.spriteFactory.notifyAll(new SpriteCmd(function(sprite) {
                 if (ctxSprite != sprite && sprite instanceof Character) {
                     if (sprite.team == GameInfo.myTeamId) {
-                        sprite.deselect();                        
+                        sprite.deselect();
                     }
                 }
             }));
 
             this.isSelected = true;
             var sound = new Howl({
-              urls: ['unit-select.mp3'],
-              volume: 0.6,
+                urls: ['unit-select.mp3'],
+                volume: 0.6,
             }).play();
         }
     },
@@ -273,41 +273,41 @@ var Character = Sprite.extend({
 
     enqueueMotion: function(destX, destZ) {
         // if (this.isCoolDown == 0) {
-            var path = this.world.findPath(this.getTileXPos(), this.getTileZPos(), destX, destZ);
-            this.destX = destX;
-            this.destZ = destZ;
-            this.hasPendingMove = true;
-            var addNewItem = true;
-            var newMotions = [];
-            for (var i = 1; i < path.length; i++) {
-                // checking if path[i], path[i-1], path[i-2] are on the same line
-                if (i > 1) {
-                    if ((path[i][0] == path[i - 2][0] || path[i][1] == path[i - 2][1]) &&
-                        (path[i][0] * (path[i - 1][1] - path[i - 2][1]) + path[i - 1][0] * (path[i - 2][1] - path[i][1]) + path[i - 2][0] *
-                            (path[i][1] - path[i - 1][1]) == 0)) {
-                        // if they are on the same, line, expand the last element in the motionQueue
-                        var lastMotion = newMotions[newMotions.length - 1];
-                        lastMotion.x = path[i][0];
-                        lastMotion.z = path[i][1];
-                        addNewItem = false;
-                    }
+        var path = this.world.findPath(this.getTileXPos(), this.getTileZPos(), destX, destZ);
+        this.destX = destX;
+        this.destZ = destZ;
+        this.hasPendingMove = true;
+        var addNewItem = true;
+        var newMotions = [];
+        for (var i = 1; i < path.length; i++) {
+            // checking if path[i], path[i-1], path[i-2] are on the same line
+            if (i > 1) {
+                if ((path[i][0] == path[i - 2][0] || path[i][1] == path[i - 2][1]) &&
+                    (path[i][0] * (path[i - 1][1] - path[i - 2][1]) + path[i - 1][0] * (path[i - 2][1] - path[i][1]) + path[i - 2][0] *
+                        (path[i][1] - path[i - 1][1]) == 0)) {
+                    // if they are on the same, line, expand the last element in the motionQueue
+                    var lastMotion = newMotions[newMotions.length - 1];
+                    lastMotion.x = path[i][0];
+                    lastMotion.z = path[i][1];
+                    addNewItem = false;
                 }
-                if (addNewItem) {
-                    newMotions.push(new THREE.Vector3(path[i][0], 0, path[i][1]));
-                }
-                addNewItem = true;
             }
+            if (addNewItem) {
+                newMotions.push(new THREE.Vector3(path[i][0], 0, path[i][1]));
+            }
+            addNewItem = true;
+        }
 
-            this.motionQueue.push({
-                'sentinel': 'end'
-            });
-            for (var i = newMotions.length - 1; i >= 0; i--) {
-                this.motionQueue.push(newMotions[i]);
-            }
-            this.motionQueue.push({
-                'sentinel': 'start',
-                'highlightTiles': path
-            });
+        this.motionQueue.push({
+            'sentinel': 'end'
+        });
+        for (var i = newMotions.length - 1; i >= 0; i--) {
+            this.motionQueue.push(newMotions[i]);
+        }
+        this.motionQueue.push({
+            'sentinel': 'start',
+            'highlightTiles': path
+        });
     },
 
     setCharacterMeshPosX: function(x) {
@@ -349,7 +349,7 @@ var Character = Sprite.extend({
             var newMeshX = this.mesh.position.x + this.velocityX * delta;
             var newMeshZ = this.mesh.position.z + this.velocityZ * delta;
 
-    
+
             if (((newMeshX - this.goalMeshX) / (this.goalMeshX - this.prevMeshX) > 0 || this.velocityX == 0) &&
                 ((newMeshZ - this.goalMeshZ) / (this.goalMeshZ - this.prevMeshZ) > 0 || this.velocityZ == 0)) {
                 this.setCharacterMeshPosZ(this.goalMeshZ);
@@ -363,8 +363,8 @@ var Character = Sprite.extend({
                 this.prevMeshX = newMeshX;
                 this.prevMeshZ = newMeshZ;
             }
-                 
-        } 
+
+        }
     },
 
     isInRoute: function() {
@@ -372,11 +372,19 @@ var Character = Sprite.extend({
     },
 
     getDestination: function() {
-        return {'x': this.destX, 'y':0, 'z':this.destZ};  
+        return {
+            'x': this.destX,
+            'y': 0,
+            'z': this.destZ
+        };
     },
 
     getCurrentPosition: function() {
-        return {'x': this.xPos, 'y':0, 'z':this.zPos};
+        return {
+            'x': this.xPos,
+            'y': 0,
+            'z': this.zPos
+        };
     },
 
     update: function(delta, dispatcher) {
@@ -400,8 +408,7 @@ var Character = Sprite.extend({
             var direction = this.motionQueue.pop();
             if (direction.sentinel == 'start') {
                 this.isCharacterInRoute = true;
-                if (this.team == GameInfo.myTeamId) {
-                }
+                if (this.team == GameInfo.myTeamId) {}
                 return;
             } else if (direction.sentinel == 'end') {
                 this.isCharacterInRoute = false;
@@ -412,7 +419,7 @@ var Character = Sprite.extend({
             }
 
             if (this.xPos !== direction.x || this.zPos !== direction.z) {
-       
+
                 // And, only if we're not colliding with an obstacle or a wall ...
                 if (this.collide()) {
                     return false;
@@ -423,15 +430,15 @@ var Character = Sprite.extend({
                 this.prevMeshZ = this.mesh.position.z;
 
                 this.world.markTileNotOccupiedByCharacter(this.getTileXPos(), this.getTileZPos());
-                
+
                 this.goalMeshX = this.world.convertXPosToWorldX(direction.x);
                 this.goalMeshZ = this.world.convertZPosToWorldZ(direction.z);
-                
+
                 var MOVE_VELOCITY = 100;
 
                 if (direction.x < this.xPos) {
                     this.velocityX = -MOVE_VELOCITY;
-                } else if(direction.x > this.xPos) {
+                } else if (direction.x > this.xPos) {
                     this.velocityX = MOVE_VELOCITY;
                 } else {
                     this.velocityX = 0;
