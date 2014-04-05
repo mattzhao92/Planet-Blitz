@@ -11,7 +11,7 @@
     <script type="text/javascript" src="ViewerControls.js"></script>
 
     <script type="text/javascript" src="class.js"></script>
-    <script type="text/javascript" src="underscore-min.js"></script>
+    <script type="text/javascript" src="lodash-min.js"></script>
 
     <script type="text/javascript" src="BlitzLoader.js"></script>
 
@@ -194,7 +194,7 @@
             addControlGUI: function() {
                 var scope = this;
                 this.datGuiControls = new function() {
-                    this.modelName = "testcube-baked.js";
+                    this.modelName = "";
                     this.loadModel = function() {
                         // if object was being viewed previously, then clear it out
                         scope.clearPreviousView();
