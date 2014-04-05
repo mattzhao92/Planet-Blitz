@@ -1,29 +1,24 @@
+var App = Class.extend({
 
-
-var App = {};
-
-App = function(containerName) {
-    // create a scene, that will hold all our elements such as objects, cameras and lights.
-    this.scene = new THREE.Scene();
-
-    // create a render and set the size
-    this.renderer = new THREE.WebGLRenderer({antialias: true, maxLights: 50});
-
-    this.renderer.gammaInput = true;
-    this.renderer.gammaOutput = true;
-
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
-
-    // add the output of the renderer to the html element
-    $(containerName).append(this.renderer.domElement);
-
-    this.init(containerName);
-};
-
-App.prototype = {
     init: function(containerName) {
+        // create a scene, that will hold all our elements such as objects, cameras and lights.
+        this.scene = new THREE.Scene();
+
+        // create a render and set the size
+        this.renderer = new THREE.WebGLRenderer({antialias: true, maxLights: 50});
+
+        this.renderer.gammaInput = true;
+        this.renderer.gammaOutput = true;
+
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+
+        // add the output of the renderer to the html element
+        $(containerName).append(this.renderer.domElement);
+
+        // grid attributes
         this.GRID_WIDTH = 400;
         this.GRID_LENGTH = 400;
+        this.clock = new THREE.Clock();
 
         this.stats = this.initStats();
         this.createGameConsole();
@@ -68,11 +63,11 @@ App.prototype = {
         // // this.scene.add(hemiLight);
 
         // // a really bright light
-        // var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.8 );
-        // directionalLight.position.x = 0;
-        // directionalLight.position.y = 400;
-        // directionalLight.position.z = 0;
-        // this.scene.add( directionalLight );
+        var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.8 );
+        directionalLight.position.x = 0;
+        directionalLight.position.y = 400;
+        directionalLight.position.z = 0;
+        this.scene.add( directionalLight );
     },
 
     addSkybox: function() {
@@ -100,7 +95,6 @@ App.prototype = {
     },
 
     setupCameraControls: function() {
-        this.clock = new THREE.Clock();
         var controls = new THREE.MapControls(this.camera, this.scene, document.getElementById("WebGL-output"));
         controls.panSpeed = 0.31;
 
@@ -220,5 +214,5 @@ App.prototype = {
 
     }
 
-};
+});
 
