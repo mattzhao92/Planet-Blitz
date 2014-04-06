@@ -300,6 +300,7 @@ $(document).ready(function() {
   $('#playBtn').click(function() {
     sendListGameMsg();
   });
+  showBackground();
 
 
   /* Start the game locally */
