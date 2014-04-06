@@ -23,6 +23,9 @@ var MenuBackground = Class.extend({
 		this.setupCamera();
 		this.setupControls();
 
+		this.addLighting();
+
+
 		// begin animation loop
 		this.animate();
 
@@ -30,6 +33,25 @@ var MenuBackground = Class.extend({
 		window.addEventListener( 'resize', function() {
 		    scope.onWindowResize(); }, false );
 
+	},
+
+
+	addLighting: function() {
+	    // // really subtle ambient lighting
+	    // var ambientLight = new THREE.AmbientLight( 0x191919 );
+	    // this.scene.add( ambientLight );
+
+	    // this.scene.remove( ambientLight );
+	    // // sky color, ground color, intensity
+	    // // var hemiLight = new THREE.HemisphereLight( 0x0000ff, 0xffffff, 0.3 ); 
+	    // // this.scene.add(hemiLight);
+
+	    // // a really bright light
+	    var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.8 );
+	    directionalLight.position.x = 0;
+	    directionalLight.position.y = 400;
+	    directionalLight.position.z = 0;
+	    this.scene.add( directionalLight );
 	},
 
 	addSkybox: function() {
@@ -54,6 +76,21 @@ var MenuBackground = Class.extend({
 	    var skyMaterial = new THREE.MeshFaceMaterial( materialArray );
 	    var skyBox = new THREE.Mesh( skyGeometry, skyMaterial );
 	    this.scene.add( skyBox );
+
+	    // create sprite factory
+	    var scope = this;
+	    scope.getTileSize = function() {
+	    	return 200;
+	    }
+	    var sceneAddCmd = new SpriteCmd(function(sprite) {
+	        scope.scene.add(sprite.getRepr());
+	    });
+	    var sceneRemoveCmd = new SpriteCmd(function(sprite) {
+	        scope.scene.remove(sprite.getRepr());
+	    });	    // add a character
+	    this.spriteFactory = new SpriteFactory(this, sceneAddCmd, sceneRemoveCmd);
+
+	    this.spriteFactory.createArtillerySoldier(1, 1);
 	},
 
 	setupCamera: function() {
@@ -77,14 +114,6 @@ var MenuBackground = Class.extend({
 	    var delta = this.clock.getDelta();
 	    this.controls.update(delta);
 
-	    // PubSub.publish(Constants.TOPIC_DELTA, delta);
-	    
-	    // main game render loop
-	    // this.world.update(delta);
-	    
-
-	    // update with delta
-
 	},
 
 	animate: function() {
@@ -98,6 +127,18 @@ var MenuBackground = Class.extend({
 
 	    // render function - can optionally add shaders later
 	    this.renderer.render(this.scene, this.camera);
+	},
+
+
+	onWindowResize: function() {
+
+	    this.camera.aspect = window.innerWidth / window.innerHeight;
+	    this.camera.updateProjectionMatrix();
+
+	    this.renderer.setSize(window.innerWidth, window.innerHeight);
+
+	    // adjust camera controls
+	    // this.controls.handleResize();
 	}
 
 });

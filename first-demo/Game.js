@@ -172,7 +172,6 @@ var App = Class.extend({
         this.gameConsole = gameConsole;
     },
 
-
     createScoreBoard: function() {
         var scoreBoard = new ScoreBoard();
         $("#Stats-output").append(scoreBoard.domElement);
