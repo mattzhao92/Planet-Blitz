@@ -21,6 +21,7 @@ var MenuBackground = Class.extend({
 		this.addSkybox();
 
 		this.setupCamera();
+		this.setupControls();
 
 		// begin animation loop
 		this.animate();
@@ -66,9 +67,15 @@ var MenuBackground = Class.extend({
 	    this.camera.lookAt(origin);
 	},
 
+	setupControls: function() {
+		this.controls = new THREE.OrbitControls(this.camera, document.getElementById("background-3d"));
+		this.controls.autoRotate = true;
+		this.controls.autoRotateSpeed = 0.5;
+	},
+
 	update: function() {
 	    var delta = this.clock.getDelta();
-	    // this.controls.update(delta);
+	    this.controls.update(delta);
 
 	    // PubSub.publish(Constants.TOPIC_DELTA, delta);
 	    
