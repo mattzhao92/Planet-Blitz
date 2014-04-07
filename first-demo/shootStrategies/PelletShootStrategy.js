@@ -2,6 +2,9 @@ var PelletShootStrategy = ShootStrategy.extend({
 	init: function(spriteFactory, materialFactory) {
 		this.spriteFactory = spriteFactory;
 		this.materialFactory = materialFactory;
+
+		this.weaponClipSize = 4;
+		this.weaponReloadRate = 0.04;
 	}, 
 
 	shoot: function(owner, from, to) {

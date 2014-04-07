@@ -175,8 +175,8 @@ var SpriteFactory = Class.extend({
 		return bullet;
 	},
 
-	createAmmoBar: function(characterSize, position, barAspectRatio) {
-		var ammoBar = new AmmoBar(this.sceneAddCmd, this.sceneRemoveCmd, characterSize, position, barAspectRatio);
+	createAmmoBar: function(characterSize, position, barAspectRatio, weaponArgs) {
+		var ammoBar = new AmmoBar(this.sceneAddCmd, this.sceneRemoveCmd, characterSize, position, barAspectRatio, weaponArgs);
 		ammoBar.setup();
 
 		return ammoBar;

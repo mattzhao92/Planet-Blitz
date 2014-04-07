@@ -2,6 +2,9 @@ var LaserShootStrategy = ShootStrategy.extend({
 	init: function(spriteFactory, materialFactory) {
 		this.spriteFactory = spriteFactory;
 		this.materialFactory = materialFactory;
+
+		this.weaponClipSize = 2;
+		this.weaponReloadRate = 0.005;
 	}, 
 
 	shoot: function(owner, from, to) {

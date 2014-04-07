@@ -51,11 +51,17 @@ var Character = Sprite.extend({
         this.healthObservers = [];
 
         var barAspectRatio = 10;
+        var scope = this;
 
-        this.ammoBar = this.spriteFactory.createAmmoBar(this.characterSize, this.getRepr().position, 10);
+        var weaponArgs = {
+            weaponClipSize: scope.shootStrategy.weaponClipSize,
+            weaponReloadRate: scope.shootStrategy.weaponReloadRate
+        };
+
+        this.ammoBar = this.spriteFactory.createAmmoBar(this.characterSize, this.getRepr().position, barAspectRatio, weaponArgs);
         this.addPositionObserver(this.ammoBar);
 
-        this.healthBar = this.spriteFactory.createHealthBar(this.characterSize, this.getRepr().position, 10, this.maximumHealth);
+        this.healthBar = this.spriteFactory.createHealthBar(this.characterSize, this.getRepr().position, barAspectRatio, this.maximumHealth);
         this.addPositionObserver(this.healthBar);
         this.addHealthObserver(this.healthBar);
 
