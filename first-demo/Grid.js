@@ -114,7 +114,7 @@ var Grid = Class.extend({
         });
     },
 
-    loadGroundFromMapJson: function(mapJson) {
+    loadGround: function(mapJson) {
         var width = mapJson.board.width;
         var length = mapJson.board.height;
         var size = mapJson.board.tileSize;
@@ -144,7 +144,7 @@ var Grid = Class.extend({
         this.scene.add(ground);
     },
 
-    drawGridSquaresFromMapJson: function(mapJson) {
+    drawGridSquares: function(mapJson) {
         var width = mapJson.board.width;
         var length = mapJson.board.height;
         var size = mapJson.board.tileSize;
@@ -191,7 +191,7 @@ var Grid = Class.extend({
         this.scene.add(this.tiles);
     },
 
-    setupObstaclesFromMapJson: function(mapJson) {
+    setupObstacles: function(mapJson) {
 
         var obstacles = mapJson.obstacles;
         for (var i = 0; i < obstacles.length; i++) {
@@ -209,7 +209,7 @@ var Grid = Class.extend({
         }
     },
 
-    setupCharctersFromMapJson: function(mapJson) {
+    setupCharacters: function(mapJson) {
 
         // reconstructing BlitzUnits here
         var units_in_teams = [];
@@ -262,14 +262,6 @@ var Grid = Class.extend({
     },
 
     onGameStart: function() {
-
-        for (var tm = 0; tm < 4; tm++) {
-            if (GameInfo.existingTeams.indexOf(tm) == -1) {
-                for (var i = 0; i < this.numOfCharacters; i++) {
-                    this.silentlyRemoveCharacter(this.getCharacterById(tm, i));
-                }
-            }
-        }
         if (this.getCurrentSelectedUnits().length > 0) {
             var groupUnits = this.getCurrentSelectedUnits();
 
@@ -283,23 +275,6 @@ var Grid = Class.extend({
             this.currentSelectedUnits[GameInfo.myTeamId].length = 0;
         }
 
-        var teamJoinMessage;
-        switch (GameInfo.myTeamId) {
-            case 0:
-                teamJoinMessage = "You spawned at top";
-                break;
-            case 1:
-                teamJoinMessage = "You spawned at bottom";
-                break;
-            case 2:
-                teamJoinMessage = "You spawned at left";
-                break;
-            case 3:
-                teamJoinMessage = "You spawned at right";
-                break;
-        }
-
-        //this.controls.rotateRight(this.getCameraDegreesToRotate());
         // this.displayMessage(teamJoinMessage);
 
         // focus camera on start position (TODO: hardcoded)
@@ -514,8 +489,6 @@ var Grid = Class.extend({
     },
 
     handleCharacterDead: function(character) {
-        this.displayMessage("A robot was destroyed!");
-
         this.silentlyRemoveCharacter(character);
     },
 
@@ -692,7 +665,6 @@ var Grid = Class.extend({
         }
         return charactersInRange;
     },
-
 
     onMouseUp: function(event) {
 
@@ -880,7 +852,7 @@ var Grid = Class.extend({
                 }
                 if (dest.x != x || dest.z != z) {
                     // Inconsistent with auth state, adjust position.
-                    console.log('Inconsitent shoud be at ' + x + ' ' + z + ' but was at ' + dest.x + ' ' + dest.z);
+                    console.log('Inconsistent position, should be at ' + x + ' ' + z + ' but was at ' + dest.x + ' ' + dest.z);
                     charToCheck.placeAtGridPos(x, z);
                 }
             }
@@ -922,12 +894,12 @@ var Grid = Class.extend({
         this.tilesArray = null;
 
         // create grid tiles
-        this.loadGroundFromMapJson(this.mapJson);
-        this.drawGridSquaresFromMapJson(this.mapJson);
+        this.loadGround(this.mapJson);
+        this.drawGridSquares(this.mapJson);
 
         // initialize characters
-        this.setupCharctersFromMapJson(this.mapJson);
-        this.setupObstaclesFromMapJson(this.mapJson);
+        this.setupCharacters(this.mapJson);
+        this.setupObstacles(this.mapJson);
 
         this.resetInProgress = false;
         this.camera.position.x = 0;
