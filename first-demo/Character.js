@@ -230,7 +230,7 @@ var Character = Sprite.extend({
     },
 
     // callback - called when unit is selected. Gets a reference to the game state ("world")
-    onSelect: function() {
+    onSelect: function(deselectOther) {
         // don't do anything if this unit was already selected
         if (this.isSelected) {
             return;
@@ -243,13 +243,15 @@ var Character = Sprite.extend({
 
             var ctxSprite = this;
             // deselect all other units
-            this.spriteFactory.notifyAll(new SpriteCmd(function(sprite) {
-                if (ctxSprite != sprite && sprite instanceof Character) {
-                    if (sprite.team == GameInfo.myTeamId) {
-                        sprite.deselect();
+            if (deselectOther) {
+                this.spriteFactory.notifyAll(new SpriteCmd(function(sprite) {
+                    if (ctxSprite != sprite && sprite instanceof Character) {
+                        if (sprite.team == GameInfo.myTeamId) {
+                            sprite.deselect();
+                        }
                     }
-                }
-            }));
+                }));
+            }
 
             this.isSelected = true;
             var sound = new Howl({
