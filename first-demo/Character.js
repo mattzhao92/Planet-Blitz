@@ -59,9 +59,6 @@ var Character = Sprite.extend({
         this.addPositionObserver(this.healthBar);
         this.addHealthObserver(this.healthBar);
 
-        this.coolDownCount = 55;
-        this.coolDownLeft = this.coolDownCount;
-
         this.isCharacterInRoute = false;
         this.lastRoadMap = [];
 
@@ -188,7 +185,6 @@ var Character = Sprite.extend({
 
     addUnitSelector: function() {
         // setup unit selector mesh
-        // have to supply the radius
         var geometry = new THREE.TorusGeometry(this.getRadius(), 1, 5, 35);
         var material = new THREE.MeshLambertMaterial({
             color: 0xFF0000
@@ -345,14 +341,9 @@ var Character = Sprite.extend({
         if (this.breakUpdateHere) return;
         if (this.motionInProgress) {
             this.breakUpdateHere = true;
-            if (this.coolDownLeft < 0.1 * this.coolDownCount || this.lockMovement) {
-                this.lockMovement = true;
-                return;
-            }
 
             var newMeshX = this.mesh.position.x + this.velocityX * delta;
             var newMeshZ = this.mesh.position.z + this.velocityZ * delta;
-
 
             if (((newMeshX - this.goalMeshX) / (this.goalMeshX - this.prevMeshX) > 0 || this.velocityX == 0) &&
                 ((newMeshZ - this.goalMeshZ) / (this.goalMeshZ - this.prevMeshZ) > 0 || this.velocityZ == 0)) {
@@ -397,14 +388,6 @@ var Character = Sprite.extend({
         this.breakUpdateHere = false;
         this.ammoBar.updateWeaponReload(delta);
         this.updateInProgressLinearMotion(delta);
-
-        this.coolDownLeft += 0.005 * this.coolDownCount;
-        if (this.coolDownLeft >= this.coolDownCount) {
-            this.coolDownLeft = this.coolDownCount;
-        }
-        if (this.coolDownLeft >= 0.5 * this.coolDownCount && this.lockMovement) {
-            this.lockMovement = false;
-        }
 
         // handle dequeue action here
         if (this.motionQueue.length > 0 && !this.breakUpdateHere) {
