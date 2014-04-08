@@ -14,6 +14,7 @@ var Character = Sprite.extend({
         this.id = args.id;
         this.modelName = args.modelName;
         this.shootStrategy = args.shootStrategy;
+        this.moveSpeed = args.moveSpeed;
 
         this.teamColor = new THREE.Color(Constants.TEAM_COLORS[this.team]);
 
@@ -427,20 +428,18 @@ var Character = Sprite.extend({
                 this.goalMeshX = this.world.convertXPosToWorldX(direction.x);
                 this.goalMeshZ = this.world.convertZPosToWorldZ(direction.z);
 
-                var MOVE_VELOCITY = 100;
-
                 if (direction.x < this.xPos) {
-                    this.velocityX = -MOVE_VELOCITY;
+                    this.velocityX = -this.moveSpeed;
                 } else if (direction.x > this.xPos) {
-                    this.velocityX = MOVE_VELOCITY;
+                    this.velocityX = this.moveSpeed;
                 } else {
                     this.velocityX = 0;
                 }
 
                 if (direction.z < this.zPos) {
-                    this.velocityZ = -MOVE_VELOCITY;
+                    this.velocityZ = -this.moveSpeed;
                 } else if (direction.z > this.zPos) {
-                    this.velocityZ = MOVE_VELOCITY;
+                    this.velocityZ = this.moveSpeed;
                 } else {
                     this.velocityZ = 0;
                 }

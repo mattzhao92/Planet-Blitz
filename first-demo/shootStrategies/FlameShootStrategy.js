@@ -20,7 +20,7 @@ var FlameShootStrategy = ShootStrategy.extend({
 			radius: radius,
 			mesh: mesh,
 			addons: [light],
-			damage: 30, 
+			damage: 20, 
 			speed: 400,
  			range: 600,
  			from: from,

@@ -20,7 +20,7 @@ var PelletShootStrategy = ShootStrategy.extend({
 			radius: radius,
 			mesh: mesh,
 			addons: [light],
-			damage: 20, 
+			damage: 5, 
 			speed: 500,
  			range: 300,
  			from: from,

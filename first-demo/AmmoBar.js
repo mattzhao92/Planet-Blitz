@@ -3,8 +3,6 @@ var AmmoBar = Sprite.extend({
 	init: function(sceneAddCmd, sceneRemoveCmd, tileSize, position, barAspectRatio, args) {
 		this._super(sceneAddCmd, sceneRemoveCmd);
 
-		console.log(args);
-
 		// essential attributes of the ammo
 		this.maximumAmmoCapacity = args.weaponClipSize;				
 		this.ammoReplenishRate = args.weaponReloadRate;
