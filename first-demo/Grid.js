@@ -761,24 +761,25 @@ var Grid = Class.extend({
             var selectedUnits = this.getCurrentSelectedUnits();
             if (selectedUnits.length > 0 && coordinate) {
 
-                    for (var i = 0; i < selectedUnits.length; i++) {
-                        var deltaX = coordinate.x - selectedUnits[i].getTileXPos();
-                        var deltaY = 0;
-                        var deltaZ = coordinate.z - selectedUnits[i].getTileZPos();
+                _.forEach(selectedUnits, function(selectedUnit) {
+                    var deltaX = coordinate.x - selectedUnit.getTileXPos();
+                    var deltaZ = coordinate.z - selectedUnit.getTileZPos();
 
-                        var unitMovedToDifferentSquare = !(deltaX == 0 && deltaZ == 0);
+                    var unitMovedToDifferentSquare = !(deltaX == 0 && deltaZ == 0);
 
-                        if (unitMovedToDifferentSquare) {
-                            // Put the network communication here.
-                            if (selectedUnits[i].isCoolDown == 0) {
-                                sendMoveMsg(selectedUnits[i].id,
-                                    coordinate.x, 0, coordinate.z);
-                            }
-                        }
+                    var moveDeltaX = coordinate.x - selectedUnit.destX;
+                    var moveDeltaY = coordinate.z - selectedUnit.destZ;
+                    var isNotAlreadyMovingToDestination = !(moveDeltaX == 0 && moveDeltaY == 0);
+
+                    if (unitMovedToDifferentSquare && isNotAlreadyMovingToDestination) {
+                        // transmit move over network
+                        sendMoveMsg(selectedUnit.id,
+                            coordinate.x, 0, coordinate.z);
                     }
-                }
+                });
             }
-        },
+        }
+    },
 
     getTileAtTilePos: function(xPos, zPos) {
         // TODO: better error handling here?
