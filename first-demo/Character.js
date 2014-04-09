@@ -232,10 +232,23 @@ var Character = Sprite.extend({
         this.healthBar.destroy();
     },
 
+
+    deselectOther: function() {
+        var ctxSprite = this; 
+        this.spriteFactory.notifyAll(new SpriteCmd(function(sprite) {
+            if (ctxSprite != sprite && sprite instanceof Character) {
+                if (sprite.team == GameInfo.myTeamId) {
+                    sprite.deselect();
+                }
+            }
+        }));
+    },
+
     // callback - called when unit is selected. Gets a reference to the game state ("world")
     onSelect: function(deselectOther) {
         // don't do anything if this unit was already selected
         if (this.isSelected) {
+            this.deselectOther(); 
             return;
         }
 
@@ -247,13 +260,7 @@ var Character = Sprite.extend({
             var ctxSprite = this;
             // deselect all other units
             if (deselectOther) {
-                this.spriteFactory.notifyAll(new SpriteCmd(function(sprite) {
-                    if (ctxSprite != sprite && sprite instanceof Character) {
-                        if (sprite.team == GameInfo.myTeamId) {
-                            sprite.deselect();
-                        }
-                    }
-                }));
+                this.deselectOther();
             }
 
             this.isSelected = true;

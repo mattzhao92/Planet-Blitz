@@ -63,7 +63,7 @@ var Grid = Class.extend({
 
    drawGroupSelectionRectangle: function (mouseX, mouseY) {
         var canvas = document.createElement('canvas');
-        var canvas2d = canvas.getContext('2d');
+        this.canvas2d = canvas.getContext('2d');
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
@@ -82,11 +82,11 @@ var Grid = Class.extend({
 
         this.bar = new THREE.Sprite(healthBarMaterial);
 
-        canvas2d.beginPath();
-        canvas2d.rect(0, 0, 1000, 1000);
+        this.canvas2d.beginPath();
+        this.canvas2d.rect(0, 0, 100000, 100000);
         //canvas2d.rect(1000, 1000, -1000, -1000);
-        canvas2d.fillStyle = "rgba(0, 255, 127, 0.1)";
-        canvas2d.fill();
+        this.canvas2d.fillStyle = "rgba(0, 255, 127, 0.1)";
+        this.canvas2d.fill();
 
         this.bar.position.set(mouseX,mouseY,0);
         //bar.scale.set(100,100,1.0);
@@ -611,8 +611,9 @@ var Grid = Class.extend({
             var mouseX = mouseLocation.x;
             var mouseY = mouseLocation.y;
 
-            this.bar.scale.set(mouseX - this.mousestartX, 
-            mouseY - this.mousestartY, 1.0);
+            this.bar.scale.set(mouseX - this.mousestartX, mouseY - this.mousestartY, 1.0);
+
+
             this.mouseSelectHappened = true;
             return;
             //bar.position.set(e.clientX-50,e.clientY-50,0);           
@@ -695,7 +696,7 @@ var Grid = Class.extend({
 
                 for (var i = 0; i < characters.length; i++) {
                     characters[i].onSelect();
-                    this.currentSelectedUnits[GameInfo.myTeamId].push(characters[i]);
+                    //this.currentSelectedUnits[GameInfo.myTeamId].push(characters[i]);
                 }
             }
             this.mouseSelectHappened = false;
@@ -746,13 +747,20 @@ var Grid = Class.extend({
 
             if (intersects.length > 0) {
                 var clickedObject = intersects[0].object.owner;
-
-                // done so that you can click on a tile behind a character easily
-                if (!(clickedObject in this.getCurrentSelectedUnits())) {
+               
+                 if (clickedObject instanceof Character) {
                     clickedObject.onSelect(true);
                 } else {
                     continueClickHandler = true;
                 }
+
+                // // done so that you can click on a tile behind a character easily
+                // if ((clickedObject in this.getCurrentSelectedUnits())) {
+               
+                //     clickedObject.onSelect(true);
+                // } else {
+                //     continueClickHandler = true;
+                // }
             } else {
                 continueClickHandler = true;
             }
