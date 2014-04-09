@@ -447,6 +447,7 @@ Game.prototype.removePlayer = function(socket, game) {
     game.usernames.splice(index, 1);
     game.numPlayers--;
     var leaveTeamId = game.score[username].teamId;
+    // TODO.
     delete game.score[username];
     if (game.isPlaying) {
       var lvTm = game.gameState.teams[leaveTeamId];

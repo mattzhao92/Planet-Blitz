@@ -297,6 +297,9 @@ $(document).ready(function() {
   $('#Loading-output').hide();
   $('#slide-container').hide();
   $('#leaveBtn').hide();
+  centerElement($('#playBtn'));
+  centerElement($('#debugBtn'));
+  centerElement($('#helpBtn'));
   $('#playBtn').click(function() {
     sendListGameMsg();
   });
@@ -335,4 +338,10 @@ window.oncontextmenu = function () {
     return false;
   }
   return true;
+}
+
+
+function centerElement(ele) {
+  var width = $(window).width();
+  ele.css('left', width / 2 - ele.width() / 2);
 }
