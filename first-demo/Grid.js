@@ -749,7 +749,7 @@ var Grid = Class.extend({
 
                 // done so that you can click on a tile behind a character easily
                 if (!(clickedObject in this.getCurrentSelectedUnits())) {
-                    clickedObject.onSelect();
+                    clickedObject.onSelect(true);
                 } else {
                     continueClickHandler = true;
                 }
