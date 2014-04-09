@@ -14,22 +14,22 @@ body {
 
 .btn {
   position: absolute;
-  left: 400px;
+  /*left: 400px;*/
   width: 200px;
   height: 50px;
 }
 
 
 #debugBtn {
-  top: 100px;
+  top: 300px;
 }
 
 #playBtn {
-  top: 200px;
+  top: 400px;
 }
 
 #helpBtn {
-  top: 300px;
+  top: 500px;
 }
 
 #leaveBtn {
