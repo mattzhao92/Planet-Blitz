@@ -306,33 +306,44 @@ var Grid = Class.extend({
             KeyboardJS.clear.key(hotkey);
         });
 
-        // // dynamic hotkey mapping to characters
-        // unitNumbers.forEach(function(number) {
-        //     var hotkey = number.toString();
-        //     KeyboardJS.on("ctrl, command > " + hotkey,
-        //         function(event, keysPressed, keyCombo) {
-        //             event.preventDefault();
+        // dynamic hotkey mapping to characters
+        unitNumbers.forEach(function(number) {
+            var hotkey = number.toString();
+            KeyboardJS.on("ctrl, command > " + hotkey,
+                function(event, keysPressed, keyCombo) {
+                    event.preventDefault();
 
-        //             var currentSelectedUnit = scope.getCurrentSelectedUnit();
-        //             if (currentSelectedUnit && currentSelectedUnit.active) {
+                    var currentSelectedUnits = _.filter(scope.getCurrentSelectedUnits(), function(character) {
+                        return (character != null && character.active);
+                    });
 
-        //                 var previousKeybinding = scope.hotkeyToUnitMap[number];
-        //                 if (previousKeybinding) {
-        //                     previousKeybinding.clear();
-        //                 }
+                    if (currentSelectedUnits && currentSelectedUnits.length > 0) {
 
-        //                 // assign new hotkey number to this unit
-        //                 var keyBinding = KeyboardJS.on(hotkey, function(event, keysPressed, keyCombo) {
-        //                     if (currentSelectedUnit && currentSelectedUnit.active) {
-        //                         currentSelectedUnit.onSelect();
-        //                     }
-        //                 });
+                        var previousKeybinding = scope.hotkeyToUnitMap[number];
+                        if (previousKeybinding) {
+                            previousKeybinding.clear();
+                        }
 
-        //                 scope.hotkeyToUnitMap[number] = keyBinding;
-        //             }
-        //         }
-        //     );
-        // });
+                        // assign new hotkey number to this unit
+                        var keyBinding = KeyboardJS.on(hotkey, function(event, keysPressed, keyCombo) {
+                            for (var i = 0; i < scope.currentSelectedUnits[GameInfo.myTeamId].length; i++) {
+                                scope.currentSelectedUnits[GameInfo.myTeamId][i].deselect();
+                            }
+
+                            scope.currentSelectedUnits[GameInfo.myTeamId].length = 0;
+                            if (currentSelectedUnits && currentSelectedUnits.length > 0) {
+                                for (var i = 0; i < currentSelectedUnits.length; i++) {
+                                    currentSelectedUnits[i].onSelect();
+                                    scope.currentSelectedUnits[GameInfo.myTeamId].push(currentSelectedUnits[i]);
+                                }
+                            }
+                        });
+
+                        scope.hotkeyToUnitMap[number] = keyBinding;
+                    }
+                }
+            );
+        });
 
         // unit toggle - cycle forwards
         KeyboardJS.on("t, tab",
