@@ -2,14 +2,18 @@ var ApplyDamageStrategy = InteractStrategy.extend({
 	init: function(dmgToApply) {
 		this._super();
 		this.dmgToApply = dmgToApply;
+		this.shouldApplyDamage = true;
 	},
 
 	interact: function(ctxSprite, otherSprite, dispatcher) {
 		if (this.checkOverlap(ctxSprite, otherSprite)) {
             if (otherSprite instanceof Character) {
 			    if (otherSprite.team != ctxSprite.owner.team) {
-				    ctxSprite.destroy();
-				    sendHitMsg(ctxSprite, otherSprite, this.dmgToApply);
+			    	if (this.shouldApplyDamage) {
+						ctxSprite.destroy();
+						sendHitMsg(ctxSprite, otherSprite, this.dmgToApply);			    		
+			    		this.shouldApplyDamage = false;
+			    	}
 			    }
             } else if (otherSprite instanceof Obstacle) {
                 ctxSprite.destroy();
