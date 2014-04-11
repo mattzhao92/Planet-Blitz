@@ -297,9 +297,7 @@ $(document).ready(function() {
   $('#Loading-output').hide();
   $('#slide-container').hide();
   $('#leaveBtn').hide();
-  centerElement($('#playBtn'));
-  centerElement($('#debugBtn'));
-  centerElement($('#helpBtn'));
+  centerButtons();
   $('#playBtn').click(function() {
     sendListGameMsg();
   });
@@ -344,4 +342,10 @@ window.oncontextmenu = function () {
 function centerElement(ele) {
   var width = $(window).width();
   ele.css('left', width / 2 - ele.width() / 2);
+}
+
+function centerButtons() {
+  centerElement($('#playBtn'));
+  centerElement($('#debugBtn'));
+  centerElement($('#helpBtn'));
 }
