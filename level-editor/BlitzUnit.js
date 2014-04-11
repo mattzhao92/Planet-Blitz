@@ -43,13 +43,13 @@ var Unit = Class.extend({
 		switch(this.unitType)
 		{
 		case "soldier":
-		  path_to_mesh = "../assets/blendermodels/soldier-regular.js";
+		  path_to_mesh = "blendermodels/soldier-regular.js";
 		  break;
 		case "artillery":
-		  path_to_mesh = "../assets/blendermodels/soldier-artillery.js";
+		  path_to_mesh = "blendermodels/soldier-artillery.js";
 		  break;
 		default:
-		  path_to_mesh = "../assets/blendermodels/soldier-flamethrower.js";
+		  path_to_mesh = "blendermodels/soldier-flamethrower.js";
 		  break;
 		}
         this.loadFile(path_to_mesh, this.box_mesh);

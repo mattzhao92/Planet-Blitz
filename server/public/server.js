@@ -314,13 +314,6 @@ $(document).ready(function() {
     sendListMapMsg();
   });
 
-  $('#helpBtn').click(function() {
-    $('#debugBtn').hide();
-    $('#playBtn').hide();
-    $('#helpBtn').hide();
-    $('#slide-container').fadeIn();
-    $('#jms-slideshow' ).jmslideshow();
-  });
 
   // TODO: reset game state?
   $('.jms-link').click(function() {

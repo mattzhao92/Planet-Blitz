@@ -31,3 +31,4 @@ function Colors() {
 // light-orange
 Colors.EXPLOSION = 0xFF8929;
 
+Constants.ORIGINAL_TILESIZE = 40;
