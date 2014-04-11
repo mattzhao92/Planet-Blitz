@@ -248,7 +248,8 @@ var Character = Sprite.extend({
     onSelect: function(deselectOther) {
         // don't do anything if this unit was already selected
         if (this.isSelected) {
-            this.deselectOther(); 
+            if (deselectOther)
+                this.deselectOther(); 
             return;
         }
 
@@ -272,9 +273,12 @@ var Character = Sprite.extend({
     },
 
     deselect: function() {
+
         // return to original color
         if (GameInfo.myTeamId == null || this.team == GameInfo.myTeamId) {
+
             this.unitSelectorMesh.visible = false;
+            this.world.markCharacterAsNotSelected(this);
             this.isSelected = false;
         }
     },

@@ -328,13 +328,13 @@ var Grid = Class.extend({
                         var keyBinding = KeyboardJS.on(hotkey, function(event, keysPressed, keyCombo) {
                             for (var i = 0; i < scope.currentSelectedUnits[GameInfo.myTeamId].length; i++) {
                                 scope.currentSelectedUnits[GameInfo.myTeamId][i].deselect();
+                                i -= 1;
                             }
-
                             scope.currentSelectedUnits[GameInfo.myTeamId].length = 0;
+
                             if (currentSelectedUnits && currentSelectedUnits.length > 0) {
                                 for (var i = 0; i < currentSelectedUnits.length; i++) {
                                     currentSelectedUnits[i].onSelect();
-                                    scope.currentSelectedUnits[GameInfo.myTeamId].push(currentSelectedUnits[i]);
                                 }
                             }
                         });
@@ -360,6 +360,7 @@ var Grid = Class.extend({
 
                 for (var i = 0; i < scope.currentSelectedUnits[GameInfo.myTeamId].length; i++) {
                     scope.currentSelectedUnits[GameInfo.myTeamId][i].deselect();
+                    i -= 1;
                 }
 
                 scope.currentSelectedUnits[GameInfo.myTeamId].length = 0;
@@ -523,6 +524,13 @@ var Grid = Class.extend({
         this.currentSelectedUnits[GameInfo.myTeamId].push(character);
     },
 
+    markCharacterAsNotSelected: function(character) {
+    	var index = this.currentSelectedUnits[GameInfo.myTeamId].indexOf(character);
+    	if (index > -1) {
+    		this.currentSelectedUnits[GameInfo.myTeamId].splice(index, 1);
+		}
+    },
+
     markTileAsSelected: function(tile) {
         if (tile == this.currentMouseOverTile) {
             return;
@@ -679,6 +687,7 @@ var Grid = Class.extend({
     },
 
     onMouseUp: function(event) {
+    	var didSelect = false;
 
         if (this.isDrawing) {
             this.scene.remove(this.bar);
@@ -690,17 +699,55 @@ var Grid = Class.extend({
             if (characters.length > 0 && this.mouseSelectHappened) {
                 for (var i = 0; i < this.currentSelectedUnits[GameInfo.myTeamId].length; i++) {
                     this.currentSelectedUnits[GameInfo.myTeamId][i].deselect();
+                    i -= 1;
                 }
-
                 this.currentSelectedUnits[GameInfo.myTeamId].length = 0;
 
                 for (var i = 0; i < characters.length; i++) {
+                	didSelect = true;
+
                     characters[i].onSelect();
-                    //this.currentSelectedUnits[GameInfo.myTeamId].push(characters[i]);
                 }
             }
             this.mouseSelectHappened = false;
         }
+ 		var RIGHT_CLICK = 3;
+        var LEFT_CLICK = 1;
+
+        var raycaster = this.gridHelper.getRaycaster();
+
+        // recursively call intersects
+        var characterMeshes = _.map(this.getCharacters(), function(character) {
+            return character.getRepr();
+        });
+
+        var intersects = raycaster.intersectObjects(characterMeshes, true);
+        var intersectsWithTiles = raycaster.intersectObjects(this.tiles.children);
+        var unitIsCurrentlySelected = (this.getCurrentSelectedUnits().length > 0);
+
+       if (event.which == LEFT_CLICK) {
+            // care about characters first, then tile intersects
+
+            if (intersects.length > 0) {
+                var clickedObject = intersects[0].object.owner;
+               
+                 if (clickedObject instanceof Character) {
+                    clickedObject.onSelect(true);
+                    return;
+           		 }
+            } 
+        }
+
+        if (unitIsCurrentlySelected) {
+        	if (!didSelect && event.which == LEFT_CLICK)
+        		this.handleMoveCase(intersectsWithTiles);
+            // fire on click
+            if (event.which == RIGHT_CLICK) {
+                this.handleShootEvent();
+            }
+        }
+      
+ 
     },
 
     onMouseDown: function(event) {
@@ -717,58 +764,6 @@ var Grid = Class.extend({
 
             this.drawGroupSelectionRectangle(this.mousestartX, this.mousestartY);
             //return;
-        }
-
-        var RIGHT_CLICK = 3;
-        var LEFT_CLICK = 1;
-
-        var raycaster = this.gridHelper.getRaycaster();
-
-        // recursively call intersects
-        var characterMeshes = _.map(this.getCharacters(), function(character) {
-            return character.getRepr();
-        });
-
-        var intersects = raycaster.intersectObjects(characterMeshes, true);
-        var intersectsWithTiles = raycaster.intersectObjects(this.tiles.children);
-        var unitIsCurrentlySelected = (this.getCurrentSelectedUnits().length > 0);
-
-        if (unitIsCurrentlySelected) {
-            // fire on click
-            if (event.which == RIGHT_CLICK) {
-                this.handleShootEvent();
-            }
-        }
-
-        // move on click
-        if (event.which == LEFT_CLICK) {
-            // care about characters first, then tile intersects
-            var continueClickHandler = false;
-
-            if (intersects.length > 0) {
-                var clickedObject = intersects[0].object.owner;
-               
-                 if (clickedObject instanceof Character) {
-                    clickedObject.onSelect(true);
-                } else {
-                    continueClickHandler = true;
-                }
-
-                // // done so that you can click on a tile behind a character easily
-                // if ((clickedObject in this.getCurrentSelectedUnits())) {
-               
-                //     clickedObject.onSelect(true);
-                // } else {
-                //     continueClickHandler = true;
-                // }
-            } else {
-                continueClickHandler = true;
-            }
-
-            // case where unit is moving
-            if (continueClickHandler) {
-                this.handleMoveCase(intersectsWithTiles);
-            }
         }
     },
 
