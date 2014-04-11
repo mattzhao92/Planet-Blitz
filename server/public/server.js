@@ -153,6 +153,7 @@ function getUsername(forGameId) {
   $('#Input-dialog').keypress(function(e) {
       if (e.keyCode == $.ui.keyCode.ENTER) {
         $("#unameBtn").click();
+        $( "#Input-dialog" ).off("keypress");
       }
   });
 }
@@ -162,7 +163,7 @@ function createGameStep() {
   content += '<form><label for="rname" style="margin-left:7">Game room name</label><input id="rname" name="rname"  maxlength="15" type="text" style="margin-left: 25"/>';
   content += '<form><label for="uname" style="margin-left:7">Player name</label><input id="uname" name="name"  maxlength="15" type="text" style="margin-left: 25"/>';
   content += '<label for="map" style="margin-left:7">Map</label>';
-  content += '<div class="styled-select"><select name="map" id="choosemap">';
+  content += '<div class="styled-select"><select name="=map" id="choosemap">';
   for (var t = 0; t < GameInfo.maps.length; t++) {
     content += '<option>' + GameInfo.maps[t] + '</option>';
   }
@@ -202,6 +203,8 @@ function createGameStep() {
   $('#Input-dialog').keypress(function(e) {
       if (e.keyCode == $.ui.keyCode.ENTER) {
         $("#unameBtn").click();
+        $( "#Input-dialog" ).off("keypress");
+        
       }
   });
 }
@@ -247,6 +250,7 @@ function createSingleGame() {
   $('#Input-dialog').keypress(function(e) {
       if (e.keyCode == $.ui.keyCode.ENTER) {
         $("#unameBtn").click();
+        $( "#Input-dialog" ).off("keypress");
       }
   });
 }
