@@ -38,13 +38,13 @@ var Obstacle = Class.extend({
 		switch(this.obstacleType)
 		{
 		case "rock":
-		  path_to_mesh = "../assets/blendermodels/rock.js";
+		  path_to_mesh = "blendermodels/rock.js";
 		  break;
 		case "powerup-health":
-		  path_to_mesh = "../assets/blendermodels/powerup-health.js"
+		  path_to_mesh = "blendermodels/powerup-health.js"
 		  break;
 		default:
-		  path_to_mesh = "../assets/blendermodels/rock.js";
+		  path_to_mesh = "blendermodels/rock.js";
 		  break;
 		}
         this.loadFile(path_to_mesh, this.box_mesh);

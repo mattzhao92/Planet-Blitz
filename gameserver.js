@@ -28,10 +28,13 @@ app.configure(function() {
   app.use(express.static(__dirname + '/first-demo'));
   app.use(express.static(__dirname + '/libs'));
   app.use(express.static(__dirname + '/css'));
+  app.use(express.static(__dirname + '/assets/gndTexture'));
   app.use(express.static(__dirname + '/assets/blendertextures'));
   app.use(express.static(__dirname + '/assets/blendermodels'));
+  app.use(express.static(__dirname + '/assets/cardImages'));
   app.use(express.static(__dirname + '/assets/sounds'));
   app.use(express.static(__dirname + '/assets'));
+  app.use(express.static(__dirname + '/level-editor'));
 });
 
 
