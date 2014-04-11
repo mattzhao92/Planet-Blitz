@@ -739,7 +739,7 @@ var Grid = Class.extend({
         }
 
         if (unitIsCurrentlySelected) {
-        	if (!didSelect)
+        	if (!didSelect && event.which == LEFT_CLICK)
         		this.handleMoveCase(intersectsWithTiles);
             // fire on click
             if (event.which == RIGHT_CLICK) {

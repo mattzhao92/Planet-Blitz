@@ -238,8 +238,6 @@ var Character = Sprite.extend({
         this.spriteFactory.notifyAll(new SpriteCmd(function(sprite) {
             if (ctxSprite != sprite && sprite instanceof Character) {
                 if (sprite.team == GameInfo.myTeamId) {
-                    console.log(" deselect 00-- ");
-
                     sprite.deselect();
                 }
             }
