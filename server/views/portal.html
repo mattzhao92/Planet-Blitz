@@ -6,12 +6,15 @@
     <script type="text/javascript" src="jquery-1.9.0.js"></script>
     <script type="text/javascript" src="lodash-min.js"></script>
 
+    <link rel="stylesheet" media="screen" href="http://openfontlibrary.org/face/xolonium" rel="stylesheet" type="text/css"/>
+
     <!-- Why the 1.9.0 jquery doesn't have the property 'mozilla'? -->
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
-    <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css" />
-    <!-- Tutorial jquery slide css-->
+
+   <!-- Tutorial jquery slide css-->
     <link href='http://fonts.googleapis.com/css?family=Open+Sans+Condensed:700,300,300italic' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="jquery-ui-custom.css" />
     <link rel="stylesheet" type="text/css" href="style.css" />
     <link rel="stylesheet" type="text/css" href="demo.css" />
     <link rel='stylesheet' type='text/css' href='game.css'>
@@ -43,6 +46,7 @@
     <!-- Includes for controls -->
     <script type="text/javascript" src="pointerlock.js"></script>
     <script type="text/javascript" src="keyboard.js"></script>
+    <script type="text/javascript" src="OrbitControls.js"></script>
     <script type="text/javascript" src="MapControls.js"></script>
 
     <!-- Game core; must be included in order of dependencies. Base classes first. -->
@@ -89,7 +93,8 @@
 
     <script type="text/javascript" src="SpriteFactory.js"></script>
 
-
+    <!-- Not sure where this should go -->
+    <script type="text/javascript" src="MenuBackground.js"></script>
 
     <!-- jmpress plugin -->
     <script type="text/javascript" src="jmpress.min.js"></script>
@@ -150,7 +155,7 @@
 
   </head>
 
-  <body>
+  <body onresize="centerButtons()">
     <div id='background-3d'>
         <div id='game-container'>
             <button class='btn' id='debugBtn'>Single Mode</button>
@@ -213,11 +218,11 @@
                         </div>
                     </section>  
             </div>
-            <div id="Stats-output">
-            </div>
+            <!-- <div id="Stats-output"> -->
+            <!-- </div> -->
             <!-- Div which will hold the Output -->
-            <div id="WebGL-output">
-            </div>
+            <!-- <div id="WebGL-output"> -->
+            <!-- </div> -->
             <div id="Message-dialog" title="Game Statistics"></div>
             <div id="Input-dialog" title="Player name"></div>
             <div id="Loading-output-container"><p id="Loading-output"></p></div>

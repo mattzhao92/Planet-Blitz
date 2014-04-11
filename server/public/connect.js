@@ -1,3 +1,14 @@
+function showBackground() {
+  console.log("Entering game menu");
+  var app = new MenuBackground("#background-3d");
+  var elem = document.getElementById("background-3d");
+  console.log(elem);
+}
+
+function destroyBackground() {
+  // console.log("Exiting game menu");
+}
+
 // When not passing any argument, it automatically connects to the server
 // which serves the page.
 var socket = io.connect();
@@ -195,6 +206,7 @@ function removeGameCanvas() {
   var outputBox = document.getElementById('WebGL-output');
   var msgBox = document.getElementById('Stats-output');
   if (outputBox) {
+    $('#WebGL-output').unwrap();
     outputBox.parentNode.removeChild(outputBox);
   }
   if (msgBox) {
@@ -216,6 +228,7 @@ function renderGame() {
   game = app;
   $('#WebGL-output').hide();
   $('#Stats-output').hide();  
+  $('#WebGL-output').wrap('<div id="game-gui"></div>');
 }
 
 function sendMoveMsg(index, x, y, z) {

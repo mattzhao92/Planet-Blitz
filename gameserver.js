@@ -325,16 +325,31 @@ io.sockets.on('connection', function(socket) {
 
   socket.on(Message.LEAVE, function() {
     socket.get('inGame', function(error, game) {
-      if (game.isStart) {
-        // TODO: Not sure....
+      if (game == null) {
+        return;
+      }
+      if (game.isSingleMode) {
+        socket.set('inGame', null);
+        socket.set('username', null);
+        return;
+      }
+      
+      if (!game.isPlaying) {
         game.removePlayer(socket, game);
-      } else if (game.isWaitingRestart) {
-        // Kill all?
-      } else if (!game.isFull()) {
         var playerState = game.getPlayerInfo();
         socket.broadcast.to(game.room).emit(Message.JOIN, playerState);
-        socket.set('inGame', null);          
-     } 
+      } else {
+        game.removePlayer(socket, game);
+      }
+
+     //  if (game.isStart) {
+     //    // TODO: Not sure....
+     //    game.removePlayer(socket, game);
+     //  } else if (game.isWaitingRestart) {
+     //    // Kill all?
+     //  } else if (!game.isFull()) {
+       
+     // } 
      if (game.numPlayers == 0) {
         delete emptyGames[game.gameId];
         return;
@@ -352,16 +367,13 @@ io.sockets.on('connection', function(socket) {
         socket.set('username', null);
         return;
       }
-      if (game.isStart) {
-        // TODO: Not sure....
+      if (!game.isPlaying) {
         game.removePlayer(socket, game);
-      } else if (game.isWaitingRestart) {
-        // Kill all?
-      } else if (!game.isFull()) {
         var playerState = game.getPlayerInfo();
         socket.broadcast.to(game.room).emit(Message.JOIN, playerState);
-        socket.set('inGame', null);          
-       } 
+      } else {
+        game.removePlayer(socket, game);
+      }
       if (game.numPlayers == 0) {
           delete emptyGames[game.gameId];
           return;
@@ -442,69 +454,73 @@ Game.prototype.addPlayer = function(sk, username) {
 
 Game.prototype.removePlayer = function(socket, game) {
   console.log(this);
-  socket.get('username', function(error, username) {
-    var index = game.usernames.indexOf(username);
-    game.usernames.splice(index, 1);
-    game.numPlayers--;
-    var leaveTeamId = game.score[username].teamId;
-    delete game.score[username];
-    if (game.isPlaying) {
-      var lvTm = game.gameState.teams[leaveTeamId];
-      for (var t = 0; t < lvTm.length; t++) {
-        lvTm[t].alive = false;
-      }
+  socket.set('inGame', null, function() {
+    socket.get('username', function(error, username) {
+      var index = game.usernames.indexOf(username);
+      game.usernames.splice(index, 1);
+      game.numPlayers--;
+      var leaveTeamId = game.score[username].teamId;
+      // TODO.
+      delete game.score[username];
+      if (game.isPlaying) {
+        var lvTm = game.gameState.teams[leaveTeamId];
+        for (var t = 0; t < lvTm.length; t++) {
+          lvTm[t].alive = false;
+        }
 
-      var numLiveTeams = 0;
-      var winnerTeamId;
-      for (var t in game.gameState.teams) {
-        var team = game.gameState.teams[t];
-        for (var i = 0; i < team.length; i++) {
-          // console.log(game.gameState.teams[t][i]);
-          if (team[i].alive) {
-            numLiveTeams++;
-            winnerTeamId = t;
-            break;
+        var numLiveTeams = 0;
+        var winnerTeamId;
+        for (var t in game.gameState.teams) {
+          var team = game.gameState.teams[t];
+          for (var i = 0; i < team.length; i++) {
+            // console.log(game.gameState.teams[t][i]);
+            if (team[i].alive) {
+              numLiveTeams++;
+              winnerTeamId = t;
+              break;
+            }
           }
         }
-      }
-      console.log(numLiveTeams);
-      console.log(game.gameState.teams);
-      // Reset the count.
-      game.gameState.numLiveTeams = numLiveTeams;
-      game.playerEscaped.push(username);
-      
-      if (numLiveTeams == 1) {
-        // Found the winning player.
-        var winnerUsername;
-        for (var name in game.score) {
-          if (game.score[name].teamId == winnerTeamId) {
-            winnerUsername = name;
-            break;
+        console.log(numLiveTeams);
+        console.log(game.gameState.teams);
+        // Reset the count.
+        game.gameState.numLiveTeams = numLiveTeams;
+        game.playerEscaped.push(username);
+        
+        if (numLiveTeams == 1) {
+          // Found the winning player.
+          var winnerUsername;
+          for (var name in game.score) {
+            if (game.score[name].teamId == winnerTeamId) {
+              winnerUsername = name;
+              break;
+            }
           }
+          game.score[winnerUsername].win++;
+          gameStatistics = {};
+          gameStatistics[Stat.winner] = winnerUsername;
+          var scoreStat = game.getScoreJSON();
+          gameStatistics[Stat.result] = scoreStat;
+          console.log(gameStatistics);
+          // Reset the game state.
+          game.reset();
+          gameStatistics[Message.LEAVE] = 'Players escaped: ' + game.playerEscaped;
+          socket.broadcast.to(game.room).emit(Message.FINISH, gameStatistics);
+        } else {
+          var removeMsg = {};
+          removeMsg[Message.REMOVEALL] = leaveTeamId;
+          removeMsg[Message.MAXPLAYER] = game.gameState.teams[leaveTeamId].length;
+          socket.broadcast.to(game.room).emit(Message.REMOVEALL, removeMsg);
         }
-        game.score[winnerUsername].win++;
-        gameStatistics = {};
-        gameStatistics[Stat.winner] = winnerUsername;
-        var scoreStat = game.getScoreJSON();
-        gameStatistics[Stat.result] = scoreStat;
-        console.log(gameStatistics);
-        // Reset the game state.
-        game.reset();
-        gameStatistics[Message.LEAVE] = 'Players escaped: ' + game.playerEscaped;
-        socket.broadcast.to(game.room).emit(Message.FINISH, gameStatistics);
       } else {
-        var removeMsg = {};
-        removeMsg[Message.REMOVEALL] = leaveTeamId;
-        removeMsg[Message.MAXPLAYER] = game.gameState.teams[leaveTeamId].length;
-        socket.broadcast.to(game.room).emit(Message.REMOVEALL, removeMsg);
+        if (game.isRestartReady()) {
+          game.restart(socket);
+        }
       }
-    } else {
-      if (game.isRestartReady()) {
-        game.restart(socket);
-      }
-    }
-    socket.leave(game.room);
+      socket.leave(game.room);
+    });
   });
+
 };
 
 
@@ -541,7 +557,7 @@ Game.prototype.isReady = function() {
 };
 
 Game.prototype.isRestartReady = function() {
-  return this.numRestartPlayers == this.numPlayers && this.numRestartPlayers != 1;
+  return (this.numRestartPlayers == this.numPlayers) && (this.numRestartPlayers > 1);
 };
 
 Game.prototype.prepareGame = function(isRestart) {

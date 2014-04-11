@@ -1,7 +1,9 @@
 function startGame() {
+  destroyBackground();
+
   GameInfo.isStart = true;
   GameInfo.isLoading = false;
-  // $('body').css('background-image', 'none');
+
   $('#Loading-output').hide();
   $('.span').hide();
   $('.cloud').hide();
@@ -25,8 +27,10 @@ function restartLoading() {
   GameInfo.isLoading = true;
   $('#WebGL-output').hide();
   $('#Stats-output').hide();
-  // $('body').css('background-image', 'url(images/PlanetBlitz.jpg)');
+
   $('#game-container').wrap('<div id="background-3d"></div>');
+  showBackground();
+
   $('#Loading-output').show();
   $('.span').show();
   $('.cloud').show();
@@ -37,14 +41,13 @@ function mainMenu() {
   GameInfo.isStart = false;
 
   removeGameCanvas();
-  // $('#WebGL-output').hide();
-  // $('#Stats-output').hide();
   $('body').css('background-image', 'url(images/PlanetBlitz.jpg)');
 
   $('#game-container').wrap('<div id="background-3d"></div>');
+  showBackground();
+
   $('#WebGL-output').hide();
   $('#Stats-output').hide();
-  // $('body').css('background-image', 'url(images/PlanetBlitz.jpg)');
 
   $('#Loading-output').hide();
   $('.span').hide();
@@ -67,8 +70,8 @@ function showRestartDialog(message, additionalMsg, score) {
     content += '<p style="text-align:center; margin:0">' + additionalMsg + '</p>';
   }
   content += '<br/>';
-  content += '<table style="width:400px"><tr><td>Name</td><td>Kill</td><td>Death</td><td>Win</td></tr>';
-  // Score the result according to win.
+  content += '<table style="width:400px"><tr class="gameScore"><td>Player</td><td>Kills</td><td>Death</td><td>Wins</td></tr>';
+  // Score the result according to number of wins
   var sortedUsernames = new Array();
   for (var username in score) {
     sortedUsernames.push(username);
@@ -78,7 +81,7 @@ function showRestartDialog(message, additionalMsg, score) {
   });
   for (var t = 0; t < sortedUsernames.length; t++) {
     var username = sortedUsernames[t];
-    content += '<tr>';
+    content += '<tr class="gameScore">';
     content += '<td>' + username + '</td>';
     content += '<td>' + score[username][Stat.kill] + '</td>';
     content += '<td>' + score[username][Stat.death] + '</td>';
@@ -86,7 +89,6 @@ function showRestartDialog(message, additionalMsg, score) {
     content += '</tr>';
   }
   content += '</table>';
-
     
   $("#Message-dialog").html(content).dialog(
   {
@@ -112,6 +114,8 @@ function showRestartDialog(message, additionalMsg, score) {
   });
   $('#Message-dialog').css('height', 'auto');
   $('#Message-dialog').css('overflow', 'visible');
+  $(".gameScore").css("color", "white")
+
 }
 
 function getUsername(forGameId) {
@@ -150,6 +154,7 @@ function getUsername(forGameId) {
   $('#Input-dialog').keypress(function(e) {
       if (e.keyCode == $.ui.keyCode.ENTER) {
         $("#unameBtn").click();
+        $( "#Input-dialog" ).off("keypress");
       }
   });
 }
@@ -159,7 +164,7 @@ function createGameStep() {
   content += '<form><label for="rname" style="margin-left:7">Game room name</label><input id="rname" name="rname"  maxlength="15" type="text" style="margin-left: 25"/>';
   content += '<form><label for="uname" style="margin-left:7">Player name</label><input id="uname" name="name"  maxlength="15" type="text" style="margin-left: 25"/>';
   content += '<label for="map" style="margin-left:7">Map</label>';
-  content += '<div class="styled-select"><select name="map" id="choosemap">';
+  content += '<div class="styled-select"><select name="=map" id="choosemap">';
   for (var t = 0; t < GameInfo.maps.length; t++) {
     content += '<option>' + GameInfo.maps[t] + '</option>';
   }
@@ -199,6 +204,8 @@ function createGameStep() {
   $('#Input-dialog').keypress(function(e) {
       if (e.keyCode == $.ui.keyCode.ENTER) {
         $("#unameBtn").click();
+        $( "#Input-dialog" ).off("keypress");
+        
       }
   });
 }
@@ -244,6 +251,7 @@ function createSingleGame() {
   $('#Input-dialog').keypress(function(e) {
       if (e.keyCode == $.ui.keyCode.ENTER) {
         $("#unameBtn").click();
+        $( "#Input-dialog" ).off("keypress");
       }
   });
 }
@@ -294,9 +302,11 @@ $(document).ready(function() {
   $('#Loading-output').hide();
   $('#slide-container').hide();
   $('#leaveBtn').hide();
+  centerButtons();
   $('#playBtn').click(function() {
     sendListGameMsg();
   });
+  showBackground();
 
 
   /* Start the game locally */
@@ -333,3 +343,14 @@ window.oncontextmenu = function () {
   return true;
 }
 
+
+function centerElement(ele) {
+  var width = $(window).width();
+  ele.css('left', width / 2 - ele.width() / 2);
+}
+
+function centerButtons() {
+  centerElement($('#playBtn'));
+  centerElement($('#debugBtn'));
+  centerElement($('#helpBtn'));
+}
