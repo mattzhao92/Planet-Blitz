@@ -70,8 +70,8 @@ function showRestartDialog(message, additionalMsg, score) {
     content += '<p style="text-align:center; margin:0">' + additionalMsg + '</p>';
   }
   content += '<br/>';
-  content += '<table style="width:400px"><tr><td>Name</td><td>Kill</td><td>Death</td><td>Win</td></tr>';
-  // Score the result according to win.
+  content += '<table style="width:400px"><tr class="gameScore"><td>Player</td><td>Kills</td><td>Death</td><td>Wins</td></tr>';
+  // Score the result according to number of wins
   var sortedUsernames = new Array();
   for (var username in score) {
     sortedUsernames.push(username);
@@ -81,7 +81,7 @@ function showRestartDialog(message, additionalMsg, score) {
   });
   for (var t = 0; t < sortedUsernames.length; t++) {
     var username = sortedUsernames[t];
-    content += '<tr>';
+    content += '<tr class="gameScore">';
     content += '<td>' + username + '</td>';
     content += '<td>' + score[username][Stat.kill] + '</td>';
     content += '<td>' + score[username][Stat.death] + '</td>';
@@ -89,7 +89,6 @@ function showRestartDialog(message, additionalMsg, score) {
     content += '</tr>';
   }
   content += '</table>';
-
     
   $("#Message-dialog").html(content).dialog(
   {
@@ -115,6 +114,8 @@ function showRestartDialog(message, additionalMsg, score) {
   });
   $('#Message-dialog').css('height', 'auto');
   $('#Message-dialog').css('overflow', 'visible');
+  $(".gameScore").css("color", "white")
+
 }
 
 function getUsername(forGameId) {
