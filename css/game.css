@@ -15,21 +15,31 @@ body {
 .btn {
   position: absolute;
   /*left: 400px;*/
-  width: 200px;
-  height: 50px;
+  /*width: 400px;*/
+  /*height: 85px;*/
+  font-size: 30pt;
+  padding: 0;
+border: none;
+background: none;
+  color: white;
+  margin: 0;
+  text-align: center
 }
 
+#title {
+
+}
 
 #debugBtn {
-  top: 300px;
+  bottom: 35%;
 }
 
 #playBtn {
-  top: 400px;
+  bottom: 25%;
 }
 
 #helpBtn {
-  top: 500px;
+  bottom: 15%;
 }
 
 #leaveBtn {

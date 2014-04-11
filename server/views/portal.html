@@ -158,71 +158,11 @@
   <body onresize="centerButtons()">
     <div id='background-3d'>
         <div id='game-container'>
+            <div id='title'></div>
             <button class='btn' id='debugBtn'>Single Mode</button>
             <button class='btn' id='playBtn'>Network Mode</button>
-            <button class='btn' id='helpBtn'>Help</button>
+            <button class='btn' id='helpBtn'>Settings</button>
             <button class='btn jms-link' id='leaveBtn'>Main Menu</button>
-            <div class="container" id="slide-container">
-                
-                    <section id="jms-slideshow" class="jms-slideshow">
-                        <div class="step" data-color="color-1" id="step-first">
-                            <div class="jms-content">
-                                <h3>Planet Blitz</h3>
-                                <p>• Death Match - get the most kills!</p>
-                                <p>• Each player controls 3 robots</p>
-                                <p>• Scoreboard is at the top right corner</p>
-                                <button class="jms-link">Main Menu</button>
-                            </div>
-                            <img src="images/1.png" />
-
-                        </div>
-                        <div class="step" data-color="color-2" data-y="500" data-scale="0.4" data-rotate-x="30">
-                            <div class="jms-content">
-                                <h3>Your robots</h3>
-                                <p>• Red line above robot is the health</p>
-                                <p>• Click on the robot to see how far the robot can move</p>
-                                <p>• 1, 2, 3 keys provide fast switching between robots</p>
-                                <button class="jms-link">Main Menu</button>
-                            </div>
-                            <img src="images/2.png" />
-                        </div>
-                        <div class="step" data-color="color-3" data-x="2000" data-z="3000" data-rotate="170">
-                            <div class="jms-content">
-                                <h3>Moving robots</h3>
-                                <p>• To move a robot, click on any green cell after selecting the robot</p>
-                                <br/>
-                                <p>• The green line above the robot is the movement cooldown.</p>
-                                <button class="jms-link">Main Menu</button>
-                            </div>
-                            <img src="images/3.png" />
-                        </div>
-                        <div class="step" data-color="color-4" data-x="3000">
-                            <div class="jms-content">
-                                <h3>Shooting</h3>
-                                <p>• To shoot, right click in the direction you want to fire at</p>
-                                <br/>
-                                <p>• The blue line above the robot indicates the shooting cooldown</p>
-                                <button class="jms-link">Main Menu</button>
-                            </div>
-                            <img src="images/4.png" />
-                        </div>
-                        <div class="step" data-color="color-5" data-x="4500" data-z="1000" data-rotate-y="45">
-                            <div class="jms-content">
-                                <h3>Camera Navigation</h3>
-                                <p>• Pan around by moving your cursor to the edges of the screen </p>
-                                <p>• Zoom in and out by scrolling down or up </P>
-                                <p>• Rotate your view by pressing 'q' for clockwise and 'e' for counter-clockwise rotation</p>
-                                <button class="jms-link">Main Menu</button>
-                            </div>
-                            <img src="images/5.png" />
-                        </div>
-                    </section>  
-            </div>
-            <!-- <div id="Stats-output"> -->
-            <!-- </div> -->
-            <!-- Div which will hold the Output -->
-            <!-- <div id="WebGL-output"> -->
-            <!-- </div> -->
             <div id="Message-dialog" title="Game Statistics"></div>
             <div id="Input-dialog" title="Player name"></div>
             <div id="Loading-output-container"><p id="Loading-output"></p></div>

@@ -1,8 +1,8 @@
 $(function () {
 
-    var App = {};
+    var Editor = {};
 
-    App = function(containerName) {
+    Editor = function(containerName) {
         // create a scene, that will hold all our elements such as objects, cameras and lights.
         this.scene = new THREE.Scene();
 
@@ -16,7 +16,7 @@ $(function () {
         this.init(containerName);
     };
 
-    App.prototype = {
+    Editor.prototype = {
         init: function(containerName) {
             this.GRID_WIDTH = 400;
             this.GRID_LENGTH = 400;
@@ -218,9 +218,7 @@ $(function () {
 
     };
 
-    var app = new App("#WebGL-output");
-    var MAPGAME = app;
-    game = app;
+    var editor = new Editor("#WebGL-output");
 
 });
 

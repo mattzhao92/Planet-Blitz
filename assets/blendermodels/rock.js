@@ -26,7 +26,7 @@
 		"colorSpecular" : [1.0, 1.0, 1.0],
 		"depthTest" : true,
 		"depthWrite" : true,
-		"mapDiffuse" : "../../blendertextures/rocks.jpg",
+		"mapDiffuse" : "../../blendertextures/crate.png",
 		"mapDiffuseWrap" : ["repeat", "repeat"],
 		"shading" : "Lambert",
 		"specularCoef" : 50,
