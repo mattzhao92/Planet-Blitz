@@ -14,6 +14,7 @@ var Character = Sprite.extend({
         this.id = args.id;
         this.modelName = args.modelName;
         this.shootStrategy = args.shootStrategy;
+        this.moveSpeed = args.moveSpeed;
 
         this.teamColor = new THREE.Color(Constants.TEAM_COLORS[this.team]);
 
@@ -51,16 +52,19 @@ var Character = Sprite.extend({
         this.healthObservers = [];
 
         var barAspectRatio = 10;
+        var scope = this;
 
-        this.ammoBar = this.spriteFactory.createAmmoBar(this.characterSize, this.getRepr().position, 10);
+        var weaponArgs = {
+            weaponClipSize: scope.shootStrategy.weaponClipSize,
+            weaponReloadRate: scope.shootStrategy.weaponReloadRate
+        };
+
+        this.ammoBar = this.spriteFactory.createAmmoBar(this.characterSize, this.getRepr().position, barAspectRatio, weaponArgs);
         this.addPositionObserver(this.ammoBar);
 
-        this.healthBar = this.spriteFactory.createHealthBar(this.characterSize, this.getRepr().position, 10, this.maximumHealth);
+        this.healthBar = this.spriteFactory.createHealthBar(this.characterSize, this.getRepr().position, barAspectRatio, this.maximumHealth);
         this.addPositionObserver(this.healthBar);
         this.addHealthObserver(this.healthBar);
-
-        this.coolDownCount = 55;
-        this.coolDownLeft = this.coolDownCount;
 
         this.isCharacterInRoute = false;
         this.lastRoadMap = [];
@@ -188,7 +192,6 @@ var Character = Sprite.extend({
 
     addUnitSelector: function() {
         // setup unit selector mesh
-        // have to supply the radius
         var geometry = new THREE.TorusGeometry(this.getRadius(), 1, 5, 35);
         var material = new THREE.MeshLambertMaterial({
             color: 0xFF0000
@@ -229,10 +232,23 @@ var Character = Sprite.extend({
         this.healthBar.destroy();
     },
 
+
+    deselectOther: function() {
+        var ctxSprite = this; 
+        this.spriteFactory.notifyAll(new SpriteCmd(function(sprite) {
+            if (ctxSprite != sprite && sprite instanceof Character) {
+                if (sprite.team == GameInfo.myTeamId) {
+                    sprite.deselect();
+                }
+            }
+        }));
+    },
+
     // callback - called when unit is selected. Gets a reference to the game state ("world")
-    onSelect: function() {
+    onSelect: function(deselectOther) {
         // don't do anything if this unit was already selected
         if (this.isSelected) {
+            this.deselectOther(); 
             return;
         }
 
@@ -243,13 +259,9 @@ var Character = Sprite.extend({
 
             var ctxSprite = this;
             // deselect all other units
-            this.spriteFactory.notifyAll(new SpriteCmd(function(sprite) {
-                if (ctxSprite != sprite && sprite instanceof Character) {
-                    if (sprite.team == GameInfo.myTeamId) {
-                        sprite.deselect();
-                    }
-                }
-            }));
+            if (deselectOther) {
+                this.deselectOther();
+            }
 
             this.isSelected = true;
             var sound = new Howl({
@@ -343,14 +355,9 @@ var Character = Sprite.extend({
         if (this.breakUpdateHere) return;
         if (this.motionInProgress) {
             this.breakUpdateHere = true;
-            if (this.coolDownLeft < 0.1 * this.coolDownCount || this.lockMovement) {
-                this.lockMovement = true;
-                return;
-            }
 
             var newMeshX = this.mesh.position.x + this.velocityX * delta;
             var newMeshZ = this.mesh.position.z + this.velocityZ * delta;
-
 
             if (((newMeshX - this.goalMeshX) / (this.goalMeshX - this.prevMeshX) > 0 || this.velocityX == 0) &&
                 ((newMeshZ - this.goalMeshZ) / (this.goalMeshZ - this.prevMeshZ) > 0 || this.velocityZ == 0)) {
@@ -396,14 +403,6 @@ var Character = Sprite.extend({
         this.ammoBar.updateWeaponReload(delta);
         this.updateInProgressLinearMotion(delta);
 
-        this.coolDownLeft += 0.005 * this.coolDownCount;
-        if (this.coolDownLeft >= this.coolDownCount) {
-            this.coolDownLeft = this.coolDownCount;
-        }
-        if (this.coolDownLeft >= 0.5 * this.coolDownCount && this.lockMovement) {
-            this.lockMovement = false;
-        }
-
         // handle dequeue action here
         if (this.motionQueue.length > 0 && !this.breakUpdateHere) {
             this.motionInProcess = true;
@@ -436,20 +435,18 @@ var Character = Sprite.extend({
                 this.goalMeshX = this.world.convertXPosToWorldX(direction.x);
                 this.goalMeshZ = this.world.convertZPosToWorldZ(direction.z);
 
-                var MOVE_VELOCITY = 100;
-
                 if (direction.x < this.xPos) {
-                    this.velocityX = -MOVE_VELOCITY;
+                    this.velocityX = -this.moveSpeed;
                 } else if (direction.x > this.xPos) {
-                    this.velocityX = MOVE_VELOCITY;
+                    this.velocityX = this.moveSpeed;
                 } else {
                     this.velocityX = 0;
                 }
 
                 if (direction.z < this.zPos) {
-                    this.velocityZ = -MOVE_VELOCITY;
+                    this.velocityZ = -this.moveSpeed;
                 } else if (direction.z > this.zPos) {
-                    this.velocityZ = MOVE_VELOCITY;
+                    this.velocityZ = this.moveSpeed;
                 } else {
                     this.velocityZ = 0;
                 }

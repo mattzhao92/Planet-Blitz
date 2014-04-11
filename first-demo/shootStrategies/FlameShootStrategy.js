@@ -2,6 +2,9 @@ var FlameShootStrategy = ShootStrategy.extend({
 	init: function(spriteFactory, materialFactory) {
 		this.spriteFactory = spriteFactory;
 		this.materialFactory = materialFactory;
+
+		this.weaponClipSize = 4;
+		this.weaponReloadRate = 0.01;
 	}, 
 
 	shoot: function(owner, from, to) {
@@ -17,7 +20,7 @@ var FlameShootStrategy = ShootStrategy.extend({
 			radius: radius,
 			mesh: mesh,
 			addons: [light],
-			damage: 30, 
+			damage: 20, 
 			speed: 400,
  			range: 600,
  			from: from,

@@ -67,7 +67,8 @@ var SpriteFactory = Class.extend({
 			team: team,
 			id: id,
 			modelName: "soldier-regular.js",
-			shootStrategy: shootStrategy
+			shootStrategy: shootStrategy,
+			moveSpeed: 150
 		};
 		return this.createCharacter(soldierArgs);
 	},
@@ -79,7 +80,8 @@ var SpriteFactory = Class.extend({
 			team: team,
 			id: id,
 			modelName: "soldier-artillery.js",
-			shootStrategy: shootStrategy
+			shootStrategy: shootStrategy,
+			moveSpeed: 50
 		};
 		return this.createCharacter(soldierArgs);
 	},
@@ -91,7 +93,8 @@ var SpriteFactory = Class.extend({
 			team: team,
 			id: id,
 			modelName: "soldier-flamethrower.js",
-			shootStrategy: shootStrategy
+			shootStrategy: shootStrategy,
+			moveSpeed: 90
 		};
 		return this.createCharacter(soldierArgs);
 	},
@@ -128,7 +131,8 @@ var SpriteFactory = Class.extend({
 			characterSize: scope.characterSize,
 			id: soldierArgs.id, 
 			modelName: soldierArgs.modelName,
-			shootStrategy: soldierArgs.shootStrategy
+			shootStrategy: soldierArgs.shootStrategy,
+			moveSpeed: soldierArgs.moveSpeed
 		};
 
 		var robot = new Character(postInitCmd, postDestroyCmd, characterArgs);
@@ -175,8 +179,8 @@ var SpriteFactory = Class.extend({
 		return bullet;
 	},
 
-	createAmmoBar: function(characterSize, position, barAspectRatio) {
-		var ammoBar = new AmmoBar(this.sceneAddCmd, this.sceneRemoveCmd, characterSize, position, barAspectRatio);
+	createAmmoBar: function(characterSize, position, barAspectRatio, weaponArgs) {
+		var ammoBar = new AmmoBar(this.sceneAddCmd, this.sceneRemoveCmd, characterSize, position, barAspectRatio, weaponArgs);
 		ammoBar.setup();
 
 		return ammoBar;

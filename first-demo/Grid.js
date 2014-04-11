@@ -20,6 +20,7 @@ var Grid = Class.extend({
         this.highlightedTiles = null;
         this.currentMouseOverTile = null;
         this.currentSelectedUnits = [];
+        this.currentSelectedUnits[GameInfo.myTeamId] = [];
 
         // listeners and state
         this.mouseDownListenerActive = true;
@@ -42,6 +43,8 @@ var Grid = Class.extend({
         // nonessentials
         this.setupMouseMoveListener();
         this.setupMouseDownListener();
+        this.setupMouseUpListener();
+
         this.setupHotkeys();
 
         this.unitCycle = 1;
@@ -49,8 +52,45 @@ var Grid = Class.extend({
 
         this.hotkeys = [];
         this.hotkeyToUnitMap = {};
-
         this.setupMaterialRefresher();
+
+        // group selection
+        this.isDrawing = false;
+        this.mousestartX = 0;
+        this.mousestartY = 0;
+        this.mouseSelectHappened = false;
+    },
+
+   drawGroupSelectionRectangle: function (mouseX, mouseY) {
+        var canvas = document.createElement('canvas');
+        this.canvas2d = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        if (this.bar) {
+            this.scene.remove(this.bar);
+        }
+
+        var barTexture = new THREE.Texture(canvas);
+        barTexture.needsUpdate = true;
+
+        var healthBarMaterial = new THREE.SpriteMaterial({
+            map: barTexture,
+            useScreenCoordinates: true,
+            alignment: THREE.SpriteAlignment.topLeft
+        });
+
+        this.bar = new THREE.Sprite(healthBarMaterial);
+
+        this.canvas2d.beginPath();
+        this.canvas2d.rect(0, 0, 100000, 100000);
+        //canvas2d.rect(1000, 1000, -1000, -1000);
+        this.canvas2d.fillStyle = "rgba(0, 255, 127, 0.1)";
+        this.canvas2d.fill();
+
+        this.bar.position.set(mouseX,mouseY,0);
+        //bar.scale.set(100,100,1.0);
+        this.scene.add(this.bar);
     },
 
     setupMaterialRefresher: function() {
@@ -74,7 +114,7 @@ var Grid = Class.extend({
         });
     },
 
-    loadGroundFromMapJson: function(mapJson) {
+    loadGround: function(mapJson) {
         var width = mapJson.board.width;
         var length = mapJson.board.height;
         var size = mapJson.board.tileSize;
@@ -104,16 +144,18 @@ var Grid = Class.extend({
         this.scene.add(ground);
     },
 
-    drawGridSquaresFromMapJson: function(mapJson) {
+    drawGridSquares: function(mapJson) {
+        var width = mapJson.board.width;
+        var length = mapJson.board.height;
         var size = mapJson.board.tileSize;
 
         this.tileFactory = new TileFactory(this, size);
+        this.numberSquaresOnXAxis = width / size;
+        this.numberSquaresOnZAxis = length / size;
+
 
         this.PFGrid = new PF.Grid(this.numberSquaresOnXAxis, this.numberSquaresOnZAxis);
-        this.pathFinder = new PF.BreadthFirstFinder({
-            allowDiagonal: false,
-            dontCrossCorners: true
-        });
+        this.pathFinder = new PF.BreadthFirstFinder({allowDiagonal: false, dontCrossCorners: true});
 
 
         this.tilesArray = new Array(this.numberSquaresOnXAxis);
@@ -149,7 +191,7 @@ var Grid = Class.extend({
         this.scene.add(this.tiles);
     },
 
-    setupObstaclesFromMapJson: function(mapJson) {
+    setupObstacles: function(mapJson) {
 
         var obstacles = mapJson.obstacles;
         for (var i = 0; i < obstacles.length; i++) {
@@ -167,7 +209,7 @@ var Grid = Class.extend({
         }
     },
 
-    setupCharctersFromMapJson: function(mapJson) {
+    setupCharacters: function(mapJson) {
 
         // reconstructing BlitzUnits here
         var units_in_teams = [];
@@ -220,43 +262,19 @@ var Grid = Class.extend({
     },
 
     onGameStart: function() {
+        if (this.getCurrentSelectedUnits().length > 0) {
+            var groupUnits = this.getCurrentSelectedUnits();
 
-        for (var tm = 0; tm < 4; tm++) {
-            if (GameInfo.existingTeams.indexOf(tm) == -1) {
-                for (var i = 0; i < this.numOfCharacters; i++) {
-                    this.silentlyRemoveCharacter(this.getCharacterById(tm, i));
-                }
+            for (var i = 0; i < groupUnits.length; i++) {
+                groupUnits[i].deselect();
+                // deselect tiles if there were any
+                groupUnits[i].highlightedTiles.forEach(function(tile) {
+                    tile.reset();
+                });
             }
-        }
-        if (this.getCurrentSelectedUnit()) {
-            // TODO: duplicated code
-
-            this.getCurrentSelectedUnit().deselect();
-            // deselect tiles if there were any
-            this.getCurrentSelectedUnit().highlightedTiles.forEach(function(tile) {
-                tile.reset();
-            });
-
-            this.currentSelectedUnits[GameInfo.myTeamId] = null;
+            this.currentSelectedUnits[GameInfo.myTeamId].length = 0;
         }
 
-        var teamJoinMessage;
-        switch (GameInfo.myTeamId) {
-            case 0:
-                teamJoinMessage = "You spawned at top";
-                break;
-            case 1:
-                teamJoinMessage = "You spawned at bottom";
-                break;
-            case 2:
-                teamJoinMessage = "You spawned at left";
-                break;
-            case 3:
-                teamJoinMessage = "You spawned at right";
-                break;
-        }
-
-        //this.controls.rotateRight(this.getCameraDegreesToRotate());
         // this.displayMessage(teamJoinMessage);
 
         // focus camera on start position (TODO: hardcoded)
@@ -295,8 +313,11 @@ var Grid = Class.extend({
                 function(event, keysPressed, keyCombo) {
                     event.preventDefault();
 
-                    var currentSelectedUnit = scope.getCurrentSelectedUnit();
-                    if (currentSelectedUnit && currentSelectedUnit.active) {
+                    var currentSelectedUnits = _.filter(scope.getCurrentSelectedUnits(), function(character) {
+                        return (character != null && character.active);
+                    });
+
+                    if (currentSelectedUnits && currentSelectedUnits.length > 0) {
 
                         var previousKeybinding = scope.hotkeyToUnitMap[number];
                         if (previousKeybinding) {
@@ -305,8 +326,16 @@ var Grid = Class.extend({
 
                         // assign new hotkey number to this unit
                         var keyBinding = KeyboardJS.on(hotkey, function(event, keysPressed, keyCombo) {
-                            if (currentSelectedUnit && currentSelectedUnit.active) {
-                                currentSelectedUnit.onSelect();
+                            for (var i = 0; i < scope.currentSelectedUnits[GameInfo.myTeamId].length; i++) {
+                                scope.currentSelectedUnits[GameInfo.myTeamId][i].deselect();
+                            }
+
+                            scope.currentSelectedUnits[GameInfo.myTeamId].length = 0;
+                            if (currentSelectedUnits && currentSelectedUnits.length > 0) {
+                                for (var i = 0; i < currentSelectedUnits.length; i++) {
+                                    currentSelectedUnits[i].onSelect();
+                                    scope.currentSelectedUnits[GameInfo.myTeamId].push(currentSelectedUnits[i]);
+                                }
                             }
                         });
 
@@ -329,6 +358,12 @@ var Grid = Class.extend({
                     scope.unitCycle = 0;
                 }
 
+                for (var i = 0; i < scope.currentSelectedUnits[GameInfo.myTeamId].length; i++) {
+                    scope.currentSelectedUnits[GameInfo.myTeamId][i].deselect();
+                }
+
+                scope.currentSelectedUnits[GameInfo.myTeamId].length = 0;
+
                 // need to cycle until the next "defined character". If character became dead, then the unitCycle concept ceases to become valid
                 for (var i = scope.unitCycle; i < myTeamCharacters.length; i++) {
                     if (characterSelected !== undefined && characterSelected.active) {
@@ -348,6 +383,7 @@ var Grid = Class.extend({
                 var myTeamCharacters = scope.getMyTeamCharacters();
                 var characterSelected = myTeamCharacters[scope.unitCycle];
                 if (characterSelected.active) {
+
                     characterSelected.onSelect();
                 }
                 if (scope.unitCycle == 0) {
@@ -359,11 +395,11 @@ var Grid = Class.extend({
         );
 
         // focus camera on unit
-        KeyboardJS.on("space",
+         KeyboardJS.on("space",
             function(event, keysPressed, keyCombo) {
-                var character = scope.getCurrentSelectedUnit();
-                if (character && character.active) {
-                    scope.controls.focusOnPosition(character.mesh.position);
+                var characters = scope.getCurrentSelectedUnits();
+                if (characters.length > 0 && character.active) {
+                    scope.controls.focusOnPosition(characters[0].mesh.position);
                 }
             }
         );
@@ -439,9 +475,10 @@ var Grid = Class.extend({
         this.gameApp.displayMessage(msg);
     },
 
-    silentlyRemoveCharacter: function(character) {
+   silentlyRemoveCharacter: function(character) {
         // if the character was the currently selected unit, then reset tile state
-        if (this.getCurrentSelectedUnit() == character) {
+        var selectedUnits = this.getCurrentSelectedUnits();
+        if (character in selectedUnits) {
             // deselect character
             character.deselect();
 
@@ -450,7 +487,8 @@ var Grid = Class.extend({
                 tile.reset();
             });
 
-            this.currentSelectedUnits[GameInfo.myTeamId] = null;
+            var index = this.currentSelectedUnits[GameInfo.myTeamId].indexOf(character);
+            this.currentSelectedUnits[GameInfo.myTeamId].splice(index,1);
         }
 
         // mark tile position as available
@@ -482,7 +520,7 @@ var Grid = Class.extend({
     },
 
     markCharacterAsSelected: function(character) {
-        this.currentSelectedUnits[GameInfo.myTeamId] = character;
+        this.currentSelectedUnits[GameInfo.myTeamId].push(character);
     },
 
     markTileAsSelected: function(tile) {
@@ -555,9 +593,30 @@ var Grid = Class.extend({
         }, false);
     },
 
+    setupMouseUpListener: function() {
+        var scope = this;
+        window.addEventListener('mouseup', function(event) {
+            scope.onMouseUp(event);
+        }, false);
+    },
+
     onMouseMove: function(event) {
         if (this.mouseMoveListenerActive == false) {
             return;
+        }
+
+        var mouseLocation = this.controls.getMousePosition();
+
+        if (this.isDrawing && this.bar) {
+            var mouseX = mouseLocation.x;
+            var mouseY = mouseLocation.y;
+
+            this.bar.scale.set(mouseX - this.mousestartX, mouseY - this.mousestartY, 1.0);
+
+
+            this.mouseSelectHappened = true;
+            return;
+            //bar.position.set(e.clientX-50,e.clientY-50,0);           
         }
 
         // recursively call intersects
@@ -570,9 +629,13 @@ var Grid = Class.extend({
             obj.onMouseOver();
         }
 
-        if (this.getCurrentSelectedUnit()) {
+        var selectedUnits = this.getCurrentSelectedUnits();
+
+        if (selectedUnits.length > 0) {
             var mouseLocation = this.gridHelper.getMouseProjectionOnGrid();
-            this.getCurrentSelectedUnit().onMouseMovement(mouseLocation);
+            for (var i = 0; i < selectedUnits.length; i++) {
+                selectedUnits[i].onMouseMovement(mouseLocation);
+            }
         }
     },
 
@@ -587,16 +650,75 @@ var Grid = Class.extend({
     },
 
     handleShootEvent: function() {
-        var from = this.getCurrentSelectedUnit().position.clone();
         var to = this.gridHelper.getMouseProjectionOnGrid();
-        this.getCurrentSelectedUnit().shoot(from, to, true);
+        var selectedUnits = this.getCurrentSelectedUnits();
+
+        for (var i = 0; i < selectedUnits.length; i++) {
+            var from = selectedUnits[i].position.clone();
+            selectedUnits[i].shoot(from, to, true);
+        }
     },
 
-    getCurrentSelectedUnit: function() {
+    getCurrentSelectedUnits: function() {
         return this.currentSelectedUnits[GameInfo.myTeamId];
     },
 
+    getCharactersInMeshRange: function(lowMeshX, lowMeshZ, highMeshX, highMeshZ) {
+        var characters = this.getMyTeamCharacters();
+        var charactersInRange = [];
+
+        for (var i = 0; i < characters.length; i++) {
+            var character = characters[i];
+            var characterMeshPos = character.mesh.position;
+            if (((lowMeshX-characterMeshPos.x) * (characterMeshPos.x - highMeshX) > 0)
+            && ((lowMeshZ - characterMeshPos.z) * (characterMeshPos.z - highMeshZ) > 0)) {
+                charactersInRange.push(character);
+            }
+        }
+        return charactersInRange;
+    },
+
+    onMouseUp: function(event) {
+
+        if (this.isDrawing) {
+            this.scene.remove(this.bar);
+            this.bar = null;
+            this.isDrawing = false;  
+            var endPosOnGrid = this.gridHelper.getMouseProjectionOnGrid();
+            var characters = this.getCharactersInMeshRange(this.startPosOnGrid.x, this.startPosOnGrid.z, endPosOnGrid.x, endPosOnGrid.z);
+            
+            if (characters.length > 0 && this.mouseSelectHappened) {
+                for (var i = 0; i < this.currentSelectedUnits[GameInfo.myTeamId].length; i++) {
+                    this.currentSelectedUnits[GameInfo.myTeamId][i].deselect();
+                }
+
+                this.currentSelectedUnits[GameInfo.myTeamId].length = 0;
+
+                for (var i = 0; i < characters.length; i++) {
+                    characters[i].onSelect();
+                    //this.currentSelectedUnits[GameInfo.myTeamId].push(characters[i]);
+                }
+            }
+            this.mouseSelectHappened = false;
+        }
+    },
+
     onMouseDown: function(event) {
+
+        if (this.isDrawing == false) {
+            this.isDrawing = true;
+
+            var mouseLocation = this.controls.getMousePosition();
+
+            this.mousestartX = mouseLocation.x;
+            this.mousestartY = mouseLocation.y;
+
+            this.startPosOnGrid = this.gridHelper.getMouseProjectionOnGrid();
+
+            this.drawGroupSelectionRectangle(this.mousestartX, this.mousestartY);
+            //return;
+        }
+
         var RIGHT_CLICK = 3;
         var LEFT_CLICK = 1;
 
@@ -609,7 +731,7 @@ var Grid = Class.extend({
 
         var intersects = raycaster.intersectObjects(characterMeshes, true);
         var intersectsWithTiles = raycaster.intersectObjects(this.tiles.children);
-        var unitIsCurrentlySelected = (this.getCurrentSelectedUnit() != null);
+        var unitIsCurrentlySelected = (this.getCurrentSelectedUnits().length > 0);
 
         if (unitIsCurrentlySelected) {
             // fire on click
@@ -625,13 +747,20 @@ var Grid = Class.extend({
 
             if (intersects.length > 0) {
                 var clickedObject = intersects[0].object.owner;
-
-                // done so that you can click on a tile behind a character easily
-                if (clickedObject != this.getCurrentSelectedUnit()) {
-                    clickedObject.onSelect();
+               
+                 if (clickedObject instanceof Character) {
+                    clickedObject.onSelect(true);
                 } else {
                     continueClickHandler = true;
                 }
+
+                // // done so that you can click on a tile behind a character easily
+                // if ((clickedObject in this.getCurrentSelectedUnits())) {
+               
+                //     clickedObject.onSelect(true);
+                // } else {
+                //     continueClickHandler = true;
+                // }
             } else {
                 continueClickHandler = true;
             }
@@ -643,24 +772,30 @@ var Grid = Class.extend({
         }
     },
 
-    handleMoveCase: function(intersectsWithTiles) {
+   handleMoveCase: function(intersectsWithTiles) {
         if (intersectsWithTiles.length > 0) {
             var tileSelected = intersectsWithTiles[0].object.owner;
             var coordinate = tileSelected.onMouseOver();
-            if (this.getCurrentSelectedUnit() && coordinate) {
-                var deltaX = coordinate.x - this.getCurrentSelectedUnit().getTileXPos();
-                var deltaY = 0;
-                var deltaZ = coordinate.z - this.getCurrentSelectedUnit().getTileZPos();
 
-                var unitMovedToDifferentSquare = !(deltaX == 0 && deltaZ == 0);
+            var selectedUnits = this.getCurrentSelectedUnits();
+            if (selectedUnits.length > 0 && coordinate) {
 
-                if (unitMovedToDifferentSquare) {
-                    // Put the network communication here.
-                    if (this.getCurrentSelectedUnit().isCoolDown == 0) {
-                        sendMoveMsg(this.getCurrentSelectedUnit().id,
+                _.forEach(selectedUnits, function(selectedUnit) {
+                    var deltaX = coordinate.x - selectedUnit.getTileXPos();
+                    var deltaZ = coordinate.z - selectedUnit.getTileZPos();
+
+                    var unitMovedToDifferentSquare = !(deltaX == 0 && deltaZ == 0);
+
+                    var moveDeltaX = coordinate.x - selectedUnit.destX;
+                    var moveDeltaY = coordinate.z - selectedUnit.destZ;
+                    var isNotAlreadyMovingToDestination = !(moveDeltaX == 0 && moveDeltaY == 0);
+
+                    if (unitMovedToDifferentSquare && isNotAlreadyMovingToDestination) {
+                        // transmit move over network
+                        sendMoveMsg(selectedUnit.id,
                             coordinate.x, 0, coordinate.z);
                     }
-                }
+                });
             }
         }
     },
@@ -737,7 +872,7 @@ var Grid = Class.extend({
                 }
                 if (dest.x != x || dest.z != z) {
                     // Inconsistent with auth state, adjust position.
-                    console.log('Inconsitent shoud be at ' + x + ' ' + z + ' but was at ' + dest.x + ' ' + dest.z);
+                    console.log('Inconsistent position, should be at ' + x + ' ' + z + ' but was at ' + dest.x + ' ' + dest.z);
                     charToCheck.placeAtGridPos(x, z);
                 }
             }
@@ -779,12 +914,12 @@ var Grid = Class.extend({
         this.tilesArray = null;
 
         // create grid tiles
-        this.loadGroundFromMapJson(this.mapJson);
-        this.drawGridSquaresFromMapJson(this.mapJson);
+        this.loadGround(this.mapJson);
+        this.drawGridSquares(this.mapJson);
 
         // initialize characters
-        this.setupCharctersFromMapJson(this.mapJson);
-        this.setupObstaclesFromMapJson(this.mapJson);
+        this.setupCharacters(this.mapJson);
+        this.setupObstacles(this.mapJson);
 
         this.resetInProgress = false;
         this.camera.position.x = 0;

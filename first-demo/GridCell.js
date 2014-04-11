@@ -42,26 +42,25 @@ var GridCell = Class.extend({
     },
 
     highlight: function(color) {
+        // this.tileMesh.visible = true;
+        // this.tileMesh.material.opacity = 0.6;
+        // var rgb;
+        // switch (color) {
+        //     case "GREEN":
+        //         rgb = [0.1, 1.0, 0.1];
+        //         break;
+        //     case "YELLOW":
+        //         rgb = [3.0, 3.0, 0];
+        //         break;
+        //     case "RED": 
+        //         rgb = [1.0, 0, 0];
+        //         break;
+        //     default:
+        //         console.log("Invalid color specified");
+        //         break;
+        // }
 
-        this.tileMesh.visible = true;
-        this.tileMesh.material.opacity = 0.6;
-        var rgb;
-        switch (color) {
-            case "GREEN":
-                rgb = [0.1, 1.0, 0.1];
-                break;
-            case "YELLOW":
-                rgb = [3.0, 3.0, 0];
-                break;
-            case "RED": 
-                rgb = [1.0, 0, 0];
-                break;
-            default:
-                console.log("Invalid color specified");
-                break;
-        }
-
-        this.tileMesh.material.color.setRGB(rgb[0], rgb[1], rgb[2]);
+        // this.tileMesh.material.color.setRGB(rgb[0], rgb[1], rgb[2]);
     },
 
     setSelectable: function(isSelectable) {

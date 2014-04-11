@@ -1,7 +1,14 @@
 var AmmoBar = Sprite.extend({
 
-	init: function(sceneAddCmd, sceneRemoveCmd, tileSize, position, barAspectRatio) {
+	init: function(sceneAddCmd, sceneRemoveCmd, tileSize, position, barAspectRatio, args) {
 		this._super(sceneAddCmd, sceneRemoveCmd);
+
+		// essential attributes of the ammo
+		this.maximumAmmoCapacity = args.weaponClipSize;				
+		this.ammoReplenishRate = args.weaponReloadRate;
+
+		this.ammoCount = this.maximumAmmoCapacity;
+		this.needsReload = false;
 
 		this.tileSize = tileSize;
 		this.barAspectRatio = barAspectRatio;
@@ -21,11 +28,6 @@ var AmmoBar = Sprite.extend({
 		this.barZOffset = 0;
 		this.barYOffset = 62;
 		this.bar = new THREE.Sprite(ammoCountBarMaterial);
-
-		this.maximumAmmoCapacity = 3;
-		this.ammoCount = this.maximumAmmoCapacity;
-		this.ammoReplenishRate = 0.01;
-		this.needsReload = false;
 
 		this.canvas2d.rect(150, 0, 600, 150);
 		this.canvas2d.fillStyle = "skyblue";

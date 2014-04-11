@@ -1,9 +1,12 @@
 function showBackground() {
   console.log("Entering game menu");
+  var app = new MenuBackground("#background-3d");
+  var elem = document.getElementById("background-3d");
+  console.log(elem);
 }
 
 function destroyBackground() {
-  console.log("Exiting game menu");
+  // console.log("Exiting game menu");
 }
 
 // When not passing any argument, it automatically connects to the server
@@ -11,9 +14,6 @@ function destroyBackground() {
 var socket = io.connect();
 var game;
 var GameInfo = new GameConfig();
-
-// show the background
-showBackground();
 
 socket.on(Message.LISTGAME, function(info) {
   GameInfo.maps = info[Message.MAPS];
@@ -206,6 +206,7 @@ function removeGameCanvas() {
   var outputBox = document.getElementById('WebGL-output');
   var msgBox = document.getElementById('Stats-output');
   if (outputBox) {
+    $('#WebGL-output').unwrap();
     outputBox.parentNode.removeChild(outputBox);
   }
   if (msgBox) {
@@ -227,6 +228,7 @@ function renderGame() {
   game = app;
   $('#WebGL-output').hide();
   $('#Stats-output').hide();  
+  $('#WebGL-output').wrap('<div id="game-gui"></div>');
 }
 
 function sendMoveMsg(index, x, y, z) {
