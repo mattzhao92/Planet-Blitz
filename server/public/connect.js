@@ -206,6 +206,7 @@ function removeGameCanvas() {
   var outputBox = document.getElementById('WebGL-output');
   var msgBox = document.getElementById('Stats-output');
   if (outputBox) {
+    $('#WebGL-output').unwrap();
     outputBox.parentNode.removeChild(outputBox);
   }
   if (msgBox) {
@@ -227,6 +228,7 @@ function renderGame() {
   game = app;
   $('#WebGL-output').hide();
   $('#Stats-output').hide();  
+  $('#WebGL-output').wrap('<div id="game-gui"></div>');
 }
 
 function sendMoveMsg(index, x, y, z) {
