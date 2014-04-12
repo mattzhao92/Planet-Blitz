@@ -1,15 +1,11 @@
 body {
   margin: 0;
-  /*background-image:url('images/PlanetBlitz.jpg');*/
-
 }
 
 #background-3d {
   height: 100%;
-  /*background-image:url('images/PlanetBlitz.jpg');*/
   background-size: 100% 100%;
   background-repeat: no-repeat;
-  /*background-color: blue;*/
 }
 
 .btn {
@@ -19,11 +15,15 @@ body {
   /*height: 85px;*/
   font-size: 30pt;
   padding: 0;
-border: none;
-background: none;
+  border: none;
+  background: none;
   color: white;
   margin: 0;
-  text-align: center
+  text-align: center;
+
+  font-family: 'Xolonium'; 
+  font-weight: bold; 
+  font-style: normal; 
 }
 
 #title {
