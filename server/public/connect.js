@@ -2,7 +2,6 @@ function showBackground() {
   console.log("Entering game menu");
   var app = new MenuBackground("#background-3d");
   var elem = document.getElementById("background-3d");
-  console.log(elem);
 }
 
 function destroyBackground() {

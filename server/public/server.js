@@ -41,8 +41,6 @@ function mainMenu() {
   GameInfo.isStart = false;
 
   removeGameCanvas();
-  $('body').css('background-image', 'url(images/PlanetBlitz.jpg)');
-
   $('#game-container').wrap('<div id="background-3d"></div>');
   showBackground();
 
