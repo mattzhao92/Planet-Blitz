@@ -1,7 +1,44 @@
+var menuButtons = ["#debugBtn", "#playBtn", "#helpBtn"];
+
 function showBackground() {
   console.log("Entering game menu");
   var app = new MenuBackground("#background-3d");
   var elem = document.getElementById("background-3d");
+
+  // bind hover handlers
+  for (var i = 0; i < menuButtons.length; i++) {
+    var menuButton = menuButtons[i];
+
+    console.log(menuButton);
+    $(menuButton).hover(
+      function() {
+        $(this).stop();
+        $(this).fadeTo(300, 1);
+      },
+      function() {
+        $(this).stop();
+        $(this).fadeTo(300, 0.5);
+      }
+    );
+  }
+}
+
+function applyToMenuButtons(buttonFunc) {
+  for (var i = 0; i < menuButtons.length; i++) {
+    buttonFunc(menuButtons[i]);
+  }
+}
+
+function showMenuButtons() {
+  applyToMenuButtons(function(elem) {
+    $(elem).show();
+  })
+}
+
+function hideMenuButtons() {
+  applyToMenuButtons(function(elem) {
+    $(elem).hide();
+  })
 }
 
 function destroyBackground() {

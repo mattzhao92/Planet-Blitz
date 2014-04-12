@@ -14,9 +14,12 @@ function startGame() {
 function loading() {
   GameInfo.isStart = false;
   GameInfo.isLoading = true;
+  
   $('#debugBtn').hide();
   $('#playBtn').hide();
   $('#helpBtn').hide();
+  $('#blitzTitle').hide();
+
   $('#leaveBtn').show();
   $('#Loading-output').show();
   $('.span').show();
@@ -50,9 +53,12 @@ function mainMenu() {
   $('#Loading-output').hide();
   $('.span').hide();
   $('.cloud').hide();
+  
   $('#debugBtn').show();
   $('#playBtn').show();
   $('#helpBtn').show();
+  $('#blitzTitle').show();
+
   $('#leaveBtn').hide();
 }
 

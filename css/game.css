@@ -24,6 +24,8 @@ body {
   font-family: 'Xolonium'; 
   font-weight: bold; 
   font-style: normal; 
+
+  opacity: 0.5;
 }
 
 #blitzTitle {
@@ -43,7 +45,7 @@ body {
   font-weight: bold; 
   font-style: normal;
 
-  opacity: 0.6;
+  opacity: 0.8;
 }
 
 #debugBtn {
