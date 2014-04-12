@@ -26,7 +26,6 @@ function showGameHUD() {
 function hideGameHUD() {
   $('#WebGL-output').hide();
   $('#Stats-output').hide();
-
 }
 
 function startGame() {
@@ -331,6 +330,18 @@ $(document).ready(function() {
     sendListMapMsg();
   });
 
+  // TODO: reset game state?
+  $('.jms-link').click(function() {
+    if (GameInfo.isLoading) {
+      sendLeaveMsg();
+    } else if (GameInfo.isStart) {
+      sendLeaveMsg();
+    } else {
+      $('#slide-container').fadeOut();
+    }
+    mainMenu();
+  });
+  
 });
 
 window.oncontextmenu = function () {
