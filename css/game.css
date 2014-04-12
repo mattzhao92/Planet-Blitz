@@ -26,20 +26,36 @@ body {
   font-style: normal; 
 }
 
-#title {
+#blitzTitle {
+  bottom: 40%;
 
+  position: absolute;
+  padding: 0;
+  border: none;
+  background: none;
+  color: white;
+  margin: 0;
+  width: 100%;
+  text-align: center;
+  font-size: 100pt;
+
+  font-family: 'Xolonium'; 
+  font-weight: bold; 
+  font-style: normal;
+
+  opacity: 0.6;
 }
 
 #debugBtn {
-  bottom: 35%;
+  bottom: 40%;
 }
 
 #playBtn {
-  bottom: 25%;
+  bottom: 30%;
 }
 
 #helpBtn {
-  bottom: 15%;
+  bottom: 20%;
 }
 
 #leaveBtn {

@@ -343,6 +343,7 @@ function centerElement(ele) {
 }
 
 function centerButtons() {
+  centerElement($('#blitzTitle'));
   centerElement($('#playBtn'));
   centerElement($('#debugBtn'));
   centerElement($('#helpBtn'));
