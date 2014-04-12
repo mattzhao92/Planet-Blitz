@@ -1,15 +1,16 @@
-var menuButtons = ["#debugBtn", "#playBtn", "#helpBtn"];
+var menuElements = ["#debugBtn", "#playBtn", "#helpBtn", "#blitzTitle"];
 
 function showBackground() {
   console.log("Entering game menu");
   var app = new MenuBackground("#background-3d");
   var elem = document.getElementById("background-3d");
 
+  var menuButtons = ["#debugBtn", "#playBtn", "#helpBtn"];
+
   // bind hover handlers
   for (var i = 0; i < menuButtons.length; i++) {
     var menuButton = menuButtons[i];
 
-    console.log(menuButton);
     $(menuButton).hover(
       function() {
         $(this).stop();
@@ -23,20 +24,20 @@ function showBackground() {
   }
 }
 
-function applyToMenuButtons(buttonFunc) {
-  for (var i = 0; i < menuButtons.length; i++) {
-    buttonFunc(menuButtons[i]);
+function applyToMenuElems(func) {
+  for (var i = 0; i < menuElements.length; i++) {
+    func(menuElements[i]);
   }
 }
 
-function showMenuButtons() {
-  applyToMenuButtons(function(elem) {
+function showMenu() {
+  applyToMenuElems(function(elem) {
     $(elem).show();
   })
 }
 
-function hideMenuButtons() {
-  applyToMenuButtons(function(elem) {
+function hideMenu() {
+  applyToMenuElems(function(elem) {
     $(elem).hide();
   })
 }

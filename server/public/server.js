@@ -1,42 +1,63 @@
+var loadScreenElements = ["#Loading-output", ".span", ".cloud"];
+
+function applyToLoadScreen(func) {
+  for (var i = 0; i < loadScreenElements.length; i++) {
+    func(loadScreenElements[i]);
+  }
+}
+
+function showLoadScreen() {
+  applyToLoadScreen(function(elem) {
+    $(elem).show();
+  });
+}
+
+function hideLoadScreen() {
+  applyToLoadScreen(function(elem) {
+    $(elem).hide();
+  });
+}
+
+function showGameHUD() {
+  $('#Stats-output').show();
+  $('#WebGL-output').show();
+}
+
+function hideGameHUD() {
+  $('#WebGL-output').hide();
+  $('#Stats-output').hide();
+
+}
+
 function startGame() {
   destroyBackground();
 
   GameInfo.isStart = true;
   GameInfo.isLoading = false;
 
-  $('#Loading-output').hide();
-  $('.span').hide();
-  $('.cloud').hide();
-  $('#Stats-output').show();
-  $('#WebGL-output').show();
+  hideLoadScreen();
+
+  showGameHUD();
 }
 
 function loading() {
   GameInfo.isStart = false;
   GameInfo.isLoading = true;
   
-  $('#debugBtn').hide();
-  $('#playBtn').hide();
-  $('#helpBtn').hide();
-  $('#blitzTitle').hide();
+  hideMenu();
 
   $('#leaveBtn').show();
-  $('#Loading-output').show();
-  $('.span').show();
-  $('.cloud').show();
+  showLoadScreen();
 }
 
 function restartLoading() {
   GameInfo.isLoading = true;
-  $('#WebGL-output').hide();
-  $('#Stats-output').hide();
+  hideGameHUD();
 
   $('#game-container').wrap('<div id="background-3d"></div>');
   showBackground();
 
-  $('#Loading-output').show();
-  $('.span').show();
-  $('.cloud').show();
+  showLoadScreen();
 }
 
 function mainMenu() {
@@ -47,19 +68,12 @@ function mainMenu() {
   $('#game-container').wrap('<div id="background-3d"></div>');
   showBackground();
 
-  $('#WebGL-output').hide();
-  $('#Stats-output').hide();
-
-  $('#Loading-output').hide();
-  $('.span').hide();
-  $('.cloud').hide();
+  hideGameHUD();
   
-  $('#debugBtn').show();
-  $('#playBtn').show();
-  $('#helpBtn').show();
-  $('#blitzTitle').show();
+  showMenu();
 
   $('#leaveBtn').hide();
+  hideLoadScreen();
 }
 
 function joinGame(gameId) {
@@ -312,25 +326,11 @@ $(document).ready(function() {
   });
   showBackground();
 
-
   /* Start the game locally */
   $('#debugBtn').click(function() {
     sendListMapMsg();
   });
 
-
-  // TODO: reset game state?
-  $('.jms-link').click(function() {
-    if (GameInfo.isLoading) {
-      sendLeaveMsg();
-    } else if (GameInfo.isStart) {
-      sendLeaveMsg();
-    } else {
-      $('#slide-container').fadeOut();
-    }
-    mainMenu();
-  });
-  
 });
 
 window.oncontextmenu = function () {

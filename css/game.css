@@ -45,6 +45,8 @@ body {
   font-weight: bold; 
   font-style: normal;
 
+  cursor: default;
+
   opacity: 0.8;
 }
 
