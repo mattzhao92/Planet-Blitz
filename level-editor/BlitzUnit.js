@@ -112,7 +112,7 @@ var Unit = Class.extend({
     	});
     },
 
-    getUnitMesh: function() {
+    getMesh: function() {
     	return this.box_mesh;
     }, 
 
@@ -125,7 +125,6 @@ var Unit = Class.extend({
         if (opacity == null)
             opacity = 0.0
     	var myclone = new Unit(this.unitType, this.color, opacity, this.unitSize, this.teamId);
-        console.log("clone unit teamid "+this.teamId);
         return myclone;
     }
 

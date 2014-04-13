@@ -38,7 +38,7 @@ var EditorModel = Class.extend({
 		this.tmpVec = new THREE.Vector3();
 		this.voxelPosition = new THREE.Vector3();
 		this.virtualUnit = new Unit("soldier", 0x33CCFF, 0.5, this.map_tileSize, -1);
-		this.virtualUnitMesh = this.virtualUnit.getUnitMesh();
+		this.virtualUnitMesh = this.virtualUnit.getMesh();
 		this.virtualUnitMesh.position.x += this.map_tileSize / 2;
 		this.virtualUnitMesh.position.z += this.map_tileSize / 2;
 		this.scene.add(this.virtualUnitMesh);
@@ -371,13 +371,13 @@ var EditorModel = Class.extend({
 					zLeftBoundary < zPos && zPos < zRightBoundary) {
 					this.created_units[i].setUnitSize(this.map_tileSize);
 					new_units.push(this.created_units[i]);
-					var unit_mesh = this.created_units[i].getUnitMesh();
+					var unit_mesh = this.created_units[i].getMesh();
 					var tile = this.tilesArray[xPos][zPos];
 					tile.onPlaceUnit(this.created_units[i]);
 					unit_mesh.position.x = this.convertXPosToWorldX(xPos);
 					unit_mesh.position.z = this.convertZPosToWorldZ(zPos);
 				} else {
-					this.scene.remove(this.created_units[i].getUnitMesh());
+					this.scene.remove(this.created_units[i].getMesh());
 				}
 			}
 
@@ -511,7 +511,7 @@ var EditorModel = Class.extend({
 		console.log("updateVirtualUnitMesh ");
 		this.virtualUnit = unit.clone(0.5);
 		this.current_unit_prototype = unit;
-		this.virtualUnitMesh = this.virtualUnit.getUnitMesh();
+		this.virtualUnitMesh = this.virtualUnit.getMesh();
 		this.virtualUnitMesh.material.color.setHex(unit.getUnitColor());
 		this.scene.add(this.virtualUnitMesh);
 	},
@@ -707,7 +707,6 @@ var EditorModel = Class.extend({
 		}
 
 		this.normalMatrix.getNormalMatrix(intersector.object.matrixWorld);
-
 		this.tmpVec.copy(intersector.face.normal);
 		this.tmpVec.applyMatrix3(this.normalMatrix).normalize();
 
@@ -777,6 +776,8 @@ var EditorModel = Class.extend({
 				break;
 		}
 
+		this.isShiftDown = false;
+		this.isCtrlDown = false;
 		switch (event.keyCode) {
 
 			case 16:
@@ -849,6 +850,7 @@ var EditorModel = Class.extend({
 	},
 
 	onDocumentKeyUp: function(event) {
+		this.isShiftDown = false;
 
 		switch (event.keyCode) {
 
@@ -887,17 +889,43 @@ var EditorModel = Class.extend({
 
 			// delete cube
 			if (this.isShiftDown) {
-				if (true) {
-					this.scene.remove(intersector.object);
-					//this.created_units.splice( this.created_unit_meshes.indexOf( intersector.object ), 1 );
-				}
+				var scope = this;
+				intersector.object.owner.onRemoveAsset(function(asset_to_remove, asset_type) {
+					if (asset_to_remove) {
+						var index = -1;
+						if (asset_type == "VirtualUnit") {
+							index = scope.created_units.indexOf(asset_to_remove);
+							if (index > -1) {
+    							scope.created_units.splice(index, 1);
+    							scope.scene.remove(asset_to_remove.getMesh());
+							}
+
+						} else if (asset_type == "VirtualObstacle") {
+							index = scope.created_obstacles.indexOf(asset_to_remove);
+							if (index > -1) {
+    							scope.created_obstacles.splice(index, 1);
+    							scope.scene.remove(asset_to_remove.getMesh());
+
+							}
+						} else if (asset_type == "VirtualPowerUp") {
+							index = scope.created_powerups.indexOf(asset_to_remove);
+							if (index > -1) {
+    							scope.created_powerups.splice(index, 1);
+    							scope.scene.remove(asset_to_remove.getMesh());
+							}
+						}
+					}
+				});
+			
 			} else {
 				switch (this.currentVirtualObjectType) {
 					case "VirtualUnit":
 
 						this.setVirtualMeshPosition(intersector);
 						var new_unit = this.current_unit_prototype.clone();
-						var new_unit_mesh = new_unit.getUnitMesh();
+						var new_unit_mesh = new_unit.getMesh();
+						new_unit_mesh.owner = new_unit;
+
 						new_unit_mesh.position.copy(this.voxelPosition);
 						new_unit_mesh.rotation.y = this.virtualUnitMesh.rotation.y;
 
