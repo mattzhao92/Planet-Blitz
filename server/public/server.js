@@ -132,7 +132,6 @@ function showRestartDialog(message, additionalMsg, score) {
   $('#Message-dialog').css('height', 'auto');
   $('#Message-dialog').css('overflow', 'visible');
   $(".gameScore").css("color", "white")
-
 }
 
 function getUsername(forGameId) {

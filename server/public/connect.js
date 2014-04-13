@@ -210,11 +210,7 @@ socket.on(Message.FINISH, function(data) {
     var grid = game.getWorld();
     var additionalMsg = data[Message.LEAVE];
     grid.onGameFinish();
-    if (data[Stat.winner] == GameInfo.username) {
-      showRestartDialog('You win', additionalMsg, score);
-    } else {
-      showRestartDialog('You lose', additionalMsg, score);
-    }
+    showRestartDialog('Winner: ' + data[Stat.winner], additionalMsg, score);
   });
 
 socket.on(Message.ERROR, function(reason) {
