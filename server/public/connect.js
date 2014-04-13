@@ -190,6 +190,15 @@ socket.on(Message.HIT, function(hitData) {
   }
 });
 
+socket.on(Message.SYNC, function(state) {
+  var seq = parseInt(state[Message.SEQ]);
+  // Old seq, discard it.
+  if (seq <= game.getWorld().seq) {
+    return;
+  }
+  game.getWorld().syncGameState(state[Message.STATE]);
+});
+
 socket.on(Message.REMOVE, function(removeDead) {
   var team = parseInt(removeDead[Hit.team]);
   var index = parseInt(removeDead[Hit.index]);

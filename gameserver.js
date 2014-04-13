@@ -308,6 +308,17 @@ io.sockets.on('connection', function(socket) {
     });
   });
 
+  socket.on(Message.SYNC, function() {
+    socket.get('inGame', function(error, game) {
+      if (game!= null && game.isPlaying) {
+        var state = game.gameState.toJSON();
+        game.seq++;
+        state[Message.SEQ] = game.seq;
+        socket.emit(Message.SYNC, state);
+      }
+    });
+  });
+
   socket.on(Message.RESTART, function(message) {
     socket.get('inGame', function(error, curGame) {
       // Send the team id to the player.
