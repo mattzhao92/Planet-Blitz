@@ -84,6 +84,7 @@ function joinGame(gameId) {
 }
 
 function showRestartDialog(message, additionalMsg, score) {
+  Hotkeys.disableHotkeys();
   GameInfo.inPostGame = true;
   var content = '<h2 style="text-align:center">' + message + '</h2>';
   if (additionalMsg) {
