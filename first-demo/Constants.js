@@ -13,7 +13,7 @@ Constants.BULLET_LEVEL = 15;
 // used to listen for clock updates
 Constants.TOPIC_DELTA = "delta";
 
-Constants.HOTKEYS = ["q", "e", "space", "r", "t", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "ctrl", "command"];
+Constants.HOTKEYS = ["q", "e", "space", "r", "t", "tab", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "ctrl", "command"];
 
 Constants.ACTIVE_KEYBINDINGS = {};
 
@@ -32,3 +32,17 @@ function Colors() {
 Colors.EXPLOSION = 0xFF8929;
 
 Constants.ORIGINAL_TILESIZE = 40;
+
+function Hotkeys() {
+
+}
+
+Hotkeys.disableHotkeys = function() {
+
+	// remove previous hotkey bindings
+	_.forEach(Constants.HOTKEYS, function(hotkey) {
+	    KeyboardJS.clear(hotkey);
+	    // remove all bindings that use given key inside the combo
+	    KeyboardJS.clear.key(hotkey);
+	});
+}

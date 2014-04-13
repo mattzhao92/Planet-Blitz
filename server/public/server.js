@@ -60,6 +60,9 @@ function restartLoading() {
 }
 
 function mainMenu() {
+  // disable hotkeys
+  Hotkeys.disableHotkeys();
+
   if (GameInfo.isStart) {
     removeGameCanvas();
     $('#game-container').wrap('<div id="background-3d"></div>');

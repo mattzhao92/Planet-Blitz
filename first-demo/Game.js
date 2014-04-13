@@ -189,11 +189,7 @@ var App = Class.extend({
 
     reset: function() {
         // remove all hotkey bindings
-
-        _.forEach(Constants.HOTKEYS, function(hotkey) {
-            KeyboardJS.clear(hotkey);
-        });
-
+        Hotkeys.disableHotkeys();
     }
 
 });
