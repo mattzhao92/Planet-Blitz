@@ -1,4 +1,4 @@
-var ApplyDamageStrategy = InteractStrategy.extend({
+var AoeDamageStrategy = InteractStrategy.extend({
 	init: function(dmgToApply) {
 		this._super();
 		this.dmgToApply = dmgToApply;
@@ -9,11 +9,9 @@ var ApplyDamageStrategy = InteractStrategy.extend({
 		if (this.checkOverlap(ctxSprite, otherSprite)) {
             if (otherSprite instanceof Character) {
 			    if (otherSprite.team != ctxSprite.owner.team) {
-			    	if (this.shouldApplyDamage) {
-						ctxSprite.destroy();
-						sendHitMsg(ctxSprite, otherSprite, this.dmgToApply);			    		
-			    		this.shouldApplyDamage = false;
-			    	}
+					ctxSprite.destroy();
+					sendHitMsg(ctxSprite, otherSprite, this.dmgToApply);			    		
+		    		this.shouldApplyDamage = false;
 			    }
             } else if (otherSprite instanceof Obstacle) {
                 ctxSprite.destroy();

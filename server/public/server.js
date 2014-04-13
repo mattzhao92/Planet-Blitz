@@ -1,61 +1,81 @@
+var loadScreenElements = ["#Loading-output", ".span", ".cloud"];
+
+function applyToLoadScreen(func) {
+  for (var i = 0; i < loadScreenElements.length; i++) {
+    func(loadScreenElements[i]);
+  }
+}
+
+function showLoadScreen() {
+  applyToLoadScreen(function(elem) {
+    $(elem).show();
+  });
+}
+
+function hideLoadScreen() {
+  applyToLoadScreen(function(elem) {
+    $(elem).hide();
+  });
+}
+
+function showGameHUD() {
+  $('#Stats-output').show();
+  $('#WebGL-output').show();
+}
+
+function hideGameHUD() {
+  $('#WebGL-output').hide();
+  $('#Stats-output').hide();
+}
+
 function startGame() {
   destroyBackground();
 
   GameInfo.isStart = true;
   GameInfo.isLoading = false;
 
-  $('#Loading-output').hide();
-  $('.span').hide();
-  $('.cloud').hide();
-  $('#Stats-output').show();
-  $('#WebGL-output').show();
+  hideLoadScreen();
+
+  showGameHUD();
 }
 
 function loading() {
   GameInfo.isStart = false;
   GameInfo.isLoading = true;
-  $('#debugBtn').hide();
-  $('#playBtn').hide();
-  $('#helpBtn').hide();
+  
+  hideMenu();
+
   $('#leaveBtn').show();
-  $('#Loading-output').show();
-  $('.span').show();
-  $('.cloud').show();
+  showLoadScreen();
 }
 
 function restartLoading() {
   GameInfo.isLoading = true;
-  $('#WebGL-output').hide();
-  $('#Stats-output').hide();
+  hideGameHUD();
 
   $('#game-container').wrap('<div id="background-3d"></div>');
   showBackground();
 
-  $('#Loading-output').show();
-  $('.span').show();
-  $('.cloud').show();
+  showLoadScreen();
 }
 
 function mainMenu() {
+  // disable hotkeys
+  Hotkeys.disableHotkeys();
+
+  if (GameInfo.isStart) {
+    removeGameCanvas();
+    $('#game-container').wrap('<div id="background-3d"></div>');
+    showBackground();
+
+    hideGameHUD();
+  }
+  showMenu(); 
+  $('#leaveBtn').hide();
+  hideLoadScreen();
   GameInfo.isLoading = false;
   GameInfo.isStart = false;
 
-  removeGameCanvas();
-  $('body').css('background-image', 'url(images/PlanetBlitz.jpg)');
-
-  $('#game-container').wrap('<div id="background-3d"></div>');
-  showBackground();
-
-  $('#WebGL-output').hide();
-  $('#Stats-output').hide();
-
-  $('#Loading-output').hide();
-  $('.span').hide();
-  $('.cloud').hide();
-  $('#debugBtn').show();
-  $('#playBtn').show();
-  $('#helpBtn').show();
-  $('#leaveBtn').hide();
 }
 
 function joinGame(gameId) {
@@ -115,7 +135,6 @@ function showRestartDialog(message, additionalMsg, score) {
   $('#Message-dialog').css('height', 'auto');
   $('#Message-dialog').css('overflow', 'visible');
   $(".gameScore").css("color", "white")
-
 }
 
 function getUsername(forGameId) {
@@ -257,6 +276,7 @@ function createSingleGame() {
 }
 
 function listAvailableGames(games) {
+  GameInfo.isListingGames = true;
   var content = '<div class="rain" style="margin:0"><div class="border start">';
   content += '<form><label style="text-align:center">Click on a game room to join or create your own</label>';
   content += '<table><tr><td style="padding-left:32">Room</td><td style="width:140">Map</td><td style="padding-right:40px">Players</td><td>Status</td></tr>';
@@ -288,10 +308,12 @@ function listAvailableGames(games) {
   $(".ui-widget.name-dialog").css('padding', 0);
   $("#Input-dialog").css('padding', 0);
   $("#createGameBtn").click(function() {
+    GameInfo.isListingGames = false;
     $("#Input-dialog").dialog("close");
     createGameStep();
   });
   $("#quitBtn").click(function() {
+    GameInfo.isListingGames = false;
     $("#Input-dialog").dialog("close");
   });
 }
@@ -308,12 +330,10 @@ $(document).ready(function() {
   });
   showBackground();
 
-
   /* Start the game locally */
   $('#debugBtn').click(function() {
     sendListMapMsg();
   });
-
 
   // TODO: reset game state?
   $('.jms-link').click(function() {
@@ -321,8 +341,6 @@ $(document).ready(function() {
       sendLeaveMsg();
     } else if (GameInfo.isStart) {
       sendLeaveMsg();
-    } else {
-      $('#slide-container').fadeOut();
     }
     mainMenu();
   });
@@ -343,6 +361,7 @@ function centerElement(ele) {
 }
 
 function centerButtons() {
+  centerElement($('#blitzTitle'));
   centerElement($('#playBtn'));
   centerElement($('#debugBtn'));
   centerElement($('#helpBtn'));

@@ -1,8 +1,45 @@
+var menuElements = ["#debugBtn", "#playBtn", "#helpBtn", "#blitzTitle"];
+
 function showBackground() {
   console.log("Entering game menu");
   var app = new MenuBackground("#background-3d");
   var elem = document.getElementById("background-3d");
-  console.log(elem);
+
+  var menuButtons = ["#debugBtn", "#playBtn", "#helpBtn"];
+
+  // bind hover handlers
+  for (var i = 0; i < menuButtons.length; i++) {
+    var menuButton = menuButtons[i];
+
+    $(menuButton).hover(
+      function() {
+        $(this).stop();
+        $(this).fadeTo(300, 1);
+      },
+      function() {
+        $(this).stop();
+        $(this).fadeTo(300, 0.5);
+      }
+    );
+  }
+}
+
+function applyToMenuElems(func) {
+  for (var i = 0; i < menuElements.length; i++) {
+    func(menuElements[i]);
+  }
+}
+
+function showMenu() {
+  applyToMenuElems(function(elem) {
+    $(elem).show();
+  })
+}
+
+function hideMenu() {
+  applyToMenuElems(function(elem) {
+    $(elem).hide();
+  })
 }
 
 function destroyBackground() {
@@ -16,8 +53,16 @@ var game;
 var GameInfo = new GameConfig();
 
 socket.on(Message.LISTGAME, function(info) {
-  GameInfo.maps = info[Message.MAPS];
-  listAvailableGames(info[Message.ROOMS]);
+  if (info[Message.LISTREQUEST]) {
+    GameInfo.maps = info[Message.MAPS];
+    listAvailableGames(info[Message.ROOMS]);
+  } else {
+    if (GameInfo.isListingGames) {
+      $('#quitBtn').click();
+      listAvailableGames(info[Message.ROOMS]);
+    }
+  }
+
 });
 
 socket.on(Message.LISTMAP, function(maps) {
@@ -173,11 +218,7 @@ socket.on(Message.FINISH, function(data) {
     var grid = game.getWorld();
     var additionalMsg = data[Message.LEAVE];
     grid.onGameFinish();
-    if (data[Stat.winner] == GameInfo.username) {
-      showRestartDialog('You win', additionalMsg, score);
-    } else {
-      showRestartDialog('You lose', additionalMsg, score);
-    }
+    showRestartDialog('Winner: ' + data[Stat.winner], additionalMsg, score);
   });
 
 socket.on(Message.ERROR, function(reason) {
@@ -199,6 +240,7 @@ function GameConfig() {
   this.existingTeams = new Array();
   this.mapContent = null;
   this.inPostGame = false;
+  this.isListingGames = false;
 }
 
 

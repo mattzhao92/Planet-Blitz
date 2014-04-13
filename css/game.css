@@ -1,15 +1,11 @@
 body {
   margin: 0;
-  /*background-image:url('images/PlanetBlitz.jpg');*/
-
 }
 
 #background-3d {
   height: 100%;
-  /*background-image:url('images/PlanetBlitz.jpg');*/
   background-size: 100% 100%;
   background-repeat: no-repeat;
-  /*background-color: blue;*/
 }
 
 .btn {
@@ -19,27 +15,51 @@ body {
   /*height: 85px;*/
   font-size: 30pt;
   padding: 0;
-border: none;
-background: none;
+  border: none;
+  background: none;
   color: white;
   margin: 0;
-  text-align: center
+  text-align: center;
+
+  font-family: 'Xolonium'; 
+  font-weight: bold; 
+  font-style: normal; 
+
+  opacity: 0.5;
 }
 
-#title {
+#blitzTitle {
+  bottom: 40%;
 
+  position: absolute;
+  padding: 0;
+  border: none;
+  background: none;
+  color: white;
+  margin: 0;
+  width: 100%;
+  text-align: center;
+  font-size: 100pt;
+
+  font-family: 'Xolonium'; 
+  font-weight: bold; 
+  font-style: normal;
+
+  cursor: default;
+
+  opacity: 0.8;
 }
 
 #debugBtn {
-  bottom: 35%;
+  bottom: 40%;
 }
 
 #playBtn {
-  bottom: 25%;
+  bottom: 30%;
 }
 
 #helpBtn {
-  bottom: 15%;
+  bottom: 20%;
 }
 
 #leaveBtn {

@@ -20,7 +20,6 @@ var App = Class.extend({
         this.GRID_LENGTH = 400;
         this.clock = new THREE.Clock();
 
-        this.stats = this.initStats();
         this.createGameConsole();
         this.createScoreBoard();
 
@@ -125,8 +124,7 @@ var App = Class.extend({
 
     update: function() {
         TWEEN.update();
-        this.stats.update();
-
+        
         var delta = this.clock.getDelta();
         this.controls.update(delta);
 
@@ -148,21 +146,6 @@ var App = Class.extend({
         // render function - can optionally add shaders later
         this.renderer.render(this.scene, this.camera);
     }, 
-
-    initStats: function() {
-        var stats = new Stats();
-
-        // stats.setMode(0); // 0: fps, 1: ms
-
-        // // Align top-left
-        // stats.domElement.style.position = 'absolute';
-        // stats.domElement.style.left = '9px';
-        // stats.domElement.style.top = '10px';
-
-        // $("#Stats-output").append(stats.domElement);
-
-        return stats;
-    },
 
     createGameConsole: function() {
         var gameConsole = new GameConsole();
@@ -206,11 +189,7 @@ var App = Class.extend({
 
     reset: function() {
         // remove all hotkey bindings
-
-        _.forEach(Constants.HOTKEYS, function(hotkey) {
-            KeyboardJS.clear(hotkey);
-        });
-
+        Hotkeys.disableHotkeys();
     }
 
 });

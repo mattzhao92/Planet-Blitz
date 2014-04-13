@@ -90,7 +90,19 @@ var MenuBackground = Class.extend({
 	    });	    // add a character
 	    this.spriteFactory = new SpriteFactory(this, sceneAddCmd, sceneRemoveCmd);
 
-	    this.spriteFactory.createArtillerySoldier(1, 1);
+	    var d = new Date();
+	    var numSeconds = d.getSeconds();
+
+	    var character;
+	    if (numSeconds % 3 == 0) {
+	    	character = this.spriteFactory.createArtillerySoldier(1, 1);
+	    } else if (numSeconds % 3 == 1) {
+	    	character = this.spriteFactory.createSoldier(1, 1);
+	    } else {
+	    	character = this.spriteFactory.createFlamethrowerSoldier(1, 1);
+	    }
+
+	    character.unitSelectorMesh.visible = false;
 	},
 
 	setupCamera: function() {
@@ -113,7 +125,6 @@ var MenuBackground = Class.extend({
 	update: function() {
 	    var delta = this.clock.getDelta();
 	    this.controls.update(delta);
-
 	},
 
 	animate: function() {
