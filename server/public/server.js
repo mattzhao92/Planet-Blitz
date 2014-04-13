@@ -60,19 +60,19 @@ function restartLoading() {
 }
 
 function mainMenu() {
+  if (GameInfo.isStart) {
+    removeGameCanvas();
+    $('#game-container').wrap('<div id="background-3d"></div>');
+    showBackground();
+
+    hideGameHUD();
+  }
+  showMenu(); 
+  $('#leaveBtn').hide();
+  hideLoadScreen();
   GameInfo.isLoading = false;
   GameInfo.isStart = false;
 
-  removeGameCanvas();
-  $('#game-container').wrap('<div id="background-3d"></div>');
-  showBackground();
-
-  hideGameHUD();
-  
-  showMenu();
-
-  $('#leaveBtn').hide();
-  hideLoadScreen();
 }
 
 function joinGame(gameId) {
@@ -273,6 +273,7 @@ function createSingleGame() {
 }
 
 function listAvailableGames(games) {
+  GameInfo.isListingGames = true;
   var content = '<div class="rain" style="margin:0"><div class="border start">';
   content += '<form><label style="text-align:center">Click on a game room to join or create your own</label>';
   content += '<table><tr><td style="padding-left:32">Room</td><td style="width:140">Map</td><td style="padding-right:40px">Players</td><td>Status</td></tr>';
@@ -304,10 +305,12 @@ function listAvailableGames(games) {
   $(".ui-widget.name-dialog").css('padding', 0);
   $("#Input-dialog").css('padding', 0);
   $("#createGameBtn").click(function() {
+    GameInfo.isListingGames = false;
     $("#Input-dialog").dialog("close");
     createGameStep();
   });
   $("#quitBtn").click(function() {
+    GameInfo.isListingGames = false;
     $("#Input-dialog").dialog("close");
   });
 }
@@ -335,8 +338,6 @@ $(document).ready(function() {
       sendLeaveMsg();
     } else if (GameInfo.isStart) {
       sendLeaveMsg();
-    } else {
-      $('#slide-container').fadeOut();
     }
     mainMenu();
   });

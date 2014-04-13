@@ -79,6 +79,7 @@ io.sockets.on('connection', function(socket) {
     var info = {};
     info[Message.ROOMS] = roomInfo;
     info[Message.MAPS] = Object.keys(maps);
+    info[Message.LISTREQUEST] = true;
     gameLog(info);
     socket.emit(Message.LISTGAME, info);
   });
@@ -125,6 +126,9 @@ io.sockets.on('connection', function(socket) {
       socket.set('inGame', newGame, function() {
         gameLog('user ' + username + ' create game id ' + newGame.gameId);
         socket.emit(Message.GAME, newGame.getPlayerInfo());
+        info = {};
+        info[Message.ROOMS] = getAllGameInfo();
+        io.sockets.emit(Message.LISTGAME, info);
       });
     });
   });
@@ -291,7 +295,6 @@ io.sockets.on('connection', function(socket) {
           var scoreStat = game.getScoreJSON();
           gameStatistics[Stat.result] = scoreStat;
           if (game.playerEscaped.length != 0) {
-            // delete emptyGames[game.gameId];
             gameStatistics[Message.LEAVE] = 'Players escaped: ' + game.playerEscaped;
 
           }
@@ -343,16 +346,11 @@ io.sockets.on('connection', function(socket) {
         game.removePlayer(socket, game);
       }
 
-     //  if (game.isStart) {
-     //    // TODO: Not sure....
-     //    game.removePlayer(socket, game);
-     //  } else if (game.isWaitingRestart) {
-     //    // Kill all?
-     //  } else if (!game.isFull()) {
-       
-     // } 
      if (game.numPlayers == 0) {
         delete emptyGames[game.gameId];
+        info = {};
+        info[Message.ROOMS] = getAllGameInfo();
+        io.sockets.emit(Message.LISTGAME, info);
         return;
       }
     });
@@ -376,8 +374,11 @@ io.sockets.on('connection', function(socket) {
         game.removePlayer(socket, game);
       }
       if (game.numPlayers == 0) {
-          delete emptyGames[game.gameId];
-          return;
+        delete emptyGames[game.gameId];
+        info = {};
+        info[Message.ROOMS] = getAllGameInfo();
+        io.sockets.emit(Message.LISTGAME, info);
+        return;
       }
     });
   });
@@ -460,10 +461,10 @@ Game.prototype.removePlayer = function(socket, game) {
       var index = game.usernames.indexOf(username);
       game.usernames.splice(index, 1);
       game.numPlayers--;
-      var leaveTeamId = game.score[username].teamId;
-      // TODO.
-      delete game.score[username];
       if (game.isPlaying) {
+        var leaveTeamId = game.score[username].teamId;
+        // TODO.
+        delete game.score[username];
         var lvTm = game.gameState.teams[leaveTeamId];
         for (var t = 0; t < lvTm.length; t++) {
           lvTm[t].alive = false;

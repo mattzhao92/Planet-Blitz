@@ -53,8 +53,16 @@ var game;
 var GameInfo = new GameConfig();
 
 socket.on(Message.LISTGAME, function(info) {
-  GameInfo.maps = info[Message.MAPS];
-  listAvailableGames(info[Message.ROOMS]);
+  if (info[Message.LISTREQUEST]) {
+    GameInfo.maps = info[Message.MAPS];
+    listAvailableGames(info[Message.ROOMS]);
+  } else {
+    if (GameInfo.isListingGames) {
+      $('#quitBtn').click();
+      listAvailableGames(info[Message.ROOMS]);
+    }
+  }
+
 });
 
 socket.on(Message.LISTMAP, function(maps) {
@@ -232,6 +240,7 @@ function GameConfig() {
   this.existingTeams = new Array();
   this.mapContent = null;
   this.inPostGame = false;
+  this.isListingGames = false;
 }
 
 
