@@ -300,10 +300,17 @@ var Grid = Class.extend({
     },
 
     onGameFinish: function() {
-        console.log("Game finish called - exiting pointerlock");
+        console.log("onGameFinish");
+
+        // remove all existing mouse listeners
+        window.removeEventListener('mousemove', this.mouseMoveListener, false);
+        window.removeEventListener('mouseup', this.mouseUpListener, false);
+        window.removeEventListener('mousedown', this.mouseDownListener, false);
 
         // reset the pointerlock
         this.controls.releasePointerLock();
+
+        // TODO: unbind mouse listeners from pointerlock
     },
 
     getMyTeamCharacters: function() {
@@ -613,16 +620,25 @@ var Grid = Class.extend({
     setupMouseMoveListener: function() {
         var scope = this;
 
-        window.addEventListener('mousemove', function(event) {
+        var listener = function(event) {
             scope.onMouseMove(event);
-        }, false);
+        }
+
+        window.addEventListener('mousemove', listener, false);
+        this.mouseMoveListener = listener;
     },
 
     setupMouseUpListener: function() {
         var scope = this;
-        window.addEventListener('mouseup', function(event) {
-            scope.onMouseUp(event);
-        }, false);
+
+        var listener = function(event) {
+            if (scope.mouseDownListenerActive) {
+                scope.onMouseUp(event);
+            }
+        }
+
+        window.addEventListener('mouseup', listener, false);
+        this.mouseUpListener = listener;
     },
 
     onMouseMove: function(event) {
@@ -667,11 +683,14 @@ var Grid = Class.extend({
     setupMouseDownListener: function() {
         var scope = this;
 
-        window.addEventListener('mousedown', function(event) {
+        var listener = function(event) {
             if (scope.mouseDownListenerActive) {
                 scope.onMouseDown(event);
             }
-        }, false);
+        }
+
+        window.addEventListener('mousedown', listener, false);
+        this.mouseDownListener = listener;
     },
 
     handleShootEvent: function() {
@@ -923,5 +942,42 @@ var Grid = Class.extend({
 
     destroy: function() {
         console.log("Game destroy");
+
+        var scope = this;
+
+        for (var i = 0; i < 10; i++) {
+            try {
+                if (this.scene) {
+                    // TODO: need to dispose of the texture
+                    this.scene.traverse(function(obj) {
+                        // console.log(obj);
+                        scope.scene.remove(obj);
+
+                        if (obj.geometry) {
+                            // console.log("dispose geometry");
+                            obj.geometry.dispose();
+                        }
+
+                        if (obj.material) {
+                            // console.log("dispose material");
+                            // console.log(obj.material.texture);
+                            if (obj.material.materials) {
+                                _.forEach(obj.material.materials, function(material) {
+                                    material.dispose();
+                                });
+                            } else {
+                                obj.material.dispose();
+                            }
+                        }
+
+                        // dispose of textures
+                        // TODO: deallocate textures
+                    });
+                }
+            } catch (e) {
+                // not proud of this, but there are problems with traversing the scene and disposing of it the same way
+            }
+        }
+
     }
 });

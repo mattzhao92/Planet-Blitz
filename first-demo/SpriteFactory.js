@@ -42,6 +42,28 @@ var SpriteFactory = Class.extend({
 		// remove all inactive sprites
 		_.forEach(inactiveSprites, function(sprite) {
 		    sprite.applySpriteCmd(scope.sceneRemoveCmd);
+		    // deallocate memory
+
+		    // TODO: need to dispose of the texture
+
+		    var obj = sprite.getRepr();
+		    
+		    if (obj.geometry) {
+		        obj.geometry.dispose();
+		    }
+
+		    if (obj.material) {
+		        // console.log(obj.material.texture);
+		        if (obj.material.materials) {
+		            _.forEach(obj.material.materials, function(material) {
+		                material.dispose();
+		            });
+		        } else {
+		            obj.material.dispose();
+		        }
+		    }
+
+		    // TODO: deallocate textures
 		});
 
 		// only retain active sprites
