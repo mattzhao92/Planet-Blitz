@@ -46,3 +46,45 @@ Hotkeys.disableHotkeys = function() {
 	    KeyboardJS.clear.key(hotkey);
 	});
 }
+
+function Utils() {
+
+}
+
+Utils.deallocate = function(scene) {
+
+	for (var i = 0; i < 10; i++) {
+	    try {
+	        if (scene) {
+	            // TODO: need to dispose of the texture
+	            scene.traverse(function(obj) {
+	                // console.log(obj);
+	                scene.remove(obj);
+
+	                if (obj.geometry) {
+	                    // console.log("dispose geometry");
+	                    obj.geometry.dispose();
+	                }
+
+	                if (obj.material) {
+	                    // console.log("dispose material");
+	                    // console.log(obj.material.texture);
+	                    if (obj.material.materials) {
+	                        _.forEach(obj.material.materials, function(material) {
+	                            material.dispose();
+	                        });
+	                    } else {
+	                        obj.material.dispose();
+	                    }
+	                }
+
+	                // dispose of textures
+	                // TODO: deallocate textures
+	            });
+	        }
+	    } catch (e) {
+	        // not proud of this, but there are problems with traversing the scene and disposing of it the same way
+	    }
+	}
+
+}

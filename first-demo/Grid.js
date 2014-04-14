@@ -19,7 +19,7 @@ var Grid = Class.extend({
         // information about what's being selected
         this.highlightedTiles = null;
         this.currentMouseOverTile = null;
-        this.currentSelectedUnits = [];
+        this.currentSelectedUnits = {};
         this.currentSelectedUnits[GameInfo.myTeamId] = [];
 
         // listeners and state
@@ -279,24 +279,11 @@ var Grid = Class.extend({
     },
 
     onGameStart: function() {
-        if (this.getCurrentSelectedUnits().length > 0) {
-            var groupUnits = this.getCurrentSelectedUnits();
-
-            for (var i = 0; i < groupUnits.length; i++) {
-                groupUnits[i].deselect();
-                // deselect tiles if there were any
-                groupUnits[i].highlightedTiles.forEach(function(tile) {
-                    tile.reset();
-                });
-            }
-            this.currentSelectedUnits[GameInfo.myTeamId].length = 0;
+        if (this.getMyTeamCharacters().length > 0) {
+            // focus camera on start position
+            this.controls.focusOnPosition(this.getMyTeamCharacters()[0].mesh.position);
+            this.getMyTeamCharacters()[0].onSelect();            
         }
-
-        // this.displayMessage(teamJoinMessage);
-
-        // focus camera on start position (TODO: hardcoded)
-        this.controls.focusOnPosition(this.getMyTeamCharacters()[0].mesh.position);
-        this.getMyTeamCharacters()[0].onSelect();
     },
 
     onGameFinish: function() {
@@ -942,42 +929,7 @@ var Grid = Class.extend({
 
     destroy: function() {
         console.log("Game destroy");
-
-        var scope = this;
-
-        for (var i = 0; i < 10; i++) {
-            try {
-                if (this.scene) {
-                    // TODO: need to dispose of the texture
-                    this.scene.traverse(function(obj) {
-                        // console.log(obj);
-                        scope.scene.remove(obj);
-
-                        if (obj.geometry) {
-                            // console.log("dispose geometry");
-                            obj.geometry.dispose();
-                        }
-
-                        if (obj.material) {
-                            // console.log("dispose material");
-                            // console.log(obj.material.texture);
-                            if (obj.material.materials) {
-                                _.forEach(obj.material.materials, function(material) {
-                                    material.dispose();
-                                });
-                            } else {
-                                obj.material.dispose();
-                            }
-                        }
-
-                        // dispose of textures
-                        // TODO: deallocate textures
-                    });
-                }
-            } catch (e) {
-                // not proud of this, but there are problems with traversing the scene and disposing of it the same way
-            }
-        }
-
+        this.onGameFinish();
+        Utils.deallocate(this.scene);
     }
 });
