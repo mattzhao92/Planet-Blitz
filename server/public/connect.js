@@ -277,6 +277,7 @@ function renderGame() {
   var app = new App("#WebGL-output");
   var MAPGAME = app;
   game = app;
+
   $('#WebGL-output').hide();
   $('#Stats-output').hide();  
   $('#WebGL-output').wrap('<div id="game-gui"></div>');

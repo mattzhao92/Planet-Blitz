@@ -919,5 +919,9 @@ var Grid = Class.extend({
 
     enableMouseMoveListener: function() {
         this.mouseMoveListenerActive = true;
+    },
+
+    destroy: function() {
+        console.log("Game destroy");
     }
 });

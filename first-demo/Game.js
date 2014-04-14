@@ -183,6 +183,10 @@ var App = Class.extend({
 
     getWorld: function() {
         return this.world;
+    },
+
+    destroy: function() {
+        this.world.destroy();
     }
 });
 
