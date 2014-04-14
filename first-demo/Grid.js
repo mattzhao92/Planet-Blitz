@@ -450,26 +450,6 @@ var Grid = Class.extend({
         return degreesToRotate;
     },
 
-
-    getCameraDegreesToRotate: function() {
-        switch (GameInfo.myTeamId) {
-            case 0:
-                degreesToRotate = Math.PI;
-                break;
-            case 1:
-                degreesToRotate = 0;
-                break;
-            case 2:
-                degreesToRotate = 3 * Math.PI / 2;
-                break;
-            case 3:
-                degreesToRotate = Math.PI / 2;
-                break;
-        }
-
-        return degreesToRotate;
-    },
-
     getCharacterById: function(team, id) {
         var characters = this.getCharacters();
         // search through characters
