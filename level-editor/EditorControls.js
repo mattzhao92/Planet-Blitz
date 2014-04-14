@@ -898,7 +898,7 @@ var EditorModel = Class.extend({
 				scope.map_tileSize = mapJson.board.tileSize;
 
 
-				console.log(scope.map_width +" "+scope.map_height +" "+scope.map_tileSize);
+				//console.log(scope.map_width +" "+scope.map_height +" "+scope.map_tileSize);
 				scope.onBoardSizeChange(scope.map_width, scope.map_height, scope.map_tileSize, true);
 
 				var tiles = mapJson.tiles;
