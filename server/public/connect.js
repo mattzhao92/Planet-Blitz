@@ -1,8 +1,12 @@
 var menuElements = ["#debugBtn", "#playBtn", "#helpBtn", "#blitzTitle"];
+var CURRENT_MENU = null;
 
 function showBackground() {
   console.log("Entering game menu");
-  var app = new MenuBackground("#background-3d");
+
+  var menu = new MenuBackground("#background-3d");
+  CURRENT_MENU = menu;
+
   var elem = document.getElementById("background-3d");
 
   var menuButtons = ["#debugBtn", "#playBtn", "#helpBtn"];
@@ -33,17 +37,20 @@ function applyToMenuElems(func) {
 function showMenu() {
   applyToMenuElems(function(elem) {
     $(elem).show();
-  })
+  });
 }
 
 function hideMenu() {
   applyToMenuElems(function(elem) {
     $(elem).hide();
-  })
+  });
 }
 
 function destroyBackground() {
-  // console.log("Exiting game menu");
+  console.log("Exiting game menu");
+  if (CURRENT_MENU) {
+    CURRENT_MENU.destroy();
+  }
 }
 
 // When not passing any argument, it automatically connects to the server

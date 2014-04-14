@@ -140,7 +140,6 @@ var MenuBackground = Class.extend({
 	    this.renderer.render(this.scene, this.camera);
 	},
 
-
 	onWindowResize: function() {
 
 	    this.camera.aspect = window.innerWidth / window.innerHeight;
@@ -148,8 +147,11 @@ var MenuBackground = Class.extend({
 
 	    this.renderer.setSize(window.innerWidth, window.innerHeight);
 
-	    // adjust camera controls
-	    // this.controls.handleResize();
+	    // could technically controls.resize here
+	},
+
+	destroy: function() {
+		Utils.deallocate(this.scene);
 	}
 
 });

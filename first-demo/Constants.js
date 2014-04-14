@@ -53,7 +53,7 @@ function Utils() {
 
 Utils.deallocate = function(scene) {
 
-	for (var i = 0; i < 10; i++) {
+	for (var i = 0; i < 8; i++) {
 	    try {
 	        if (scene) {
 	            // TODO: need to dispose of the texture
