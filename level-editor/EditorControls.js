@@ -29,7 +29,7 @@ var EditorModel = Class.extend({
 		this.current_obstacle_prototype = null;
 		this.current_powerup_prototype = null;
 		this.isShiftDown = false;
-		this.currentSelectedObstacle = "Rock";
+		this.currentSelectedObstacle = "rock";
 		this.currentSelectedPowerUp = "PowerUp";
 		this.currentVirtualObjectType = "VirtualUnit"; // Other types are VirtualObstacle, VirtualPowerHouse
 
@@ -236,16 +236,23 @@ var EditorModel = Class.extend({
 				scope.exportJson();
 			}
 		};
-
 		var exportBtn = this.gui.add(exportCtl, 'onChange').name("Export to JSON");
+
+		var importCtl = {
+			onChange: function() {
+				scope.importJson();
+			}
+		};
+		var importBtn = this.gui.add(importCtl, 'onChange').name("Import JSON");
+
 
 
 		this.onTeamCreation(0);
 		this.onTeamSelection(0);
 
-		this.onObstacleCreation("Rock");
+		this.onObstacleCreation("rock");
 		this.onPowerupCreation("powerup-health");
-
+		this.current_obstacle_prototype = this.obstacle_cards[0].obstacle;
 		this.drawGridSquares(this.map_width, this.map_height, this.map_tileSize);
 	},
 
@@ -321,8 +328,8 @@ var EditorModel = Class.extend({
 		this.scene.add(this.lastground);
 	},
 
-	onBoardSizeChange: function(width, height, tile_size) {
-		if (this.map_width != width || this.map_height != height || tile_size != this.map_tileSize) {
+	onBoardSizeChange: function(width, height, tile_size, removeEverything) {
+		if (this.map_width != width || this.map_height != height || tile_size != this.map_tileSize || removeEverything) {
 			var old_map_tileSize = this.map_tileSize;
 
 			this.map_width = width;
@@ -368,7 +375,7 @@ var EditorModel = Class.extend({
 				var zPos = this.created_units[i].getZPos();
 
 				if (xLeftBoundary < xPos && xPos < xRightBoundary &&
-					zLeftBoundary < zPos && zPos < zRightBoundary) {
+					zLeftBoundary < zPos && zPos < zRightBoundary && !removeEverything) {
 					this.created_units[i].setUnitSize(this.map_tileSize);
 					new_units.push(this.created_units[i]);
 					var unit_mesh = this.created_units[i].getMesh();
@@ -393,7 +400,7 @@ var EditorModel = Class.extend({
 				var zPos = this.created_obstacles[i].getZPos();
 
 				if (xLeftBoundary < xPos && xPos < xRightBoundary &&
-					zLeftBoundary < zPos && zPos < zRightBoundary) {
+					zLeftBoundary < zPos && zPos < zRightBoundary && !removeEverything) {
 					this.created_obstacles[i].setSize(this.map_tileSize);
 					new_obstacles.push(this.created_obstacles[i]);
 					var obstacle_mesh = this.created_obstacles[i].getMesh();
@@ -415,7 +422,7 @@ var EditorModel = Class.extend({
 				var zPos = this.created_powerups[i].getZPos();
 
 				if (xLeftBoundary < xPos && xPos < xRightBoundary &&
-					zLeftBoundary < zPos && zPos < zRightBoundary) {
+					zLeftBoundary < zPos && zPos < zRightBoundary && !removeEverything) {
 					this.created_powerups[i].setSize(this.map_tileSize);
 					new_obstacles.push(this.created_powerups[i]);
 					var obstacle_mesh = this.created_powerups[i].getMesh();
@@ -847,6 +854,93 @@ var EditorModel = Class.extend({
 		});
 		console.log(output);
 		this.download('test.txt', output);
+	},
+
+
+	readBlob: function(opt_startByte, opt_stopByte, callback) {
+
+	    var files = document.getElementById('filechooser').files;
+	    if (!files.length) {
+	      alert('Please select a file!');
+	      return;
+	    }
+
+	    var file = files[0];
+	    var start = parseInt(opt_startByte) || 0;
+	    var stop = parseInt(opt_stopByte) || file.size - 1;
+
+	    var reader = new FileReader();
+
+	    // If we use onloadend, we need to check the readyState.
+	    reader.onloadend = function(evt) {
+	      if (evt.target.readyState == FileReader.DONE) { // DONE == 2
+	      	debugger;
+	        if (callback)
+	        	callback(evt.target.result);
+	      }
+	    };
+
+	    var blob = file.slice(start, stop + 1);
+	    reader.readAsBinaryString(blob);
+  	},
+
+	importJson: function(mapJson) {
+		var scope = this;
+		document.getElementById('filechooser').onchange = function() {
+			scope.readBlob(null, null, function(data) {
+				var mapJson = data;
+
+				mapJson = JSON.parse(JSON.parse(mapJson).obj);
+				console.log(mapJson);
+		
+				scope.map_width  = mapJson.board.width;
+				scope.map_height = mapJson.board.height;
+				scope.map_tileSize = mapJson.board.tileSize;
+
+
+				console.log(scope.map_width +" "+scope.map_height +" "+scope.map_tileSize);
+				scope.onBoardSizeChange(scope.map_width, scope.map_height, scope.map_tileSize, true);
+
+				var tiles = mapJson.tiles;
+				var units = mapJson.units;
+				var obstacles = mapJson.obstacles;
+
+				for (var i = 0; i < units.length; i++) {
+					var unitJson = units[i];
+					var new_unit = scope.current_unit_prototype.fromJson(unitJson);
+					var tile = scope.tilesArray[new_unit.xPos][new_unit.zPos];
+					var unit_mesh = new_unit.getMesh();
+					unit_mesh.position.x = scope.convertXPosToWorldX(new_unit.xPos);
+					unit_mesh.position.z = scope.convertZPosToWorldZ(new_unit.zPos);
+
+					tile.onPlaceUnit(new_unit, function() {
+						scope.scene.add(new_unit.getMesh());
+						scope.created_units.push(new_unit);
+					});
+				}
+
+				for (var i = 0; i < obstacles.length; i++ ) {
+					var objJson = obstacles[i];
+					var new_obj = scope.current_obstacle_prototype.fromJson(objJson);
+					var tile = scope.tilesArray[new_obj.xPos][new_obj.zPos];
+					var obj_mesh = new_obj.getMesh();
+
+					obj_mesh.position.x = scope.convertXPosToWorldX(new_obj.xPos);
+					obj_mesh.position.z = scope.convertZPosToWorldZ(new_obj.zPos);
+
+					tile.onPlaceObstacle(new_obj, function() {
+						scope.scene.add(obj_mesh);
+						scope.created_obstacles.push(new_obj);
+					});
+				}
+
+				// add power-ups
+			});
+
+		}
+
+		document.getElementById('filechooser').click();
+
 	},
 
 	onDocumentKeyUp: function(event) {

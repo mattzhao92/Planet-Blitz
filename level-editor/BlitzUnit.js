@@ -28,7 +28,10 @@ var Unit = Class.extend({
 
     fromJson: function(jsonStr) {
         var jsonObject = JSON.parse(jsonStr);
-        return new Unit(jsonObject.unitType, jsonObject.color, jsonObject.opacity, jsonObject.unitSize, jsonObject.teamId);
+        var new_unit = new Unit(jsonObject.unitType, jsonObject.color, jsonObject.opacity, jsonObject.unitSize, jsonObject.teamId);
+        new_unit.xPos = jsonObject.xPos;
+        new_unit.zPos = jsonObject.zPos;
+        return new_unit;
     },
 
     initBoundBoxAndUnitMesh: function() {

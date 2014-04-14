@@ -23,7 +23,11 @@ var Obstacle = Class.extend({
 
     fromJson: function(jsonStr) {
         var jsonObject = JSON.parse(jsonStr);
-        return new Unit(jsonObject.unitType, jsonObject.color, jsonObject.opacity, jsonObject.unitSize, jsonObject.teamId);
+        console.log(">>>>>>> "+jsonObject.obstacleType);
+        var new_obstacle = new Obstacle(jsonObject.obstacleType, 0.0, jsonObject.obstacleSize);
+        new_obstacle.xPos = jsonObject.xPos;
+        new_obstacle.zPos = jsonObject.zPos;
+        return new_obstacle;
     },
 
     initBoundBoxAndMesh: function() {
