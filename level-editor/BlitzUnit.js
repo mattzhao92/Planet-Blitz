@@ -28,7 +28,10 @@ var Unit = Class.extend({
 
     fromJson: function(jsonStr) {
         var jsonObject = JSON.parse(jsonStr);
-        return new Unit(jsonObject.unitType, jsonObject.color, jsonObject.opacity, jsonObject.unitSize, jsonObject.teamId);
+        var new_unit = new Unit(jsonObject.unitType, jsonObject.color, jsonObject.opacity, jsonObject.unitSize, jsonObject.teamId);
+        new_unit.xPos = jsonObject.xPos;
+        new_unit.zPos = jsonObject.zPos;
+        return new_unit;
     },
 
     initBoundBoxAndUnitMesh: function() {
@@ -112,7 +115,7 @@ var Unit = Class.extend({
     	});
     },
 
-    getUnitMesh: function() {
+    getMesh: function() {
     	return this.box_mesh;
     }, 
 
@@ -125,7 +128,6 @@ var Unit = Class.extend({
         if (opacity == null)
             opacity = 0.0
     	var myclone = new Unit(this.unitType, this.color, opacity, this.unitSize, this.teamId);
-        console.log("clone unit teamid "+this.teamId);
         return myclone;
     }
 

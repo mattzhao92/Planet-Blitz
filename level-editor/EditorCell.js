@@ -100,6 +100,30 @@ var EditorCell = Class.extend({
     },
 
 
+    onRemoveAsset: function(callback) {
+
+        var asset_to_remove = null;
+        var asset_type = "null";
+        if (this.hasCharacter) {
+            asset_to_remove = this.unit;
+            this.unit = null;
+            this.hasCharacter = false;
+            asset_type = "VirtualUnit";
+        } else if (this.hasObstacle) {
+            asset_to_remove = this.obstacle;
+            this.obstacle = null;
+            this.hasObstacle = false;
+            asset_type = "VirtualObstacle";
+        }
+        this.highlight("GREEN");
+
+
+        if (callback)
+            callback(asset_to_remove, asset_type);
+
+    },
+
+
     onPlaceObstacle: function(obstacle, callback) {
         if (this.hasCharacter == false && this.hasObstacle == false) {
             this.highlight('0xffffff');
