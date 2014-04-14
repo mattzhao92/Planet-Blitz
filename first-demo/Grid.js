@@ -38,7 +38,24 @@ var Grid = Class.extend({
             scope.scene.remove(sprite.getRepr());
         });
         this.spriteFactory = new SpriteFactory(this, sceneAddCmd, sceneRemoveCmd);
-        this.reset();
+        
+        this.tiles = new THREE.Object3D();
+        this.tilesArray = null;
+
+        // create grid tiles
+        this.loadGround(this.mapJson);
+        this.drawGridSquares(this.mapJson);
+
+        // initialize characters
+        this.setupCharacters(this.mapJson);
+        this.setupObstacles(this.mapJson);
+
+        this.resetInProgress = false;
+        this.camera.position.x = 0;
+        this.camera.position.y = 600;
+        this.camera.position.z = 400;
+
+        this.controls.reset();
 
         // nonessentials
         this.setupMouseMoveListener();
@@ -902,25 +919,5 @@ var Grid = Class.extend({
 
     enableMouseMoveListener: function() {
         this.mouseMoveListenerActive = true;
-    },
-
-    reset: function() {
-        this.tiles = new THREE.Object3D();
-        this.tilesArray = null;
-
-        // create grid tiles
-        this.loadGround(this.mapJson);
-        this.drawGridSquares(this.mapJson);
-
-        // initialize characters
-        this.setupCharacters(this.mapJson);
-        this.setupObstacles(this.mapJson);
-
-        this.resetInProgress = false;
-        this.camera.position.x = 0;
-        this.camera.position.y = 600;
-        this.camera.position.z = 400;
-
-        this.controls.reset();
-    },
+    }
 });

@@ -161,12 +161,10 @@ var App = Class.extend({
         this.scoreBoard = scoreBoard;
     },
 
-
     // scores is expected to be a list of jsonObjects [{name: 'matt', score: 5}, ..]
     updateScoreBoard: function(listOfScores) {
         this.scoreBoard.setText(listOfScores);
     },
-
 
     displayMessage: function(msg) {
         this.gameConsole.append(msg);
@@ -185,12 +183,6 @@ var App = Class.extend({
 
     getWorld: function() {
         return this.world;
-    },
-
-    reset: function() {
-        // remove all hotkey bindings
-        Hotkeys.disableHotkeys();
     }
-
 });
 
