@@ -19,7 +19,7 @@ var Grid = Class.extend({
         // information about what's being selected
         this.highlightedTiles = null;
         this.currentMouseOverTile = null;
-        this.currentSelectedUnits = [];
+        this.currentSelectedUnits = {};
         this.currentSelectedUnits[GameInfo.myTeamId] = [];
 
         // listeners and state
@@ -38,7 +38,24 @@ var Grid = Class.extend({
             scope.scene.remove(sprite.getRepr());
         });
         this.spriteFactory = new SpriteFactory(this, sceneAddCmd, sceneRemoveCmd);
-        this.reset();
+        
+        this.tiles = new THREE.Object3D();
+        this.tilesArray = null;
+
+        // create grid tiles
+        this.loadGround(this.mapJson);
+        this.drawGridSquares(this.mapJson);
+
+        // initialize characters
+        this.setupCharacters(this.mapJson);
+        this.setupObstacles(this.mapJson);
+
+        this.resetInProgress = false;
+        this.camera.position.x = 0;
+        this.camera.position.y = 600;
+        this.camera.position.z = 400;
+
+        this.controls.reset();
 
         // nonessentials
         this.setupMouseMoveListener();
@@ -262,31 +279,25 @@ var Grid = Class.extend({
     },
 
     onGameStart: function() {
-        if (this.getCurrentSelectedUnits().length > 0) {
-            var groupUnits = this.getCurrentSelectedUnits();
-
-            for (var i = 0; i < groupUnits.length; i++) {
-                groupUnits[i].deselect();
-                // deselect tiles if there were any
-                groupUnits[i].highlightedTiles.forEach(function(tile) {
-                    tile.reset();
-                });
-            }
-            this.currentSelectedUnits[GameInfo.myTeamId].length = 0;
+        if (this.getMyTeamCharacters().length > 0) {
+            // focus camera on start position
+            this.controls.focusOnPosition(this.getMyTeamCharacters()[0].mesh.position);
+            this.getMyTeamCharacters()[0].onSelect();            
         }
-
-        // this.displayMessage(teamJoinMessage);
-
-        // focus camera on start position (TODO: hardcoded)
-        this.controls.focusOnPosition(this.getMyTeamCharacters()[0].mesh.position);
-        this.getMyTeamCharacters()[0].onSelect();
     },
 
     onGameFinish: function() {
-        console.log("Game finish called - exiting pointerlock");
+        console.log("onGameFinish");
+
+        // remove all existing mouse listeners
+        window.removeEventListener('mousemove', this.mouseMoveListener, false);
+        window.removeEventListener('mouseup', this.mouseUpListener, false);
+        window.removeEventListener('mousedown', this.mouseDownListener, false);
 
         // reset the pointerlock
         this.controls.releasePointerLock();
+
+        // TODO: unbind mouse listeners from pointerlock
     },
 
     getMyTeamCharacters: function() {
@@ -439,26 +450,6 @@ var Grid = Class.extend({
         return degreesToRotate;
     },
 
-
-    getCameraDegreesToRotate: function() {
-        switch (GameInfo.myTeamId) {
-            case 0:
-                degreesToRotate = Math.PI;
-                break;
-            case 1:
-                degreesToRotate = 0;
-                break;
-            case 2:
-                degreesToRotate = 3 * Math.PI / 2;
-                break;
-            case 3:
-                degreesToRotate = Math.PI / 2;
-                break;
-        }
-
-        return degreesToRotate;
-    },
-
     getCharacterById: function(team, id) {
         var characters = this.getCharacters();
         // search through characters
@@ -596,16 +587,25 @@ var Grid = Class.extend({
     setupMouseMoveListener: function() {
         var scope = this;
 
-        window.addEventListener('mousemove', function(event) {
+        var listener = function(event) {
             scope.onMouseMove(event);
-        }, false);
+        }
+
+        window.addEventListener('mousemove', listener, false);
+        this.mouseMoveListener = listener;
     },
 
     setupMouseUpListener: function() {
         var scope = this;
-        window.addEventListener('mouseup', function(event) {
-            scope.onMouseUp(event);
-        }, false);
+
+        var listener = function(event) {
+            if (scope.mouseDownListenerActive) {
+                scope.onMouseUp(event);
+            }
+        }
+
+        window.addEventListener('mouseup', listener, false);
+        this.mouseUpListener = listener;
     },
 
     onMouseMove: function(event) {
@@ -650,11 +650,14 @@ var Grid = Class.extend({
     setupMouseDownListener: function() {
         var scope = this;
 
-        window.addEventListener('mousedown', function(event) {
+        var listener = function(event) {
             if (scope.mouseDownListenerActive) {
                 scope.onMouseDown(event);
             }
-        }, false);
+        }
+
+        window.addEventListener('mousedown', listener, false);
+        this.mouseDownListener = listener;
     },
 
     handleShootEvent: function() {
@@ -904,23 +907,9 @@ var Grid = Class.extend({
         this.mouseMoveListenerActive = true;
     },
 
-    reset: function() {
-        this.tiles = new THREE.Object3D();
-        this.tilesArray = null;
-
-        // create grid tiles
-        this.loadGround(this.mapJson);
-        this.drawGridSquares(this.mapJson);
-
-        // initialize characters
-        this.setupCharacters(this.mapJson);
-        this.setupObstacles(this.mapJson);
-
-        this.resetInProgress = false;
-        this.camera.position.x = 0;
-        this.camera.position.y = 600;
-        this.camera.position.z = 400;
-
-        this.controls.reset();
-    },
+    destroy: function() {
+        console.log("Game destroy");
+        this.onGameFinish();
+        Utils.deallocate(this.scene);
+    }
 });

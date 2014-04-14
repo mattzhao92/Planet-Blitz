@@ -60,6 +60,11 @@ function restartLoading() {
 }
 
 function mainMenu() {
+  // destory game if there was one
+  if (game) {
+    game.destroy();
+  }
+
   // disable hotkeys
   Hotkeys.disableHotkeys();
 
