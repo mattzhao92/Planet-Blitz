@@ -132,9 +132,7 @@ io.sockets.on('connection', function(socket) {
       socket.set('inGame', newGame, function() {
         gameLog('user ' + username + ' create game id ' + newGame.gameId);
         socket.emit(Message.GAME, newGame.getPlayerInfo());
-        info = {};
-        info[Message.ROOMS] = getAllGameInfo();
-        io.sockets.emit(Message.LISTGAME, info);
+        updateClientsGameLists();
       });
     });
   });
@@ -155,7 +153,7 @@ io.sockets.on('connection', function(socket) {
           return; 
         }
         gameToJoin.addPlayer(socket, username);
-
+        updateClientsGameLists();
         var username = joinRequest[Message.USERNAME];
         socket.set('username', username, function() {
           gameLog('User ' + username + ' game ' + gameId);
@@ -209,6 +207,7 @@ io.sockets.on('connection', function(socket) {
       game.numReadyPlayers++;
       if (game.isReady()) {
         game.startGame(socket);
+        updateClientsGameLists();
       }
     });
   });
@@ -365,11 +364,8 @@ io.sockets.on('connection', function(socket) {
 
      if (game.numPlayers == 0) {
         delete emptyGames[game.gameId];
-        info = {};
-        info[Message.ROOMS] = getAllGameInfo();
-        io.sockets.emit(Message.LISTGAME, info);
-        return;
       }
+      updateClientsGameLists();
     });
   });
 
@@ -392,9 +388,7 @@ io.sockets.on('connection', function(socket) {
       }
       if (game.numPlayers == 0) {
         delete emptyGames[game.gameId];
-        info = {};
-        info[Message.ROOMS] = getAllGameInfo();
-        io.sockets.emit(Message.LISTGAME, info);
+        updateClientsGameLists();
         return;
       }
     });
@@ -745,4 +739,10 @@ function gameLog(log) {
   if (debugMode) {
     console.log(log);
   }
+}
+
+function updateClientsGameLists() {
+  info = {};
+  info[Message.ROOMS] = getAllGameInfo();
+  io.sockets.emit(Message.LISTGAME, info);
 }
