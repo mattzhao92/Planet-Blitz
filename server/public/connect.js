@@ -331,12 +331,16 @@ function sendListGameMsg() {
 }
 
 function sendCreateMsg(gamename, username, map) {
-  GameInfo.username = username;
-  var createMsg = {};
-  createMsg[Message.GAMENAME] = gamename;
-  createMsg[Message.MAP] = map;
-  createMsg[Message.USERNAME] = username;
-  socket.emit(Message.CREATEGAME, createMsg);
+  // Prevent retransmission due to network delay.
+  if (!GameInfo.isLoading && !GameInfo.isStart) {
+    GameInfo.username = username;
+    var createMsg = {};
+    createMsg[Message.GAMENAME] = gamename;
+    createMsg[Message.MAP] = map;
+    createMsg[Message.USERNAME] = username;
+    socket.emit(Message.CREATEGAME, createMsg);
+  }
+
   // alert('creat req');
 }
 
@@ -350,11 +354,14 @@ function sendSingleModeMsg(map) {
 }
 
 function sendJoinMsg(gameId, username) {
-  GameInfo.username = username;
-  var joinMsg = {};
-  joinMsg[Message.GAME] = gameId;
-  joinMsg[Message.USERNAME] = username;
-  socket.emit(Message.JOIN, joinMsg);
+  if (!GameInfo.isLoading && !GameInfo.isStart) {
+    GameInfo.username = username;
+    var joinMsg = {};
+    joinMsg[Message.GAME] = gameId;
+    joinMsg[Message.USERNAME] = username;
+    socket.emit(Message.JOIN, joinMsg);
+  }
+
 }
 
 function sendListMapMsg() {

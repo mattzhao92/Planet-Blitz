@@ -127,7 +127,6 @@ function showRestartDialog(message, additionalMsg, score) {
       "Play again": function() {
         GameInfo.inPostGame = false;
         $(this).dialog("close");
-        game.reset();
         sendRestartMsg();
         restartLoading();
       },
