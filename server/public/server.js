@@ -232,8 +232,6 @@ function createGameStep() {
       if (e.keyCode == $.ui.keyCode.ENTER) {
         $( "#Input-dialog" ).off("keypress");
         $("#unameBtn").click();
-        
-        
       }
   });
 }
@@ -283,27 +281,28 @@ function createSingleGame() {
         
       }
   });
+  
 }
 
 function listAvailableGames(games) {
   GameInfo.isListingGames = true;
-  var content = '<div class="rain" style="margin:0"><div class="border start">';
-  content += '<form><label style="text-align:center">Click on a game room to join or create your own</label>';
-  content += '<table><tr><td style="padding-left:32">Room</td><td style="width:140">Map</td><td style="padding-right:40px">Players</td><td>Status</td></tr>';
+  var content = '<div class="rain" style="margin:0; width:600px;"><div class="border start" style="width:100%">';
+  content += '<form style="width:600px"><label style="text-align:center">Click on a game room to join or create your own</label>';
+  content += '<table><tr><td style="min-width:150px">Room</td><td style="min-width:150px">Map</td><td style="min-width:150px">Players</td><td style="min-width:150px">Status</td></tr>';
   for (var t = 0; t < games.length; t++) {
     var game = games[t];
     var isPlaying = game[Info.gameStart] ? 'Playing' : 'Waiting';
     if (game[Info.isFull]) {
-      content += '<tr class="list-game"><td class="open-game" style="padding-left:32">' + game[Info.gameName] + '</td><td>' + game[Info.mapName] + '</td><td style="padding-right:40px">' + game[Info.player] +'</td>';
+      content += '<tr class="list-game"><td class="open-game">' + game[Info.gameName] + '</td><td>' + game[Info.mapName] + '</td><td>' + game[Info.player] +'</td>';
     } else {
-      content += '<tr class="list-game" onClick="joinGame(' + game[Info.gameId] + ')"><td class="open-game" style="padding-left:32">' + game[Info.gameName] + '</td><td>' + game[Info.mapName] + '</td><td style="padding-right:40px">' + game[Info.player] +'</td>';
+      content += '<tr class="list-game" onClick="joinGame(' + game[Info.gameId] + ')"><td class="open-game">' + game[Info.gameName] + '</td><td>' + game[Info.mapName] + '</td><td>' + game[Info.player] +'</td>';
     }
     
     
     content += '<td>' + isPlaying + '</td></tr>';
   }
   content += '</table>';
-  content += '<input type="button" value="Create Game" style="margin: 20 23 10 29" id="createGameBtn"/><input value="Quit" type="button" id="quitBtn" style="margin: 0 23 14 29"/>';
+  content += '<input type="button" value="Create Game" style="margin: 20 22 10 42" id="createGameBtn"/><input value="Quit" type="button" id="quitBtn" style="margin: 0 23 14 42 "/>';
   content += '</form></div></div>';
   // game.getWorld().disableHotKeys();
   $("#Input-dialog").html(content).dialog(
@@ -326,6 +325,7 @@ function listAvailableGames(games) {
     GameInfo.isListingGames = false;
     $("#Input-dialog").dialog("close");
   });
+  centerElement($(".ui-widget.name-dialog"));
 }
 
 $(document).ready(function() { 
