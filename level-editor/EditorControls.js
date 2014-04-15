@@ -75,6 +75,18 @@ var EditorModel = Class.extend({
 			scope.onDocumentKeyUp(event);
 		}, false);
 
+		this.setupControls();
+	},
+
+
+	removeDat: function (gui, parent) {
+		var domEle = gui.domElement;
+		domEle.parentNode.removeChild(domEle);
+	},
+
+
+	setupControls: function(teams) {
+		if (this.gui) this.removeDat(this.gui);
 		this.gui = new dat.GUI();
 
 		var parameters = {
@@ -159,8 +171,22 @@ var EditorModel = Class.extend({
 		powerupFolder.open();
 
 		var selectTeamFolder = this.gui.addFolder('Add unit / team');
-		var listOfTeams = ['Team0'];
+		var listOfTeams = [];
 		var TeamCount = 0;
+
+		if (teams) {
+			for (var i = 0;  i < teams.length; i++) {
+				var team = teams[i];
+				if (team.teamId > TeamCount)
+					TeamCount = team.teamId;
+				listOfTeams.push("Team" + team.teamId);
+				this.onTeamCreation(team.teamId, team.color);
+			}
+		} else {
+			listOfTeams.push('Team0');
+			this.onTeamCreation(0);
+		}
+
 
 		var selectTeamGUI = selectTeamFolder.add(parameters, 'Team', listOfTeams);
 		var scope = this;
@@ -245,48 +271,12 @@ var EditorModel = Class.extend({
 		};
 		var importBtn = this.gui.add(importCtl, 'onChange').name("Import JSON");
 
-
-
-		this.onTeamCreation(0);
 		this.onTeamSelection(0);
 
 		this.onObstacleCreation("rock");
 		this.onPowerupCreation("powerup-health");
 		this.current_obstacle_prototype = this.obstacle_cards[0].obstacle;
 		this.drawGridSquares(this.map_width, this.map_height, this.map_tileSize);
-	},
-
-	pickMapJson: function() {
-		var newElem = document.createElement('input');
-		newElem.setAttribute("id", "files");
-		newElem.setAttribute("type", "file");
-		newElem.setAttribute("name", "files[]");
-
-		//document.createElement('files')`.addEventListener('change', handleFileSelect, false);
-		function handleFileSelect(evt) {
-			var files = evt.target.files; // FileList object
-
-			// Loop through the FileList and render image files as thumbnails.
-			for (var i = 0, f; f = files[i]; i++) {
-
-				var reader = new FileReader();
-
-				// Closure to capture the file information.
-				reader.onload = (function(theFile) {
-					return function(e) {
-						// Render thumbnail.
-						console.log(e.target.result);
-					};
-				})(f);
-				// Read in the image file as a data URL.
-				reader.readAsText(f);
-			}
-		}
-
-		newElem.addEventListener('change', handleFileSelect, false);
-		console.log(newElem);
-		debugger;
-		newElem.onchange.apply(newElem);
 	},
 
 	getTileSize: function() {
@@ -673,14 +663,17 @@ var EditorModel = Class.extend({
 		this.redrawPowerUpCards();
 	},
 
-	onTeamCreation: function(teamId) {
+	onTeamCreation: function(teamId, color) {
 		//adding default units to the unitcards_in_teams
 		var new_unit_cards = [];
 		var unitcardSize = 80;
 
-		var soldier_unit_prototype = new Unit('soldier', this.currentSelectedHexColor, 0.0, this.map_tileSize, teamId);
-		var artillery_unit_prototype = new Unit('artillery', this.currentSelectedHexColor, 0.0, this.map_tileSize, teamId);
-		var flamethrower_unit_prototype = new Unit('flamethrower', this.currentSelectedHexColor, 0.0, this.map_tileSize, teamId);
+		if (!color) {
+			color = this.currentSelectedHexColor;
+		}
+		var soldier_unit_prototype = new Unit('soldier', color, 0.0, this.map_tileSize, teamId);
+		var artillery_unit_prototype = new Unit('artillery', color, 0.0, this.map_tileSize, teamId);
+		var flamethrower_unit_prototype = new Unit('flamethrower', color, 0.0, this.map_tileSize, teamId);
 		var new_unit_card = new UnitCard(soldier_unit_prototype, unitcardSize, 'soldier-regular.png');
 		var new_unit_card2 = new UnitCard(artillery_unit_prototype, unitcardSize, 'soldier-artillery.png');
 		var new_unit_card3 = new UnitCard(flamethrower_unit_prototype, unitcardSize, 'soldier-flamethrower.png');
@@ -874,7 +867,6 @@ var EditorModel = Class.extend({
 	    // If we use onloadend, we need to check the readyState.
 	    reader.onloadend = function(evt) {
 	      if (evt.target.readyState == FileReader.DONE) { // DONE == 2
-	      	debugger;
 	        if (callback)
 	        	callback(evt.target.result);
 	      }
@@ -905,6 +897,8 @@ var EditorModel = Class.extend({
 				var units = mapJson.units;
 				var obstacles = mapJson.obstacles;
 
+				var teams = [];
+
 				for (var i = 0; i < units.length; i++) {
 					var unitJson = units[i];
 					var new_unit = scope.current_unit_prototype.fromJson(unitJson);
@@ -917,7 +911,22 @@ var EditorModel = Class.extend({
 						scope.scene.add(new_unit.getMesh());
 						scope.created_units.push(new_unit);
 					});
+
+					var teamExist = false;
+
+					for (var j = 0; j < teams.length; j++) {
+						var currTeam = teams[j];
+						if (currTeam.teamId == new_unit.teamId) {
+							teamExist = true;
+						}
+					}
+
+					if (!teamExist) {
+						teams.push({'teamId' : new_unit.teamId, 'color' : new_unit.color});
+					}
 				}
+
+				scope.setupControls(teams);
 
 				for (var i = 0; i < obstacles.length; i++ ) {
 					var objJson = obstacles[i];

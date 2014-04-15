@@ -23,7 +23,6 @@ var Obstacle = Class.extend({
 
     fromJson: function(jsonStr) {
         var jsonObject = JSON.parse(jsonStr);
-        console.log(">>>>>>> "+jsonObject.obstacleType);
         var new_obstacle = new Obstacle(jsonObject.obstacleType, 0.0, jsonObject.obstacleSize);
         new_obstacle.xPos = jsonObject.xPos;
         new_obstacle.zPos = jsonObject.zPos;
