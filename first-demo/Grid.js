@@ -213,7 +213,8 @@ var Grid = Class.extend({
         var obstacles = mapJson.obstacles;
         for (var i = 0; i < obstacles.length; i++) {
             var obj = JSON.parse(obstacles[i]);
-            var obstacle = this.spriteFactory.createObstacle('rock');
+
+            var obstacle = this.spriteFactory.createObstacle(obj.obstacleType);
 
             var objMesh = obstacle.getRepr();
             objMesh.position.x = this.convertXPosToWorldX(obj.xPos);

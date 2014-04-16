@@ -131,7 +131,7 @@ var EditorModel = Class.extend({
 
 		// Obstacle Folder, select an obstacle
 		var obstacleFolder = this.gui.addFolder('Add obstacle');
-		var listOfObstacles = ['Rock'];
+		var listOfObstacles = ['rock', 'crate'];
 
 		var selectObstacleGUI = obstacleFolder.add(parameters, 'Obstacle', listOfObstacles);
 		var scope = this;
@@ -274,6 +274,7 @@ var EditorModel = Class.extend({
 		this.onTeamSelection(0);
 
 		this.onObstacleCreation("rock");
+		this.onObstacleCreation("crate");
 		this.onPowerupCreation("powerup-health");
 		this.current_obstacle_prototype = this.obstacle_cards[0].obstacle;
 		this.drawGridSquares(this.map_width, this.map_height, this.map_tileSize);
@@ -650,6 +651,17 @@ var EditorModel = Class.extend({
 	onObstacleSelection: function(obstacle) {
 		console.log("onObstacleSelection " + obstacle);
 		this.current_obstacle_prototype = this.obstacle_cards[0].obstacle; //TODO : use an actual index
+
+		for (var i = 0; i < this.obstacle_cards.length; i++) {
+			var card = this.obstacle_cards[i];
+			if (card.obstacle.obstacleType == obstacle) {
+				console.log("onObstacleSelection "+i);
+				this.current_obstacle_prototype = card.obstacle;
+				break;
+			}
+		}
+		this.virtualObstacle = this.current_obstacle_prototype;
+		this.virtualObstacleMesh = this.virtualObstacle.getMesh();
 		this.updateVirtualObject("VirtualObstacle");
 		this.currentVirtualObjectType = "VirtualObstacle";
 		this.redrawObstacleCards();
@@ -688,7 +700,21 @@ var EditorModel = Class.extend({
 		console.log('onObstacleCreation ' + obstacleName);
 		var new_obstacle_prototype = new Obstacle(obstacleName, 0.0, this.map_tileSize);
 		var obstacleCardSize = 80;
-		var new_obstacle_card = new ObstacleCard(new_obstacle_prototype, 80, "rock.png");
+
+		var path_to_card_image = "rock.png";
+
+		switch (obstacleName) {
+			case "rock":
+				path_to_card_image = "rock.png";
+				break;
+			case "crate":
+				path_to_card_image = "crate.png";
+				break;
+			default:
+				break;
+		}
+
+		var new_obstacle_card = new ObstacleCard(new_obstacle_prototype, 80, path_to_card_image);
 		this.obstacle_cards.push(new_obstacle_card);
 	},
 
@@ -926,8 +952,6 @@ var EditorModel = Class.extend({
 					}
 				}
 
-				scope.setupControls(teams);
-
 				for (var i = 0; i < obstacles.length; i++ ) {
 					var objJson = obstacles[i];
 					var new_obj = scope.current_obstacle_prototype.fromJson(objJson);
@@ -943,6 +967,9 @@ var EditorModel = Class.extend({
 					});
 				}
 
+				scope.setupControls(teams);
+
+	
 				// add power-ups
 			});
 
