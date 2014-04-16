@@ -128,6 +128,11 @@ var App = Class.extend({
         var delta = this.clock.getDelta();
         this.controls.update(delta);
 
+        // bound time frame
+        if (delta > 0.25) {
+            sendSyncMsg();
+        }
+
         PubSub.publish(Constants.TOPIC_DELTA, delta);
         
         // main game render loop

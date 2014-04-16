@@ -372,3 +372,7 @@ function updateLoadingPlayerState(state) {
   $('#Loading-output').html('Waiting...</br>Player: ' + state);
 }
 
+function sendSyncMsg() {
+  socket.emit(Message.SYNC);
+}
+
