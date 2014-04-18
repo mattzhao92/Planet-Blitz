@@ -70,7 +70,6 @@ var Character = Sprite.extend({
         this.lastRoadMap = [];
 
         this.breakUpdateHere = false;
-        this.lockMovement = false;
         this.motionInProgress = false;
     },
 
@@ -285,7 +284,6 @@ var Character = Sprite.extend({
 
     emptyMotionQueue: function() {
         this.motionQueue.length = 0;
-        this.lockMovement = false;
         this.motionInProgress = false;
     },
 
