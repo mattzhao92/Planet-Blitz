@@ -24,8 +24,6 @@ var Character = Sprite.extend({
         this.xPos = 0;
         this.zPos = 0;
 
-        this.highlightedTiles = [];
-
         this.hasPendingMove = false;
         this.destX = 0;
         this.destZ = 0;
@@ -40,7 +38,6 @@ var Character = Sprite.extend({
         this.motionQueue = [];
 
         this.addUnitSelector();
-        this.isCoolDown = false;
 
         this.loader = new THREE.JSONLoader();
         this.loadFile("blendermodels/" + args.modelName);
@@ -65,9 +62,6 @@ var Character = Sprite.extend({
         this.healthBar = this.spriteFactory.createHealthBar(this.characterSize, this.getRepr().position, barAspectRatio, this.maximumHealth);
         this.addPositionObserver(this.healthBar);
         this.addHealthObserver(this.healthBar);
-
-        this.isCharacterInRoute = false;
-        this.lastRoadMap = [];
 
         this.breakUpdateHere = false;
         this.motionInProgress = false;
@@ -394,11 +388,9 @@ var Character = Sprite.extend({
             this.motionInProcess = true;
             var direction = this.motionQueue.pop();
             if (direction.sentinel == 'start') {
-                this.isCharacterInRoute = true;
                 if (this.team == GameInfo.myTeamId) {}
                 return;
             } else if (direction.sentinel == 'end') {
-                this.isCharacterInRoute = false;
                 if (direction.x == this.xPos && direction.z == this.zPos) {
                     this.hasPendingMove = false;
                 }
