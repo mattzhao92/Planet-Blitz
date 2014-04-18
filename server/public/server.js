@@ -186,22 +186,45 @@ function getUsername(forGameId) {
 }
 
 function showSettings() {
-  var content = '<div class="rain" style="margin:0"><div class="border start">';
-  content += '<form><input type="radio" name="sex" value="male" style="margin: 5px 10px 1px 5px; float:left; width:auto">On<input type="radio" name="sex" value="female" style="margin: 5px 10px 1px 5px; float:left; width:auto">Off';
-  content += '</form></div></div>';
+  var content = '<h2 style="text-align:center">Settings</h2>';
+  // content += '<form>';
+  // content += '<input type="checkbox" id="soundSwitch" name="music" value="music" style="float:left; width:auto">Sound<br>';
+  content += '<table style="width:100%"><tr>';
+  content += '<td><p style="color:white; text-align:center">Sound</p></td>';
+  content += "<td>"; 
+  content += '<div class="onoffswitch">';
+  content += '<input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch" checked>';
+  content += '<label class="onoffswitch-label" for="myonoffswitch">';
+  content += '<div class="onoffswitch-inner"></div>';
+  content += '<div class="onoffswitch-switch"></div>';
+  content += '</label></div></td>';
 
-  $("#Input-dialog").html(content).dialog(
+    
+  $("#Message-dialog").html(content).dialog(
   {
     width: 400, 
-    // height: 400,
+    // height: 300,
     modal: true,
     resizable: false,
-    dialogClass: 'name-dialog'
+    buttons: {
+      "Quit": function() {
+        GameInfo.inPostGame = false;
+        $(this).dialog("close");
+        mainMenu();
+        sendLeaveMsg();
+      }
+    }
   });
-  $(".ui-dialog-titlebar").hide();   
-  $(".ui-widget.name-dialog").css('width', 'auto');
-  $(".ui-widget.name-dialog").css('padding', 0);
-  $("#Input-dialog").css('padding', 0);
+  $('#Message-dialog').css('height', 'auto');
+  $('#Message-dialog').css('overflow', 'visible');
+  $(".gameScore").css("color", "white");
+  $('#soundSwitch').click(function() {
+    if ($('#soundSwitch').is(':checked')) {r
+      alert('You turn on the music!');
+    } else {
+      alert('Music off');
+    }
+  })
 }
 
 
