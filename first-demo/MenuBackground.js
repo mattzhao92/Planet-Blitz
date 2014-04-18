@@ -23,6 +23,8 @@ var MenuBackground = Class.extend({
 		this.setupCamera();
 		this.setupControls();
 
+		this.setupPodium();
+
 		this.addLighting();
 
 
@@ -35,6 +37,11 @@ var MenuBackground = Class.extend({
 
 	},
 
+	setupPodium: function() {
+		this.mesh = new THREE.Object3D();
+		this.loadFile("blendermodels/menu.js", this.mesh);
+		this.scene.add(this.mesh);
+	},
 
 	addLighting: function() {
 	    // // really subtle ambient lighting
@@ -87,22 +94,49 @@ var MenuBackground = Class.extend({
 	    });
 	    var sceneRemoveCmd = new SpriteCmd(function(sprite) {
 	        scope.scene.remove(sprite.getRepr());
-	    });	    // add a character
-	    this.spriteFactory = new SpriteFactory(this, sceneAddCmd, sceneRemoveCmd);
+	    });	
 
-	    var d = new Date();
-	    var numSeconds = d.getSeconds();
+	    // add a character
+	    // this.spriteFactory = new SpriteFactory(this, sceneAddCmd, sceneRemoveCmd);
 
-	    var character;
-	    if (numSeconds % 3 == 0) {
-	    	character = this.spriteFactory.createArtillerySoldier(1, 1);
-	    } else if (numSeconds % 3 == 1) {
-	    	character = this.spriteFactory.createSoldier(1, 1);
-	    } else {
-	    	character = this.spriteFactory.createFlamethrowerSoldier(1, 1);
-	    }
+	    // var d = new Date();
+	    // var numSeconds = d.getSeconds();
 
-	    character.unitSelectorMesh.visible = false;
+	    // var character;
+	    // if (numSeconds % 3 == 0) {
+	    // 	character = this.spriteFactory.createArtillerySoldier(1, 1);
+	    // } else if (numSeconds % 3 == 1) {
+	    // 	character = this.spriteFactory.createSoldier(1, 1);
+	    // } else {
+	    // 	character = this.spriteFactory.createFlamethrowerSoldier(1, 1);
+	    // }
+
+	    // character.unitSelectorMesh.visible = false;
+	},
+
+	loadFile: function(filename, mesh) {
+
+	  var fullFilename = filename;
+	  var myloader = new THREE.JSONLoader();
+	  var scope = this;
+	  myloader.load(fullFilename, function(geometry, materials) {      
+	        var combinedMaterials = new THREE.MeshFaceMaterial(materials);
+	        scope.ext_file_mesh = new THREE.Mesh(geometry, combinedMaterials);
+
+	       // scale to correct width / height / depth
+	        geometry.computeBoundingBox();
+
+	        // use bounding box to scale model correctly to the character size
+	        var boundingBox = geometry.boundingBox;
+	        var width = geometry.boundingBox.max.x - geometry.boundingBox.min.x;
+	        var height = geometry.boundingBox.max.y - geometry.boundingBox.min.y;
+	        var depth = geometry.boundingBox.max.z - geometry.boundingBox.min.z;
+
+	        var ratio = 500 / width;
+	        scope.ext_file_mesh.scale.set(ratio, ratio, ratio);
+	        
+	        mesh.add(scope.ext_file_mesh);
+	  });
 	},
 
 	setupCamera: function() {
