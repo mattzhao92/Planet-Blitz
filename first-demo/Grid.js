@@ -713,6 +713,7 @@ var Grid = Class.extend({
         return charactersInRange;
     },
 
+
     onMouseDoubleClick: function(event) {
         var RIGHT_CLICK = 3;
         var LEFT_CLICK = 1;
@@ -763,11 +764,14 @@ var Grid = Class.extend({
             var characters = this.getCharactersInMeshRange(this.startPosOnGrid.x, this.startPosOnGrid.z, endPosOnGrid.x, endPosOnGrid.z);
             
             if (characters.length > 0 && this.mouseSelectHappened) {
-                for (var i = 0; i < this.currentSelectedUnits[GameInfo.myTeamId].length; i++) {
-                    this.currentSelectedUnits[GameInfo.myTeamId][i].deselect();
-                    i -= 1;
+
+                if (!this.keyCommandDown) {
+                    for (var i = 0; i < this.currentSelectedUnits[GameInfo.myTeamId].length; i++) {
+                        this.currentSelectedUnits[GameInfo.myTeamId][i].deselect();
+                        i -= 1;
+                    }
+                    this.currentSelectedUnits[GameInfo.myTeamId].length = 0;
                 }
-                this.currentSelectedUnits[GameInfo.myTeamId].length = 0;
 
                 for (var i = 0; i < characters.length; i++) {
                 	didSelect = true;
@@ -797,10 +801,8 @@ var Grid = Class.extend({
                 var clickedObject = intersects[0].object.owner;
                
                  if (clickedObject instanceof Character) {
-                    if (this.keyCommandDown)
-                        clickedObject.onSelect(false);
-                    else 
-                        clickedObject.onSelect(true);
+
+                    clickedObject.onSelect(true);
                     return;
            		 }
             } 
