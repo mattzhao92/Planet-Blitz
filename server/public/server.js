@@ -185,6 +185,26 @@ function getUsername(forGameId) {
   });
 }
 
+function showSettings() {
+  var content = '<div class="rain" style="margin:0"><div class="border start">';
+  content += '<form><input type="radio" name="sex" value="male" style="margin: 5px 10px 1px 5px; float:left; width:auto">On<input type="radio" name="sex" value="female" style="margin: 5px 10px 1px 5px; float:left; width:auto">Off';
+  content += '</form></div></div>';
+
+  $("#Input-dialog").html(content).dialog(
+  {
+    width: 400, 
+    // height: 400,
+    modal: true,
+    resizable: false,
+    dialogClass: 'name-dialog'
+  });
+  $(".ui-dialog-titlebar").hide();   
+  $(".ui-widget.name-dialog").css('width', 'auto');
+  $(".ui-widget.name-dialog").css('padding', 0);
+  $("#Input-dialog").css('padding', 0);
+}
+
+
 function createGameStep() {
   var content = '<div class="rain" style="margin:0"><div class="border start">';
   content += '<form><label for="rname" style="margin-left:7">Game room name</label><input id="rname" name="rname"  maxlength="15" type="text" style="margin-left: 25"/>';
@@ -328,8 +348,7 @@ function listAvailableGames(games) {
 }
 
 $(document).ready(function() { 
-  $('#WebGL-output').hide();
-  $('#Stats-output').hide();
+  hideGameHUD();
   $('#Loading-output').hide();
   $('#slide-container').hide();
   $('#leaveBtn').hide();
@@ -338,6 +357,9 @@ $(document).ready(function() {
     sendListGameMsg();
   });
   showBackground();
+  $('#settingBtn').click(function() {
+    showSettings();
+  });
 
   /* Start the game locally */
   $('#debugBtn').click(function() {
@@ -373,5 +395,6 @@ function centerButtons() {
   centerElement($('#blitzTitle'));
   centerElement($('#playBtn'));
   centerElement($('#debugBtn'));
-  centerElement($('#helpBtn'));
+  centerElement($('#settingBtn'));
+  centerElement($('#tutorialBtn'));
 }

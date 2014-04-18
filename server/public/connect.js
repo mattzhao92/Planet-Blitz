@@ -1,4 +1,4 @@
-var menuElements = ["#debugBtn", "#playBtn", "#helpBtn", "#blitzTitle"];
+var menuElements = ["#debugBtn", "#playBtn", "#settingBtn", "#tutorialBtn", "#blitzTitle"];
 var CURRENT_MENU = null;
 
 function showBackground() {
@@ -9,7 +9,7 @@ function showBackground() {
 
   var elem = document.getElementById("background-3d");
 
-  var menuButtons = ["#debugBtn", "#playBtn", "#helpBtn"];
+  var menuButtons = [".btn"];
 
   // bind hover handlers
   for (var i = 0; i < menuButtons.length; i++) {
@@ -65,7 +65,7 @@ socket.on(Message.LISTGAME, function(info) {
     listAvailableGames(info[Message.ROOMS]);
   } else {
     if (GameInfo.isListingGames) {
-      $('#quitBtn').click();
+      $('#quitBtn').listAvailableGames();
       listAvailableGames(info[Message.ROOMS]);
     }
   }

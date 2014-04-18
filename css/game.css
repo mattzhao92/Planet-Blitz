@@ -50,16 +50,20 @@ body {
   opacity: 0.8;
 }
 
-#debugBtn {
+#tutorialBtn {
   bottom: 40%;
 }
 
-#playBtn {
+#debugBtn {
   bottom: 30%;
 }
 
-#helpBtn {
+#playBtn {
   bottom: 20%;
+}
+
+#settingBtn {
+  bottom: 10%;
 }
 
 #leaveBtn {
