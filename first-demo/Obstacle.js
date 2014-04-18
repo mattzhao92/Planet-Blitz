@@ -13,13 +13,8 @@ var Obstacle = Sprite.extend({
 
     initBoundBoxAndMesh: function() {
     	var size = Constants.ORIGINAL_TILESIZE;
-      // var obstacle_bounding_cube = new THREE.CubeGeometry(size,size,size);
-      // var obstacle_bounding_cube_material = new THREE.MeshLambertMaterial({opacity: this.opacity, transparent:true});
 
       this.box_mesh = new THREE.Object3D();
-
-
-      
       var path_to_mesh = "blendermodels/rock.js";
 
       switch(this.obstacleType)
@@ -27,7 +22,6 @@ var Obstacle = Sprite.extend({
         case "rock":
           path_to_mesh = "blendermodels/rock.js";
           break;
-
         case "crate":
           path_to_mesh = "blendermodels/obstacle-exCrate.js";
           break;
@@ -69,19 +63,7 @@ var Obstacle = Sprite.extend({
             var combinedMaterials = new THREE.MeshFaceMaterial(materials);
             scope.obstacle_mesh = new THREE.Mesh(geometry, combinedMaterials);
 
-           // scale to correct width / height / depth
-            geometry.computeBoundingBox();
-
-            // use bounding box to scale model correctly to the character size
-            var boundingBox = geometry.boundingBox;
-            var width = geometry.boundingBox.max.x - geometry.boundingBox.min.x;
-            var height = geometry.boundingBox.max.y - geometry.boundingBox.min.y;
-            var depth = geometry.boundingBox.max.z - geometry.boundingBox.min.z;
-
-            var ratio = Constants.ORIGINAL_TILESIZE / width;
-            scope.obstacle_mesh.scale.set(ratio, ratio, ratio);
-
-            
+            Utils.resize(scope.obstacle_mesh, Constants.ORIGINAL_TILESIZE);
             box_mesh.add(scope.obstacle_mesh);
       });
     },

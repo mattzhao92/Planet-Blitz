@@ -88,6 +88,7 @@ Utils.deallocate = function(scene) {
 	}
 }
 
+// scales to fit width
 Utils.resize = function(mesh, size) {
 	var boundingBox = mesh.geometry.computeBoundingBox();
 
