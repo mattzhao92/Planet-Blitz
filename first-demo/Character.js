@@ -289,7 +289,11 @@ var Character = Sprite.extend({
         var addNewItem = true;
         var newMotions = [];
         for (var i = 1; i < path.length; i++) {
-            newMotions.push(new THREE.Vector3(path[i][0], 0, path[i][1]));
+            var move = {
+                x: path[i][0],
+                z: path[i][1]
+            }
+            newMotions.push(move);
         }
 
         this.motionQueue.push({
@@ -300,7 +304,6 @@ var Character = Sprite.extend({
         }
         this.motionQueue.push({
             'sentinel': 'start',
-            'highlightTiles': path
         });
     },
 
@@ -386,18 +389,18 @@ var Character = Sprite.extend({
         // handle dequeue action here
         if (this.motionQueue.length > 0 && !this.breakUpdateHere) {
             this.motionInProcess = true;
-            var direction = this.motionQueue.pop();
-            if (direction.sentinel == 'start') {
+            var moveDest = this.motionQueue.pop();
+            if (moveDest.sentinel == 'start') {
                 if (this.team == GameInfo.myTeamId) {}
                 return;
-            } else if (direction.sentinel == 'end') {
-                if (direction.x == this.xPos && direction.z == this.zPos) {
+            } else if (moveDest.sentinel == 'end') {
+                if (moveDest.x == this.xPos && moveDest.z == this.zPos) {
                     this.hasPendingMove = false;
                 }
                 return;
             }
 
-            if (this.xPos !== direction.x || this.zPos !== direction.z) {
+            if (this.xPos !== moveDest.x || this.zPos !== moveDest.z) {
 
                 // And, only if we're not colliding with an obstacle or a wall ...
                 if (this.collide()) {
@@ -410,20 +413,20 @@ var Character = Sprite.extend({
 
                 this.world.markTileNotOccupiedByCharacter(this.getTileXPos(), this.getTileZPos());
 
-                this.goalMeshX = this.world.convertXPosToWorldX(direction.x);
-                this.goalMeshZ = this.world.convertZPosToWorldZ(direction.z);
+                this.goalMeshX = this.world.convertXPosToWorldX(moveDest.x);
+                this.goalMeshZ = this.world.convertZPosToWorldZ(moveDest.z);
 
-                if (direction.x < this.xPos) {
+                if (moveDest.x < this.xPos) {
                     this.velocityX = -this.moveSpeed;
-                } else if (direction.x > this.xPos) {
+                } else if (moveDest.x > this.xPos) {
                     this.velocityX = this.moveSpeed;
                 } else {
                     this.velocityX = 0;
                 }
 
-                if (direction.z < this.zPos) {
+                if (moveDest.z < this.zPos) {
                     this.velocityZ = -this.moveSpeed;
-                } else if (direction.z > this.zPos) {
+                } else if (moveDest.z > this.zPos) {
                     this.velocityZ = this.moveSpeed;
                 } else {
                     this.velocityZ = 0;
