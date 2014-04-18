@@ -128,17 +128,7 @@ var Character = Sprite.extend({
             var combinedMaterials = new THREE.MeshFaceMaterial(materials);
             mesh = new THREE.Mesh(geometry, combinedMaterials);
 
-            // scale to correct width / height / depth
-            geometry.computeBoundingBox();
-
-            // use bounding box to scale model correctly to the character size
-            var boundingBox = geometry.boundingBox;
-            var width = geometry.boundingBox.max.x - geometry.boundingBox.min.x;
-            var height = geometry.boundingBox.max.y - geometry.boundingBox.min.y;
-            var depth = geometry.boundingBox.max.z - geometry.boundingBox.min.z;
-
-            var ratio = scope.characterSize / width;
-            mesh.scale.set(ratio, ratio, ratio);
+            Utils.resize(mesh, scope.characterSize);
 
             // link the mesh with the character owner object
             this.mesh.owner = scope;

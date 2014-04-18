@@ -86,5 +86,16 @@ Utils.deallocate = function(scene) {
 	        // not proud of this, but there are problems with traversing the scene and disposing of it the same way
 	    }
 	}
+}
 
+Utils.resize = function(mesh, size) {
+	var boundingBox = mesh.geometry.computeBoundingBox();
+
+	var boundingBox = mesh.geometry.boundingBox;
+	var width = boundingBox.max.x - boundingBox.min.x;
+	var height = boundingBox.max.y - boundingBox.min.y;
+	var depth = boundingBox.max.z - boundingBox.min.z;
+
+	var ratio = size / width;
+	mesh.scale.set(ratio, ratio, ratio);
 }
