@@ -290,8 +290,7 @@ var Character = Sprite.extend({
     },
 
     enqueueMotion: function(destX, destZ) {
-        // if (this.isCoolDown == 0) {
-        var path = this.world.findPath(this.getTileXPos(), this.getTileZPos(), destX, destZ);
+        var path = this.world.findPath(this.getTileXPos(), this.getTileZPos(), destX, destZ);        
         this.destX = destX;
         this.destZ = destZ;
         this.hasPendingMove = true;
