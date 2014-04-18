@@ -357,6 +357,20 @@ var Grid = Class.extend({
             );
         });
 
+        
+        KeyboardJS.on("command",
+            function(event, keysPressed, keyCombo) {
+                event.preventDefault();
+                scope.keyCommandDown = true;
+            },
+
+            function(event, keysPressed, keyCombo) {
+                event.preventDefault();
+                scope.keyCommandDown = false;
+            }
+        );
+
+
         // unit toggle - cycle forwards
         KeyboardJS.on("t, tab",
             function(event, keysPressed, keyCombo) {
@@ -604,9 +618,18 @@ var Grid = Class.extend({
                 scope.onMouseUp(event);
             }
         }
-
-        window.addEventListener('mouseup', listener, false);
         this.mouseUpListener = listener;
+        window.addEventListener('mouseup', listener, false);
+
+
+        var doubleListener = function(event) {
+            if (scope.mouseDownListenerActive) {
+                scope.onMouseDoubleClick(event);
+            }
+        }
+
+        this.mouseDoubleClickListener = doubleListener;
+        window.addEventListener('dblclick', doubleListener, false);
     },
 
     onMouseMove: function(event) {
@@ -690,7 +713,46 @@ var Grid = Class.extend({
         return charactersInRange;
     },
 
+    onMouseDoubleClick: function(event) {
+        var RIGHT_CLICK = 3;
+        var LEFT_CLICK = 1;
+
+        var raycaster = this.gridHelper.getRaycaster();
+
+        // recursively call intersects
+        var characterMeshes = _.map(this.getCharacters(), function(character) {
+            return character.getRepr();
+        });
+
+        var scope = this;
+        var intersects = raycaster.intersectObjects(characterMeshes, true);
+        var intersectsWithTiles = raycaster.intersectObjects(this.tiles.children);
+        var unitIsCurrentlySelected = (this.getCurrentSelectedUnits().length > 0);
+
+        if (intersects.length > 0) {
+            var clickedObject = intersects[0].object.owner;
+           
+            var myTeamCharacters = scope.getMyTeamCharacters();
+
+            for (var i = 0; i < scope.currentSelectedUnits[GameInfo.myTeamId].length; i++) {
+                scope.currentSelectedUnits[GameInfo.myTeamId][i].deselect();
+                i -= 1;
+            }
+
+            scope.currentSelectedUnits[GameInfo.myTeamId].length = 0;
+
+            for (var i = 0; i < myTeamCharacters.length; i++) {
+                var characterSelected = myTeamCharacters[i];
+                if (characterSelected.modelName == clickedObject.modelName) {
+                    characterSelected.onSelect();
+                }
+            }
+        }
+    },
+
+
     onMouseUp: function(event) {
+
     	var didSelect = false;
 
         if (this.isDrawing) {
@@ -730,13 +792,15 @@ var Grid = Class.extend({
         var unitIsCurrentlySelected = (this.getCurrentSelectedUnits().length > 0);
 
        if (event.which == LEFT_CLICK) {
-            // care about characters first, then tile intersects
 
             if (intersects.length > 0) {
                 var clickedObject = intersects[0].object.owner;
                
                  if (clickedObject instanceof Character) {
-                    clickedObject.onSelect(true);
+                    if (this.keyCommandDown)
+                        clickedObject.onSelect(false);
+                    else 
+                        clickedObject.onSelect(true);
                     return;
            		 }
             } 
