@@ -295,22 +295,7 @@ var Character = Sprite.extend({
         var addNewItem = true;
         var newMotions = [];
         for (var i = 1; i < path.length; i++) {
-            // checking if path[i], path[i-1], path[i-2] are on the same line
-            if (i > 1) {
-                if ((path[i][0] == path[i - 2][0] || path[i][1] == path[i - 2][1]) &&
-                    (path[i][0] * (path[i - 1][1] - path[i - 2][1]) + path[i - 1][0] * (path[i - 2][1] - path[i][1]) + path[i - 2][0] *
-                        (path[i][1] - path[i - 1][1]) == 0)) {
-                    // if they are on the same, line, expand the last element in the motionQueue
-                    var lastMotion = newMotions[newMotions.length - 1];
-                    lastMotion.x = path[i][0];
-                    lastMotion.z = path[i][1];
-                    addNewItem = false;
-                }
-            }
-            if (addNewItem) {
-                newMotions.push(new THREE.Vector3(path[i][0], 0, path[i][1]));
-            }
-            addNewItem = true;
+            newMotions.push(new THREE.Vector3(path[i][0], 0, path[i][1]));
         }
 
         this.motionQueue.push({
