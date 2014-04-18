@@ -23,10 +23,10 @@ var MenuBackground = Class.extend({
 		this.setupCamera();
 		this.setupControls();
 
+		this.setupGround();
 		this.setupPodium();
 
 		this.addLighting();
-
 
 		// begin animation loop
 		this.animate();
@@ -34,7 +34,32 @@ var MenuBackground = Class.extend({
 		var scope = this;
 		window.addEventListener( 'resize', function() {
 		    scope.onWindowResize(); }, false );
+	},
 
+	setupGround: function() {
+		var texture = THREE.ImageUtils.loadTexture("gndTexture/gnd-dirty.jpg");
+
+		this.gridWidth = 400;
+		this.gridLength = 400;
+
+		var groundMaterial = new THREE.MeshLambertMaterial({
+		    map: texture,
+		    side: THREE.DoubleSide
+		});
+
+		var ground = new THREE.Mesh(new THREE.PlaneGeometry(this.gridWidth, this.gridLength, this.gridWidth / 5, this.gridLength / 5), groundMaterial);
+		ground.receiveShadow = true;
+
+		ground.rotation.x = -0.5 * Math.PI;
+
+		var Y_BUFFER = -0.5;
+		// needed because otherwise tiles will overlay directly on the grid and will cause glitching during scrolling ("z fighting")
+		ground.position.y = Y_BUFFER;
+		// offset to fit grid drawing 
+		ground.position.x -= this.gridWidth / 2;
+		ground.position.z -= this.gridLength / 2;
+
+		this.scene.add(ground);
 	},
 
 	setupPodium: function() {
@@ -44,9 +69,9 @@ var MenuBackground = Class.extend({
 	},
 
 	addLighting: function() {
-	    // // really subtle ambient lighting
-	    // var ambientLight = new THREE.AmbientLight( 0x191919 );
-	    // this.scene.add( ambientLight );
+	    // really subtle ambient lighting
+	    var ambientLight = new THREE.AmbientLight( 0x191919 );
+	    this.scene.add( ambientLight );
 
 	    // this.scene.remove( ambientLight );
 	    // // sky color, ground color, intensity
@@ -97,7 +122,7 @@ var MenuBackground = Class.extend({
 	    });	
 
 	    // add a character
-	    // this.spriteFactory = new SpriteFactory(this, sceneAddCmd, sceneRemoveCmd);
+	    this.spriteFactory = new SpriteFactory(this, sceneAddCmd, sceneRemoveCmd);
 
 	    // var d = new Date();
 	    // var numSeconds = d.getSeconds();
@@ -133,6 +158,7 @@ var MenuBackground = Class.extend({
 	        var depth = geometry.boundingBox.max.z - geometry.boundingBox.min.z;
 
 	        var ratio = 500 / width;
+
 	        scope.ext_file_mesh.scale.set(ratio, ratio, ratio);
 	        
 	        mesh.add(scope.ext_file_mesh);
