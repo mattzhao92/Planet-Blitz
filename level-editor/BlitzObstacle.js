@@ -94,20 +94,7 @@ var Obstacle = Class.extend({
       myloader.load(fullFilename, function(geometry, materials) {      
             var combinedMaterials = new THREE.MeshFaceMaterial(materials);
             scope.obstacle_mesh = new THREE.Mesh(geometry, combinedMaterials);
-
-           // scale to correct width / height / depth
-            geometry.computeBoundingBox();
-
-            // use bounding box to scale model correctly to the character size
-            var boundingBox = geometry.boundingBox;
-            var width = geometry.boundingBox.max.x - geometry.boundingBox.min.x;
-            var height = geometry.boundingBox.max.y - geometry.boundingBox.min.y;
-            var depth = geometry.boundingBox.max.z - geometry.boundingBox.min.z;
-
-            var ratio = Constants.ORIGINAL_TILESIZE / width;
-            scope.obstacle_mesh.scale.set(ratio, ratio, ratio);
-
-            
+            Utils.resize(scope.obstacle_mesh, Constants.ORIGINAL_TILESIZE / 2);
             box_mesh.add(scope.obstacle_mesh);
       });
     },

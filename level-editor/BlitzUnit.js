@@ -98,19 +98,7 @@ var Unit = Class.extend({
 
             var combinedMaterials = new THREE.MeshFaceMaterial(materials);
             scope.unit_mesh = new THREE.Mesh(geometry, combinedMaterials);
-
-            // scale to correct width / height / depth
-            geometry.computeBoundingBox();
-
-
-            // TODO: should use this bounding box to compute correct scale
-            var boundingBox = geometry.boundingBox;
-            var width = geometry.boundingBox.max.x - geometry.boundingBox.min.x;
-            var height = geometry.boundingBox.max.y - geometry.boundingBox.min.y;
-            var depth = geometry.boundingBox.max.z - geometry.boundingBox.min.z;
-            var size = Constants.ORIGINAL_TILESIZE;
-            scope.unit_mesh.scale.set(size/10, size/10, size/10);
-            
+            Utils.resize(scope.unit_mesh, Constants.ORIGINAL_TILESIZE / 2);
             box_mesh.add(scope.unit_mesh);
     	});
     },
