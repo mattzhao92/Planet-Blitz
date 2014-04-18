@@ -167,7 +167,10 @@ socket.on(Message.SHOOT, function(data) {
     var toX = parseInt(data[Shoot.toX]);
     var toZ = parseInt(data[Shoot.toZ]);
     var character = game.getWorld().getCharacterById(team, index);
-    character.shoot(new THREE.Vector3(fromX, 0, fromZ), new THREE.Vector3(toX, 0, toZ), false);
+    if (character != null) {
+      character.shoot(new THREE.Vector3(fromX, 0, fromZ), new THREE.Vector3(toX, 0, toZ), false);  
+    }
+    
 });
 
 /* Handle the hit message */
