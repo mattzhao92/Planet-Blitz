@@ -84,10 +84,9 @@ THREE.MapControls = function ( object, scene, domElement ) {
     this.panSpeed = 0.35;
 
     // camera boundary settings
-    this.minX = -Infinity;
-    this.maxX = Infinity;
-    this.minZ = -Infinity;
-    this.maxZ = Infinity;
+    this.cameraBoundaries = {minX: -Infinity, maxX: Infinity, minZ: -Infinity, maxZ: Infinity};
+    // "margin" of camera boundaries
+    var MARGIN = 30;
 
     // for smooth scrolling
     this.velocityX = 0.0;
@@ -384,7 +383,23 @@ THREE.MapControls = function ( object, scene, domElement ) {
             (scope.mousePosition.x == scope.mouseBounds.maxX) || 
             (scope.mousePosition.y == scope.mouseBounds.minY) ||
             (scope.mousePosition.y == scope.mouseBounds.maxY);
-    }
+    };
+
+    // this.isBetween = function(checkMe, bounds, margin) {
+    //     if (checkMe )
+    // };
+
+    this.checkIfCameraAtBoundaries = function() {
+        var atb = false;
+
+        var epsilon = 5;
+        if (this.object.position.x ) {
+
+        }
+        if (this.object.position.z ) {
+
+        }
+    };
 
     this.updateCameraFromVelocity = function(delta) {
 
@@ -426,6 +441,18 @@ THREE.MapControls = function ( object, scene, domElement ) {
         // prevent camera from getting closer to grid
         distance.y = 0;
 
+        if (this.object.position.x + distance.x > this.cameraBoundaries.maxX) {
+            distance.x = this.cameraBoundaries.maxX - this.object.position.x;
+        } else if (this.object.position.x < this.cameraBoundaries.minX) {
+            distance.x = this.cameraBoundaries.minX - this.object.position.x;
+        }
+
+        if (this.object.position.z + distance.z > this.cameraBoundaries.maxZ) {
+            distance.z = this.cameraBoundaries.maxZ - this.object.position.z;
+        } else if (this.object.position.z + distance.z < this.cameraBoundaries.minZ) {
+            distance.z = this.cameraBoundaries.minZ - this.object.position.z;
+        }
+
         this.object.position.add( distance );
         this.target.add( distance );
 
@@ -447,75 +474,83 @@ THREE.MapControls = function ( object, scene, domElement ) {
             // case: camera coming towards user
             scope.velocityZ += scope.DECELERATION * delta;
         }
+
+        return true;
     };
 
     this.update = function (delta) {
         _eye.subVectors(_this.object.position, this.target);
         _this.updateCameraFromVelocity(delta);
 
-        var position = this.object.position;
-        var offset = position.clone().sub( this.target );
+        var shouldContinueUpdate = true;
+        if (shouldContinueUpdate) {
+            var position = this.object.position;
+            var offset = position.clone().sub( this.target );
 
-        // angle from z-axis around y-axis
+            // angle from z-axis around y-axis
 
-        var theta = Math.atan2( offset.x, offset.z );
+            var theta = Math.atan2( offset.x, offset.z );
 
-        // angle from y-axis
+            // angle from y-axis
 
-        var phi = Math.atan2( Math.sqrt( offset.x * offset.x + offset.z * offset.z ), offset.y );
+            var phi = Math.atan2( Math.sqrt( offset.x * offset.x + offset.z * offset.z ), offset.y );
 
-        if ( this.autoRotate ) {
+            if ( this.autoRotate ) {
 
-            this.rotateLeft( getAutoRotationAngle() );
+                this.rotateLeft( getAutoRotationAngle() );
 
+            }
+
+            theta += thetaDelta;
+            
+            phi += phiDelta;            
+
+            // restrict phi to be between desired limits
+            phi = Math.max( this.minPolarAngle, Math.min( this.maxPolarAngle, phi ) );
+
+            // restrict phi to be betwee EPS and PI-EPS
+            phi = Math.max( EPS, Math.min( Math.PI - EPS, phi ) );
+
+            var radius = offset.length() * scale;
+
+            // restrict radius to be between desired limits
+            radius = Math.max( this.minDistance, Math.min( this.maxDistance, radius ) );
+
+            offset.x = radius * Math.sin( phi ) * Math.sin( theta );
+            offset.y = radius * Math.cos( phi );
+            offset.z = radius * Math.sin( phi ) * Math.cos( theta );
+
+            position.copy( this.target ).add( offset );
+
+            this.object.lookAt( this.target );
+
+            thetaDelta = 0;
+            phiDelta = 0;
+            scale = 1;
+
+            if ( lastPosition.distanceTo( this.object.position ) > 0 ) {
+
+                this.dispatchEvent( changeEvent );
+
+                lastPosition.copy( this.object.position );
+            }
+
+            // PubSub.publish(Constants.TOPIC_CAMERA_POSITION, this.object.position);
+
+            // calculating field of view - width and height
+            // var verticalFOV = this.object.fov * ( Math.PI / 180);
+
+            // var height = 2 * Math.tan(verticalFOV / 2) * _eye.length();
+
+            // var aspect = this.screen.width / this.screen.height;
+            // // calculated 
+            // var width = height * aspect;
+
+            // console.log("viewable width " + width);
+
+            
         }
 
-        theta += thetaDelta;
-        
-        phi += phiDelta;            
-
-        // restrict phi to be between desired limits
-        phi = Math.max( this.minPolarAngle, Math.min( this.maxPolarAngle, phi ) );
-
-        // restrict phi to be betwee EPS and PI-EPS
-        phi = Math.max( EPS, Math.min( Math.PI - EPS, phi ) );
-
-        var radius = offset.length() * scale;
-
-        // restrict radius to be between desired limits
-        radius = Math.max( this.minDistance, Math.min( this.maxDistance, radius ) );
-
-        offset.x = radius * Math.sin( phi ) * Math.sin( theta );
-        offset.y = radius * Math.cos( phi );
-        offset.z = radius * Math.sin( phi ) * Math.cos( theta );
-
-        position.copy( this.target ).add( offset );
-
-        this.object.lookAt( this.target );
-
-        thetaDelta = 0;
-        phiDelta = 0;
-        scale = 1;
-
-        if ( lastPosition.distanceTo( this.object.position ) > 0 ) {
-
-            this.dispatchEvent( changeEvent );
-
-            lastPosition.copy( this.object.position );
-        }
-
-        // PubSub.publish(Constants.TOPIC_CAMERA_POSITION, this.object.position);
-
-        // calculating field of view - width and height
-        // var verticalFOV = this.object.fov * ( Math.PI / 180);
-
-        // var height = 2 * Math.tan(verticalFOV / 2) * _eye.length();
-
-        // var aspect = this.screen.width / this.screen.height;
-        // // calculated 
-        // var width = height * aspect;
-
-        // console.log("viewable width " + width);
     };
 
 

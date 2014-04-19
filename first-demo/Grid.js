@@ -1,7 +1,7 @@
 /* Game world */
 var Grid = Class.extend({
     // Class constructor
-    init: function(gameApp, width, length, tileSize, scene, camera, controls) {
+    init: function(gameApp, tileSize, scene, camera, controls) {
         'use strict';
 
         var mapContent = GameInfo.mapContent;
@@ -15,6 +15,12 @@ var Grid = Class.extend({
         this.camera = camera;
         this.controls = controls;
 
+        // adjust control scheme - panning boundaries
+        this.controls.cameraBoundaries.minX = -(this.gridWidth) * 3;
+        this.controls.cameraBoundaries.maxX = (this.gridWidth) * 3;
+
+        this.controls.cameraBoundaries.minZ = -(this.gridLength) * 3;
+        this.controls.cameraBoundaries.maxZ = (this.gridLength) * 3;
 
         // information about what's being selected
         this.highlightedTiles = null;

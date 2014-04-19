@@ -15,9 +15,6 @@ var App = Class.extend({
         // add the output of the renderer to the html element
         $(containerName).append(this.renderer.domElement);
 
-        // grid attributes
-        this.GRID_WIDTH = 400;
-        this.GRID_LENGTH = 400;
         this.clock = new THREE.Clock();
 
         this.createGameConsole();
@@ -42,7 +39,7 @@ var App = Class.extend({
 
     setupCamera: function() {
         // create a camera, which defines where we're looking at
-        this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 8000);
+        this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 9000);
         this.camera.position.x = 0;
         this.camera.position.y = 600;
         this.camera.position.z = 400;
@@ -70,7 +67,7 @@ var App = Class.extend({
     },
 
     addSkybox: function() {
-        var skyGeometry = new THREE.CubeGeometry( 4000, 4000, 4000 );
+        var skyGeometry = new THREE.CubeGeometry( 7000, 7000, 7000 );
         
         // x +, x -, y + , y -, z +, z -
         var filenames = [
@@ -97,19 +94,10 @@ var App = Class.extend({
         var controls = new THREE.MapControls(this.camera, this.scene, document.getElementById("WebGL-output"));
         controls.panSpeed = 0.31;
 
-        // ensure that camera can't rotate too far down or up
-        controls.minPolarAngle = 0.3;
-        controls.maxPolarAngle = 1.26;
-
         // set up control boundaries
-        controls.minX = -this.GRID_WIDTH / 2;
-        controls.maxX = this.GRID_WIDTH / 2;
-
-        controls.minZ = -this.GRID_LENGTH / 2;
-        controls.maxZ = this.GRID_LENGTH / 2;
-
         controls.minDistance = 240;
         controls.maxDistance = 2000;
+
         this.controls = controls;
     },
 
@@ -119,7 +107,7 @@ var App = Class.extend({
 
     setupGameWorld: function() {
         var squareSize = 40;
-        this.world = new Grid(this, 800, 800, squareSize, this.scene, this.camera, this.controls);
+        this.world = new Grid(this, squareSize, this.scene, this.camera, this.controls);
     },
 
     update: function() {
