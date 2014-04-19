@@ -456,7 +456,7 @@ form input:focus{
 }
 .onoffswitch-label {
     display: block; overflow: hidden; cursor: pointer;
-    border: 2px solid #999999; border-radius: 20px;
+    border: 2px solid #0E3E6C; border-radius: 20px;
 }
 .onoffswitch-inner {
     width: 200%; margin-left: -100%;
@@ -471,7 +471,7 @@ form input:focus{
 .onoffswitch-inner:before {
     content: "ON";
     padding-left: 10px;
-    background-color: #BC7EE0; color: #FFFFFF;
+    background-color: #1C4C7C; color: #FFFFFF;
 }
 .onoffswitch-inner:after {
     content: "OFF";

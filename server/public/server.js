@@ -193,8 +193,8 @@ function showSettings() {
   content += '<td><p style="color:white; text-align:center">Sound</p></td>';
   content += "<td>"; 
   content += '<div class="onoffswitch">';
-  content += '<input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch" checked>';
-  content += '<label class="onoffswitch-label" for="myonoffswitch">';
+  content += '<input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="soundSwitch" checked>';
+  content += '<label class="onoffswitch-label" for="soundSwitch">';
   content += '<div class="onoffswitch-inner"></div>';
   content += '<div class="onoffswitch-switch"></div>';
   content += '</label></div></td>';
@@ -219,10 +219,10 @@ function showSettings() {
   $('#Message-dialog').css('overflow', 'visible');
   $(".gameScore").css("color", "white");
   $('#soundSwitch').click(function() {
-    if ($('#soundSwitch').is(':checked')) {r
-      alert('You turn on the music!');
+    if ($('#soundSwitch').is(':checked')) {
+      Howler.unmute();
     } else {
-      alert('Music off');
+      Howler.mute();
     }
   })
 }
