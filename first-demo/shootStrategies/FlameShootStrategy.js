@@ -4,7 +4,7 @@ var FlameShootStrategy = ShootStrategy.extend({
 		this.materialFactory = materialFactory;
 
 		this.weaponClipSize = 4;
-		this.weaponReloadRate = 0.01;
+		this.weaponReloadRate = 0.6;
 	}, 
 
 	shoot: function(owner, from, to) {

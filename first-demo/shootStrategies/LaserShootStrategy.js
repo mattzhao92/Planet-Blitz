@@ -4,7 +4,7 @@ var LaserShootStrategy = ShootStrategy.extend({
 		this.materialFactory = materialFactory;
 
 		this.weaponClipSize = 2;
-		this.weaponReloadRate = 0.005;
+		this.weaponReloadRate = 0.3;
 	}, 
 
 	shoot: function(owner, from, to) {

@@ -100,7 +100,7 @@ var Grid = Class.extend({
         this.bar = new THREE.Sprite(healthBarMaterial);
 
         this.canvas2d.beginPath();
-        this.canvas2d.rect(0, 0, 100000, 100000);
+        this.canvas2d.rect(0, 0, 10000, 10000);
         //canvas2d.rect(1000, 1000, -1000, -1000);
         this.canvas2d.fillStyle = "rgba(0, 255, 127, 0.1)";
         this.canvas2d.fill();

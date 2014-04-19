@@ -109,7 +109,8 @@ var AmmoBar = Sprite.extend({
 
 	updateWeaponReload: function(delta) {
 		if (this.needsReload) {
-			this.setAmmoCount(this.ammoCount + this.ammoReplenishRate);
+			var newAmmoCount = this.ammoCount + (this.ammoReplenishRate * delta)
+			this.setAmmoCount(Math.min(newAmmoCount, this.maximumAmmoCapacity));
 		}
 	},
 
