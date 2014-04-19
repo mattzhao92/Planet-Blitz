@@ -144,7 +144,7 @@ var MenuBackground = Class.extend({
 	  myloader.load(fullFilename, function(geometry, materials) {      
 	        var combinedMaterials = new THREE.MeshFaceMaterial(materials);
 	        scope.ext_file_mesh = new THREE.Mesh(geometry, combinedMaterials);
-	        Utils.resize(scope.ext_file_mesh, 500);
+	        Utils.resize(scope.ext_file_mesh, 400);
 	        mesh.add(scope.ext_file_mesh);
 	  });
 	},

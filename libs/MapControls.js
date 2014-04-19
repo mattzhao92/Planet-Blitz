@@ -308,61 +308,6 @@ THREE.MapControls = function ( object, scene, domElement ) {
         scale *= zoomScale;
     };
 
-    this.pan = function () {
-
-        var mouseChange = _panEnd.clone().sub(_panStart );
-
-        if ( mouseChange.lengthSq() > 0.00000001) {
-            
-            mouseChange.multiplyScalar(_this.panSpeed * _eye.length());
-
-            var distance = _eye.clone();
-            distance = distance.cross(this.object.up).setLength(mouseChange.x);
-
-            var unitZVector = new THREE.Vector3(0, 0, -1);
-            // transform the unit z vector into camera's local space
-            distance.add(unitZVector.transformDirection(this.object.matrix).setLength(mouseChange.y));
-            // prevent camera from getting closer to grid
-            distance.y = 0;
-
-            // experimental checking of camera boundaries while panning
-            // enforce camera boundaries when panning
-            // var newZ = distance.z + this.object.position.z;
-            // var newX = distance.x + this.object.position.x;
-
-            // // console.log(newX + " " + newZ);
-
-            // var verticalFOV = this.object.fov * ( Math.PI / 180);
-
-            // var fieldOfVisionHeight = 2 * Math.tan(verticalFOV / 2) * _eye.length();
-
-            // var aspect = this.screen.width / this.screen.height;
-            // var fieldOfVisionWidth = fieldOfVisionHeight * aspect;
-
-            // var widthMargin = fieldOfVisionWidth / 4;
-            // var heightMargin = fieldOfVisionHeight / 4;
-
-            // // if (newZ - heightMargin > this.maxZ || newZ + heightMargin < this.minZ) {
-            // //     distance.z = 0;
-            // //     _panStart.z = _panEnd.z;
-            // // }
-
-            // if (newX - widthMargin > this.maxX || newX + widthMargin < this.minX) {
-            //     distance.x = 0;
-            //     _panStart.x = _panStart.x;
-            // }
-
-            this.object.position.add( distance );
-            this.target.add( distance );
-
-            _panStart.add(mouseChange.subVectors(_panEnd, _panStart).multiplyScalar(_this.dynamicDampingFactor));
-
-            // console.log("viewable width " + width);
-
-            // otherwise, end the pan
-        }
-    };
-
     this.updateMouseVector = function() {
         var xDiff = this.screen.width / 2 - scope.mousePosition.x ;
         // multiply by 2 because of wide-screen format
@@ -507,7 +452,6 @@ THREE.MapControls = function ( object, scene, domElement ) {
     this.update = function (delta) {
         _eye.subVectors(_this.object.position, this.target);
         _this.updateCameraFromVelocity(delta);
-        _this.pan();
 
         var position = this.object.position;
         var offset = position.clone().sub( this.target );
