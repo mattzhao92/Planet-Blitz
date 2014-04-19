@@ -23,7 +23,7 @@ var MenuBackground = Class.extend({
 		this.setupCamera();
 		this.setupControls();
 
-		this.setupGround();
+		// this.setupGround();
 		this.setupPodium();
 
 		this.addLighting();
@@ -64,7 +64,18 @@ var MenuBackground = Class.extend({
 
 	setupPodium: function() {
 		this.mesh = new THREE.Object3D();
-		this.loadFile("blendermodels/menu.js", this.mesh);
+
+		var d = new Date();
+		var numSeconds = d.getSeconds();
+		var characterModel;
+		if (numSeconds % 3 == 0) {
+			characterModel = "blendermodels/soldier-regular.js";
+		} else if (numSeconds % 3 == 1) {
+			characterModel = "blendermodels/soldier-artillery.js";
+		} else {
+			characterModel = "blendermodels/soldier-flamethrower.js";
+		}
+		this.loadFile(characterModel, this.mesh);
 		this.scene.add(this.mesh);
 	},
 
@@ -123,20 +134,6 @@ var MenuBackground = Class.extend({
 
 	    // add a character
 	    this.spriteFactory = new SpriteFactory(this, sceneAddCmd, sceneRemoveCmd);
-
-	    // var d = new Date();
-	    // var numSeconds = d.getSeconds();
-
-	    // var character;
-	    // if (numSeconds % 3 == 0) {
-	    // 	character = this.spriteFactory.createArtillerySoldier(1, 1);
-	    // } else if (numSeconds % 3 == 1) {
-	    // 	character = this.spriteFactory.createSoldier(1, 1);
-	    // } else {
-	    // 	character = this.spriteFactory.createFlamethrowerSoldier(1, 1);
-	    // }
-
-	    // character.unitSelectorMesh.visible = false;
 	},
 
 	loadFile: function(filename, mesh) {
@@ -147,20 +144,7 @@ var MenuBackground = Class.extend({
 	  myloader.load(fullFilename, function(geometry, materials) {      
 	        var combinedMaterials = new THREE.MeshFaceMaterial(materials);
 	        scope.ext_file_mesh = new THREE.Mesh(geometry, combinedMaterials);
-
-	       // scale to correct width / height / depth
-	        geometry.computeBoundingBox();
-
-	        // use bounding box to scale model correctly to the character size
-	        var boundingBox = geometry.boundingBox;
-	        var width = geometry.boundingBox.max.x - geometry.boundingBox.min.x;
-	        var height = geometry.boundingBox.max.y - geometry.boundingBox.min.y;
-	        var depth = geometry.boundingBox.max.z - geometry.boundingBox.min.z;
-
-	        var ratio = 500 / width;
-
-	        scope.ext_file_mesh.scale.set(ratio, ratio, ratio);
-	        
+	        Utils.resize(scope.ext_file_mesh, 500);
 	        mesh.add(scope.ext_file_mesh);
 	  });
 	},
@@ -180,6 +164,8 @@ var MenuBackground = Class.extend({
 		this.controls = new THREE.OrbitControls(this.camera, document.getElementById("background-3d"));
 		this.controls.autoRotate = true;
 		this.controls.autoRotateSpeed = 0.5;
+		this.controls.maxDistance = 1500;
+		this.controls.minDistance = 300;
 	},
 
 	update: function() {
