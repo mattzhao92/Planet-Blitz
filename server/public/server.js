@@ -420,7 +420,9 @@ $(document).ready(function() {
   hideButtons();
 
   $('body').click(function() {
-      showButtons();
+      // add the allow message
+      $('#click-to-start').html('Click "allow" above to start');
+      centerElement($('#click-to-start'));
 
       PL.requestPointerLock(document.body, 
         function(event) {
@@ -429,14 +431,18 @@ $(document).ready(function() {
                          document.mozExitPointerLock ||
                          document.webkitExitPointerLock;
           document.exitPointerLock();
+
+          $('#click-to-start').remove();
+          $('body').off('click');
+
+          showButtons();
+
         }, function(event) {
+          // remove the "allow message"
 
         }, function(event) {
           console.log("Error: could not obtain pointerlock");
         });
-
-      $('#click-to-start').remove();
-      $('body').off('click');
   });
 
 
