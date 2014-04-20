@@ -66,6 +66,10 @@ body {
   bottom: 10%;
 }
 
+#click-to-start {
+  bottom: 25%;
+}
+
 #leaveBtn {
   left: 0;
   bottom: 0;
