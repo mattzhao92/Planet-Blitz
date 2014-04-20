@@ -421,6 +421,20 @@ $(document).ready(function() {
 
   $('body').click(function() {
       showButtons();
+
+      PL.requestPointerLock(document.body, 
+        function(event) {
+          // immediately release pointerlock
+          document.exitPointerLock = document.exitPointerLock ||
+                         document.mozExitPointerLock ||
+                         document.webkitExitPointerLock;
+          document.exitPointerLock();
+        }, function(event) {
+
+        }, function(event) {
+          console.log("Error: could not obtain pointerlock");
+        });
+
       $('#click-to-start').remove();
       $('body').off('click');
   });
