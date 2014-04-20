@@ -364,7 +364,7 @@ var Grid = Class.extend({
         });
 
         
-        KeyboardJS.on("ctrl, command",
+        KeyboardJS.on("command",
             function(event, keysPressed, keyCombo) {
                 event.preventDefault();
                 scope.keyCommandDown = true;
@@ -373,6 +373,19 @@ var Grid = Class.extend({
             function(event, keysPressed, keyCombo) {
                 event.preventDefault();
                 scope.keyCommandDown = false;
+            }
+        );
+
+
+        KeyboardJS.on("shift",
+            function(event, keysPressed, keyCombo) {
+                event.preventDefault();
+                scope.keyShiftDown = true;
+            },
+
+            function(event, keysPressed, keyCombo) {
+                event.preventDefault();
+                scope.keyShiftDown = false;
             }
         );
 
@@ -771,20 +784,28 @@ var Grid = Class.extend({
             
             if (characters.length > 0 && this.mouseSelectHappened) {
 
-                if (!this.keyCommandDown) {
-                    for (var i = 0; i < this.currentSelectedUnits[GameInfo.myTeamId].length; i++) {
-                        this.currentSelectedUnits[GameInfo.myTeamId][i].deselect();
-                        i -= 1;
+                if (this.keyShiftDown) {
+                    for (var i = 0; i < characters.length; i++) {
+                        didSelect = true;
+                        characters[i].deselect();
                     }
-                    this.currentSelectedUnits[GameInfo.myTeamId].length = 0;
-                }
+                } else {
+                    if (!this.keyCommandDown) {
+                        for (var i = 0; i < this.currentSelectedUnits[GameInfo.myTeamId].length; i++) {
+                            this.currentSelectedUnits[GameInfo.myTeamId][i].deselect();
+                            i -= 1;
+                        }
+                        this.currentSelectedUnits[GameInfo.myTeamId].length = 0;
+                    }
 
-                for (var i = 0; i < characters.length; i++) {
-                	didSelect = true;
+                    for (var i = 0; i < characters.length; i++) {
+                    	didSelect = true;
 
-                    characters[i].onSelect();
+                        characters[i].onSelect();
+                    }
                 }
             }
+
             this.mouseSelectHappened = false;
         }
 
@@ -808,11 +829,15 @@ var Grid = Class.extend({
                 var clickedObject = intersects[0].object.owner;
                
                  if (clickedObject instanceof Character) {
-                    if (this.keyCommandDown) {
-                        clickedObject.onSelect(false);
-                    } else  {
-                        clickedObject.onSelect(true);
+                    if (this.keyShiftDown) {
+                        clickedObject.deselect();
+                    } else {
+                        if (this.keyCommandDown) {
+                            clickedObject.onSelect(false);
+                        } else  {
+                            clickedObject.onSelect(true);
 
+                        }
                     }
                     return;
            		 }
