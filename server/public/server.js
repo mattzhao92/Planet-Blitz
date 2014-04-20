@@ -415,6 +415,13 @@ $(document).ready(function() {
     }
     mainMenu();
   });
+
+  hideButtons();
+  $('#click-to-start').click(function() {
+    showButtons();
+    this.remove();
+  });
+
   
 });
 
@@ -437,4 +444,19 @@ function centerButtons() {
   centerElement($('#debugBtn'));
   centerElement($('#settingBtn'));
   centerElement($('#tutorialBtn'));
+  centerElement($('#click-to-start'));
+}
+
+function hideButtons() {
+  $('#playBtn').hide();
+  $('#debugBtn').hide();
+  $('#settingBtn').hide();
+  $('#tutorialBtn').hide();
+}
+
+function showButtons() {
+  $('#playBtn').show();
+  $('#debugBtn').show();
+  $('#settingBtn').show();
+  $('#tutorialBtn').show();
 }
