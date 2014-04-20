@@ -787,6 +787,7 @@ var Grid = Class.extend({
             }
             this.mouseSelectHappened = false;
         }
+
  		var RIGHT_CLICK = 3;
         var LEFT_CLICK = 1;
 
@@ -807,8 +808,12 @@ var Grid = Class.extend({
                 var clickedObject = intersects[0].object.owner;
                
                  if (clickedObject instanceof Character) {
+                    if (this.keyCommandDown) {
+                        clickedObject.onSelect(false);
+                    } else  {
+                        clickedObject.onSelect(true);
 
-                    clickedObject.onSelect(true);
+                    }
                     return;
            		 }
             } 
