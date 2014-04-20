@@ -421,11 +421,23 @@ $(document).ready(function() {
 
   // add looping fade animation to "click to start"
 
-
   $('body').click(function() {
-      // add the allow message
-      $('#click-to-start').html('Click "allow" above to start');
-      centerElement($('#click-to-start'));
+      var clickToStart = $('#click-to-start');
+
+      var pointerLockChecker = setInterval(function() {
+        if (mouseLockEntered) {
+          // remove the "allow message"
+          clickToStart.remove();
+          $('body').off('click');
+
+          showButtons();
+        
+          clearInterval(pointerLockChecker);
+        } else {
+          clickToStart.html('Click "allow" above to start');
+          centerElement($('#click-to-start'));
+        }
+      }, 100);
 
       var mouseLockEntered = false;
 
@@ -439,13 +451,7 @@ $(document).ready(function() {
           mouseLockEntered = true;
 
         }, function(event) {
-          if (mouseLockEntered) {
-            // remove the "allow message"
-            $('#click-to-start').remove();
-            $('body').off('click');
-
-            showButtons();
-          }
+          // empty callback for when pointerlock is released
         }, function(event) {
           console.log("Error: could not obtain pointerlock");
         });
