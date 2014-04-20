@@ -417,9 +417,10 @@ $(document).ready(function() {
   });
 
   hideButtons();
-  $('#click-to-start').click(function() {
-    showButtons();
-    this.remove();
+
+  $('body').click(function() {
+      showButtons();
+      $('#click-to-start').remove();
   });
 
   
