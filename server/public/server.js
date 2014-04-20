@@ -187,17 +187,27 @@ function getUsername(forGameId) {
 
 function showSettings() {
   var content = '<h2 style="text-align:center">Settings</h2>';
-  // content += '<form>';
-  // content += '<input type="checkbox" id="soundSwitch" name="music" value="music" style="float:left; width:auto">Sound<br>';
   content += '<table style="width:100%"><tr>';
-  content += '<td><p style="color:white; text-align:center">Sound</p></td>';
+
+  content += '<tr><td><p style="color:white; text-align:center">Sound</p></td>';
   content += "<td>"; 
   content += '<div class="onoffswitch">';
   content += '<input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="soundSwitch" checked>';
   content += '<label class="onoffswitch-label" for="soundSwitch">';
   content += '<div class="onoffswitch-inner"></div>';
   content += '<div class="onoffswitch-switch"></div>';
-  content += '</label></div></td>';
+  content += '</label></div></td></tr>';
+
+  content += '<td><p style="color:white; text-align:center">Background Music</p></td>';
+  content += "<td>"; 
+  content += '<div class="onoffswitch">';
+  content += '<input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="bgSwtich" checked>';
+  content += '<label class="onoffswitch-label" for="bgSwtich">';
+  content += '<div class="onoffswitch-inner"></div>';
+  content += '<div class="onoffswitch-switch"></div>';
+  content += '</label></div></td></tr>';
+
+  content += '</table>';
 
     
   $("#Message-dialog").html(content).dialog(
@@ -224,7 +234,14 @@ function showSettings() {
     } else {
       Howler.mute();
     }
-  })
+  });
+  $('#bgSwtich').click(function() {
+    if ($('#bgSwtich').is(':checked')) {
+      // Howler.unmute();
+    } else {
+      // Howler.mute();
+    }
+  });
 }
 
 
