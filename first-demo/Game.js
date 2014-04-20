@@ -67,7 +67,7 @@ var App = Class.extend({
     },
 
     addSkybox: function() {
-        var skyGeometry = new THREE.CubeGeometry( 7000, 7000, 7000 );
+        var skyGeometry = new THREE.CubeGeometry( 6500, 6500, 6500 );
         
         // x +, x -, y + , y -, z +, z -
         var filenames = [

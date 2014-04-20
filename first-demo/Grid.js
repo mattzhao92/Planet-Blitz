@@ -16,11 +16,11 @@ var Grid = Class.extend({
         this.controls = controls;
 
         // adjust control scheme - panning boundaries
-        this.controls.cameraBoundaries.minX = -(this.gridWidth) * 3;
-        this.controls.cameraBoundaries.maxX = (this.gridWidth) * 3;
+        this.controls.cameraBoundaries.minX = -2400;
+        this.controls.cameraBoundaries.maxX = 2400;
 
-        this.controls.cameraBoundaries.minZ = -(this.gridLength) * 3;
-        this.controls.cameraBoundaries.maxZ = (this.gridLength) * 3;
+        this.controls.cameraBoundaries.minZ = -2400;
+        this.controls.cameraBoundaries.maxZ = 2400;
 
         // information about what's being selected
         this.highlightedTiles = null;
