@@ -419,10 +419,15 @@ $(document).ready(function() {
 
   hideButtons();
 
+  // add looping fade animation to "click to start"
+
+
   $('body').click(function() {
       // add the allow message
       $('#click-to-start').html('Click "allow" above to start');
       centerElement($('#click-to-start'));
+
+      var mouseLockEntered = false;
 
       PL.requestPointerLock(document.body, 
         function(event) {
@@ -431,23 +436,20 @@ $(document).ready(function() {
                          document.mozExitPointerLock ||
                          document.webkitExitPointerLock;
           document.exitPointerLock();
-
-          $('#click-to-start').remove();
-          $('body').off('click');
-
-          showButtons();
+          mouseLockEntered = true;
 
         }, function(event) {
-          // remove the "allow message"
+          if (mouseLockEntered) {
+            // remove the "allow message"
+            $('#click-to-start').remove();
+            $('body').off('click');
 
+            showButtons();
+          }
         }, function(event) {
           console.log("Error: could not obtain pointerlock");
         });
   });
-
-
-
-  
 });
 
 window.oncontextmenu = function () {
