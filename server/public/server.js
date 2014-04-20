@@ -43,6 +43,7 @@ function loading() {
   GameInfo.isStart = false;
   GameInfo.isLoading = true;
   
+  hideButtons();
   hideMenu();
 
   $('#leaveBtn').show();
@@ -421,7 +422,10 @@ $(document).ready(function() {
   $('body').click(function() {
       showButtons();
       $('#click-to-start').remove();
+      $('body').off('click');
   });
+
+
 
   
 });
