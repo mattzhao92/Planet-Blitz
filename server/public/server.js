@@ -349,7 +349,7 @@ function createSingleGame() {
 function listAvailableGames(games) {
   GameInfo.isListingGames = true;
   var content = '<div class="rain" style="margin:0; width:600px;"><div class="border start" style="width:100%">';
-  content += '<form style="width:600px"><label style="text-align:center">Click on a game room to join or create your own</label>';
+  content += '<form style="width:600px"><label style="text-align:center" class="largertext">Click on a game room to join or create your own</label>';
   content += '<table><tr><td style="min-width:150px">Room</td><td style="min-width:150px">Map</td><td style="min-width:150px">Players</td><td style="min-width:150px">Status</td></tr>';
   for (var t = 0; t < games.length; t++) {
     var game = games[t];

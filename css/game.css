@@ -8,6 +8,10 @@ body {
   background-repeat: no-repeat;
 }
 
+.largertext {
+  font-size: 15px;
+}
+
 .btn {
   position: absolute;
   /*left: 400px;*/
