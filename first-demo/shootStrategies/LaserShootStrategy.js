@@ -14,7 +14,7 @@ var LaserShootStrategy = ShootStrategy.extend({
 		var geometry = new THREE.SphereGeometry(radius, 30, 30);
 		var mesh = new THREE.Mesh(geometry, material);
 
-		var light = new THREE.PointLight(0x33CC33, 5.0, 200);
+		var light = new THREE.PointLight(0x33CC33, 5.0, 100);
 
 		var bulletArgs = {
 			radius: radius,

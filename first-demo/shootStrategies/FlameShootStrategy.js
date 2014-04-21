@@ -14,7 +14,7 @@ var FlameShootStrategy = ShootStrategy.extend({
 		var geometry = new THREE.SphereGeometry(radius, 15, 15);
 		var mesh = new THREE.Mesh(geometry, material);
 
-		var light = new THREE.PointLight(0xED4A1C, 4.0, 200);
+		var light = new THREE.PointLight(0xED4A1C, 4.0, 100);
 
 		var bulletArgs = {
 			radius: radius,

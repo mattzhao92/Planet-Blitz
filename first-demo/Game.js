@@ -33,7 +33,7 @@ var Game = Class.extend({
         this.animate();
 
         // tutorial mode
-        this.tutorialMode = SENT_FROM_TUTORIAL;
+        this.isTutorialMode = SENT_FROM_TUTORIAL;
 
         // flag because tracing renderGame pathway takes too long
         if (SENT_FROM_TUTORIAL) {
@@ -78,11 +78,11 @@ var Game = Class.extend({
         // // this.scene.add(hemiLight);
 
         // // a really bright light
-        var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.8 );
-        directionalLight.position.x = 0;
-        directionalLight.position.y = 400;
-        directionalLight.position.z = 0;
-        this.scene.add( directionalLight );
+        // var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.8 );
+        // directionalLight.position.x = 0;
+        // directionalLight.position.y = 400;
+        // directionalLight.position.z = 0;
+        // this.scene.add( directionalLight );
     },
 
     addSkybox: function() {
@@ -162,8 +162,13 @@ var Game = Class.extend({
     createGameConsole: function() {
         var gameConsole = new GameConsole();
         $("#Stats-output").append(gameConsole.domElement);
-        gameConsole.displayInitialMessage("Welcome to Planet Blitz! Fight to the death!");
 
+        if (this.isTutorialMode) {
+            gameConsole.displayInitialMessage("Welcome to Planet Blitz! Fight to the death!");   
+        } else {
+            gameConsole.displayInitialMessage("Welcome to the Planet Blitz tutorial!");   
+        }
+ 
         this.gameConsole = gameConsole;
     },
 
