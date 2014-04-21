@@ -115,4 +115,8 @@ Sounds['laser-shoot.mp3'] = new Howl({
   volume: 0.4
 });
 
+Sounds['unit-select.mp3'] = new Howl({
+    urls: ['unit-select.mp3'],
+    volume: 0.4,
+});
 

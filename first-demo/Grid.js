@@ -289,7 +289,8 @@ var Grid = Class.extend({
         if (this.getMyTeamCharacters().length > 0) {
             // focus camera on start position
             this.controls.focusOnPosition(this.getMyTeamCharacters()[0].mesh.position);
-            this.getMyTeamCharacters()[0].onSelect();            
+            this.getMyTeamCharacters()[0].onSelect();
+            Sounds['unit-select.mp3'].play();            
         }
     },
 
@@ -354,6 +355,7 @@ var Grid = Class.extend({
                                 for (var i = 0; i < currentSelectedUnits.length; i++) {
                                     currentSelectedUnits[i].onSelect();
                                 }
+                                Sounds['unit-select.mp3'].play();
                             }
                         });
 
@@ -414,6 +416,7 @@ var Grid = Class.extend({
                 for (var i = scope.unitCycle; i < myTeamCharacters.length; i++) {
                     if (characterSelected !== undefined && characterSelected.active) {
                         characterSelected.onSelect();
+                        Sounds['unit-select.mp3'].play();
                         break;
                     }
                     scope.unitCycle = i;
@@ -429,8 +432,8 @@ var Grid = Class.extend({
                 var myTeamCharacters = scope.getMyTeamCharacters();
                 var characterSelected = myTeamCharacters[scope.unitCycle];
                 if (characterSelected.active) {
-
                     characterSelected.onSelect();
+                    Sounds['unit-select.mp3'].play();
                 }
                 if (scope.unitCycle == 0) {
                     scope.unitCycle = myTeamCharacters.length - 1;
@@ -762,6 +765,7 @@ var Grid = Class.extend({
                 var characterSelected = myTeamCharacters[i];
                 if (characterSelected.modelName == clickedObject.modelName) {
                     characterSelected.onSelect();
+                    Sounds['unit-select.mp3'].play();
                 }
             }
         }
@@ -797,8 +801,10 @@ var Grid = Class.extend({
 
                     for (var i = 0; i < characters.length; i++) {
                     	didSelect = true;
-
                         characters[i].onSelect();
+                    }
+                    if (didSelect) {
+                        Sounds['unit-select.mp3'].play();
                     }
                 }
             }
@@ -828,9 +834,10 @@ var Grid = Class.extend({
                     } else {
                         if (this.keyCommandDown) {
                             clickedObject.onSelect(false);
+                            Sounds['unit-select.mp3'].play();
                         } else  {
                             clickedObject.onSelect(true);
-
+                            Sounds['unit-select.mp3'].play();
                         }
                     }
                     return;
