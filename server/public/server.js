@@ -407,6 +407,12 @@ $(document).ready(function() {
     sendListMapMsg();
   });
 
+  $('#tutorialBtn').click(function() {
+    sendSingleModeMsg('Blitz Fight (2)');
+    loading();  
+  });
+
+
   // TODO: reset game state?
   $('.jms-link').click(function() {
     if (GameInfo.isLoading) {
@@ -418,6 +424,7 @@ $(document).ready(function() {
   });
 
   hideButtons();
+
 
   // add looping fade animation to "click to start"
 
@@ -456,6 +463,8 @@ $(document).ready(function() {
           console.log("Error: could not obtain pointerlock");
         });
   });
+
+
 });
 
 window.oncontextmenu = function () {
