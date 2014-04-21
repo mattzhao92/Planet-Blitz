@@ -446,11 +446,10 @@ var Grid = Class.extend({
         // focus camera on unit
          KeyboardJS.on("space",
             function(event, keysPressed, keyCombo) {
-                scope.haltMove();
-                // var characters = scope.getCurrentSelectedUnits();
-                // if (characters.length > 0 && character.active) {
-                //     scope.controls.focusOnPosition(characters[0].mesh.position);
-                // }
+                var characters = scope.getCurrentSelectedUnits();
+                if (characters.length > 0 && character.active) {
+                    scope.controls.focusOnPosition(characters[0].mesh.position);
+                }
             }
         );
 
@@ -922,17 +921,6 @@ var Grid = Class.extend({
                     }
                 });
             }
-        }
-    },
-
-    haltMove: function() {
-        var selectedUnits = this.getCurrentSelectedUnits();
-        if (selectedUnits.length > 0) {
-
-            _.forEach(selectedUnits, function(selectedUnit) {
-                sendMoveMsg(selectedUnit.id,
-                        selectedUnit.getTileXPos(), 0, selectedUnit.getTileZPos());
-            });
         }
     },
 
