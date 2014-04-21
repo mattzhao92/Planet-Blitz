@@ -176,15 +176,16 @@ var Character = Sprite.extend({
     addUnitSelector: function() {
         // setup unit selector mesh
         var geometry = new THREE.TorusGeometry(this.getRadius(), 1, 5, 35);
-        var material = new THREE.MeshLambertMaterial({
+        var material = new THREE.MeshBasicMaterial({
             color: 0xFF0000
         });
         var torus = new THREE.Mesh(geometry, material);
         torus.rotation.x = -0.5 * Math.PI;
         torus.visible = false;
 
-        this.mesh.add(torus);
         this.unitSelectorMesh = torus;
+        this.unitSelectorMesh.material.color.setRGB(1.0, 0, 0);
+        this.mesh.add(torus);
     },
 
     placeAtGridPos: function(xPos, zPos) {
@@ -237,7 +238,6 @@ var Character = Sprite.extend({
         }
 
         if (GameInfo.myTeamId == null || this.team == GameInfo.myTeamId) {
-            this.unitSelectorMesh.material.color.setRGB(1.0, 0, 0);
             this.unitSelectorMesh.visible = true;
             this.world.markCharacterAsSelected(this);
 
@@ -248,10 +248,6 @@ var Character = Sprite.extend({
             }
 
             this.isSelected = true;
-            var sound = new Howl({
-                urls: ['unit-select.mp3'],
-                volume: 0.6,
-            }).play();
         }
     },
 

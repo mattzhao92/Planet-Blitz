@@ -8,6 +8,10 @@ body {
   background-repeat: no-repeat;
 }
 
+.largertext {
+  font-size: 15px;
+}
+
 .btn {
   position: absolute;
   /*left: 400px;*/
@@ -50,15 +54,15 @@ body {
   opacity: 0.8;
 }
 
-#tutorialBtn {
+#playBtn {
   bottom: 40%;
 }
 
-#debugBtn {
+#tutorialBtn {
   bottom: 30%;
 }
 
-#playBtn {
+#debugBtn {
   bottom: 20%;
 }
 

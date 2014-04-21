@@ -65,7 +65,7 @@ socket.on(Message.LISTGAME, function(info) {
     listAvailableGames(info[Message.ROOMS]);
   } else {
     if (GameInfo.isListingGames) {
-      $('#quitBtn').listAvailableGames();
+      $('#quitBtn').click();
       listAvailableGames(info[Message.ROOMS]);
     }
   }

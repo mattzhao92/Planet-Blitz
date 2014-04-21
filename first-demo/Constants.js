@@ -24,6 +24,9 @@ Constants.TOPIC_CAMERA_ROTATION = "cameraRotation";
 
 Constants.TOPIC_REFRESH_MATERIALS = "refreshMaterials";
 
+var RIGHT_CLICK = 3;
+var LEFT_CLICK = 1;
+
 function Colors() {
 
 }
@@ -100,3 +103,20 @@ Utils.resize = function(mesh, size) {
 	var ratio = size / width;
 	mesh.scale.set(ratio, ratio, ratio);
 }
+
+function Sounds() {
+
+}
+
+// Sounds.weapons = {};
+
+Sounds['laser-shoot.mp3'] = new Howl({
+  urls: ['laser-shoot.mp3'],
+  volume: 0.4
+});
+
+Sounds['unit-select.mp3'] = new Howl({
+    urls: ['unit-select.mp3'],
+    volume: 0.4,
+});
+

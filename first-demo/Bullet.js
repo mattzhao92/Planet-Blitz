@@ -38,10 +38,7 @@ var Bullet = Sprite.extend({
     var expireStrategy = new ExpireUpdateStrategy(this.startPosition, this.range);
     this.updateStrategy = new MultiUpdateStrategy([moveStrategy, expireStrategy]);
 
-    var sound = new Howl({
-      urls: [args.sound]
-    }).play();
-
+    Sounds[args.sound].play();
   },
 
   getPosition: function() {

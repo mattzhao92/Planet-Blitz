@@ -289,7 +289,8 @@ var Grid = Class.extend({
         if (this.getMyTeamCharacters().length > 0) {
             // focus camera on start position
             this.controls.focusOnPosition(this.getMyTeamCharacters()[0].mesh.position);
-            this.getMyTeamCharacters()[0].onSelect();            
+            this.getMyTeamCharacters()[0].onSelect();
+            Sounds['unit-select.mp3'].play();            
         }
     },
 
@@ -354,6 +355,7 @@ var Grid = Class.extend({
                                 for (var i = 0; i < currentSelectedUnits.length; i++) {
                                     currentSelectedUnits[i].onSelect();
                                 }
+                                Sounds['unit-select.mp3'].play();
                             }
                         });
 
@@ -414,6 +416,7 @@ var Grid = Class.extend({
                 for (var i = scope.unitCycle; i < myTeamCharacters.length; i++) {
                     if (characterSelected !== undefined && characterSelected.active) {
                         characterSelected.onSelect();
+                        Sounds['unit-select.mp3'].play();
                         break;
                     }
                     scope.unitCycle = i;
@@ -429,8 +432,8 @@ var Grid = Class.extend({
                 var myTeamCharacters = scope.getMyTeamCharacters();
                 var characterSelected = myTeamCharacters[scope.unitCycle];
                 if (characterSelected.active) {
-
                     characterSelected.onSelect();
+                    Sounds['unit-select.mp3'].play();
                 }
                 if (scope.unitCycle == 0) {
                     scope.unitCycle = myTeamCharacters.length - 1;
@@ -735,37 +738,39 @@ var Grid = Class.extend({
 
 
     onMouseDoubleClick: function(event) {
-        var RIGHT_CLICK = 3;
-        var LEFT_CLICK = 1;
+        if (event.which == LEFT_CLICK) {
+            var raycaster = this.gridHelper.getRaycaster();
 
-        var raycaster = this.gridHelper.getRaycaster();
+            // recursively call intersects
+            var characterMeshes = _.map(this.getCharacters(), function(character) {
+                return character.getRepr();
+            });
 
-        // recursively call intersects
-        var characterMeshes = _.map(this.getCharacters(), function(character) {
-            return character.getRepr();
-        });
+            var scope = this;
+            var intersects = raycaster.intersectObjects(characterMeshes, true);
+            var intersectsWithTiles = raycaster.intersectObjects(this.tiles.children);
+            var unitIsCurrentlySelected = (this.getCurrentSelectedUnits().length > 0);
 
-        var scope = this;
-        var intersects = raycaster.intersectObjects(characterMeshes, true);
-        var intersectsWithTiles = raycaster.intersectObjects(this.tiles.children);
-        var unitIsCurrentlySelected = (this.getCurrentSelectedUnits().length > 0);
+            if (intersects.length > 0) {
+                var clickedObject = intersects[0].object.owner;
+                
+                if (clickedObject instanceof Character && clickedObject.team == GameInfo.myTeamId) {
+                    var myTeamCharacters = scope.getMyTeamCharacters();
 
-        if (intersects.length > 0) {
-            var clickedObject = intersects[0].object.owner;
-           
-            var myTeamCharacters = scope.getMyTeamCharacters();
+                    for (var i = 0; i < scope.currentSelectedUnits[GameInfo.myTeamId].length; i++) {
+                        scope.currentSelectedUnits[GameInfo.myTeamId][i].deselect();
+                        i -= 1;
+                    }
 
-            for (var i = 0; i < scope.currentSelectedUnits[GameInfo.myTeamId].length; i++) {
-                scope.currentSelectedUnits[GameInfo.myTeamId][i].deselect();
-                i -= 1;
-            }
+                    scope.currentSelectedUnits[GameInfo.myTeamId].length = 0;
 
-            scope.currentSelectedUnits[GameInfo.myTeamId].length = 0;
-
-            for (var i = 0; i < myTeamCharacters.length; i++) {
-                var characterSelected = myTeamCharacters[i];
-                if (characterSelected.modelName == clickedObject.modelName) {
-                    characterSelected.onSelect();
+                    for (var i = 0; i < myTeamCharacters.length; i++) {
+                        var characterSelected = myTeamCharacters[i];
+                        if (characterSelected.modelName == clickedObject.modelName) {
+                            characterSelected.onSelect();
+                            Sounds['unit-select.mp3'].play();
+                        }
+                    }
                 }
             }
         }
@@ -801,17 +806,16 @@ var Grid = Class.extend({
 
                     for (var i = 0; i < characters.length; i++) {
                     	didSelect = true;
-
                         characters[i].onSelect();
+                    }
+                    if (didSelect) {
+                        Sounds['unit-select.mp3'].play();
                     }
                 }
             }
 
             this.mouseSelectHappened = false;
         }
-
- 		var RIGHT_CLICK = 3;
-        var LEFT_CLICK = 1;
 
         var raycaster = this.gridHelper.getRaycaster();
 
@@ -835,9 +839,10 @@ var Grid = Class.extend({
                     } else {
                         if (this.keyCommandDown) {
                             clickedObject.onSelect(false);
+                            Sounds['unit-select.mp3'].play();
                         } else  {
                             clickedObject.onSelect(true);
-
+                            Sounds['unit-select.mp3'].play();
                         }
                     }
                     return;
@@ -859,7 +864,7 @@ var Grid = Class.extend({
 
     onMouseDown: function(event) {
 
-        if (this.isDrawing == false) {
+        if (event.which == LEFT_CLICK && this.isDrawing == false) {
             this.isDrawing = true;
 
             var mouseLocation = this.controls.getMousePosition();

@@ -43,6 +43,7 @@ function loading() {
   GameInfo.isStart = false;
   GameInfo.isLoading = true;
   
+  hideButtons();
   hideMenu();
 
   $('#leaveBtn').show();
@@ -186,10 +187,10 @@ function getUsername(forGameId) {
 }
 
 function showSettings() {
-  var content = '<h2 style="text-align:center">Settings</h2>';
+  var content = '';
   content += '<table style="width:100%"><tr>';
 
-  content += '<tr><td><p style="color:white; text-align:center">Sound</p></td>';
+  content += '<tr><td><p style="color:white; text-align:left">Sound</p></td>';
   content += "<td>"; 
   content += '<div class="onoffswitch">';
   content += '<input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="soundSwitch" checked>';
@@ -198,7 +199,7 @@ function showSettings() {
   content += '<div class="onoffswitch-switch"></div>';
   content += '</label></div></td></tr>';
 
-  content += '<td><p style="color:white; text-align:center">Background Music</p></td>';
+  content += '<td><p style="color:white; text-align:left">Background Music</p></td>';
   content += "<td>"; 
   content += '<div class="onoffswitch">';
   content += '<input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="bgSwtich" checked>';
@@ -223,8 +224,10 @@ function showSettings() {
         mainMenu();
         sendLeaveMsg();
       }
-    }
+    },
+    title: "Settings"
   });
+  $(".ui-dialog-titlebar").show();
   $('#Message-dialog').css('height', 'auto');
   $('#Message-dialog').css('overflow', 'visible');
   $(".gameScore").css("color", "white");
@@ -346,7 +349,7 @@ function createSingleGame() {
 function listAvailableGames(games) {
   GameInfo.isListingGames = true;
   var content = '<div class="rain" style="margin:0; width:600px;"><div class="border start" style="width:100%">';
-  content += '<form style="width:600px"><label style="text-align:center">Click on a game room to join or create your own</label>';
+  content += '<form style="width:600px"><label style="text-align:center" class="largertext">Click on a game room to join or create your own</label>';
   content += '<table><tr><td style="min-width:150px">Room</td><td style="min-width:150px">Map</td><td style="min-width:150px">Players</td><td style="min-width:150px">Status</td></tr>';
   for (var t = 0; t < games.length; t++) {
     var game = games[t];
@@ -371,7 +374,7 @@ function listAvailableGames(games) {
     resizable: false,
     dialogClass: 'name-dialog'
   });
-  $(".ui-dialog-titlebar").hide();   
+  $(".ui-dialog-titlebar").hide();
   $(".ui-widget.name-dialog").css('width', 'auto');
   $(".ui-widget.name-dialog").css('padding', 0);
   $("#Input-dialog").css('padding', 0);
@@ -406,6 +409,12 @@ $(document).ready(function() {
     sendListMapMsg();
   });
 
+  $('#tutorialBtn').click(function() {
+    sendSingleModeMsg('Blitz Fight (2)');
+    loading();  
+  });
+
+
   // TODO: reset game state?
   $('.jms-link').click(function() {
     if (GameInfo.isLoading) {
@@ -418,12 +427,46 @@ $(document).ready(function() {
 
   hideButtons();
 
+
+  // add looping fade animation to "click to start"
+
   $('body').click(function() {
-      showButtons();
-      $('#click-to-start').remove();
+      var clickToStart = $('#click-to-start');
+
+      var pointerLockChecker = setInterval(function() {
+        if (mouseLockEntered) {
+          // remove the "allow message"
+          clickToStart.remove();
+          $('body').off('click');
+
+          showButtons();
+        
+          clearInterval(pointerLockChecker);
+        } else {
+          clickToStart.html('Click "allow" above to start');
+          centerElement($('#click-to-start'));
+        }
+      }, 100);
+
+      var mouseLockEntered = false;
+
+      PL.requestPointerLock(document.body, 
+        function(event) {
+          // immediately release pointerlock
+          document.exitPointerLock = document.exitPointerLock ||
+                         document.mozExitPointerLock ||
+                         document.webkitExitPointerLock;
+          document.exitPointerLock();
+          mouseLockEntered = true;
+
+        }, function(event) {
+          // empty callback for when pointerlock is released
+        }, function(event) {
+          console.log("Error: could not obtain pointerlock");
+        });
   });
 
-  
+
 });
 
 window.oncontextmenu = function () {

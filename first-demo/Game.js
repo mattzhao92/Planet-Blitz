@@ -35,6 +35,15 @@ var App = Class.extend({
         var scope = this;
         window.addEventListener( 'resize', function() {
             scope.onWindowResize(); }, false );
+
+        var tutorialBtn = $("#tutorialBtn");
+        var ensureGameMenuGone = setInterval(function() {
+            if (tutorialBtn.is(":visible")) {
+                hideMenu();                
+            } else {
+                clearInterval(ensureGameMenuGone);
+            }
+        }, 100);
     }, 
 
     setupCamera: function() {
@@ -59,11 +68,11 @@ var App = Class.extend({
         // // this.scene.add(hemiLight);
 
         // // a really bright light
-        var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.8 );
-        directionalLight.position.x = 0;
-        directionalLight.position.y = 400;
-        directionalLight.position.z = 0;
-        this.scene.add( directionalLight );
+        // var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.8 );
+        // directionalLight.position.x = 0;
+        // directionalLight.position.y = 400;
+        // directionalLight.position.z = 0;
+        // this.scene.add( directionalLight );
     },
 
     addSkybox: function() {
