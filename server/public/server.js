@@ -164,6 +164,7 @@ function getUsername(forGameId) {
   $("#unameBtn").click(function() {
     var username = $('#uname').val();
     if (username != '') {
+      $('#unameBtn').off('click');
       $("#Input-dialog").dialog("close");
       sendJoinMsg(forGameId, username);
       loading();
@@ -276,6 +277,7 @@ function createGameStep() {
     var username = $('#uname').val();
     var gamename = $('#rname').val();
     if (username != '' && gamename != '') {
+      $('#unameBtn').off('click');
       var map = $('#choosemap :selected').text();
       // alert(map);
       sendCreateMsg(gamename, username, map);
@@ -325,6 +327,7 @@ function createSingleGame() {
   $(".ui-widget.name-dialog").css('padding', 0);
   $("#Input-dialog").css('padding', 0);
   $("#unameBtn").click(function() {
+    $('#unameBtn').off('click');
     var map = $('#choosemap :selected').text();
     sendSingleModeMsg(map);
     loading();
@@ -379,6 +382,7 @@ function listAvailableGames(games) {
   $(".ui-widget.name-dialog").css('padding', 0);
   $("#Input-dialog").css('padding', 0);
   $("#createGameBtn").click(function() {
+    $('#createGameBtn').off('click');
     GameInfo.isListingGames = false;
     $("#Input-dialog").dialog("close");
     createGameStep();
