@@ -366,7 +366,7 @@ var Grid = Class.extend({
         });
 
         
-        KeyboardJS.on("command",
+        KeyboardJS.on("ctrl, command",
             function(event, keysPressed, keyCombo) {
                 event.preventDefault();
                 scope.keyCommandDown = true;
