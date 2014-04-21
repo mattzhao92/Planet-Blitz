@@ -46,10 +46,18 @@ var Game = Class.extend({
         window.addEventListener( 'resize', function() {
             scope.onWindowResize(); }, false );
 
-        var tutorialBtn = $("#tutorialBtn");
+        var menuBtns = [$("#tutorialBtn"), $("#playBtn"), $("#settingBtn"), $("#tutorialBtn")];
         var ensureGameMenuGone = setInterval(function() {
-            if (tutorialBtn.is(":visible")) {
-                hideMenu();                
+            
+            var anyButtonsVisible = false;
+            _.forEach(menuBtns, function(btn) {
+                if (btn.is(":visible")) {
+                    anyButtonsVisible = true;
+                }
+            });
+
+            if (anyButtonsVisible) {
+                hideMenu();
             } else {
                 clearInterval(ensureGameMenuGone);
             }

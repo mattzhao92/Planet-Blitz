@@ -328,12 +328,12 @@ var EditorModel = Class.extend({
 			this.map_tileSize = tile_size;
 
 			if (this.line != null) {
-				this.scene.remove(this.mapTileMeshes);
 				this.scene.remove(this.line);
-				this.drawGridSquares(width, height, tile_size);
-
+				this.scene.remove(this.mapTileMeshes);
 			}
-			//update virtualUnitMesh
+
+			this.drawGridSquares(width, height, tile_size);
+			// update virtualUnitMesh
 			// figure which units are still in scope and reposition units
 
 			var scale = 1.0 * tile_size / this.originalScale;
@@ -655,14 +655,17 @@ var EditorModel = Class.extend({
 		for (var i = 0; i < this.obstacle_cards.length; i++) {
 			var card = this.obstacle_cards[i];
 			if (card.obstacle.obstacleType == obstacle) {
-				console.log("onObstacleSelection "+i);
+				console.log("onObstacleSelection "+i +" type "+obstacle);
 				this.current_obstacle_prototype = card.obstacle;
 				break;
 			}
 		}
+		this.scene.remove(this.virtualPowerUpMesh);
+		this.scene.remove(this.virtualUnitMesh);
+		this.scene.remove(this.virtualObstacleMesh);
 		this.virtualObstacle = this.current_obstacle_prototype;
-		this.virtualObstacleMesh = this.virtualObstacle.getMesh();
-		this.updateVirtualObject("VirtualObstacle");
+		this.virtualObstacleMesh = this.current_obstacle_prototype.getMesh();
+		this.scene.add(this.virtualObstacleMesh);
 		this.currentVirtualObjectType = "VirtualObstacle";
 		this.redrawObstacleCards();
 	},
@@ -842,15 +845,21 @@ var EditorModel = Class.extend({
 		var units = [];
 		var obstacles = [];
 		var tiles = [];
+
+		console.log(">>>>>>>>> exportJson");
+		console.log(numberSquaresOnXAxis + " "+ numberSquaresOnZAxis);
 		for (var i = 0; i < numberSquaresOnXAxis; i++) {
 			for (var j = 0; j < numberSquaresOnZAxis; j++) {
 				var tile = this.tilesArray[i][j];
 				if (tile.hasCharacter || tile.hasObstacle) {
+					console.log("adding tile "+ tile.toJson());
 					tiles.push(tile.toJson());
 				}
 				if (tile.hasCharacter) {
+					console.log("adding character " + tile.unit.toJson());
 					units.push(tile.unit.toJson());
 				} else if (tile.hasObstacle) {
+					console.log("adding obstacle "+ tile.obstacle.toJson());
 					obstacles.push(tile.obstacle.toJson());
 				}
 
@@ -938,6 +947,7 @@ var EditorModel = Class.extend({
 						scope.created_units.push(new_unit);
 					});
 
+					console.log(">>>>>> onPlaceUnit " + tile.hasCharacter);
 					var teamExist = false;
 
 					for (var j = 0; j < teams.length; j++) {
