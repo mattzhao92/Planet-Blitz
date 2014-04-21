@@ -530,6 +530,7 @@ var Grid = Class.extend({
 
     handleCharacterDead: function(character) {
         this.silentlyRemoveCharacter(character);
+        PubSub.publish(Topic.CHARACTER_DEAD, character);
     },
 
     convertMeshXToXPos: function(meshX) {
@@ -761,12 +762,17 @@ var Grid = Class.extend({
 
             scope.currentSelectedUnits[GameInfo.myTeamId].length = 0;
 
+            var atLeastOneSelected = false;
             for (var i = 0; i < myTeamCharacters.length; i++) {
                 var characterSelected = myTeamCharacters[i];
                 if (characterSelected.modelName == clickedObject.modelName) {
                     characterSelected.onSelect();
-                    Sounds['unit-select.mp3'].play();
+                    atLeastOneSelected = true;
                 }
+            }
+
+            if (atLeastOneSelected) {
+                Sounds['unit-select.mp3'].play();
             }
         }
     },

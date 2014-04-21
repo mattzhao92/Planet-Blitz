@@ -19,9 +19,9 @@ Constants.ACTIVE_KEYBINDINGS = {};
 
 // used to listen for camera position
 Constants.TOPIC_CAMERA_POSITION = "cameraPosition";
-
 Constants.TOPIC_CAMERA_ROTATION = "cameraRotation";
 
+// used to refresh all materials for lighting recalculations
 Constants.TOPIC_REFRESH_MATERIALS = "refreshMaterials";
 
 var SENT_FROM_TUTORIAL = false;
@@ -121,4 +121,18 @@ Sounds['unit-select.mp3'] = new Howl({
     urls: ['unit-select.mp3'],
     volume: 0.4,
 });
+
+// used for tutorials
+function Topic() {
+
+}
+
+Topic.CHARACTER_DEAD = "character.dead";
+Topic.CHARACTER_SELECTED = "character.selected";
+Topic.CHARACTER_MULTI_SELECTED = "character.multiSelect";
+Topic.CHARACTER_SHOOT = "character.shoot";
+Topic.CHARACTER_MOVE = "character.move";
+Topic.CHARACTER_DESELECTED = "character.deselected";
+Topic.HOTKEY_ASSIGNED = "hotkey.assigned";
+Topic.CAMERA_PAN = "camera.pan";
 
