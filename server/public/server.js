@@ -187,10 +187,10 @@ function getUsername(forGameId) {
 }
 
 function showSettings() {
-  var content = '<h2 style="text-align:center">Settings</h2>';
+  var content = '';
   content += '<table style="width:100%"><tr>';
 
-  content += '<tr><td><p style="color:white; text-align:center">Sound</p></td>';
+  content += '<tr><td><p style="color:white; text-align:left">Sound</p></td>';
   content += "<td>"; 
   content += '<div class="onoffswitch">';
   content += '<input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="soundSwitch" checked>';
@@ -199,7 +199,7 @@ function showSettings() {
   content += '<div class="onoffswitch-switch"></div>';
   content += '</label></div></td></tr>';
 
-  content += '<td><p style="color:white; text-align:center">Background Music</p></td>';
+  content += '<td><p style="color:white; text-align:left">Background Music</p></td>';
   content += "<td>"; 
   content += '<div class="onoffswitch">';
   content += '<input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="bgSwtich" checked>';
@@ -224,8 +224,10 @@ function showSettings() {
         mainMenu();
         sendLeaveMsg();
       }
-    }
+    },
+    title: "Settings"
   });
+  $(".ui-dialog-titlebar").show();
   $('#Message-dialog').css('height', 'auto');
   $('#Message-dialog').css('overflow', 'visible');
   $(".gameScore").css("color", "white");
@@ -372,7 +374,7 @@ function listAvailableGames(games) {
     resizable: false,
     dialogClass: 'name-dialog'
   });
-  $(".ui-dialog-titlebar").hide();   
+  $(".ui-dialog-titlebar").hide();
   $(".ui-widget.name-dialog").css('width', 'auto');
   $(".ui-widget.name-dialog").css('padding', 0);
   $("#Input-dialog").css('padding', 0);
