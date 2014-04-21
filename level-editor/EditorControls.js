@@ -655,14 +655,17 @@ var EditorModel = Class.extend({
 		for (var i = 0; i < this.obstacle_cards.length; i++) {
 			var card = this.obstacle_cards[i];
 			if (card.obstacle.obstacleType == obstacle) {
-				console.log("onObstacleSelection "+i);
+				console.log("onObstacleSelection "+i +" type "+obstacle);
 				this.current_obstacle_prototype = card.obstacle;
 				break;
 			}
 		}
+		this.scene.remove(this.virtualPowerUpMesh);
+		this.scene.remove(this.virtualUnitMesh);
+		this.scene.remove(this.virtualObstacleMesh);
 		this.virtualObstacle = this.current_obstacle_prototype;
-		this.virtualObstacleMesh = this.virtualObstacle.getMesh();
-		this.updateVirtualObject("VirtualObstacle");
+		this.virtualObstacleMesh = this.current_obstacle_prototype.getMesh();
+		this.scene.add(this.virtualObstacleMesh);
 		this.currentVirtualObjectType = "VirtualObstacle";
 		this.redrawObstacleCards();
 	},
