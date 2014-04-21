@@ -176,7 +176,7 @@ var Character = Sprite.extend({
     addUnitSelector: function() {
         // setup unit selector mesh
         var geometry = new THREE.TorusGeometry(this.getRadius(), 1, 5, 35);
-        var material = new THREE.MeshLambertMaterial({
+        var material = new THREE.MeshBasicMaterial({
             color: 0xFF0000
         });
         var torus = new THREE.Mesh(geometry, material);
