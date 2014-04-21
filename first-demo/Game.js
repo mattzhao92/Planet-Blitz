@@ -35,6 +35,15 @@ var App = Class.extend({
         var scope = this;
         window.addEventListener( 'resize', function() {
             scope.onWindowResize(); }, false );
+
+        var tutorialBtn = $("#tutorialBtn");
+        var ensureGameMenuGone = setInterval(function() {
+            if (tutorialBtn.is(":visible")) {
+                hideMenu();                
+            } else {
+                clearInterval(ensureGameMenuGone);
+            }
+        }, 100);
     }, 
 
     setupCamera: function() {
