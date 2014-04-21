@@ -734,9 +734,6 @@ var Grid = Class.extend({
 
 
     onMouseDoubleClick: function(event) {
-        var RIGHT_CLICK = 3;
-        var LEFT_CLICK = 1;
-
         var raycaster = this.gridHelper.getRaycaster();
 
         // recursively call intersects
@@ -809,9 +806,6 @@ var Grid = Class.extend({
             this.mouseSelectHappened = false;
         }
 
- 		var RIGHT_CLICK = 3;
-        var LEFT_CLICK = 1;
-
         var raycaster = this.gridHelper.getRaycaster();
 
         // recursively call intersects
@@ -858,7 +852,7 @@ var Grid = Class.extend({
 
     onMouseDown: function(event) {
 
-        if (this.isDrawing == false) {
+        if (event.which == LEFT_CLICK && this.isDrawing == false) {
             this.isDrawing = true;
 
             var mouseLocation = this.controls.getMousePosition();
