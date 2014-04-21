@@ -1,4 +1,4 @@
-var App = Class.extend({
+var Game = Class.extend({
 
     init: function(containerName) {
         // create a scene, that will hold all our elements such as objects, cameras and lights.

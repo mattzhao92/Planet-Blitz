@@ -284,7 +284,7 @@ function renderGame() {
   newScore.id = 'Stats-output';
   containerBox.parentNode.insertBefore(newScore, containerBox);
   containerBox.parentNode.insertBefore(newDiv, containerBox);
-  var app = new App("#WebGL-output");
+  var app = new Game("#WebGL-output");
   var MAPGAME = app;
   game = app;
 
