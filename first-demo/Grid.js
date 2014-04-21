@@ -776,6 +776,24 @@ var Grid = Class.extend({
         }
     },
 
+    isKeyBeingHeldDown: function(key) {
+        var activeKeys = KeyboardJS.activeKeys();
+        for (var i = 0; i < activeKeys; i++) {
+            if (activeKeys[i] == key) {
+                return true;
+            }
+        }
+
+        return false;
+    },
+
+    isShiftKeyDown: function() {
+        return this.keyShiftDown || this.isKeyBeingHeldDown("shift");
+    },
+
+    isCtrlKeyDown: function() {
+        return this.keyCommandDown || this.isKeyBeingHeldDown("command") || this.isKeyBeingHeldDown("ctrl");
+    },
 
     onMouseUp: function(event) {
 
@@ -790,13 +808,13 @@ var Grid = Class.extend({
             
             if (characters.length > 0 && this.mouseSelectHappened) {
 
-                if (this.keyShiftDown) {
+                if (this.isShiftKeyDown()) {
                     for (var i = 0; i < characters.length; i++) {
                         didSelect = true;
                         characters[i].deselect();
                     }
                 } else {
-                    if (!this.keyCommandDown) {
+                    if (!this.isCtrlKeyDown()) {
                         for (var i = 0; i < this.currentSelectedUnits[GameInfo.myTeamId].length; i++) {
                             this.currentSelectedUnits[GameInfo.myTeamId][i].deselect();
                             i -= 1;
@@ -834,10 +852,10 @@ var Grid = Class.extend({
                 var clickedObject = intersects[0].object.owner;
                
                  if (clickedObject instanceof Character) {
-                    if (this.keyShiftDown) {
+                    if (this.isShiftKeyDown()) {
                         clickedObject.deselect();
                     } else {
-                        if (this.keyCommandDown) {
+                        if (this.isShiftKeyDown()) {
                             clickedObject.onSelect(false);
                             Sounds['unit-select.mp3'].play();
                         } else  {
