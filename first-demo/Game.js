@@ -32,6 +32,16 @@ var Game = Class.extend({
         // begin animation loop
         this.animate();
 
+        // tutorial mode
+        this.tutorialMode = SENT_FROM_TUTORIAL;
+
+        // flag because tracing renderGame pathway takes too long
+        if (SENT_FROM_TUTORIAL) {
+            // activate tutorial mode
+            console.log("Tutorial mode activated");
+            SENT_FROM_TUTORIAL = false;
+        }
+
         var scope = this;
         window.addEventListener( 'resize', function() {
             scope.onWindowResize(); }, false );

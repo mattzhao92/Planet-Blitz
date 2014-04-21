@@ -411,9 +411,9 @@ $(document).ready(function() {
 
   $('#tutorialBtn').click(function() {
     sendSingleModeMsg('Blitz Fight (2)');
-    loading();  
+    loading();
+    SENT_FROM_TUTORIAL = true; 
   });
-
 
   // TODO: reset game state?
   $('.jms-link').click(function() {

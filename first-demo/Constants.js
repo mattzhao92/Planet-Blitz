@@ -24,6 +24,8 @@ Constants.TOPIC_CAMERA_ROTATION = "cameraRotation";
 
 Constants.TOPIC_REFRESH_MATERIALS = "refreshMaterials";
 
+var SENT_FROM_TUTORIAL = false;
+
 var RIGHT_CLICK = 3;
 var LEFT_CLICK = 1;
 
