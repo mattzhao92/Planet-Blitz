@@ -14,7 +14,7 @@ var PelletShootStrategy = ShootStrategy.extend({
 		var geometry = new THREE.SphereGeometry(radius, 12, 12);
 		var mesh = new THREE.Mesh(geometry, material);
 
-		var light = new THREE.PointLight(0x33CCFF, 3.0, 120);
+		var light = new THREE.PointLight(0x33CCFF, 3.0, 60);
 
 		var bulletArgs = {
 			radius: radius,
