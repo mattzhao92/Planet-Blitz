@@ -277,7 +277,7 @@ function removeGameCanvas() {
 
 function renderGame() {
   $('#game-container').unwrap();
-  var containerBox = document.getElementById('Loading-output-container');
+  var containerBox = document.getElementById('container');
   var newDiv = document.createElement("div");
   newDiv.id = 'WebGL-output';
   var newScore = document.createElement("div");
@@ -371,8 +371,11 @@ function sendListMapMsg() {
   socket.emit(Message.LISTMAP);
 }
 
-function updateLoadingPlayerState(state) {
-  $('#Loading-output').html('Waiting...</br>Player: ' + state);
+function updateLoadingPlayerState(msgs) {
+  $('#Loading-output').text('Waiting...\nPlayer: ' + msgs[0]);
+  if (msgs.length == 2) {
+    $('#Loading-output2').text(msgs[1]);
+  }
 }
 
 function sendSyncMsg() {

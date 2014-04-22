@@ -183,6 +183,7 @@ io.sockets.on('connection', function(socket) {
               }
             } else {
               var playerState = gameToJoin.getPlayerInfo();
+              console.log(playerState);
               socket.broadcast.to(gameToJoin.room).emit(Message.JOIN, playerState);
               socket.emit(Message.JOIN, playerState);
               if (gameToJoin.isFull()) {
@@ -451,11 +452,20 @@ function shuffle(o){
 };
 
 Game.prototype.getPlayerInfo = function() {
-  return this.numPlayers + '/' + this.maxNumPlayers;
+	var msgs = [];
+	var msg = this.numPlayers + '/' + this.maxNumPlayers;
+	msgs.push(msg);
+  return msgs;
 }
 
 Game.prototype.getPlayerRestartInfo = function() {
-  return this.numRestartPlayers + '/' + this.maxNumPlayers + '  . The game would restart as soon as ' + this.numPlayers + ' players are ready';
+	var more = this.numPlayers == 1 ? 2 : this.numPlayers;
+	var msgs = new Array();
+	var msg1 = this.numRestartPlayers + '/' + this.maxNumPlayers;
+	var msg2 = 'The game would restart as soon as ' + more + ' players are ready';
+	msgs.push(msg1);
+	msgs.push(msg2);
+	return msgs;
 }
 
 Game.prototype.addPlayer = function(sk, username) {

@@ -1,4 +1,4 @@
-var loadScreenElements = ["#Loading-output", ".span", ".cloud"];
+var loadScreenElements = ["#container"];
 
 function applyToLoadScreen(func) {
   for (var i = 0; i < loadScreenElements.length; i++) {
@@ -9,6 +9,7 @@ function applyToLoadScreen(func) {
 function showLoadScreen() {
   applyToLoadScreen(function(elem) {
     $(elem).show();
+    centerElement($(elem));
   });
 }
 
@@ -45,6 +46,7 @@ function loading() {
   
   hideButtons();
   hideMenu();
+  $('#Loading-output').show();
 
   $('#leaveBtn').show();
   showLoadScreen();
@@ -394,11 +396,12 @@ function listAvailableGames(games) {
   centerElement($(".ui-widget.name-dialog"));
 }
 
-$(document).ready(function() { 
+$(document).ready(function() {
   hideGameHUD();
   $('#Loading-output').hide();
   $('#slide-container').hide();
   $('#leaveBtn').hide();
+  $('#container').hide();
   centerButtons();
   $('#playBtn').click(function() {
     sendListGameMsg();
