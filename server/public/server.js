@@ -518,3 +518,8 @@ function showButtons() {
   $('#settingBtn').show();
   $('#tutorialBtn').show();
 }
+
+function onresizeHandler() {
+  centerButtons();
+  centerElement($('#container'));
+}

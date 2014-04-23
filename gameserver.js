@@ -153,8 +153,10 @@ io.sockets.on('connection', function(socket) {
           socket.emit(Message.ERROR, 'Username already exits');
           return; 
         }
-        gameToJoin.addPlayer(socket, username);
-        updateClientsGameLists();
+        if (!gameToJoin.isStart || !gameToJoin.isPlaying) {
+	        gameToJoin.addPlayer(socket, username);
+	        updateClientsGameLists();
+        }
         var username = joinRequest[Message.USERNAME];
         socket.set('username', username, function() {
           gameLog('User ' + username + ' game ' + gameId);
@@ -166,7 +168,10 @@ io.sockets.on('connection', function(socket) {
                 gameToJoin.score[username] = new Score();
                 obMsg = gameToJoin.gameState.toJSON();
                 obMsg[Stat.result] = gameToJoin.getScoreJSON();
+                obMsg[Message.PREPARE] = gameToJoin.prepareGame(true);
                 socket.emit(Message.OBSERVER, obMsg);
+                gameToJoin.addPlayer(socket, username);
+	        	updateClientsGameLists();
               } else {
                 gameToJoin.numRestartPlayers++;
                 gameToJoin.score[username] = new Score();

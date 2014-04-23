@@ -76,6 +76,7 @@
     <script type="text/javascript" src="AmmoBar.js"></script>
     <script type="text/javascript" src="HealthBar.js"></script>
 
+    <script type="text/javascript" src="ServerMapLoader.js"></script>
     <script type="text/javascript" src="Character.js"></script>
     <script type="text/javascript" src="Grid.js"></script>
     <script type="text/javascript" src="Obstacle.js"></script>
@@ -145,7 +146,7 @@
 
   </head>
 
-  <body onresize="centerButtons()">
+  <body onresize="onresizeHandler()">
     <div id='background-3d'>
         <div id='game-container'>
             <div id='blitzTitle'>
@@ -169,7 +170,7 @@
               <div class="stick"></div>
               <h1 style="padding-top:20px">Waiting...</h1>
               <br/>
-              <h1 id="Loading-output">Loading...</h1>
+              <h1 id="Loading-output"></h1>
               <br/>
               <h1 id="Loading-output2"></h1>
           </div>
