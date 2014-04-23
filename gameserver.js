@@ -302,7 +302,7 @@ io.sockets.on('connection', function(socket) {
           var scoreStat = game.getScoreJSON();
           gameStatistics[Stat.result] = scoreStat;
           if (game.playerEscaped.length != 0) {
-            gameStatistics[Message.LEAVE] = 'Players escaped: ' + game.playerEscaped;
+            gameStatistics[Message.LEAVE] = 'Players left: ' + game.playerEscaped;
 
           }
           // Reset the game state.
