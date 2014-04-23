@@ -397,6 +397,13 @@ function listAvailableGames(games) {
 }
 
 $(document).ready(function() {
+  // disable text selection
+  $("body").css("-webkit-user-select","none");
+  $("body").css("-moz-user-select","none");
+  $("body").css("-ms-user-select","none");
+  $("body").css("-o-user-select","none");
+  $("body").css("user-select","none");
+
   hideGameHUD();
   $('#Loading-output').hide();
   $('#slide-container').hide();
