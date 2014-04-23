@@ -513,6 +513,7 @@ form input:focus{
 
 
 #container h1 {
+  left: -16;
   background-color: transparent;
   font-family: 'xolonium';
   color: white;
@@ -520,8 +521,9 @@ form input:focus{
   font-size: 1em;
   letter-spacing: 1.5px;
   text-align: center;
-  width: 155px;
-  margin-top: 20px;
+  width: 180px;
+  /*margin-top: 20px;*/
+  margin: 0;
   -webkit-animation: fade 2s infinite;
   -moz-animation: fade 2s infinite;
 }

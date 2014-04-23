@@ -372,7 +372,7 @@ function sendListMapMsg() {
 }
 
 function updateLoadingPlayerState(msgs) {
-  $('#Loading-output').text('Waiting...\nPlayers: ' + msgs[0]);
+  $('#Loading-output').text('Players: ' + msgs[0]);
   if (msgs.length == 2) {
     $('#Loading-output2').text(msgs[1]);
   }
