@@ -132,7 +132,8 @@ Topic.CHARACTER_SELECTED = "character.selected";
 Topic.CHARACTER_MULTI_SELECTED = "character.multiSelect";
 Topic.CHARACTER_SHOOT = "character.shoot";
 Topic.CHARACTER_MOVE = "character.move";
+Topic.CAMERA_PAN = "camera.pan";
+
 Topic.CHARACTER_DESELECTED = "character.deselected";
 Topic.HOTKEY_ASSIGNED = "hotkey.assigned";
-Topic.CAMERA_PAN = "camera.pan";
 

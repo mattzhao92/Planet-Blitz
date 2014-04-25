@@ -40,6 +40,7 @@ var Game = Class.extend({
             // activate tutorial mode
             console.log("Tutorial mode activated");
             SENT_FROM_TUTORIAL = false;
+            this.tutorialHooks = new TutorialHooks(this.scene, this.controls, this.camera);
         }
 
         var scope = this;
@@ -183,9 +184,26 @@ var Game = Class.extend({
             // enlarge the display
             gameConsole.setWidth(500);
             gameConsole.setHeight(500);
-            gameConsole.displayInitialMessage("Welcome to the Planet Blitz tutorial!");
+            gameConsole.displayInitialMessage("Welcome to the tutorial!");
+            gameConsole.append("Left click on a robot to select");
+            gameConsole.append("Right click to shoot");
+            gameConsole.append("Drag with left click to select multiple units");
+            gameConsole.append("Click on an empty space to move there");
+            gameConsole.append("Red is your robot's health; blue shows how much ammo your robot has. Ammo regenerates over time.");
+            gameConsole.append("Destroy the enemy to win!");
 
+            // a really bright light
 
+            var scope = this;
+            setTimeout(function() {
+                scope.tutorialHooks.revealMap();
+            }, 3000);
+
+            setTimeout(function() {
+                scope.tutorialHooks.hideMap();
+            }, 6000);
+
+            // begin tutorial hooks
         }
  
         this.gameConsole = gameConsole;
