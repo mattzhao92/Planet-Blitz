@@ -109,7 +109,7 @@ THREE.MapControls = function ( object, scene, domElement ) {
     var _panStart = new THREE.Vector2();
     var _panEnd = new THREE.Vector2();
 
-    // make sure this arbitrary mouse position is slightl
+    // make sure this arbitrary mouse position is out of bounds...
     var ARBITRARY_MOUSE_POS = 50;
     this.mousePosition = {x: ARBITRARY_MOUSE_POS, y: ARBITRARY_MOUSE_POS};
 
@@ -569,15 +569,6 @@ THREE.MapControls = function ( object, scene, domElement ) {
 
         event.preventDefault();
 
-        // quick hack
-        // event.clientX = scope.mousePosition.x;
-        // event.clientY = scope.mousePosition.y;
-
-        // console.log(event.clientX);
-        // console.log(event.clientY);
-
-        // console.log(scope.mousePosition);
-
         if ( event.button === 0 ) {
 
             state = STATE.PAN;
@@ -696,7 +687,7 @@ THREE.MapControls = function ( object, scene, domElement ) {
     }
 
     this.domElement.addEventListener( 'contextmenu', function ( event ) { event.preventDefault(); }, false );
-    this.domElement.addEventListener( 'mousedown', onMouseDown, false );
+    this.domElement.addEventListener( 'mousedown', pointerlockMouseDown, false );
     this.domElement.addEventListener( 'mousewheel', onMouseWheel, false );
     // for firefox
     this.domElement.addEventListener( 'DOMMouseScroll', onMouseWheel, false ); 
@@ -704,41 +695,29 @@ THREE.MapControls = function ( object, scene, domElement ) {
     // TODO: remove this hardcoding
     var containerName = "#WebGL-output";
 
-    this.requestPointerLock = function() {
+    function pointerlockMouseDown( event ) {
         PL.requestPointerLock(document.body,
             // on pointerlock enable
             function(event) {
-                console.log("Pointerlock enabled");
+                // console.log("Pointerlock enabled");
                 scope.handleResize();
-                console.log(document.body);
+                // console.log(document.body);
                 document.addEventListener("mousemove", moveCallback, false);
-
-                // disable the pointerlock enable handler
-                $(containerName).off("click");
             }, 
             // on pointerlock disable
             function(event) {
                 document.removeEventListener("mousemove", moveCallback, false);
                 scope.resetMousePosition();
+                scope.setupPointerlockEnableHandler();
             }, 
             // on error
             function(event) {
                 console.log("Error: could not obtain pointerlock");
             }
         );
-    };
+    }
 
-    this.setupPointerlockEnableHandler = function() {
-        $(containerName).click(
-            function() {
-                console.log("Pointerlock requested");
-                scope.requestPointerLock();
-            }
-        );
-    };
-
-    this.setupPointerlockEnableHandler();
-    scope.requestPointerLock();
+    pointerlockMouseDown();
 
     this.releasePointerLock = function() {
         // Ask the browser to release the pointer
@@ -803,6 +782,8 @@ THREE.MapControls = function ( object, scene, domElement ) {
         } else if (scope.mousePosition.y > scope.mouseBounds.maxY) {
             scope.mousePosition.y = scope.mouseBounds.maxY;
         }
+
+        console.log("Mouse position determined as " + scope.mousePosition.x + " " + scope.mousePosition.y);
 
         scope.drawMouseCursor();
     }

@@ -169,6 +169,7 @@ var Game = Class.extend({
     }, 
 
     createGameConsole: function() {
+        var scope = this;
         var gameConsole = new GameConsole();
         $("#Stats-output").append(gameConsole.domElement);
 
@@ -177,6 +178,10 @@ var Game = Class.extend({
         // $("#gameConsole").disableSelection();
 
         $("#gameConsole").addClass("unselectable");
+
+        $("#gameConsole").click(function() {
+            scope.controls.requestPointerLock();
+        });
 
         if (this.isTutorialMode) {
             gameConsole.displayInitialMessage("Welcome to Planet Blitz! Fight to the death!");   
