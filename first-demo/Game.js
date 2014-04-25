@@ -240,6 +240,11 @@ var Game = Class.extend({
     },
 
     destroy: function() {
+        // remove all PubSub tokens
+        if (this.tutorialHooks) {
+            this.tutorialHooks.destroy();
+        }
+
         this.world.destroy();
     }
 });
