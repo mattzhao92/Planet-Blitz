@@ -1,19 +1,10 @@
 var Game = Class.extend({
 
     init: function(containerName) {
-        // tutorial mode
-        this.isTutorialMode = SENT_FROM_TUTORIAL;
-
-        // flag because tracing renderGame pathway takes too long
-        if (SENT_FROM_TUTORIAL) {
-            // activate tutorial mode
-            console.log("Tutorial mode activated");
-            SENT_FROM_TUTORIAL = false;
-            this.tutorialHooks = new TutorialHooks(this.scene, this.controls, this.camera);
-        }
-
         // create a scene, that will hold all our elements such as objects, cameras and lights.
         this.scene = new THREE.Scene();
+        this.setupCamera();
+        this.setupCameraControls();
 
         // create a render and set the size
         this.renderer = new THREE.WebGLRenderer({antialias: true, maxLights: 50});
@@ -28,21 +19,31 @@ var Game = Class.extend({
 
         this.clock = new THREE.Clock();
 
-        this.createGameConsole();
-        this.createScoreBoard();
-
-        this.setupCamera();
-        this.setupCameraControls();
-
         this.setupGameWorld();
         this.addLighting();
         this.addSkybox();
 
-        // this.addControlGUI();
+        // tutorial mode
+        this.isTutorialMode = SENT_FROM_TUTORIAL;
+
+        // flag because tracing renderGame pathway takes too long
+        if (SENT_FROM_TUTORIAL) {
+            // activate tutorial mode
+            console.log("Tutorial mode activated");
+            SENT_FROM_TUTORIAL = false;
+            this.tutorialHooks = new TutorialHooks(this.scene, this.controls, this.camera);
+        }
+
+        this.createGameConsole();
+        this.createScoreBoard();
 
         // begin animation loop
         this.animate();
 
+        this.ensureMenuButtonsGone();
+    }, 
+
+    ensureMenuButtonsGone: function() {
         var scope = this;
         window.addEventListener( 'resize', function() {
             scope.onWindowResize(); }, false );
@@ -63,7 +64,7 @@ var Game = Class.extend({
                 clearInterval(ensureGameMenuGone);
             }
         }, 100);
-    }, 
+    },
 
     setupCamera: function() {
         // create a camera, which defines where we're looking at
