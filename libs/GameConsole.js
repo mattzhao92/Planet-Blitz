@@ -16,7 +16,7 @@ var GameConsole = function() {
 
 	var gameTextDisplay = document.createElement('textarea');
 	// should change these attributes to match size of parent / container
-	gameTextDisplay.style.cssText = 'resize:none;width:150px;height:100px;overflow:hidden;border: none;color:white;font-family:Helvetica,Arial,sans-serif;font-size:13px;line-height:20px;background-color:transparent';
+	gameTextDisplay.style.cssText = 'resize:none;width:100%;height:100%;overflow:hidden;border: none;color:white;font-family:Helvetica,Arial,sans-serif;font-size:13px;line-height:20px;background-color:transparent';
 	gameTextDisplay.id = 'gameTextDisplay';
 
 	gameConsole.appendChild(gameTextDisplay);
