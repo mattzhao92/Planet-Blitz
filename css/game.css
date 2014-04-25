@@ -111,6 +111,10 @@ body {
    user-select: none;
 }
 
+.passthrough {
+  pointer-events:none;
+}
+
 .list-game:hover {
   color: red;
   cursor: pointer;
