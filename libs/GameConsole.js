@@ -5,7 +5,7 @@ var GameConsole = function() {
 	// initialize game console
 	var container = document.createElement('div');
 	container.id = 'msgDisplay';
-	container.style.cssText = 'width:150px;height:100px;opacity:0.7;cursor:pointer;padding:0 0 3px 3px;text-align:left;background-color:transparent';
+	container.style.cssText = 'width:150px;height:100px;opacity:0.7;cursor:url(images/pointer.cur), default;padding:0 0 3px 3px;text-align:left;background-color:transparent';
 
 	container.style.position = 'absolute';
 	container.style.left = '13px';
@@ -15,6 +15,7 @@ var GameConsole = function() {
 	gameConsole.id = 'gameConsole';
 
 	var gameTextDisplay = document.createElement('textarea');
+	gameTextDisplay.setAttribute("disabled", true);
 	// should change these attributes to match size of parent / container
 	gameTextDisplay.style.cssText = 'resize:none;width:100%;height:100%;overflow:hidden;border: none;color:white;font-family:Helvetica,Arial,sans-serif;font-size:13px;line-height:20px;background-color:transparent';
 	gameTextDisplay.id = 'gameTextDisplay';
