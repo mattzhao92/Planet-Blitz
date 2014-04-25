@@ -708,7 +708,6 @@ THREE.MapControls = function ( object, scene, domElement ) {
             function(event) {
                 document.removeEventListener("mousemove", moveCallback, false);
                 scope.resetMousePosition();
-                scope.setupPointerlockEnableHandler();
             }, 
             // on error
             function(event) {
@@ -782,8 +781,6 @@ THREE.MapControls = function ( object, scene, domElement ) {
         } else if (scope.mousePosition.y > scope.mouseBounds.maxY) {
             scope.mousePosition.y = scope.mouseBounds.maxY;
         }
-
-        console.log("Mouse position determined as " + scope.mousePosition.x + " " + scope.mousePosition.y);
 
         scope.drawMouseCursor();
     }

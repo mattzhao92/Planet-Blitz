@@ -1,6 +1,17 @@
 var Game = Class.extend({
 
     init: function(containerName) {
+        // tutorial mode
+        this.isTutorialMode = SENT_FROM_TUTORIAL;
+
+        // flag because tracing renderGame pathway takes too long
+        if (SENT_FROM_TUTORIAL) {
+            // activate tutorial mode
+            console.log("Tutorial mode activated");
+            SENT_FROM_TUTORIAL = false;
+            this.tutorialHooks = new TutorialHooks(this.scene, this.controls, this.camera);
+        }
+
         // create a scene, that will hold all our elements such as objects, cameras and lights.
         this.scene = new THREE.Scene();
 
@@ -31,17 +42,6 @@ var Game = Class.extend({
 
         // begin animation loop
         this.animate();
-
-        // tutorial mode
-        this.isTutorialMode = SENT_FROM_TUTORIAL;
-
-        // flag because tracing renderGame pathway takes too long
-        if (SENT_FROM_TUTORIAL) {
-            // activate tutorial mode
-            console.log("Tutorial mode activated");
-            SENT_FROM_TUTORIAL = false;
-            this.tutorialHooks = new TutorialHooks(this.scene, this.controls, this.camera);
-        }
 
         var scope = this;
         window.addEventListener( 'resize', function() {
@@ -184,11 +184,9 @@ var Game = Class.extend({
         });
 
         if (this.isTutorialMode) {
-            gameConsole.displayInitialMessage("Welcome to Planet Blitz! Fight to the death!");   
-        } else {
-            // enlarge the display
             gameConsole.setWidth(500);
             gameConsole.setHeight(500);
+
             gameConsole.displayInitialMessage("Welcome to the tutorial!");
             gameConsole.append("Left click on a robot to select");
             gameConsole.append("Right click to shoot");
@@ -198,7 +196,6 @@ var Game = Class.extend({
             gameConsole.append("Destroy the enemy to win!");
 
             // a really bright light
-
             var scope = this;
             setTimeout(function() {
                 scope.tutorialHooks.revealMap();
@@ -207,8 +204,9 @@ var Game = Class.extend({
             setTimeout(function() {
                 scope.tutorialHooks.hideMap();
             }, 6000);
-
-            // begin tutorial hooks
+        } else {
+            // enlarge the display
+            gameConsole.displayInitialMessage("Welcome to Planet Blitz! Fight to the death!");   
         }
  
         this.gameConsole = gameConsole;
