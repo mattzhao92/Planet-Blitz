@@ -385,10 +385,6 @@ THREE.MapControls = function ( object, scene, domElement ) {
             (scope.mousePosition.y == scope.mouseBounds.maxY);
     };
 
-    // this.isBetween = function(checkMe, bounds, margin) {
-    //     if (checkMe )
-    // };
-
     this.checkIfCameraAtBoundaries = function() {
         var atb = false;
 
@@ -705,12 +701,20 @@ THREE.MapControls = function ( object, scene, domElement ) {
     // for firefox
     this.domElement.addEventListener( 'DOMMouseScroll', onMouseWheel, false ); 
 
+    // TODO: remove this hardcoding
+    var containerName = "#WebGL-output";
+
     this.requestPointerLock = function() {
         PL.requestPointerLock(document.body,
             // on pointerlock enable
             function(event) {
+                console.log("Pointerlock enabled");
                 scope.handleResize();
+                console.log(document.body);
                 document.addEventListener("mousemove", moveCallback, false);
+
+                // disable the pointerlock enable handler
+                $(containerName).off("click");
             }, 
             // on pointerlock disable
             function(event) {
@@ -722,20 +726,19 @@ THREE.MapControls = function ( object, scene, domElement ) {
                 console.log("Error: could not obtain pointerlock");
             }
         );
-    }
+    };
 
-    // TODO: remove this hardcoding
-    var containerName = "#WebGL-output";
+    this.setupPointerlockEnableHandler = function() {
+        $(containerName).click(
+            function() {
+                console.log("Pointerlock requested");
+                scope.requestPointerLock();
+            }
+        );
+    };
 
-    $(containerName).click(
-        function() {
-            scope.requestPointerLock();
-        }
-    );
-
+    this.setupPointerlockEnableHandler();
     scope.requestPointerLock();
-
-
 
     this.releasePointerLock = function() {
         // Ask the browser to release the pointer
