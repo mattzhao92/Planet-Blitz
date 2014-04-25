@@ -6,6 +6,7 @@ var ScoreBoard = function() {
 	var container = document.createElement('div');
 	container.id = 'scoreControls';
 	container.style.cssText = 'width:150px;height:100px;opacity:0.7;cursor:url(images/pointer.cur), default;padding:0 0 3px 3px;text-align:left;background-color:transparent';
+	container.className = "passthrough";
 
 	container.style.position = 'absolute';
 	container.style.right = '13px';
@@ -17,6 +18,7 @@ var ScoreBoard = function() {
 	var scoreDisplay = document.createElement('table');
 	scoreDisplay.style.cssText = 'resize:none;width:100%;overflow:hidden;border: none;color:white;font-family:Helvetica,Arial,sans-serif;font-size:12px;line-height:10px;background-color:transparent';
 	scoreDisplay.id = 'scoreTextDisplay';
+	scoreDisplay.className = "unselectable passthrough";
 
 	gameConsole.appendChild(scoreDisplay);
 	container.appendChild(gameConsole);
