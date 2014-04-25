@@ -411,6 +411,7 @@ $(document).ready(function() {
   $('#container').hide();
   centerButtons();
   $('#playBtn').click(function() {
+    SENT_FROM_TUTORIAL = false;
     sendListGameMsg();
   });
   showBackground();
@@ -420,17 +421,18 @@ $(document).ready(function() {
 
   /* Start the game locally */
   $('#debugBtn').click(function() {
+    SENT_FROM_TUTORIAL = false; 
     sendListMapMsg();
   });
 
   $('#tutorialBtn').click(function() {
+    SENT_FROM_TUTORIAL = true; 
     sendSingleModeMsg('Blitz Fight (2)');
     loading();
-    SENT_FROM_TUTORIAL = true; 
   });
 
   // TODO: reset game state?
-  $('.jms-link').click(function() {
+  $('#leaveBtn').click(function() {
     if (GameInfo.isLoading) {
       sendLeaveMsg();
     } else if (GameInfo.isStart) {
