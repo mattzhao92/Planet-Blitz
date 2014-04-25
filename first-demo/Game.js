@@ -1,6 +1,16 @@
 var Game = Class.extend({
 
     init: function(containerName) {
+        // tutorial mode
+        this.isTutorialMode = SENT_FROM_TUTORIAL;
+
+        // flag because tracing renderGame pathway takes too long
+        if (SENT_FROM_TUTORIAL) {
+            // activate tutorial mode
+            console.log("Tutorial mode activated");
+            SENT_FROM_TUTORIAL = false;
+        }
+
         // create a scene, that will hold all our elements such as objects, cameras and lights.
         this.scene = new THREE.Scene();
 
@@ -31,16 +41,6 @@ var Game = Class.extend({
 
         // begin animation loop
         this.animate();
-
-        // tutorial mode
-        this.isTutorialMode = SENT_FROM_TUTORIAL;
-
-        // flag because tracing renderGame pathway takes too long
-        if (SENT_FROM_TUTORIAL) {
-            // activate tutorial mode
-            console.log("Tutorial mode activated");
-            SENT_FROM_TUTORIAL = false;
-        }
 
         var scope = this;
         window.addEventListener( 'resize', function() {
@@ -178,14 +178,12 @@ var Game = Class.extend({
         $("#gameConsole").addClass("unselectable");
 
         if (this.isTutorialMode) {
-            gameConsole.displayInitialMessage("Welcome to Planet Blitz! Fight to the death!");   
-        } else {
-            // enlarge the display
             gameConsole.setWidth(500);
             gameConsole.setHeight(500);
             gameConsole.displayInitialMessage("Welcome to the Planet Blitz tutorial!");
-
-
+        } else {
+            // enlarge the display
+            gameConsole.displayInitialMessage("Welcome to Planet Blitz! Fight to the death!");   
         }
  
         this.gameConsole = gameConsole;
