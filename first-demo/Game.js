@@ -20,7 +20,6 @@ var Game = Class.extend({
         this.clock = new THREE.Clock();
 
         this.setupGameWorld();
-        this.addLighting();
         this.addSkybox();
 
         // tutorial mode
@@ -36,6 +35,7 @@ var Game = Class.extend({
 
         this.createGameConsole();
         this.createScoreBoard();
+        this.addLighting();
 
         // begin animation loop
         this.animate();
@@ -78,21 +78,24 @@ var Game = Class.extend({
     },
 
     addLighting: function() {
-        // // really subtle ambient lighting
-        // var ambientLight = new THREE.AmbientLight( 0x191919 );
-        // this.scene.add( ambientLight );
+        if (GameInfo.observerMode) {
+            // really subtle ambient lighting
+            var ambientLight = new THREE.AmbientLight( 0x191919 );
+            this.scene.add( ambientLight );
 
-        // this.scene.remove( ambientLight );
-        // // sky color, ground color, intensity
-        // // var hemiLight = new THREE.HemisphereLight( 0x0000ff, 0xffffff, 0.3 ); 
-        // // this.scene.add(hemiLight);
+            this.scene.remove( ambientLight );
+            // sky color, ground color, intensity
+            // var hemiLight = new THREE.setHeightemisphereLight( 0x0000ff, 0xffffff, 0.3 ); 
+            // this.scene.add(hemiLight);
 
-        // // a really bright light
-        // var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.8 );
-        // directionalLight.position.x = 0;
-        // directionalLight.position.y = 400;
-        // directionalLight.position.z = 0;
-        // this.scene.add( directionalLight );
+            // a really bright light
+            var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.8 );
+            directionalLight.position.x = 0;
+            directionalLight.position.y = 400;
+            directionalLight.position.z = 0;
+            this.scene.add( directionalLight );
+        }
+
     },
 
     addSkybox: function() {
@@ -205,6 +208,9 @@ var Game = Class.extend({
             setTimeout(function() {
                 scope.tutorialHooks.hideMap();
             }, 6000);
+        } else if (GameInfo.observerMode) {
+            gameConsole.displayInitialMessage("You are a spectator; you will join after this game finishes");   
+
         } else {
             // enlarge the display
             gameConsole.displayInitialMessage("Welcome to Planet Blitz! Fight to the death!");   

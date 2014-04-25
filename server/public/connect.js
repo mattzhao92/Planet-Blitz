@@ -85,6 +85,7 @@ socket.on(Message.GAME, function(playerInfo) {
 /* Handle the team id message */
 socket.on(Message.PREPARE, function(prepareInfo) {
   setup_game_config(prepareInfo);
+  GameInfo.observerMode = false;
   removeGameCanvas();
   renderGame();
   
@@ -110,6 +111,7 @@ socket.on(Message.START, function(score) {
 
 socket.on(Message.OBSERVER, function(obMsg) {
   setup_game_config(obMsg[Message.PREPARE]);
+  GameInfo.observerMode = true;
   var state = obMsg[Message.STATE];
   var score = obMsg[Stat.result];
   removeGameCanvas();
@@ -250,6 +252,7 @@ function GameConfig() {
   this.mapLoader = null;
   this.inPostGame = false;
   this.isListingGames = false;
+  this.observerMode = false;
 }
 
 
