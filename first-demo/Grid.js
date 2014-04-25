@@ -4,6 +4,8 @@ var Grid = Class.extend({
     init: function(gameApp, tileSize, scene, camera, controls) {
         'use strict';
 
+        this.unsubscribeTokens = [];
+
         var mapContent = GameInfo.mapContent;
         this.mapJson = JSON.parse(mapContent);
         this.gameApp = gameApp;
@@ -57,9 +59,6 @@ var Grid = Class.extend({
         this.setupObstacles(this.mapJson);
 
         this.resetInProgress = false;
-        this.camera.position.x = 0;
-        this.camera.position.y = 600;
-        this.camera.position.z = 400;
 
         this.controls.reset();
 
@@ -123,7 +122,7 @@ var Grid = Class.extend({
             scope.refreshMaterials();
         }
 
-        PubSub.subscribe(Constants.TOPIC_REFRESH_MATERIALS, subscriber);
+        this.unsubscribeTokens.push(PubSub.subscribe(Constants.TOPIC_REFRESH_MATERIALS, subscriber));
     },
 
     refreshMaterials: function() {
@@ -1044,6 +1043,9 @@ var Grid = Class.extend({
     },
 
     destroy: function() {
+        _.forEach(this.unsubscribeTokens, function(token) {
+            PubSub.unsubscribe(token);
+        });
         console.log("Game destroy");
         this.onGameFinish();
         Utils.deallocate(this.scene);
