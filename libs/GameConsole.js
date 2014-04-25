@@ -4,7 +4,7 @@ var GameConsole = function() {
 
 	// initialize game console
 	var container = document.createElement('div');
-	container.id = 'gameControls';
+	container.id = 'msgDisplay';
 	container.style.cssText = 'width:150px;height:100px;opacity:0.7;cursor:pointer;padding:0 0 3px 3px;text-align:left;background-color:transparent';
 
 	container.style.position = 'absolute';
@@ -41,6 +41,10 @@ var GameConsole = function() {
 			box.animate({
 				scrollTop: box[0].scrollHeight - box.height()
 			}, 700);
+		},
+
+		setWidth: function(size) {
+			$("#msgDisplay").width(size);
 		}
 	}
 };

@@ -174,7 +174,9 @@ var Game = Class.extend({
         if (this.isTutorialMode) {
             gameConsole.displayInitialMessage("Welcome to Planet Blitz! Fight to the death!");   
         } else {
-            gameConsole.displayInitialMessage("Welcome to the Planet Blitz tutorial!");   
+            // enlarge the display
+            gameConsole.setWidth(500);
+            gameConsole.displayInitialMessage("Welcome to the Planet Blitz tutorial!");
         }
  
         this.gameConsole = gameConsole;
