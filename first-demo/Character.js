@@ -88,6 +88,7 @@ var Character = Sprite.extend({
 
             // TODO: clean up this code when socket semantics are clarified
             if (isOriginalCmd) {
+                PubSub.publish(Topic.CHARACTER_SHOOT, this);
                 sendShootMsg(this.id, from, to);
             }
             this.shootStrategy.shoot(this, from, to);
