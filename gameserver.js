@@ -533,7 +533,7 @@ Game.prototype.removePlayer = function(socket, game) {
           gameLog(gameStatistics);
           // Reset the game state.
           game.reset();
-          gameStatistics[Message.LEAVE] = 'Players escaped: ' + game.playerEscaped;
+          gameStatistics[Message.LEAVE] = 'Players left: ' + game.playerEscaped;
           socket.broadcast.to(game.room).emit(Message.FINISH, gameStatistics);
         } else {
           var removeMsg = {};
