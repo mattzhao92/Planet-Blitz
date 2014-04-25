@@ -171,8 +171,11 @@ var Game = Class.extend({
         var gameConsole = new GameConsole();
         $("#Stats-output").append(gameConsole.domElement);
 
-        $("#Stats-output").children("input, select, textarea").live('selectstart dragstart', function(evt){ evt.preventDefault(); return false; });
-        $("#Stats-output").children("input, select, textarea").attr("disabled",true);
+        $("#gameConsole").live('selectstart dragstart', function(evt){ evt.preventDefault(); return false; });
+        // $("gameConsole").children("input, select, textarea").attr("disabled", true);
+        // $("#gameConsole").disableSelection();
+
+        $("#gameConsole").addClass("unselectable");
 
         if (this.isTutorialMode) {
             gameConsole.displayInitialMessage("Welcome to Planet Blitz! Fight to the death!");   
