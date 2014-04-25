@@ -705,28 +705,37 @@ THREE.MapControls = function ( object, scene, domElement ) {
     // for firefox
     this.domElement.addEventListener( 'DOMMouseScroll', onMouseWheel, false ); 
 
+    this.requestPointerLock = function() {
+        PL.requestPointerLock(document.body,
+            // on pointerlock enable
+            function(event) {
+                scope.handleResize();
+                document.addEventListener("mousemove", moveCallback, false);
+            }, 
+            // on pointerlock disable
+            function(event) {
+                document.removeEventListener("mousemove", moveCallback, false);
+                scope.resetMousePosition();
+            }, 
+            // on error
+            function(event) {
+                console.log("Error: could not obtain pointerlock");
+            }
+        );
+    }
+
     // TODO: remove this hardcoding
     var containerName = "#WebGL-output";
 
     $(containerName).click(
         function() {
-            PL.requestPointerLock(document.body,
-                // on pointerlock enable
-                function(event) {
-                    scope.handleResize();
-                    document.addEventListener("mousemove", moveCallback, false);
-                }, 
-                // on pointerlock disable
-                function(event) {
-                    document.removeEventListener("mousemove", moveCallback, false);
-                    scope.resetMousePosition();
-                }, 
-                // on error
-                function(event) {
-                    console.log("Error: could not obtain pointerlock");
-                });
+            scope.requestPointerLock();
         }
     );
+
+    scope.requestPointerLock();
+
+
 
     this.releasePointerLock = function() {
         // Ask the browser to release the pointer
