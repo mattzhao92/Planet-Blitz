@@ -43,8 +43,12 @@ var GameConsole = function() {
 			}, 700);
 		},
 
-		setWidth: function(size) {
-			$("#msgDisplay").width(size);
+		setWidth: function(width) {
+			$("#msgDisplay").width(width);
+		},
+
+		setHeight: function(height) {
+			$("#msgDisplay").height(height);
 		}
 	}
 };

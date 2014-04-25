@@ -5,7 +5,7 @@ var ScoreBoard = function() {
 	// initialize game console
 	var container = document.createElement('div');
 	container.id = 'scoreControls';
-	container.style.cssText = 'width:150px;height:100px;opacity:0.7;cursor:pointer;padding:0 0 3px 3px;text-align:left;background-color:transparent';
+	container.style.cssText = 'width:150px;height:100px;opacity:0.7;cursor:url(images/pointer.cur), default;padding:0 0 3px 3px;text-align:left;background-color:transparent';
 
 	container.style.position = 'absolute';
 	container.style.right = '13px';
@@ -14,19 +14,9 @@ var ScoreBoard = function() {
 	var gameConsole = document.createElement('div');
 	gameConsole.id = 'scoreConsole';
 
-
-
-	// var gameTextDisplay = document.createElement('textarea');
-	// should change these attributes to match size of parent / container
-	// gameTextDisplay.style.cssText = 'resize:none;width:150px;height:100px;overflow:hidden;border: none;color:white;font-family:Helvetica,Arial,sans-serif;font-size:9px;line-height:20px;background-color:transparent';
-	// gameTextDisplay.id = 'scoreTextDisplay';
-
 	var scoreDisplay = document.createElement('table');
-	scoreDisplay.style.cssText = 'resize:none;width:150px;overflow:hidden;border: none;color:white;font-family:Helvetica,Arial,sans-serif;font-size:12px;line-height:10px;background-color:transparent';
+	scoreDisplay.style.cssText = 'resize:none;width:100%;overflow:hidden;border: none;color:white;font-family:Helvetica,Arial,sans-serif;font-size:12px;line-height:10px;background-color:transparent';
 	scoreDisplay.id = 'scoreTextDisplay';
-	// var tr = scoreDisplay.insertRow();
-	// var td = tr.insertCell();
-	// td.appendChild(document.createTextNode('abc'));
 
 	gameConsole.appendChild(scoreDisplay);
 	container.appendChild(gameConsole);

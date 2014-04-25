@@ -171,12 +171,18 @@ var Game = Class.extend({
         var gameConsole = new GameConsole();
         $("#Stats-output").append(gameConsole.domElement);
 
+        $("#Stats-output").children("input, select, textarea").live('selectstart dragstart', function(evt){ evt.preventDefault(); return false; });
+        $("#Stats-output").children("input, select, textarea").attr("disabled",true);
+
         if (this.isTutorialMode) {
             gameConsole.displayInitialMessage("Welcome to Planet Blitz! Fight to the death!");   
         } else {
             // enlarge the display
             gameConsole.setWidth(500);
+            gameConsole.setHeight(500);
             gameConsole.displayInitialMessage("Welcome to the Planet Blitz tutorial!");
+
+
         }
  
         this.gameConsole = gameConsole;
