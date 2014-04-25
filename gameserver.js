@@ -153,8 +153,10 @@ io.sockets.on('connection', function(socket) {
           socket.emit(Message.ERROR, 'Username already exits');
           return; 
         }
-        gameToJoin.addPlayer(socket, username);
-        updateClientsGameLists();
+        if (!gameToJoin.isStart || !gameToJoin.isPlaying) {
+	        gameToJoin.addPlayer(socket, username);
+	        updateClientsGameLists();
+        }
         var username = joinRequest[Message.USERNAME];
         socket.set('username', username, function() {
           gameLog('User ' + username + ' game ' + gameId);
@@ -166,7 +168,10 @@ io.sockets.on('connection', function(socket) {
                 gameToJoin.score[username] = new Score();
                 obMsg = gameToJoin.gameState.toJSON();
                 obMsg[Stat.result] = gameToJoin.getScoreJSON();
+                obMsg[Message.PREPARE] = gameToJoin.prepareGame(true);
                 socket.emit(Message.OBSERVER, obMsg);
+                gameToJoin.addPlayer(socket, username);
+	        	updateClientsGameLists();
               } else {
                 gameToJoin.numRestartPlayers++;
                 gameToJoin.score[username] = new Score();
@@ -183,6 +188,7 @@ io.sockets.on('connection', function(socket) {
               }
             } else {
               var playerState = gameToJoin.getPlayerInfo();
+              console.log(playerState);
               socket.broadcast.to(gameToJoin.room).emit(Message.JOIN, playerState);
               socket.emit(Message.JOIN, playerState);
               if (gameToJoin.isFull()) {
@@ -301,7 +307,7 @@ io.sockets.on('connection', function(socket) {
           var scoreStat = game.getScoreJSON();
           gameStatistics[Stat.result] = scoreStat;
           if (game.playerEscaped.length != 0) {
-            gameStatistics[Message.LEAVE] = 'Players escaped: ' + game.playerEscaped;
+            gameStatistics[Message.LEAVE] = 'Players left: ' + game.playerEscaped;
 
           }
           // Reset the game state.
@@ -451,11 +457,20 @@ function shuffle(o){
 };
 
 Game.prototype.getPlayerInfo = function() {
-  return this.numPlayers + '/' + this.maxNumPlayers;
+	var msgs = [];
+	var msg = this.numPlayers + '/' + this.maxNumPlayers;
+	msgs.push(msg);
+  return msgs;
 }
 
 Game.prototype.getPlayerRestartInfo = function() {
-  return this.numRestartPlayers + '/' + this.maxNumPlayers + '  . The game would restart as soon as ' + this.numPlayers + ' players are ready';
+	var more = this.numPlayers == 1 ? 2 : this.numPlayers;
+	var msgs = new Array();
+	var msg1 = this.numRestartPlayers + '/' + this.maxNumPlayers;
+	var msg2 = 'The game would restart as soon as ' + more + ' players are ready';
+	msgs.push(msg1);
+	msgs.push(msg2);
+	return msgs;
 }
 
 Game.prototype.addPlayer = function(sk, username) {
@@ -518,7 +533,7 @@ Game.prototype.removePlayer = function(socket, game) {
           gameLog(gameStatistics);
           // Reset the game state.
           game.reset();
-          gameStatistics[Message.LEAVE] = 'Players escaped: ' + game.playerEscaped;
+          gameStatistics[Message.LEAVE] = 'Players left: ' + game.playerEscaped;
           socket.broadcast.to(game.room).emit(Message.FINISH, gameStatistics);
         } else {
           var removeMsg = {};

@@ -1,4 +1,4 @@
-var loadScreenElements = ["#Loading-output", ".span", ".cloud"];
+var loadScreenElements = ["#container"];
 
 function applyToLoadScreen(func) {
   for (var i = 0; i < loadScreenElements.length; i++) {
@@ -9,6 +9,7 @@ function applyToLoadScreen(func) {
 function showLoadScreen() {
   applyToLoadScreen(function(elem) {
     $(elem).show();
+    centerElement($(elem));
   });
 }
 
@@ -45,6 +46,7 @@ function loading() {
   
   hideButtons();
   hideMenu();
+  $('#Loading-output').show();
 
   $('#leaveBtn').show();
   showLoadScreen();
@@ -394,11 +396,19 @@ function listAvailableGames(games) {
   centerElement($(".ui-widget.name-dialog"));
 }
 
-$(document).ready(function() { 
+$(document).ready(function() {
+  // disable text selection
+  $("body").css("-webkit-user-select","none");
+  $("body").css("-moz-user-select","none");
+  $("body").css("-ms-user-select","none");
+  $("body").css("-o-user-select","none");
+  $("body").css("user-select","none");
+
   hideGameHUD();
   $('#Loading-output').hide();
   $('#slide-container').hide();
   $('#leaveBtn').hide();
+  $('#container').hide();
   centerButtons();
   $('#playBtn').click(function() {
     sendListGameMsg();
@@ -507,4 +517,9 @@ function showButtons() {
   $('#debugBtn').show();
   $('#settingBtn').show();
   $('#tutorialBtn').show();
+}
+
+function onresizeHandler() {
+  centerButtons();
+  centerElement($('#container'));
 }

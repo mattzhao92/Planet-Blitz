@@ -84,19 +84,7 @@ socket.on(Message.GAME, function(playerInfo) {
 
 /* Handle the team id message */
 socket.on(Message.PREPARE, function(prepareInfo) {
-  var playerTeamInfo = prepareInfo[Message.TEAM];
-  GameInfo.myTeamId = parseInt(playerTeamInfo[GameInfo.username]);
-  GameInfo.existingTeams.length = 0;
-  for (var uname in playerTeamInfo) {
-    GameInfo.existingTeams.push(parseInt(playerTeamInfo[uname]));
-  }
-  var count = 0;
-  for (var key in playerTeamInfo) {
-    count++;
-  }
-  GameInfo.numOfTeams = count;
-  GameInfo.maxNumTeams = parseInt(prepareInfo[Message.MAXPLAYER]);
-  GameInfo.mapContent = prepareInfo[Message.MAP];
+  setup_game_config(prepareInfo);
   removeGameCanvas();
   renderGame();
   
@@ -121,6 +109,7 @@ socket.on(Message.START, function(score) {
 });
 
 socket.on(Message.OBSERVER, function(obMsg) {
+  setup_game_config(obMsg[Message.PREPARE]);
   var state = obMsg[Message.STATE];
   var score = obMsg[Stat.result];
   removeGameCanvas();
@@ -258,6 +247,7 @@ function GameConfig() {
   this.isLoading = false;
   this.existingTeams = new Array();
   this.mapContent = null;
+  this.mapLoader = null;
   this.inPostGame = false;
   this.isListingGames = false;
 }
@@ -277,7 +267,7 @@ function removeGameCanvas() {
 
 function renderGame() {
   $('#game-container').unwrap();
-  var containerBox = document.getElementById('Loading-output-container');
+  var containerBox = document.getElementById('container');
   var newDiv = document.createElement("div");
   newDiv.id = 'WebGL-output';
   var newScore = document.createElement("div");
@@ -371,11 +361,31 @@ function sendListMapMsg() {
   socket.emit(Message.LISTMAP);
 }
 
-function updateLoadingPlayerState(state) {
-  $('#Loading-output').html('Waiting...</br>Player: ' + state);
+function updateLoadingPlayerState(msgs) {
+  $('#Loading-output').text('Players: ' + msgs[0]);
+  if (msgs.length == 2) {
+    $('#Loading-output2').text(msgs[1]);
+  }
 }
 
 function sendSyncMsg() {
   socket.emit(Message.SYNC);
+}
+
+function setup_game_config(prepareInfo) {
+  var playerTeamInfo = prepareInfo[Message.TEAM];
+  GameInfo.myTeamId = parseInt(playerTeamInfo[GameInfo.username]);
+  GameInfo.existingTeams.length = 0;
+  for (var uname in playerTeamInfo) {
+    GameInfo.existingTeams.push(parseInt(playerTeamInfo[uname]));
+  }
+  var count = 0;
+  for (var key in playerTeamInfo) {
+    count++;
+  }
+  GameInfo.numOfTeams = count;
+  GameInfo.maxNumTeams = parseInt(prepareInfo[Message.MAXPLAYER]);
+  GameInfo.mapContent = prepareInfo[Message.MAP];
+  GameInfo.mapLoader = new ServerMapLoader(GameInfo.mapContent);
 }
 

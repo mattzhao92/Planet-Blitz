@@ -292,6 +292,16 @@ var Grid = Class.extend({
             this.getMyTeamCharacters()[0].onSelect();
             Sounds['unit-select.mp3'].play();            
         }
+
+        var mapLoader = GameInfo.mapLoader;
+        for (var tm  = 0; tm < mapLoader.getNumberOfTeams(); tm++) {
+            if (GameInfo.existingTeams.indexOf(tm) == -1) {
+                for (var i = 0; i < mapLoader.getUnitsInTeam(tm).length; i++) {
+                    this.silentlyRemoveCharacter(this.getCharacterById(tm, i));
+                }
+            }
+        }
+        GameInfo.mapLoader = null;
     },
 
     onGameFinish: function() {
