@@ -84,10 +84,9 @@ THREE.MapControls = function ( object, scene, domElement ) {
     this.panSpeed = 0.35;
 
     // camera boundary settings
-    this.minX = -Infinity;
-    this.maxX = Infinity;
-    this.minZ = -Infinity;
-    this.maxZ = Infinity;
+    this.cameraBoundaries = {minX: -Infinity, maxX: Infinity, minZ: -Infinity, maxZ: Infinity};
+    // "margin" of camera boundaries
+    var MARGIN = 30;
 
     // for smooth scrolling
     this.velocityX = 0.0;
@@ -110,7 +109,7 @@ THREE.MapControls = function ( object, scene, domElement ) {
     var _panStart = new THREE.Vector2();
     var _panEnd = new THREE.Vector2();
 
-    // make sure this arbitrary mouse position is slightl
+    // make sure this arbitrary mouse position is out of bounds...
     var ARBITRARY_MOUSE_POS = 50;
     this.mousePosition = {x: ARBITRARY_MOUSE_POS, y: ARBITRARY_MOUSE_POS};
 
@@ -308,61 +307,6 @@ THREE.MapControls = function ( object, scene, domElement ) {
         scale *= zoomScale;
     };
 
-    this.pan = function () {
-
-        var mouseChange = _panEnd.clone().sub(_panStart );
-
-        if ( mouseChange.lengthSq() > 0.00000001) {
-            
-            mouseChange.multiplyScalar(_this.panSpeed * _eye.length());
-
-            var distance = _eye.clone();
-            distance = distance.cross(this.object.up).setLength(mouseChange.x);
-
-            var unitZVector = new THREE.Vector3(0, 0, -1);
-            // transform the unit z vector into camera's local space
-            distance.add(unitZVector.transformDirection(this.object.matrix).setLength(mouseChange.y));
-            // prevent camera from getting closer to grid
-            distance.y = 0;
-
-            // experimental checking of camera boundaries while panning
-            // enforce camera boundaries when panning
-            // var newZ = distance.z + this.object.position.z;
-            // var newX = distance.x + this.object.position.x;
-
-            // // console.log(newX + " " + newZ);
-
-            // var verticalFOV = this.object.fov * ( Math.PI / 180);
-
-            // var fieldOfVisionHeight = 2 * Math.tan(verticalFOV / 2) * _eye.length();
-
-            // var aspect = this.screen.width / this.screen.height;
-            // var fieldOfVisionWidth = fieldOfVisionHeight * aspect;
-
-            // var widthMargin = fieldOfVisionWidth / 4;
-            // var heightMargin = fieldOfVisionHeight / 4;
-
-            // // if (newZ - heightMargin > this.maxZ || newZ + heightMargin < this.minZ) {
-            // //     distance.z = 0;
-            // //     _panStart.z = _panEnd.z;
-            // // }
-
-            // if (newX - widthMargin > this.maxX || newX + widthMargin < this.minX) {
-            //     distance.x = 0;
-            //     _panStart.x = _panStart.x;
-            // }
-
-            this.object.position.add( distance );
-            this.target.add( distance );
-
-            _panStart.add(mouseChange.subVectors(_panEnd, _panStart).multiplyScalar(_this.dynamicDampingFactor));
-
-            // console.log("viewable width " + width);
-
-            // otherwise, end the pan
-        }
-    };
-
     this.updateMouseVector = function() {
         var xDiff = this.screen.width / 2 - scope.mousePosition.x ;
         // multiply by 2 because of wide-screen format
@@ -439,7 +383,19 @@ THREE.MapControls = function ( object, scene, domElement ) {
             (scope.mousePosition.x == scope.mouseBounds.maxX) || 
             (scope.mousePosition.y == scope.mouseBounds.minY) ||
             (scope.mousePosition.y == scope.mouseBounds.maxY);
-    }
+    };
+
+    this.checkIfCameraAtBoundaries = function() {
+        var atb = false;
+
+        var epsilon = 5;
+        if (this.object.position.x ) {
+
+        }
+        if (this.object.position.z ) {
+
+        }
+    };
 
     this.updateCameraFromVelocity = function(delta) {
 
@@ -481,6 +437,18 @@ THREE.MapControls = function ( object, scene, domElement ) {
         // prevent camera from getting closer to grid
         distance.y = 0;
 
+        if (this.object.position.x + distance.x > this.cameraBoundaries.maxX) {
+            distance.x = this.cameraBoundaries.maxX - this.object.position.x;
+        } else if (this.object.position.x < this.cameraBoundaries.minX) {
+            distance.x = this.cameraBoundaries.minX - this.object.position.x;
+        }
+
+        if (this.object.position.z + distance.z > this.cameraBoundaries.maxZ) {
+            distance.z = this.cameraBoundaries.maxZ - this.object.position.z;
+        } else if (this.object.position.z + distance.z < this.cameraBoundaries.minZ) {
+            distance.z = this.cameraBoundaries.minZ - this.object.position.z;
+        }
+
         this.object.position.add( distance );
         this.target.add( distance );
 
@@ -502,76 +470,83 @@ THREE.MapControls = function ( object, scene, domElement ) {
             // case: camera coming towards user
             scope.velocityZ += scope.DECELERATION * delta;
         }
+
+        return true;
     };
 
     this.update = function (delta) {
         _eye.subVectors(_this.object.position, this.target);
         _this.updateCameraFromVelocity(delta);
-        _this.pan();
 
-        var position = this.object.position;
-        var offset = position.clone().sub( this.target );
+        var shouldContinueUpdate = true;
+        if (shouldContinueUpdate) {
+            var position = this.object.position;
+            var offset = position.clone().sub( this.target );
 
-        // angle from z-axis around y-axis
+            // angle from z-axis around y-axis
 
-        var theta = Math.atan2( offset.x, offset.z );
+            var theta = Math.atan2( offset.x, offset.z );
 
-        // angle from y-axis
+            // angle from y-axis
 
-        var phi = Math.atan2( Math.sqrt( offset.x * offset.x + offset.z * offset.z ), offset.y );
+            var phi = Math.atan2( Math.sqrt( offset.x * offset.x + offset.z * offset.z ), offset.y );
 
-        if ( this.autoRotate ) {
+            if ( this.autoRotate ) {
 
-            this.rotateLeft( getAutoRotationAngle() );
+                this.rotateLeft( getAutoRotationAngle() );
 
+            }
+
+            theta += thetaDelta;
+            
+            phi += phiDelta;            
+
+            // restrict phi to be between desired limits
+            phi = Math.max( this.minPolarAngle, Math.min( this.maxPolarAngle, phi ) );
+
+            // restrict phi to be betwee EPS and PI-EPS
+            phi = Math.max( EPS, Math.min( Math.PI - EPS, phi ) );
+
+            var radius = offset.length() * scale;
+
+            // restrict radius to be between desired limits
+            radius = Math.max( this.minDistance, Math.min( this.maxDistance, radius ) );
+
+            offset.x = radius * Math.sin( phi ) * Math.sin( theta );
+            offset.y = radius * Math.cos( phi );
+            offset.z = radius * Math.sin( phi ) * Math.cos( theta );
+
+            position.copy( this.target ).add( offset );
+
+            this.object.lookAt( this.target );
+
+            thetaDelta = 0;
+            phiDelta = 0;
+            scale = 1;
+
+            if ( lastPosition.distanceTo( this.object.position ) > 0 ) {
+
+                this.dispatchEvent( changeEvent );
+
+                lastPosition.copy( this.object.position );
+            }
+
+            // PubSub.publish(Constants.TOPIC_CAMERA_POSITION, this.object.position);
+
+            // calculating field of view - width and height
+            // var verticalFOV = this.object.fov * ( Math.PI / 180);
+
+            // var height = 2 * Math.tan(verticalFOV / 2) * _eye.length();
+
+            // var aspect = this.screen.width / this.screen.height;
+            // // calculated 
+            // var width = height * aspect;
+
+            // console.log("viewable width " + width);
+
+            
         }
 
-        theta += thetaDelta;
-        
-        phi += phiDelta;            
-
-        // restrict phi to be between desired limits
-        phi = Math.max( this.minPolarAngle, Math.min( this.maxPolarAngle, phi ) );
-
-        // restrict phi to be betwee EPS and PI-EPS
-        phi = Math.max( EPS, Math.min( Math.PI - EPS, phi ) );
-
-        var radius = offset.length() * scale;
-
-        // restrict radius to be between desired limits
-        radius = Math.max( this.minDistance, Math.min( this.maxDistance, radius ) );
-
-        offset.x = radius * Math.sin( phi ) * Math.sin( theta );
-        offset.y = radius * Math.cos( phi );
-        offset.z = radius * Math.sin( phi ) * Math.cos( theta );
-
-        position.copy( this.target ).add( offset );
-
-        this.object.lookAt( this.target );
-
-        thetaDelta = 0;
-        phiDelta = 0;
-        scale = 1;
-
-        if ( lastPosition.distanceTo( this.object.position ) > 0 ) {
-
-            this.dispatchEvent( changeEvent );
-
-            lastPosition.copy( this.object.position );
-        }
-
-        // PubSub.publish(Constants.TOPIC_CAMERA_POSITION, this.object.position);
-
-        // calculating field of view - width and height
-        // var verticalFOV = this.object.fov * ( Math.PI / 180);
-
-        // var height = 2 * Math.tan(verticalFOV / 2) * _eye.length();
-
-        // var aspect = this.screen.width / this.screen.height;
-        // // calculated 
-        // var width = height * aspect;
-
-        // console.log("viewable width " + width);
     };
 
 
@@ -593,15 +568,6 @@ THREE.MapControls = function ( object, scene, domElement ) {
         if ( scope.userRotate === false ) return;
 
         event.preventDefault();
-
-        // quick hack
-        // event.clientX = scope.mousePosition.x;
-        // event.clientY = scope.mousePosition.y;
-
-        // console.log(event.clientX);
-        // console.log(event.clientY);
-
-        // console.log(scope.mousePosition);
 
         if ( event.button === 0 ) {
 
@@ -721,7 +687,7 @@ THREE.MapControls = function ( object, scene, domElement ) {
     }
 
     this.domElement.addEventListener( 'contextmenu', function ( event ) { event.preventDefault(); }, false );
-    this.domElement.addEventListener( 'mousedown', onMouseDown, false );
+    this.domElement.addEventListener( 'mousedown', pointerlockMouseDown, false );
     this.domElement.addEventListener( 'mousewheel', onMouseWheel, false );
     // for firefox
     this.domElement.addEventListener( 'DOMMouseScroll', onMouseWheel, false ); 
@@ -729,25 +695,28 @@ THREE.MapControls = function ( object, scene, domElement ) {
     // TODO: remove this hardcoding
     var containerName = "#WebGL-output";
 
-    $(containerName).click(
-        function() {
-            PL.requestPointerLock(document.body,
-                // on pointerlock enable
-                function(event) {
-                    scope.handleResize();
-                    document.addEventListener("mousemove", moveCallback, false);
-                }, 
-                // on pointerlock disable
-                function(event) {
-                    document.removeEventListener("mousemove", moveCallback, false);
-                    scope.resetMousePosition();
-                }, 
-                // on error
-                function(event) {
-                    console.log("Error: could not obtain pointerlock");
-                });
-        }
-    );
+    function pointerlockMouseDown( event ) {
+        PL.requestPointerLock(document.body,
+            // on pointerlock enable
+            function(event) {
+                // console.log("Pointerlock enabled");
+                scope.handleResize();
+                // console.log(document.body);
+                document.addEventListener("mousemove", moveCallback, false);
+            }, 
+            // on pointerlock disable
+            function(event) {
+                document.removeEventListener("mousemove", moveCallback, false);
+                scope.resetMousePosition();
+            }, 
+            // on error
+            function(event) {
+                console.log("Error: could not obtain pointerlock");
+            }
+        );
+    }
+
+    pointerlockMouseDown();
 
     this.releasePointerLock = function() {
         // Ask the browser to release the pointer

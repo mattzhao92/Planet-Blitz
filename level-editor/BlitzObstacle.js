@@ -30,27 +30,32 @@ var Obstacle = Class.extend({
     },
 
     initBoundBoxAndMesh: function() {
-    	var size = Constants.ORIGINAL_TILESIZE;
-    	var obstacle_bounding_cube = new THREE.CubeGeometry(size,size,size);
-		var obstacle_bounding_cube_material = new THREE.MeshLambertMaterial({opacity: this.opacity, transparent:true});
+        var size = Constants.ORIGINAL_TILESIZE;
+      // var obstacle_bounding_cube = new THREE.CubeGeometry(size,size,size);
+      // var obstacle_bounding_cube_material = new THREE.MeshLambertMaterial({opacity: this.opacity, transparent:true});
 
-		this.box_mesh = new THREE.Mesh( obstacle_bounding_cube, obstacle_bounding_cube_material );
+      this.box_mesh = new THREE.Object3D();
+      
+      var path_to_mesh = "blendermodels/rock.js";
 
-		var path_to_mesh = "";
-		
-		switch(this.obstacleType)
-		{
-		case "rock":
-		  path_to_mesh = "blendermodels/rock.js";
-		  break;
-		case "powerup-health":
-		  path_to_mesh = "blendermodels/powerup-health.js"
-		  break;
-		default:
-		  path_to_mesh = "blendermodels/rock.js";
-		  break;
-		}
-        this.loadFile(path_to_mesh, this.box_mesh);
+      switch(this.obstacleType)
+      {
+        case "rock":
+          path_to_mesh = "blendermodels/rock.js";
+          break;
+        case "powerup-health":
+          path_to_mesh = "blendermodels/powerup-health.js"
+          break;
+        case "crate":
+          path_to_mesh = "blendermodels/obstacle-exCrate.js";
+          break;
+        default:
+          path_to_mesh = "blendermodels/rock.js";
+          break;
+      }
+      
+      this.loadFile(path_to_mesh, this.box_mesh);
+
     },
 
     setXPos: function(xPos) {
@@ -83,30 +88,15 @@ var Obstacle = Class.extend({
 
     loadFile: function(filename, box_mesh) {
 
-		var fullFilename = filename;
-		var myloader = new THREE.JSONLoader();
-		var scope = this;
-		myloader.load(fullFilename, function(geometry, materials) {	     
-            // materials[0].color = scope.teamColor;
-            // materials[1].color = scope.teamColor;
-            // materials[10].color = scope.teamColor;
-
+      var fullFilename = filename;
+      var myloader = new THREE.JSONLoader();
+      var scope = this;
+      myloader.load(fullFilename, function(geometry, materials) {      
             var combinedMaterials = new THREE.MeshFaceMaterial(materials);
             scope.obstacle_mesh = new THREE.Mesh(geometry, combinedMaterials);
-
-            // scale to correct width / height / depth
-            geometry.computeBoundingBox();
-
-            // TODO: should use this bounding box to compute correct scale
-            var boundingBox = geometry.boundingBox;
-            var width = geometry.boundingBox.max.x - geometry.boundingBox.min.x;
-            var height = geometry.boundingBox.max.y - geometry.boundingBox.min.y;
-            var depth = geometry.boundingBox.max.z - geometry.boundingBox.min.z;
-            var size = Constants.ORIGINAL_TILESIZE;
-            scope.obstacle_mesh.scale.set(size/10, size/10, size/10);
-            
+            Utils.resize(scope.obstacle_mesh, Constants.ORIGINAL_TILESIZE / 2);
             box_mesh.add(scope.obstacle_mesh);
-    	});
+      });
     },
 
     getMesh: function() {

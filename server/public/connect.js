@@ -1,4 +1,4 @@
-var menuElements = ["#debugBtn", "#playBtn", "#helpBtn", "#blitzTitle"];
+var menuElements = ["#debugBtn", "#playBtn", "#settingBtn", "#tutorialBtn", "#blitzTitle"];
 var CURRENT_MENU = null;
 
 function showBackground() {
@@ -9,7 +9,7 @@ function showBackground() {
 
   var elem = document.getElementById("background-3d");
 
-  var menuButtons = ["#debugBtn", "#playBtn", "#helpBtn"];
+  var menuButtons = [".btn"];
 
   // bind hover handlers
   for (var i = 0; i < menuButtons.length; i++) {
@@ -84,19 +84,8 @@ socket.on(Message.GAME, function(playerInfo) {
 
 /* Handle the team id message */
 socket.on(Message.PREPARE, function(prepareInfo) {
-  var playerTeamInfo = prepareInfo[Message.TEAM];
-  GameInfo.myTeamId = parseInt(playerTeamInfo[GameInfo.username]);
-  GameInfo.existingTeams.length = 0;
-  for (var uname in playerTeamInfo) {
-    GameInfo.existingTeams.push(parseInt(playerTeamInfo[uname]));
-  }
-  var count = 0;
-  for (var key in playerTeamInfo) {
-    count++;
-  }
-  GameInfo.numOfTeams = count;
-  GameInfo.maxNumTeams = parseInt(prepareInfo[Message.MAXPLAYER]);
-  GameInfo.mapContent = prepareInfo[Message.MAP];
+  setup_game_config(prepareInfo);
+  GameInfo.observerMode = false;
   removeGameCanvas();
   renderGame();
   
@@ -121,6 +110,8 @@ socket.on(Message.START, function(score) {
 });
 
 socket.on(Message.OBSERVER, function(obMsg) {
+  setup_game_config(obMsg[Message.PREPARE]);
+  GameInfo.observerMode = true;
   var state = obMsg[Message.STATE];
   var score = obMsg[Stat.result];
   removeGameCanvas();
@@ -167,7 +158,10 @@ socket.on(Message.SHOOT, function(data) {
     var toX = parseInt(data[Shoot.toX]);
     var toZ = parseInt(data[Shoot.toZ]);
     var character = game.getWorld().getCharacterById(team, index);
-    character.shoot(new THREE.Vector3(fromX, 0, fromZ), new THREE.Vector3(toX, 0, toZ), false);
+    if (character != null) {
+      character.shoot(new THREE.Vector3(fromX, 0, fromZ), new THREE.Vector3(toX, 0, toZ), false);  
+    }
+    
 });
 
 /* Handle the hit message */
@@ -255,8 +249,10 @@ function GameConfig() {
   this.isLoading = false;
   this.existingTeams = new Array();
   this.mapContent = null;
+  this.mapLoader = null;
   this.inPostGame = false;
   this.isListingGames = false;
+  this.observerMode = false;
 }
 
 
@@ -274,14 +270,14 @@ function removeGameCanvas() {
 
 function renderGame() {
   $('#game-container').unwrap();
-  var containerBox = document.getElementById('Loading-output-container');
+  var containerBox = document.getElementById('container');
   var newDiv = document.createElement("div");
   newDiv.id = 'WebGL-output';
   var newScore = document.createElement("div");
   newScore.id = 'Stats-output';
   containerBox.parentNode.insertBefore(newScore, containerBox);
   containerBox.parentNode.insertBefore(newDiv, containerBox);
-  var app = new App("#WebGL-output");
+  var app = new Game("#WebGL-output");
   var MAPGAME = app;
   game = app;
 
@@ -368,11 +364,31 @@ function sendListMapMsg() {
   socket.emit(Message.LISTMAP);
 }
 
-function updateLoadingPlayerState(state) {
-  $('#Loading-output').html('Waiting...</br>Player: ' + state);
+function updateLoadingPlayerState(msgs) {
+  $('#Loading-output').text('Players: ' + msgs[0]);
+  if (msgs.length == 2) {
+    $('#Loading-output2').text(msgs[1]);
+  }
 }
 
 function sendSyncMsg() {
   socket.emit(Message.SYNC);
+}
+
+function setup_game_config(prepareInfo) {
+  var playerTeamInfo = prepareInfo[Message.TEAM];
+  GameInfo.myTeamId = parseInt(playerTeamInfo[GameInfo.username]);
+  GameInfo.existingTeams.length = 0;
+  for (var uname in playerTeamInfo) {
+    GameInfo.existingTeams.push(parseInt(playerTeamInfo[uname]));
+  }
+  var count = 0;
+  for (var key in playerTeamInfo) {
+    count++;
+  }
+  GameInfo.numOfTeams = count;
+  GameInfo.maxNumTeams = parseInt(prepareInfo[Message.MAXPLAYER]);
+  GameInfo.mapContent = prepareInfo[Message.MAP];
+  GameInfo.mapLoader = new ServerMapLoader(GameInfo.mapContent);
 }
 

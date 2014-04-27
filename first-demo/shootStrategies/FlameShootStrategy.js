@@ -4,7 +4,7 @@ var FlameShootStrategy = ShootStrategy.extend({
 		this.materialFactory = materialFactory;
 
 		this.weaponClipSize = 4;
-		this.weaponReloadRate = 0.01;
+		this.weaponReloadRate = 0.6;
 	}, 
 
 	shoot: function(owner, from, to) {
@@ -14,7 +14,7 @@ var FlameShootStrategy = ShootStrategy.extend({
 		var geometry = new THREE.SphereGeometry(radius, 15, 15);
 		var mesh = new THREE.Mesh(geometry, material);
 
-		var light = new THREE.PointLight(0xED4A1C, 4.0, 200);
+		var light = new THREE.PointLight(0xED4A1C, 4.0, 80);
 
 		var bulletArgs = {
 			radius: radius,

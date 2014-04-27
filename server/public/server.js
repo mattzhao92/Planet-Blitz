@@ -1,4 +1,4 @@
-var loadScreenElements = ["#Loading-output", ".span", ".cloud"];
+var loadScreenElements = ["#container"];
 
 function applyToLoadScreen(func) {
   for (var i = 0; i < loadScreenElements.length; i++) {
@@ -9,6 +9,7 @@ function applyToLoadScreen(func) {
 function showLoadScreen() {
   applyToLoadScreen(function(elem) {
     $(elem).show();
+    centerElement($(elem));
   });
 }
 
@@ -43,7 +44,9 @@ function loading() {
   GameInfo.isStart = false;
   GameInfo.isLoading = true;
   
+  hideButtons();
   hideMenu();
+  $('#Loading-output').show();
 
   $('#leaveBtn').show();
   showLoadScreen();
@@ -163,6 +166,7 @@ function getUsername(forGameId) {
   $("#unameBtn").click(function() {
     var username = $('#uname').val();
     if (username != '') {
+      $('#unameBtn').off('click');
       $("#Input-dialog").dialog("close");
       sendJoinMsg(forGameId, username);
       loading();
@@ -184,6 +188,68 @@ function getUsername(forGameId) {
       }
   });
 }
+
+function showSettings() {
+  var content = '';
+  content += '<table style="width:100%"><tr>';
+
+  content += '<tr><td><p style="color:white; text-align:left">Sound</p></td>';
+  content += "<td>"; 
+  content += '<div class="onoffswitch">';
+  content += '<input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="soundSwitch" checked>';
+  content += '<label class="onoffswitch-label" for="soundSwitch">';
+  content += '<div class="onoffswitch-inner"></div>';
+  content += '<div class="onoffswitch-switch"></div>';
+  content += '</label></div></td></tr>';
+
+  content += '<td><p style="color:white; text-align:left">Background Music</p></td>';
+  content += "<td>"; 
+  content += '<div class="onoffswitch">';
+  content += '<input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="bgSwtich" checked>';
+  content += '<label class="onoffswitch-label" for="bgSwtich">';
+  content += '<div class="onoffswitch-inner"></div>';
+  content += '<div class="onoffswitch-switch"></div>';
+  content += '</label></div></td></tr>';
+
+  content += '</table>';
+
+    
+  $("#Message-dialog").html(content).dialog(
+  {
+    width: 400, 
+    // height: 300,
+    modal: true,
+    resizable: false,
+    buttons: {
+      "Quit": function() {
+        GameInfo.inPostGame = false;
+        $(this).dialog("close");
+        mainMenu();
+        sendLeaveMsg();
+      }
+    },
+    title: "Settings"
+  });
+  $(".ui-dialog-titlebar").show();
+  $('#Message-dialog').css('height', 'auto');
+  $('#Message-dialog').css('overflow', 'visible');
+  $(".gameScore").css("color", "white");
+  $('#soundSwitch').click(function() {
+    if ($('#soundSwitch').is(':checked')) {
+      Howler.unmute();
+    } else {
+      Howler.mute();
+    }
+  });
+  $('#bgSwtich').click(function() {
+    if ($('#bgSwtich').is(':checked')) {
+      // Howler.unmute();
+    } else {
+      // Howler.mute();
+    }
+  });
+}
+
 
 function createGameStep() {
   var content = '<div class="rain" style="margin:0"><div class="border start">';
@@ -213,6 +279,7 @@ function createGameStep() {
     var username = $('#uname').val();
     var gamename = $('#rname').val();
     if (username != '' && gamename != '') {
+      $('#unameBtn').off('click');
       var map = $('#choosemap :selected').text();
       // alert(map);
       sendCreateMsg(gamename, username, map);
@@ -262,6 +329,7 @@ function createSingleGame() {
   $(".ui-widget.name-dialog").css('padding', 0);
   $("#Input-dialog").css('padding', 0);
   $("#unameBtn").click(function() {
+    $('#unameBtn').off('click');
     var map = $('#choosemap :selected').text();
     sendSingleModeMsg(map);
     loading();
@@ -286,7 +354,7 @@ function createSingleGame() {
 function listAvailableGames(games) {
   GameInfo.isListingGames = true;
   var content = '<div class="rain" style="margin:0; width:600px;"><div class="border start" style="width:100%">';
-  content += '<form style="width:600px"><label style="text-align:center">Click on a game room to join or create your own</label>';
+  content += '<form style="width:600px"><label style="text-align:center" class="largertext">Click on a game room to join or create your own</label>';
   content += '<table><tr><td style="min-width:150px">Room</td><td style="min-width:150px">Map</td><td style="min-width:150px">Players</td><td style="min-width:150px">Status</td></tr>';
   for (var t = 0; t < games.length; t++) {
     var game = games[t];
@@ -311,11 +379,12 @@ function listAvailableGames(games) {
     resizable: false,
     dialogClass: 'name-dialog'
   });
-  $(".ui-dialog-titlebar").hide();   
+  $(".ui-dialog-titlebar").hide();
   $(".ui-widget.name-dialog").css('width', 'auto');
   $(".ui-widget.name-dialog").css('padding', 0);
   $("#Input-dialog").css('padding', 0);
   $("#createGameBtn").click(function() {
+    $('#createGameBtn').off('click');
     GameInfo.isListingGames = false;
     $("#Input-dialog").dialog("close");
     createGameStep();
@@ -327,25 +396,43 @@ function listAvailableGames(games) {
   centerElement($(".ui-widget.name-dialog"));
 }
 
-$(document).ready(function() { 
-  $('#WebGL-output').hide();
-  $('#Stats-output').hide();
+$(document).ready(function() {
+  // disable text selection
+  $("body").css("-webkit-user-select","none");
+  $("body").css("-moz-user-select","none");
+  $("body").css("-ms-user-select","none");
+  $("body").css("-o-user-select","none");
+  $("body").css("user-select","none");
+
+  hideGameHUD();
   $('#Loading-output').hide();
   $('#slide-container').hide();
   $('#leaveBtn').hide();
+  $('#container').hide();
   centerButtons();
   $('#playBtn').click(function() {
+    SENT_FROM_TUTORIAL = false;
     sendListGameMsg();
   });
   showBackground();
+  $('#settingBtn').click(function() {
+    showSettings();
+  });
 
   /* Start the game locally */
   $('#debugBtn').click(function() {
+    SENT_FROM_TUTORIAL = false; 
     sendListMapMsg();
   });
 
+  $('#tutorialBtn').click(function() {
+    SENT_FROM_TUTORIAL = true; 
+    sendSingleModeMsg('Blitz Fight (2)');
+    loading();
+  });
+
   // TODO: reset game state?
-  $('.jms-link').click(function() {
+  $('#leaveBtn').click(function() {
     if (GameInfo.isLoading) {
       sendLeaveMsg();
     } else if (GameInfo.isStart) {
@@ -353,7 +440,49 @@ $(document).ready(function() {
     }
     mainMenu();
   });
-  
+
+  hideButtons();
+
+
+  // add looping fade animation to "click to start"
+
+  $('body').click(function() {
+      var clickToStart = $('#click-to-start');
+
+      var pointerLockChecker = setInterval(function() {
+        if (mouseLockEntered) {
+          // remove the "allow message"
+          clickToStart.remove();
+          $('body').off('click');
+
+          showButtons();
+        
+          clearInterval(pointerLockChecker);
+        } else {
+          clickToStart.html('Click "allow" above to start');
+          centerElement($('#click-to-start'));
+        }
+      }, 100);
+
+      var mouseLockEntered = false;
+
+      PL.requestPointerLock(document.body, 
+        function(event) {
+          // immediately release pointerlock
+          document.exitPointerLock = document.exitPointerLock ||
+                         document.mozExitPointerLock ||
+                         document.webkitExitPointerLock;
+          document.exitPointerLock();
+          mouseLockEntered = true;
+
+        }, function(event) {
+          // empty callback for when pointerlock is released
+        }, function(event) {
+          console.log("Error: could not obtain pointerlock");
+        });
+  });
+
+
 });
 
 window.oncontextmenu = function () {
@@ -373,5 +502,26 @@ function centerButtons() {
   centerElement($('#blitzTitle'));
   centerElement($('#playBtn'));
   centerElement($('#debugBtn'));
-  centerElement($('#helpBtn'));
+  centerElement($('#settingBtn'));
+  centerElement($('#tutorialBtn'));
+  centerElement($('#click-to-start'));
+}
+
+function hideButtons() {
+  $('#playBtn').hide();
+  $('#debugBtn').hide();
+  $('#settingBtn').hide();
+  $('#tutorialBtn').hide();
+}
+
+function showButtons() {
+  $('#playBtn').show();
+  $('#debugBtn').show();
+  $('#settingBtn').show();
+  $('#tutorialBtn').show();
+}
+
+function onresizeHandler() {
+  centerButtons();
+  centerElement($('#container'));
 }

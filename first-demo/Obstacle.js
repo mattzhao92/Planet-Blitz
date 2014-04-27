@@ -13,32 +13,28 @@ var Obstacle = Sprite.extend({
 
     initBoundBoxAndMesh: function() {
     	var size = Constants.ORIGINAL_TILESIZE;
-    	var obstacle_bounding_cube = new THREE.CubeGeometry(size,size,size);
-		  var obstacle_bounding_cube_material = new THREE.MeshLambertMaterial({opacity: this.opacity, transparent:true});
 
-      var material = new THREE.MeshLambertMaterial({
-        map: THREE.ImageUtils.loadTexture('blendertextures/crate.png')
-      });
+      this.box_mesh = new THREE.Object3D();
+      var path_to_mesh = "blendermodels/rock.js";
 
-      var materials = [material,material,material,material,material,material];
+      switch(this.obstacleType)
+      {
+        case "rock":
+          path_to_mesh = "blendermodels/rock.js";
+          break;
+        case "crate":
+          path_to_mesh = "blendermodels/obstacle-exCrate.js";
+          break;
+        case "powerup-health":
+          path_to_mesh = "blendermodels/powerup-health.js"
+          break;
+        default:
+          path_to_mesh = "blendermodels/rock.js";
+          break;
+      }
 
-      this.box_mesh = new THREE.Mesh(new THREE.CubeGeometry(40, 40, 40, 1, 1, 1), new THREE.MeshFaceMaterial(materials))
+      this.loadFile(path_to_mesh, this.box_mesh);
 
-		// var path_to_mesh = "";
-		
-		// switch(this.obstacleType)
-		// {
-		// case "rock":
-		//   path_to_mesh = "blendermodels/rock.js";
-		//   break;
-		// case "powerup-health":
-		//   path_to_mesh = "blendermodels/powerup-health.js"
-		//   break;
-		// default:
-		//   path_to_mesh = "blendermodels/rock.js";
-		//   break;
-		// }
-  //       this.loadFile(path_to_mesh, this.box_mesh);
     },
 
     setXPos: function(xPos) {
@@ -60,44 +56,16 @@ var Obstacle = Sprite.extend({
 
     loadFile: function(filename, box_mesh) {
 
-		var fullFilename = filename;
-		var myloader = new THREE.JSONLoader();
-		var scope = this;
+      var fullFilename = filename;
+      var myloader = new THREE.JSONLoader();
+      var scope = this;
+      myloader.load(fullFilename, function(geometry, materials) {      
+            var combinedMaterials = new THREE.MeshFaceMaterial(materials);
+            scope.obstacle_mesh = new THREE.Mesh(geometry, combinedMaterials);
 
-
-        var combinedMaterials = new THREE.MeshNormalMaterial();
-        scope.obstacle_mesh = new THREE.Mesh(new THREE.CubeGeometry(40, 40, 40), combinedMaterials);
-        var size = Constants.ORIGINAL_TILESIZE;
-        scope.obstacle_mesh.scale.set(size/10, size/10, size/10);
-        
-        box_mesh.add(scope.obstacle_mesh);
-
-		// myloader.load(fullFilename, function(geometry, materials) {
-  //           // var combinedMaterials;
-  //           // if (fullFilename == "blendermodels/rock.js") {
-  //           //     combinedMaterials = new THREE.MeshNormalMaterial();
-  //           //     scope.obstacle_mesh = new THREE.Mesh(new THREE.CubeGeometry(40, 40, 40), combinedMaterials);
-  //           // } else {
-  //           //     combinedMaterials = new THREE.MeshFaceMaterial(materials);
-  //           //     scope.obstacle_mesh = new THREE.Mesh(geometry, combinedMaterials);
-  //           // }
-
-  //           var ombinedMaterials = new THREE.MeshNormalMaterial();
-  //           scope.obstacle_mesh = new THREE.Mesh(new THREE.CubeGeometry(40, 40, 40), combinedMaterials);
-
-  //           // scale to correct width / height / depth
-  //           geometry.computeBoundingBox();
-
-  //           // TODO: should use this bounding box to compute correct scale
-  //           var boundingBox = geometry.boundingBox;
-  //           var width = geometry.boundingBox.max.x - geometry.boundingBox.min.x;
-  //           var height = geometry.boundingBox.max.y - geometry.boundingBox.min.y;
-  //           var depth = geometry.boundingBox.max.z - geometry.boundingBox.min.z;
-  //           var size = Constants.ORIGINAL_TILESIZE;
-  //           scope.obstacle_mesh.scale.set(size/10, size/10, size/10);
-            
-  //           box_mesh.add(scope.obstacle_mesh);
-  //   	});
+            Utils.resize(scope.obstacle_mesh, Constants.ORIGINAL_TILESIZE);
+            box_mesh.add(scope.obstacle_mesh);
+      });
     },
 
     getRepr: function() {

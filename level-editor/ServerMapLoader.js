@@ -53,4 +53,6 @@ ServerMapLoader.prototype.getBoardDimension = function() {
 	return this.board;
 }
 
-module.exports = ServerMapLoader;
+if (typeof(exports) !== 'undefined' && exports != null) {
+	module.exports = ServerMapLoader;
+}

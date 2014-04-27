@@ -24,8 +24,6 @@ var Character = Sprite.extend({
         this.xPos = 0;
         this.zPos = 0;
 
-        this.highlightedTiles = [];
-
         this.hasPendingMove = false;
         this.destX = 0;
         this.destZ = 0;
@@ -40,7 +38,6 @@ var Character = Sprite.extend({
         this.motionQueue = [];
 
         this.addUnitSelector();
-        this.isCoolDown = false;
 
         this.loader = new THREE.JSONLoader();
         this.loadFile("blendermodels/" + args.modelName);
@@ -66,11 +63,7 @@ var Character = Sprite.extend({
         this.addPositionObserver(this.healthBar);
         this.addHealthObserver(this.healthBar);
 
-        this.isCharacterInRoute = false;
-        this.lastRoadMap = [];
-
         this.breakUpdateHere = false;
-        this.lockMovement = false;
         this.motionInProgress = false;
     },
 
@@ -95,6 +88,7 @@ var Character = Sprite.extend({
 
             // TODO: clean up this code when socket semantics are clarified
             if (isOriginalCmd) {
+                PubSub.publish(Topic.CHARACTER_SHOOT, this);
                 sendShootMsg(this.id, from, to);
             }
             this.shootStrategy.shoot(this, from, to);
@@ -135,17 +129,7 @@ var Character = Sprite.extend({
             var combinedMaterials = new THREE.MeshFaceMaterial(materials);
             mesh = new THREE.Mesh(geometry, combinedMaterials);
 
-            // scale to correct width / height / depth
-            geometry.computeBoundingBox();
-
-            // use bounding box to scale model correctly to the character size
-            var boundingBox = geometry.boundingBox;
-            var width = geometry.boundingBox.max.x - geometry.boundingBox.min.x;
-            var height = geometry.boundingBox.max.y - geometry.boundingBox.min.y;
-            var depth = geometry.boundingBox.max.z - geometry.boundingBox.min.z;
-
-            var ratio = scope.characterSize / width;
-            mesh.scale.set(ratio, ratio, ratio);
+            Utils.resize(mesh, scope.characterSize);
 
             // link the mesh with the character owner object
             this.mesh.owner = scope;
@@ -193,15 +177,16 @@ var Character = Sprite.extend({
     addUnitSelector: function() {
         // setup unit selector mesh
         var geometry = new THREE.TorusGeometry(this.getRadius(), 1, 5, 35);
-        var material = new THREE.MeshLambertMaterial({
+        var material = new THREE.MeshBasicMaterial({
             color: 0xFF0000
         });
         var torus = new THREE.Mesh(geometry, material);
         torus.rotation.x = -0.5 * Math.PI;
         torus.visible = false;
 
-        this.mesh.add(torus);
         this.unitSelectorMesh = torus;
+        this.unitSelectorMesh.material.color.setRGB(1.0, 0, 0);
+        this.mesh.add(torus);
     },
 
     placeAtGridPos: function(xPos, zPos) {
@@ -254,7 +239,6 @@ var Character = Sprite.extend({
         }
 
         if (GameInfo.myTeamId == null || this.team == GameInfo.myTeamId) {
-            this.unitSelectorMesh.material.color.setRGB(1.0, 0, 0);
             this.unitSelectorMesh.visible = true;
             this.world.markCharacterAsSelected(this);
 
@@ -265,10 +249,6 @@ var Character = Sprite.extend({
             }
 
             this.isSelected = true;
-            var sound = new Howl({
-                urls: ['unit-select.mp3'],
-                volume: 0.6,
-            }).play();
         }
     },
 
@@ -285,35 +265,22 @@ var Character = Sprite.extend({
 
     emptyMotionQueue: function() {
         this.motionQueue.length = 0;
-        this.lockMovement = false;
         this.motionInProgress = false;
     },
 
     enqueueMotion: function(destX, destZ) {
-        // if (this.isCoolDown == 0) {
-        var path = this.world.findPath(this.getTileXPos(), this.getTileZPos(), destX, destZ);
+        var path = this.world.findPath(this.getTileXPos(), this.getTileZPos(), destX, destZ);        
         this.destX = destX;
         this.destZ = destZ;
         this.hasPendingMove = true;
         var addNewItem = true;
         var newMotions = [];
         for (var i = 1; i < path.length; i++) {
-            // checking if path[i], path[i-1], path[i-2] are on the same line
-            if (i > 1) {
-                if ((path[i][0] == path[i - 2][0] || path[i][1] == path[i - 2][1]) &&
-                    (path[i][0] * (path[i - 1][1] - path[i - 2][1]) + path[i - 1][0] * (path[i - 2][1] - path[i][1]) + path[i - 2][0] *
-                        (path[i][1] - path[i - 1][1]) == 0)) {
-                    // if they are on the same, line, expand the last element in the motionQueue
-                    var lastMotion = newMotions[newMotions.length - 1];
-                    lastMotion.x = path[i][0];
-                    lastMotion.z = path[i][1];
-                    addNewItem = false;
-                }
+            var move = {
+                x: path[i][0],
+                z: path[i][1]
             }
-            if (addNewItem) {
-                newMotions.push(new THREE.Vector3(path[i][0], 0, path[i][1]));
-            }
-            addNewItem = true;
+            newMotions.push(move);
         }
 
         this.motionQueue.push({
@@ -324,7 +291,6 @@ var Character = Sprite.extend({
         }
         this.motionQueue.push({
             'sentinel': 'start',
-            'highlightTiles': path
         });
     },
 
@@ -410,20 +376,18 @@ var Character = Sprite.extend({
         // handle dequeue action here
         if (this.motionQueue.length > 0 && !this.breakUpdateHere) {
             this.motionInProcess = true;
-            var direction = this.motionQueue.pop();
-            if (direction.sentinel == 'start') {
-                this.isCharacterInRoute = true;
+            var moveDest = this.motionQueue.pop();
+            if (moveDest.sentinel == 'start') {
                 if (this.team == GameInfo.myTeamId) {}
                 return;
-            } else if (direction.sentinel == 'end') {
-                this.isCharacterInRoute = false;
-                if (direction.x == this.xPos && direction.z == this.zPos) {
+            } else if (moveDest.sentinel == 'end') {
+                if (moveDest.x == this.xPos && moveDest.z == this.zPos) {
                     this.hasPendingMove = false;
                 }
                 return;
             }
 
-            if (this.xPos !== direction.x || this.zPos !== direction.z) {
+            if (this.xPos !== moveDest.x || this.zPos !== moveDest.z) {
 
                 // And, only if we're not colliding with an obstacle or a wall ...
                 if (this.collide()) {
@@ -436,20 +400,20 @@ var Character = Sprite.extend({
 
                 this.world.markTileNotOccupiedByCharacter(this.getTileXPos(), this.getTileZPos());
 
-                this.goalMeshX = this.world.convertXPosToWorldX(direction.x);
-                this.goalMeshZ = this.world.convertZPosToWorldZ(direction.z);
+                this.goalMeshX = this.world.convertXPosToWorldX(moveDest.x);
+                this.goalMeshZ = this.world.convertZPosToWorldZ(moveDest.z);
 
-                if (direction.x < this.xPos) {
+                if (moveDest.x < this.xPos) {
                     this.velocityX = -this.moveSpeed;
-                } else if (direction.x > this.xPos) {
+                } else if (moveDest.x > this.xPos) {
                     this.velocityX = this.moveSpeed;
                 } else {
                     this.velocityX = 0;
                 }
 
-                if (direction.z < this.zPos) {
+                if (moveDest.z < this.zPos) {
                     this.velocityZ = -this.moveSpeed;
-                } else if (direction.z > this.zPos) {
+                } else if (moveDest.z > this.zPos) {
                     this.velocityZ = this.moveSpeed;
                 } else {
                     this.velocityZ = 0;

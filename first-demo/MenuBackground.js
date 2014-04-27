@@ -23,8 +23,10 @@ var MenuBackground = Class.extend({
 		this.setupCamera();
 		this.setupControls();
 
-		this.addLighting();
+		// this.setupGround();
+		this.setupPodium();
 
+		this.addLighting();
 
 		// begin animation loop
 		this.animate();
@@ -32,14 +34,55 @@ var MenuBackground = Class.extend({
 		var scope = this;
 		window.addEventListener( 'resize', function() {
 		    scope.onWindowResize(); }, false );
-
 	},
 
+	setupGround: function() {
+		var texture = THREE.ImageUtils.loadTexture("gndTexture/gnd-dirty.jpg");
+
+		this.gridWidth = 400;
+		this.gridLength = 400;
+
+		var groundMaterial = new THREE.MeshLambertMaterial({
+		    map: texture,
+		    side: THREE.DoubleSide
+		});
+
+		var ground = new THREE.Mesh(new THREE.PlaneGeometry(this.gridWidth, this.gridLength, this.gridWidth / 5, this.gridLength / 5), groundMaterial);
+		ground.receiveShadow = true;
+
+		ground.rotation.x = -0.5 * Math.PI;
+
+		var Y_BUFFER = -0.5;
+		// needed because otherwise tiles will overlay directly on the grid and will cause glitching during scrolling ("z fighting")
+		ground.position.y = Y_BUFFER;
+		// offset to fit grid drawing 
+		ground.position.x -= this.gridWidth / 2;
+		ground.position.z -= this.gridLength / 2;
+
+		this.scene.add(ground);
+	},
+
+	setupPodium: function() {
+		this.mesh = new THREE.Object3D();
+
+		var d = new Date();
+		var numSeconds = d.getSeconds();
+		var characterModel;
+		if (numSeconds % 3 == 0) {
+			characterModel = "blendermodels/soldier-regular.js";
+		} else if (numSeconds % 3 == 1) {
+			characterModel = "blendermodels/soldier-artillery.js";
+		} else {
+			characterModel = "blendermodels/soldier-flamethrower.js";
+		}
+		this.loadFile(characterModel, this.mesh);
+		this.scene.add(this.mesh);
+	},
 
 	addLighting: function() {
-	    // // really subtle ambient lighting
-	    // var ambientLight = new THREE.AmbientLight( 0x191919 );
-	    // this.scene.add( ambientLight );
+	    // really subtle ambient lighting
+	    var ambientLight = new THREE.AmbientLight( 0x191919 );
+	    this.scene.add( ambientLight );
 
 	    // this.scene.remove( ambientLight );
 	    // // sky color, ground color, intensity
@@ -87,30 +130,31 @@ var MenuBackground = Class.extend({
 	    });
 	    var sceneRemoveCmd = new SpriteCmd(function(sprite) {
 	        scope.scene.remove(sprite.getRepr());
-	    });	    // add a character
+	    });	
+
+	    // add a character
 	    this.spriteFactory = new SpriteFactory(this, sceneAddCmd, sceneRemoveCmd);
+	},
 
-	    var d = new Date();
-	    var numSeconds = d.getSeconds();
+	loadFile: function(filename, mesh) {
 
-	    var character;
-	    if (numSeconds % 3 == 0) {
-	    	character = this.spriteFactory.createArtillerySoldier(1, 1);
-	    } else if (numSeconds % 3 == 1) {
-	    	character = this.spriteFactory.createSoldier(1, 1);
-	    } else {
-	    	character = this.spriteFactory.createFlamethrowerSoldier(1, 1);
-	    }
-
-	    character.unitSelectorMesh.visible = false;
+	  var fullFilename = filename;
+	  var myloader = new THREE.JSONLoader();
+	  var scope = this;
+	  myloader.load(fullFilename, function(geometry, materials) {      
+	        var combinedMaterials = new THREE.MeshFaceMaterial(materials);
+	        scope.ext_file_mesh = new THREE.Mesh(geometry, combinedMaterials);
+	        Utils.resize(scope.ext_file_mesh, 400);
+	        mesh.add(scope.ext_file_mesh);
+	  });
 	},
 
 	setupCamera: function() {
 	    // create a camera, which defines where we're looking at
 	    this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 8000);
 	    this.camera.position.x = 0;
-	    this.camera.position.y = 600;
-	    this.camera.position.z = 400;
+	    this.camera.position.y = 300;
+	    this.camera.position.z = 500;
 
 	    var origin = new THREE.Vector3(0, 0, 0);
 	    this.camera.lookAt(origin);
@@ -120,6 +164,8 @@ var MenuBackground = Class.extend({
 		this.controls = new THREE.OrbitControls(this.camera, document.getElementById("background-3d"));
 		this.controls.autoRotate = true;
 		this.controls.autoRotateSpeed = 0.5;
+		this.controls.maxDistance = 1500;
+		this.controls.minDistance = 300;
 	},
 
 	update: function() {

@@ -19,10 +19,15 @@ Constants.ACTIVE_KEYBINDINGS = {};
 
 // used to listen for camera position
 Constants.TOPIC_CAMERA_POSITION = "cameraPosition";
-
 Constants.TOPIC_CAMERA_ROTATION = "cameraRotation";
 
+// used to refresh all materials for lighting recalculations
 Constants.TOPIC_REFRESH_MATERIALS = "refreshMaterials";
+
+var SENT_FROM_TUTORIAL = false;
+
+var RIGHT_CLICK = 3;
+var LEFT_CLICK = 1;
 
 function Colors() {
 
@@ -86,5 +91,49 @@ Utils.deallocate = function(scene) {
 	        // not proud of this, but there are problems with traversing the scene and disposing of it the same way
 	    }
 	}
+}
+
+// scales to fit width
+Utils.resize = function(mesh, size) {
+	var boundingBox = mesh.geometry.computeBoundingBox();
+
+	var boundingBox = mesh.geometry.boundingBox;
+	var width = boundingBox.max.x - boundingBox.min.x;
+	var height = boundingBox.max.y - boundingBox.min.y;
+	var depth = boundingBox.max.z - boundingBox.min.z;
+
+	var ratio = size / width;
+	mesh.scale.set(ratio, ratio, ratio);
+}
+
+function Sounds() {
 
 }
+
+// Sounds.weapons = {};
+
+Sounds['laser-shoot.mp3'] = new Howl({
+  urls: ['laser-shoot.mp3'],
+  volume: 0.4
+});
+
+Sounds['unit-select.mp3'] = new Howl({
+    urls: ['unit-select.mp3'],
+    volume: 0.4,
+});
+
+// used for tutorials
+function Topic() {
+
+}
+
+Topic.CHARACTER_DEAD = "character.dead";
+Topic.CHARACTER_SELECTED = "character.selected";
+Topic.CHARACTER_MULTI_SELECTED = "character.multiSelect";
+Topic.CHARACTER_SHOOT = "character.shoot";
+Topic.CHARACTER_MOVE = "character.move";
+Topic.CAMERA_PAN = "camera.pan";
+
+Topic.CHARACTER_DESELECTED = "character.deselected";
+Topic.HOTKEY_ASSIGNED = "hotkey.assigned";
+

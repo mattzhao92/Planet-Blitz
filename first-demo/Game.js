@@ -1,8 +1,10 @@
-var App = Class.extend({
+var Game = Class.extend({
 
     init: function(containerName) {
         // create a scene, that will hold all our elements such as objects, cameras and lights.
         this.scene = new THREE.Scene();
+        this.setupCamera();
+        this.setupCameraControls();
 
         // create a render and set the size
         this.renderer = new THREE.WebGLRenderer({antialias: true, maxLights: 50});
@@ -15,34 +17,58 @@ var App = Class.extend({
         // add the output of the renderer to the html element
         $(containerName).append(this.renderer.domElement);
 
-        // grid attributes
-        this.GRID_WIDTH = 400;
-        this.GRID_LENGTH = 400;
         this.clock = new THREE.Clock();
+
+        this.setupGameWorld();
+        this.addSkybox();
+
+        // tutorial mode
+        this.isTutorialMode = SENT_FROM_TUTORIAL;
+
+        // flag because tracing renderGame pathway takes too long
+        if (SENT_FROM_TUTORIAL) {
+            // activate tutorial mode
+            console.log("Tutorial mode activated");
+            SENT_FROM_TUTORIAL = false;
+            this.tutorialHooks = new TutorialHooks(this.scene, this.controls, this.camera);
+        }
 
         this.createGameConsole();
         this.createScoreBoard();
-
-        this.setupCamera();
-        this.setupCameraControls();
-
-        this.setupGameWorld();
         this.addLighting();
-        this.addSkybox();
-
-        // this.addControlGUI();
 
         // begin animation loop
         this.animate();
 
+        this.ensureMenuButtonsGone();
+    }, 
+
+    ensureMenuButtonsGone: function() {
         var scope = this;
         window.addEventListener( 'resize', function() {
             scope.onWindowResize(); }, false );
-    }, 
+
+        var menuBtns = [$("#tutorialBtn"), $("#playBtn"), $("#settingBtn"), $("#tutorialBtn")];
+        var ensureGameMenuGone = setInterval(function() {
+            
+            var anyButtonsVisible = false;
+            _.forEach(menuBtns, function(btn) {
+                if (btn.is(":visible")) {
+                    anyButtonsVisible = true;
+                }
+            });
+
+            if (anyButtonsVisible) {
+                hideMenu();
+            } else {
+                clearInterval(ensureGameMenuGone);
+            }
+        }, 100);
+    },
 
     setupCamera: function() {
         // create a camera, which defines where we're looking at
-        this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 8000);
+        this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 9000);
         this.camera.position.x = 0;
         this.camera.position.y = 600;
         this.camera.position.z = 400;
@@ -52,25 +78,28 @@ var App = Class.extend({
     },
 
     addLighting: function() {
-        // // really subtle ambient lighting
-        // var ambientLight = new THREE.AmbientLight( 0x191919 );
-        // this.scene.add( ambientLight );
+        if (GameInfo.observerMode) {
+            // really subtle ambient lighting
+            var ambientLight = new THREE.AmbientLight( 0x191919 );
+            this.scene.add( ambientLight );
 
-        // this.scene.remove( ambientLight );
-        // // sky color, ground color, intensity
-        // // var hemiLight = new THREE.HemisphereLight( 0x0000ff, 0xffffff, 0.3 ); 
-        // // this.scene.add(hemiLight);
+            this.scene.remove( ambientLight );
+            // sky color, ground color, intensity
+            // var hemiLight = new THREE.setHeightemisphereLight( 0x0000ff, 0xffffff, 0.3 ); 
+            // this.scene.add(hemiLight);
 
-        // // a really bright light
-        var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.8 );
-        directionalLight.position.x = 0;
-        directionalLight.position.y = 400;
-        directionalLight.position.z = 0;
-        this.scene.add( directionalLight );
+            // a really bright light
+            var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.8 );
+            directionalLight.position.x = 0;
+            directionalLight.position.y = 400;
+            directionalLight.position.z = 0;
+            this.scene.add( directionalLight );
+        }
+
     },
 
     addSkybox: function() {
-        var skyGeometry = new THREE.CubeGeometry( 4000, 4000, 4000 );
+        var skyGeometry = new THREE.CubeGeometry( 6500, 6500, 6500 );
         
         // x +, x -, y + , y -, z +, z -
         var filenames = [
@@ -97,19 +126,10 @@ var App = Class.extend({
         var controls = new THREE.MapControls(this.camera, this.scene, document.getElementById("WebGL-output"));
         controls.panSpeed = 0.31;
 
-        // ensure that camera can't rotate too far down or up
-        controls.minPolarAngle = 0.3;
-        controls.maxPolarAngle = 1.26;
-
         // set up control boundaries
-        controls.minX = -this.GRID_WIDTH / 2;
-        controls.maxX = this.GRID_WIDTH / 2;
-
-        controls.minZ = -this.GRID_LENGTH / 2;
-        controls.maxZ = this.GRID_LENGTH / 2;
-
         controls.minDistance = 240;
         controls.maxDistance = 2000;
+
         this.controls = controls;
     },
 
@@ -119,7 +139,7 @@ var App = Class.extend({
 
     setupGameWorld: function() {
         var squareSize = 40;
-        this.world = new Grid(this, 800, 800, squareSize, this.scene, this.camera, this.controls);
+        this.world = new Grid(this, squareSize, this.scene, this.camera, this.controls);
     },
 
     update: function() {
@@ -153,10 +173,49 @@ var App = Class.extend({
     }, 
 
     createGameConsole: function() {
+        var scope = this;
         var gameConsole = new GameConsole();
         $("#Stats-output").append(gameConsole.domElement);
-        gameConsole.displayInitialMessage("Welcome to Planet Blitz! Fight to the death!");
 
+        $("#gameConsole").live('selectstart dragstart', function(evt){ evt.preventDefault(); return false; });
+        // $("gameConsole").children("input, select, textarea").attr("disabled", true);
+        // $("#gameConsole").disableSelection();
+
+        $("#gameConsole").addClass("unselectable");
+
+        $("#gameConsole").click(function() {
+            scope.controls.requestPointerLock();
+        });
+
+        if (this.isTutorialMode) {
+            gameConsole.setWidth(500);
+            gameConsole.setHeight(500);
+
+            gameConsole.displayInitialMessage("Welcome to the tutorial!");
+            gameConsole.append("Left click on a robot to select");
+            gameConsole.append("Right click to shoot");
+            gameConsole.append("Drag with left click to select multiple units");
+            gameConsole.append("Click on an empty space to move there");
+            gameConsole.append("Red is your robot's health; blue shows how much ammo your robot has. Ammo regenerates over time.");
+            gameConsole.append("Destroy the enemy to win!");
+
+            // a really bright light
+            var scope = this;
+            setTimeout(function() {
+                scope.tutorialHooks.revealMap();
+            }, 3000);
+
+            setTimeout(function() {
+                scope.tutorialHooks.hideMap();
+            }, 6000);
+        } else if (GameInfo.observerMode) {
+            gameConsole.displayInitialMessage("You are a spectator; you will join after this game finishes");   
+
+        } else {
+            // enlarge the display
+            gameConsole.displayInitialMessage("Welcome to Planet Blitz! Fight to the death!");   
+        }
+ 
         this.gameConsole = gameConsole;
     },
 
@@ -191,6 +250,11 @@ var App = Class.extend({
     },
 
     destroy: function() {
+        // remove all PubSub tokens
+        if (this.tutorialHooks) {
+            this.tutorialHooks.destroy();
+        }
+
         this.world.destroy();
     }
 });

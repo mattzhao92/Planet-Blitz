@@ -1,8 +1,10 @@
 /* Game world */
 var Grid = Class.extend({
     // Class constructor
-    init: function(gameApp, width, length, tileSize, scene, camera, controls) {
+    init: function(gameApp, tileSize, scene, camera, controls) {
         'use strict';
+
+        this.unsubscribeTokens = [];
 
         var mapContent = GameInfo.mapContent;
         this.mapJson = JSON.parse(mapContent);
@@ -15,6 +17,12 @@ var Grid = Class.extend({
         this.camera = camera;
         this.controls = controls;
 
+        // adjust control scheme - panning boundaries
+        this.controls.cameraBoundaries.minX = -2400;
+        this.controls.cameraBoundaries.maxX = 2400;
+
+        this.controls.cameraBoundaries.minZ = -2400;
+        this.controls.cameraBoundaries.maxZ = 2400;
 
         // information about what's being selected
         this.highlightedTiles = null;
@@ -51,9 +59,6 @@ var Grid = Class.extend({
         this.setupObstacles(this.mapJson);
 
         this.resetInProgress = false;
-        this.camera.position.x = 0;
-        this.camera.position.y = 600;
-        this.camera.position.z = 400;
 
         this.controls.reset();
 
@@ -100,7 +105,7 @@ var Grid = Class.extend({
         this.bar = new THREE.Sprite(healthBarMaterial);
 
         this.canvas2d.beginPath();
-        this.canvas2d.rect(0, 0, 100000, 100000);
+        this.canvas2d.rect(0, 0, 10000, 10000);
         //canvas2d.rect(1000, 1000, -1000, -1000);
         this.canvas2d.fillStyle = "rgba(0, 255, 127, 0.1)";
         this.canvas2d.fill();
@@ -117,7 +122,7 @@ var Grid = Class.extend({
             scope.refreshMaterials();
         }
 
-        PubSub.subscribe(Constants.TOPIC_REFRESH_MATERIALS, subscriber);
+        this.unsubscribeTokens.push(PubSub.subscribe(Constants.TOPIC_REFRESH_MATERIALS, subscriber));
     },
 
     refreshMaterials: function() {
@@ -213,7 +218,8 @@ var Grid = Class.extend({
         var obstacles = mapJson.obstacles;
         for (var i = 0; i < obstacles.length; i++) {
             var obj = JSON.parse(obstacles[i]);
-            var obstacle = this.spriteFactory.createObstacle('rock');
+
+            var obstacle = this.spriteFactory.createObstacle(obj.obstacleType);
 
             var objMesh = obstacle.getRepr();
             objMesh.position.x = this.convertXPosToWorldX(obj.xPos);
@@ -282,8 +288,19 @@ var Grid = Class.extend({
         if (this.getMyTeamCharacters().length > 0) {
             // focus camera on start position
             this.controls.focusOnPosition(this.getMyTeamCharacters()[0].mesh.position);
-            this.getMyTeamCharacters()[0].onSelect();            
+            this.getMyTeamCharacters()[0].onSelect();
+            Sounds['unit-select.mp3'].play();            
         }
+
+        var mapLoader = GameInfo.mapLoader;
+        for (var tm  = 0; tm < mapLoader.getNumberOfTeams(); tm++) {
+            if (GameInfo.existingTeams.indexOf(tm) == -1) {
+                for (var i = 0; i < mapLoader.getUnitsInTeam(tm).length; i++) {
+                    this.silentlyRemoveCharacter(this.getCharacterById(tm, i));
+                }
+            }
+        }
+        GameInfo.mapLoader = null;
     },
 
     onGameFinish: function() {
@@ -347,6 +364,7 @@ var Grid = Class.extend({
                                 for (var i = 0; i < currentSelectedUnits.length; i++) {
                                     currentSelectedUnits[i].onSelect();
                                 }
+                                Sounds['unit-select.mp3'].play();
                             }
                         });
 
@@ -355,6 +373,33 @@ var Grid = Class.extend({
                 }
             );
         });
+
+        
+        KeyboardJS.on("ctrl, command",
+            function(event, keysPressed, keyCombo) {
+                event.preventDefault();
+                scope.keyCommandDown = true;
+            },
+
+            function(event, keysPressed, keyCombo) {
+                event.preventDefault();
+                scope.keyCommandDown = false;
+            }
+        );
+
+
+        KeyboardJS.on("shift",
+            function(event, keysPressed, keyCombo) {
+                event.preventDefault();
+                scope.keyShiftDown = true;
+            },
+
+            function(event, keysPressed, keyCombo) {
+                event.preventDefault();
+                scope.keyShiftDown = false;
+            }
+        );
+
 
         // unit toggle - cycle forwards
         KeyboardJS.on("t, tab",
@@ -380,6 +425,7 @@ var Grid = Class.extend({
                 for (var i = scope.unitCycle; i < myTeamCharacters.length; i++) {
                     if (characterSelected !== undefined && characterSelected.active) {
                         characterSelected.onSelect();
+                        Sounds['unit-select.mp3'].play();
                         break;
                     }
                     scope.unitCycle = i;
@@ -395,8 +441,8 @@ var Grid = Class.extend({
                 var myTeamCharacters = scope.getMyTeamCharacters();
                 var characterSelected = myTeamCharacters[scope.unitCycle];
                 if (characterSelected.active) {
-
                     characterSelected.onSelect();
+                    Sounds['unit-select.mp3'].play();
                 }
                 if (scope.unitCycle == 0) {
                     scope.unitCycle = myTeamCharacters.length - 1;
@@ -603,9 +649,18 @@ var Grid = Class.extend({
                 scope.onMouseUp(event);
             }
         }
-
-        window.addEventListener('mouseup', listener, false);
         this.mouseUpListener = listener;
+        window.addEventListener('mouseup', listener, false);
+
+
+        var doubleListener = function(event) {
+            if (scope.mouseDownListenerActive) {
+                scope.onMouseDoubleClick(event);
+            }
+        }
+
+        this.mouseDoubleClickListener = doubleListener;
+        window.addEventListener('dblclick', doubleListener, false);
     },
 
     onMouseMove: function(event) {
@@ -689,7 +744,67 @@ var Grid = Class.extend({
         return charactersInRange;
     },
 
+
+    onMouseDoubleClick: function(event) {
+        if (event.which == LEFT_CLICK) {
+            var raycaster = this.gridHelper.getRaycaster();
+
+            // recursively call intersects
+            var characterMeshes = _.map(this.getCharacters(), function(character) {
+                return character.getRepr();
+            });
+
+            var scope = this;
+            var intersects = raycaster.intersectObjects(characterMeshes, true);
+            var intersectsWithTiles = raycaster.intersectObjects(this.tiles.children);
+            var unitIsCurrentlySelected = (this.getCurrentSelectedUnits().length > 0);
+
+            if (intersects.length > 0) {
+                var clickedObject = intersects[0].object.owner;
+                
+                if (clickedObject instanceof Character && clickedObject.team == GameInfo.myTeamId) {
+                    var myTeamCharacters = scope.getMyTeamCharacters();
+
+                    for (var i = 0; i < scope.currentSelectedUnits[GameInfo.myTeamId].length; i++) {
+                        scope.currentSelectedUnits[GameInfo.myTeamId][i].deselect();
+                        i -= 1;
+                    }
+
+                    scope.currentSelectedUnits[GameInfo.myTeamId].length = 0;
+
+                    for (var i = 0; i < myTeamCharacters.length; i++) {
+                        var characterSelected = myTeamCharacters[i];
+                        if (characterSelected.modelName == clickedObject.modelName) {
+                            characterSelected.onSelect();
+                            Sounds['unit-select.mp3'].play();
+                        }
+                    }
+                }
+            }
+        }
+    },
+
+    isKeyBeingHeldDown: function(key) {
+        var activeKeys = KeyboardJS.activeKeys();
+        for (var i = 0; i < activeKeys; i++) {
+            if (activeKeys[i] == key) {
+                return true;
+            }
+        }
+
+        return false;
+    },
+
+    isShiftKeyDown: function() {
+        return this.keyShiftDown || this.isKeyBeingHeldDown("shift");
+    },
+
+    isCtrlKeyDown: function() {
+        return this.keyCommandDown || this.isKeyBeingHeldDown("command") || this.isKeyBeingHeldDown("ctrl");
+    },
+
     onMouseUp: function(event) {
+
     	var didSelect = false;
 
         if (this.isDrawing) {
@@ -700,22 +815,33 @@ var Grid = Class.extend({
             var characters = this.getCharactersInMeshRange(this.startPosOnGrid.x, this.startPosOnGrid.z, endPosOnGrid.x, endPosOnGrid.z);
             
             if (characters.length > 0 && this.mouseSelectHappened) {
-                for (var i = 0; i < this.currentSelectedUnits[GameInfo.myTeamId].length; i++) {
-                    this.currentSelectedUnits[GameInfo.myTeamId][i].deselect();
-                    i -= 1;
-                }
-                this.currentSelectedUnits[GameInfo.myTeamId].length = 0;
 
-                for (var i = 0; i < characters.length; i++) {
-                	didSelect = true;
+                if (this.isShiftKeyDown()) {
+                    for (var i = 0; i < characters.length; i++) {
+                        didSelect = true;
+                        characters[i].deselect();
+                    }
+                } else {
+                    if (!this.isCtrlKeyDown()) {
+                        for (var i = 0; i < this.currentSelectedUnits[GameInfo.myTeamId].length; i++) {
+                            this.currentSelectedUnits[GameInfo.myTeamId][i].deselect();
+                            i -= 1;
+                        }
+                        this.currentSelectedUnits[GameInfo.myTeamId].length = 0;
+                    }
 
-                    characters[i].onSelect();
+                    for (var i = 0; i < characters.length; i++) {
+                    	didSelect = true;
+                        characters[i].onSelect();
+                    }
+                    if (didSelect) {
+                        Sounds['unit-select.mp3'].play();
+                    }
                 }
             }
+
             this.mouseSelectHappened = false;
         }
- 		var RIGHT_CLICK = 3;
-        var LEFT_CLICK = 1;
 
         var raycaster = this.gridHelper.getRaycaster();
 
@@ -729,13 +855,22 @@ var Grid = Class.extend({
         var unitIsCurrentlySelected = (this.getCurrentSelectedUnits().length > 0);
 
        if (event.which == LEFT_CLICK) {
-            // care about characters first, then tile intersects
 
             if (intersects.length > 0) {
                 var clickedObject = intersects[0].object.owner;
                
                  if (clickedObject instanceof Character) {
-                    clickedObject.onSelect(true);
+                    if (this.isShiftKeyDown()) {
+                        clickedObject.deselect();
+                    } else {
+                        if (this.isShiftKeyDown()) {
+                            clickedObject.onSelect(false);
+                            Sounds['unit-select.mp3'].play();
+                        } else  {
+                            clickedObject.onSelect(true);
+                            Sounds['unit-select.mp3'].play();
+                        }
+                    }
                     return;
            		 }
             } 
@@ -755,7 +890,7 @@ var Grid = Class.extend({
 
     onMouseDown: function(event) {
 
-        if (this.isDrawing == false) {
+        if (event.which == LEFT_CLICK && this.isDrawing == false) {
             this.isDrawing = true;
 
             var mouseLocation = this.controls.getMousePosition();
@@ -908,6 +1043,9 @@ var Grid = Class.extend({
     },
 
     destroy: function() {
+        _.forEach(this.unsubscribeTokens, function(token) {
+            PubSub.unsubscribe(token);
+        });
         console.log("Game destroy");
         this.onGameFinish();
         Utils.deallocate(this.scene);
