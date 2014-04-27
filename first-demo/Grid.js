@@ -859,7 +859,7 @@ var Grid = Class.extend({
             if (intersects.length > 0) {
                 var clickedObject = intersects[0].object.owner;
                
-                 if (clickedObject instanceof Character) {
+                if (clickedObject instanceof Character && clickedObject.team == GameInfo.myTeamId) {
                     if (this.isShiftKeyDown()) {
                         clickedObject.deselect();
                     } else {
