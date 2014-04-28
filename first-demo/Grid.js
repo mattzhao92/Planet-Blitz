@@ -285,6 +285,7 @@ var Grid = Class.extend({
     },
 
     onGameStart: function() {
+        console.log("On game start");
         if (this.getMyTeamCharacters().length > 0) {
             // focus camera on start position
             this.controls.focusOnPosition(this.getMyTeamCharacters()[0].mesh.position);
