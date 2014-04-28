@@ -69,14 +69,13 @@ var MenuBackground = Class.extend({
 		var numSeconds = d.getSeconds();
 		var characterModel;
 		if (numSeconds % 3 == 0) {
-			characterModel = "blendermodels/soldier-regular.js";
+			characterModel = "blendermodels/soldier-flamethrowerDetailed.js";
 		} else if (numSeconds % 3 == 1) {
-			characterModel = "blendermodels/soldier-artillery.js";
+			characterModel = "blendermodels/soldier-artilleryDetailed.js";
 		} else {
-			characterModel = "blendermodels/soldier-flamethrower.js";
+			characterModel = "blendermodels/soldier-regular.js";
 		}
 
-		characterModel = "soldier-flamethrowerDetailed.js";
 		this.loadFile(characterModel, this.mesh);
 		this.scene.add(this.mesh);
 	},
