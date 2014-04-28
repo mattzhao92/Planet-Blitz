@@ -12,7 +12,7 @@ var TutorialStateMachine = Class.extend({
 		var scope = this;
 
 		if (this.state == "START" && token == Topic.ENTER_POINTERLOCK) {
-			this.write("Left click on a robot to select it.")
+			this.write("Left click on a robot (the circle-shaped guys) to select it.")
 			this.state = Topic.ENTER_POINTERLOCK;
 
 		} else if (this.state == Topic.ENTER_POINTERLOCK && token == Topic.CHARACTER_SELECTED) {
@@ -38,7 +38,7 @@ var TutorialStateMachine = Class.extend({
 
 			setTimeout(function() {
 				scope.console.clear();
-				scope.write("Let's look around the map. Move your mouse to one of the screen edges to look around.");
+				scope.write("To see more of the map, move your mouse around the edges of your screen.");
 				scope.state = Topic.CHARACTER_MOVE;
 			}, 800);
 		} else if (this.state == Topic.CHARACTER_MOVE && token == Topic.CAMERA_PAN) {
@@ -49,7 +49,7 @@ var TutorialStateMachine = Class.extend({
 
 			setTimeout(function() {
 				scope.state = Topic.CAMERA_PAN;
-				scope.write("Gather your entire team... drag with your left mouse button to select multiple units.");
+				scope.write("Gather your entire team... drag with your left mouse button to select multiple units (within the rectangle).");
 			}, 3000);
 		} else if (this.state == Topic.CAMERA_PAN && token == Topic.CHARACTER_MULTI_SELECTED) {
 			scope.write("Now move your team over there and start shooting them!")
