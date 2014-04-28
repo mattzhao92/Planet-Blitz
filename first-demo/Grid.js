@@ -457,7 +457,7 @@ var Grid = Class.extend({
          KeyboardJS.on("space",
             function(event, keysPressed, keyCombo) {
                 var characters = scope.getCurrentSelectedUnits();
-                if (characters.length > 0 && character.active) {
+                if (characters.length > 0 && characters[0].active) {
                     scope.controls.focusOnPosition(characters[0].mesh.position);
                 }
             }

@@ -52,6 +52,14 @@ var TutorialHooks = Class.extend({
 		_.forEach(this.unsubscribeTokens, function(token) {
 			PubSub.unsubscribe(token);
 		});
+	}, 
+
+	hideCharacter: function() {
+
+	},
+
+	revealCharacter: function() {
+
 	}
 
 });
