@@ -3,8 +3,8 @@ var PelletShootStrategy = ShootStrategy.extend({
 		this.spriteFactory = spriteFactory;
 		this.materialFactory = materialFactory;
 
-		this.weaponClipSize = 4;
-		this.weaponReloadRate = 2.4;
+		this.weaponClipSize = 3;
+		this.weaponReloadRate = 1.6;
 	}, 
 
 	shoot: function(owner, from, to) {
@@ -20,7 +20,7 @@ var PelletShootStrategy = ShootStrategy.extend({
 			radius: radius,
 			mesh: mesh,
 			addons: [light],
-			damage: 5, 
+			damage: 8, 
 			speed: 500,
  			range: 300,
  			from: from,

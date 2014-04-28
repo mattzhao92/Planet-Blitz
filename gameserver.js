@@ -31,6 +31,7 @@ app.use(express.static(__dirname + '/assets/blendertextures'));
 app.use(express.static(__dirname + '/assets/blendermodels'));
 app.use(express.static(__dirname + '/assets/cardImages'));
 app.use(express.static(__dirname + '/assets/sounds'));
+app.use(express.static(__dirname + '/assets/fonts'));
 app.use(express.static(__dirname + '/assets'));
 app.use(express.static(__dirname + '/level-editor'));
 
