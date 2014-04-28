@@ -15,7 +15,11 @@ var app = express();
 
 // IO socket.
 var server = http.createServer(app);
-var io = require('socket.io').listen(server);
+var io = require('socket.io').listen(server, {log: debugMode});
+
+if (!debugMode) {
+	io.set('log level', 1);
+}
 
 // Engine for render html page.
 app.set('views', __dirname + '/server/views');
