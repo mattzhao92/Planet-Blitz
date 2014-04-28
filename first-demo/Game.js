@@ -205,7 +205,7 @@ var Game = Class.extend({
 
         if (this.isTutorialMode) {
             gameConsole.setWidth(500);
-            gameConsole.setHeight(150);
+            gameConsole.setHeight(200);
 
             this.previousMessage = "Welcome to the tutorial!";
 
