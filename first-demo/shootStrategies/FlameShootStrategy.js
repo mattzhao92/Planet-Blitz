@@ -8,7 +8,11 @@ var FlameShootStrategy = ShootStrategy.extend({
 	}, 
 
 	shoot: function(owner, from, to) {
+		var bulletColor = 0xED4A1C;
 		var material = this.materialFactory.createTransparentGlowMaterial(this.spriteFactory.world.camera.position);
+		material.uniforms['glowColor'].value = new THREE.Color(bulletColor);
+		material.uniforms['p'].value = 1;
+		material.uniforms['c'].value = 0.4;
 
 		var radius = 12;
 		var geometry = new THREE.SphereGeometry(radius, 15, 15);
