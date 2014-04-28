@@ -3,6 +3,7 @@ var flag = process.argv[2];
 var debugMode = false;
 if (flag != null && flag == 'debug') {
   debugMode = true;
+  console.log = function() {}
 }
 
 // Web framework.
