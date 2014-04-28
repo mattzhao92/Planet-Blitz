@@ -2,6 +2,20 @@ body {
   margin: 0;
 }
 
+@font-face {
+    font-family: 'Xolonium';
+        src: url('fonts/XoloniumBold.otf') format('opentype');
+    font-weight: bold;
+    font-style: normal;
+      }
+
+@font-face {
+    font-family: 'Xolonium';
+        src: url('fonts/XoloniumRegular.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+      }
+
 #background-3d {
   height: 100%;
   background-size: 100% 100%;

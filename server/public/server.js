@@ -128,22 +128,27 @@ function showRestartDialog(message, additionalMsg, score) {
     resizable: false,
     buttons: {
       "Play again": function() {
+        $('#Message-dialog').unbind('dialogclose');
         GameInfo.inPostGame = false;
         $(this).dialog("close");
         sendRestartMsg();
         restartLoading();
       },
       "Quit": function() {
-        GameInfo.inPostGame = false;
         $(this).dialog("close");
-        mainMenu();
-        sendLeaveMsg();
       }
     }
   });
   $('#Message-dialog').css('height', 'auto');
   $('#Message-dialog').css('overflow', 'visible');
   $(".gameScore").css("color", "white")
+  $('#Message-dialog').bind('dialogclose', function(event) {
+    $('#Message-dialog').unbind('dialogclose');
+    GameInfo.inPostGame = false;
+    $(this).dialog("close");
+    mainMenu();
+    sendLeaveMsg();
+ });
 }
 
 function getUsername(forGameId) {

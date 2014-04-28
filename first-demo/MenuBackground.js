@@ -75,6 +75,8 @@ var MenuBackground = Class.extend({
 		} else {
 			characterModel = "blendermodels/soldier-flamethrower.js";
 		}
+
+		characterModel = "soldier-flamethrowerDetailed.js";
 		this.loadFile(characterModel, this.mesh);
 		this.scene.add(this.mesh);
 	},
@@ -141,7 +143,17 @@ var MenuBackground = Class.extend({
 	  var fullFilename = filename;
 	  var myloader = new THREE.JSONLoader();
 	  var scope = this;
-	  myloader.load(fullFilename, function(geometry, materials) {      
+	  this.materialFactory = new MaterialFactory();
+	  myloader.load(fullFilename, function(geometry, materials) {
+
+	  		for (var i = 0; i < materials.length; i++) {
+	  			if (materials[i].name == "laser") {
+	  				materials[i] = scope.materialFactory.createTransparentGlowMaterial(scope.camera.position);
+	  				materials[i].uniforms['viewVector'].value = scope.camera.position;
+	  				materials[i].uniforms['glowColor'].value = new THREE.Color(0xFF0000);
+	  				materials[i].uniforms['p'].value = 0.6;
+	  			}
+	  		}
 	        var combinedMaterials = new THREE.MeshFaceMaterial(materials);
 	        scope.ext_file_mesh = new THREE.Mesh(geometry, combinedMaterials);
 	        Utils.resize(scope.ext_file_mesh, 400);

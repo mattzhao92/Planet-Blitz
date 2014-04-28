@@ -716,8 +716,6 @@ THREE.MapControls = function ( object, scene, domElement ) {
         );
     }
 
-    pointerlockMouseDown();
-
     this.releasePointerLock = function() {
         // Ask the browser to release the pointer
         document.exitPointerLock = document.exitPointerLock ||
