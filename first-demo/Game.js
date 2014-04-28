@@ -140,6 +140,7 @@ var Game = Class.extend({
 
         var enterCallback = function() {  
             box.val(scope.gameConsole.message);
+            PubSub.publish(Topic.ENTER_POINTERLOCK, null);
         }
         var exitCallback = function() {
             box.val("Click anywhere on the screen to start");
@@ -161,7 +162,7 @@ var Game = Class.extend({
 
     setupGameWorld: function() {
         var squareSize = 40;
-        this.world = new Grid(this, squareSize, this.scene, this.camera, this.controls);
+        this.world = new Grid(this, squareSize, this.scene, this.camera, this.controls, this.isTutorialMode);
     },
 
     update: function() {
@@ -204,7 +205,7 @@ var Game = Class.extend({
 
         if (this.isTutorialMode) {
             gameConsole.setWidth(500);
-            gameConsole.setHeight(500);
+            gameConsole.setHeight(150);
 
             this.previousMessage = "Welcome to the tutorial!";
 

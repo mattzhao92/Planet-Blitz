@@ -68,7 +68,6 @@ THREE.MapControls = function ( object, scene, domElement, enterCallback, exitCal
     var STATE = { NONE: -1, ROTATE: 0, ZOOM: 1, PAN: 2 };
     var state = STATE.NONE;
 
-
     // merged in from trackball controls
     this.screen = { width: window.innerWidth, height: window.innerHeight, offsetLeft: 0, offsetTop: 0, top: 0, left: 0};
 

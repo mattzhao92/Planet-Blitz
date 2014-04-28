@@ -1,9 +1,10 @@
 /* Game world */
 var Grid = Class.extend({
     // Class constructor
-    init: function(gameApp, tileSize, scene, camera, controls) {
+    init: function(gameApp, tileSize, scene, camera, controls, isTutorialMode) {
         'use strict';
 
+        this.isTutorialMode = isTutorialMode;
         this.unsubscribeTokens = [];
 
         var mapContent = GameInfo.mapContent;
@@ -289,8 +290,11 @@ var Grid = Class.extend({
         if (this.getMyTeamCharacters().length > 0) {
             // focus camera on start position
             this.controls.focusOnPosition(this.getMyTeamCharacters()[0].mesh.position);
-            this.getMyTeamCharacters()[0].onSelect();
-            Sounds['unit-select.mp3'].play();            
+            
+            if (!this.isTutorialMode) {
+                this.getMyTeamCharacters()[0].onSelect();
+                Sounds['unit-select.mp3'].play();                            
+            }
         }
 
         var mapLoader = GameInfo.mapLoader;
@@ -539,6 +543,7 @@ var Grid = Class.extend({
     },
 
     handleCharacterDead: function(character) {
+        PubSub.publish(Topic.CHARACTER_DEAD, character);
         this.silentlyRemoveCharacter(character);
     },
 
@@ -661,7 +666,11 @@ var Grid = Class.extend({
         }
 
         this.mouseDoubleClickListener = doubleListener;
-        window.addEventListener('dblclick', doubleListener, false);
+
+        if (!this.isTutorialMode) {
+            // double click causes problems in tutorial
+            window.addEventListener('dblclick', doubleListener, false);
+        }
     },
 
     onMouseMove: function(event) {

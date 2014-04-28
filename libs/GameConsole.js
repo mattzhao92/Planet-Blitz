@@ -32,6 +32,8 @@ var GameConsole = function() {
 	// slow down jquery animations
 	jQuery.fx.interval = 30;
 
+	this.active = true;
+
 	return {
 		domElement: container,
 
@@ -51,6 +53,12 @@ var GameConsole = function() {
 
 		setHeight: function(height) {
 			$("#msgDisplay").height(height);
+		}, 
+
+		clear: function() {
+			var box = $(scope.GAME_TEXT_DISPLAY);
+			box.val("");
+			this.message = "";
 		}
 	}
 };

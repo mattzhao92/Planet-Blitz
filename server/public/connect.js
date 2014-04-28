@@ -183,8 +183,12 @@ socket.on(Message.HIT, function(hitData) {
   game.getWorld().syncGameState(state);
   if (data[Hit.kill]) {
     game.getWorld().handleCharacterDead(target);
-    var killMsg = data[Hit.killer] + ' just killed ' + data[Hit.killed];
-    game.displayMessage(killMsg);
+
+    if (!game.isTutorialMode) {
+      var killMsg = data[Hit.killer] + ' just killed ' + data[Hit.killed];
+      game.displayMessage(killMsg);
+    }
+
     var score = hitData[Stat.result];
     game.updateScoreBoard(score);
   } else{

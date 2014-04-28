@@ -211,7 +211,6 @@ var Character = Sprite.extend({
     },
 
     destroy: function() {
-        PubSub.publish(Topic.CHARACTER_DEAD, this);
         this.spriteFactory.createExplosion(this.mesh.position);
         this.active = false;
         this.ammoBar.destroy();
@@ -426,6 +425,7 @@ var Character = Sprite.extend({
     },
 
     onMouseMovement: function(mouseLocation) {
+        PubSub.publish(Topic.CHARACTER_ROTATION, this);
         // Set the direction's angle, and the difference between it and our Object3D's current rotation
         this.mesh.rotation.y = Math.atan2(mouseLocation.x - this.mesh.position.x, mouseLocation.z - this.mesh.position.z);
     },
