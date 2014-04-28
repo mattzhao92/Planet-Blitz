@@ -836,6 +836,10 @@ var Grid = Class.extend({
                     }
                     if (didSelect) {
                         Sounds['unit-select.mp3'].play();
+                        if (characters.length > 1) {
+                            // was a multi-select
+                            PubSub.publish(Topic.CHARACTER_MULTI_SELECTED, null);
+                        }
                     }
                 }
             }

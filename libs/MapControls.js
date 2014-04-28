@@ -403,6 +403,7 @@ THREE.MapControls = function ( object, scene, domElement, enterCallback, exitCal
 
         // recalculate mouse vector
         if (scope.checkIfMouseAtScreenEdge()) {
+            PubSub.publish(Topic.CAMERA_PAN, this);
             scope.updateMouseVector();
         }
 

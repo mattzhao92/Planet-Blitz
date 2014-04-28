@@ -34,26 +34,32 @@ var TutorialHooks = Class.extend({
 		// set up shoot handler
 		var shootToken = PubSub.subscribe(Topic.CHARACTER_SHOOT, function(msg) {
 			scope.tsm.accept(Topic.CHARACTER_SHOOT);
+			console.log("Good job you shot");
 		});
 
 		var deadToken = PubSub.subscribe(Topic.CHARACTER_DEAD, function(msg) {
 			scope.tsm.accept(Topic.CHARACTER_DEAD);
+			console.log("Good job you killed a character");
 		});
 
 		var selectToken = PubSub.subscribe(Topic.CHARACTER_SELECTED, function(msg) {
 			scope.tsm.accept(Topic.CHARACTER_SELECTED);
+			console.log("Good job you selected");
 		});
 
 		var multiToken = PubSub.subscribe(Topic.CHARACTER_MULTI_SELECTED, function(msg) {
 			scope.tsm.accept(Topic.CHARACTER_MULTI_SELECTED);
+			console.log("Good job you multi-selected");
 		});
 
 		var moveToken = PubSub.subscribe(Topic.CHARACTER_MOVE, function(msg) {
 			scope.tsm.accept(Topic.CHARACTER_MOVE);
+			console.log("Good job you moved");
 		});
 
 		var panToken = PubSub.subscribe(Topic.CAMERA_PAN, function(msg) {
 			scope.tsm.accept(Topic.CAMERA_PAN);
+			console.log("Good job you panned the camera");
 		});
 
 		this.unsubscribeTokens = [shootToken, deadToken, selectToken, multiToken, moveToken, panToken];

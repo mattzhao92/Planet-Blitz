@@ -211,6 +211,7 @@ var Character = Sprite.extend({
     },
 
     destroy: function() {
+        PubSub.publish(Topic.CHARACTER_DEAD, this);
         this.spriteFactory.createExplosion(this.mesh.position);
         this.active = false;
         this.ammoBar.destroy();
@@ -249,6 +250,7 @@ var Character = Sprite.extend({
             }
 
             this.isSelected = true;
+            PubSub.publish(Topic.CHARACTER_SELECTED, this);
         }
     },
 
@@ -269,6 +271,7 @@ var Character = Sprite.extend({
     },
 
     enqueueMotion: function(destX, destZ) {
+        PubSub.publish(Topic.CHARACTER_MOVE, this);
         var path = this.world.findPath(this.getTileXPos(), this.getTileZPos(), destX, destZ);        
         this.destX = destX;
         this.destZ = destZ;
