@@ -274,6 +274,10 @@ function removeGameCanvas() {
 }
 
 function renderGame() {
+  if (game) {
+    game.destroy();
+  }
+
   $('#game-container').unwrap();
   var containerBox = document.getElementById('container');
   var newDiv = document.createElement("div");
