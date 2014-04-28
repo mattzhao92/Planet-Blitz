@@ -3,6 +3,21 @@ var Game = Class.extend({
     init: function(containerName) {
         // create a scene, that will hold all our elements such as objects, cameras and lights.
         this.scene = new THREE.Scene();
+
+        // tutorial mode
+        this.isTutorialMode = SENT_FROM_TUTORIAL;
+
+        // flag because tracing renderGame pathway takes too long
+        if (SENT_FROM_TUTORIAL) {
+            // activate tutorial mode
+            console.log("Tutorial mode activated");
+            SENT_FROM_TUTORIAL = false;
+            this.tutorialHooks = new TutorialHooks(this.scene, this.controls, this.camera);
+        }
+
+        this.createGameConsole();
+        this.createScoreBoard();
+
         this.setupCamera();
         this.setupCameraControls();
 
@@ -22,25 +37,22 @@ var Game = Class.extend({
         this.setupGameWorld();
         this.addSkybox();
 
-        // tutorial mode
-        this.isTutorialMode = SENT_FROM_TUTORIAL;
-
-        // flag because tracing renderGame pathway takes too long
-        if (SENT_FROM_TUTORIAL) {
-            // activate tutorial mode
-            console.log("Tutorial mode activated");
-            SENT_FROM_TUTORIAL = false;
-            this.tutorialHooks = new TutorialHooks(this.scene, this.controls, this.camera);
-        }
-
-        this.createGameConsole();
-        this.createScoreBoard();
         this.addLighting();
 
         // begin animation loop
         this.animate();
 
         this.ensureMenuButtonsGone();
+        
+        if (this.isTutorialMode) {
+            
+            var scope = this;
+            // start the tutorial
+            this.tutorialHooks.setGameConsole(this.gameConsole);
+            setTimeout(function() {
+                scope.tutorialHooks.start();
+            }, 600);
+        }
     }, 
 
     ensureMenuButtonsGone: function() {
@@ -123,7 +135,18 @@ var Game = Class.extend({
     },
 
     setupCameraControls: function() {
-        var controls = new THREE.MapControls(this.camera, this.scene, document.getElementById("WebGL-output"));
+        var scope = this;
+        var box = $("#gameTextDisplay");
+
+        var enterCallback = function() {  
+            box.val(scope.gameConsole.message);
+            PubSub.publish(Topic.ENTER_POINTERLOCK, null);
+        }
+        var exitCallback = function() {
+            box.val("Click anywhere on the screen to start");
+        }
+
+        var controls = new THREE.MapControls(this.camera, this.scene, document.getElementById("WebGL-output"), enterCallback, exitCallback);
         controls.panSpeed = 0.31;
 
         // set up control boundaries
@@ -139,7 +162,7 @@ var Game = Class.extend({
 
     setupGameWorld: function() {
         var squareSize = 40;
-        this.world = new Grid(this, squareSize, this.scene, this.camera, this.controls);
+        this.world = new Grid(this, squareSize, this.scene, this.camera, this.controls, this.isTutorialMode);
     },
 
     update: function() {
@@ -178,43 +201,25 @@ var Game = Class.extend({
         $("#Stats-output").append(gameConsole.domElement);
 
         $("#gameConsole").live('selectstart dragstart', function(evt){ evt.preventDefault(); return false; });
-        // $("gameConsole").children("input, select, textarea").attr("disabled", true);
-        // $("#gameConsole").disableSelection();
-
         $("#gameConsole").addClass("unselectable");
-
-        $("#gameConsole").click(function() {
-            scope.controls.requestPointerLock();
-        });
 
         if (this.isTutorialMode) {
             gameConsole.setWidth(500);
-            gameConsole.setHeight(500);
+            gameConsole.setHeight(200);
 
-            gameConsole.displayInitialMessage("Welcome to the tutorial!");
-            gameConsole.append("Left click on a robot to select");
-            gameConsole.append("Right click to shoot");
-            gameConsole.append("Drag with left click to select multiple units");
-            gameConsole.append("Click on an empty space to move there");
-            gameConsole.append("Red is your robot's health; blue shows how much ammo your robot has. Ammo regenerates over time.");
-            gameConsole.append("Destroy the enemy to win!");
+            this.previousMessage = "Welcome to the tutorial!";
 
-            // a really bright light
-            var scope = this;
-            setTimeout(function() {
-                scope.tutorialHooks.revealMap();
-            }, 3000);
-
-            setTimeout(function() {
-                scope.tutorialHooks.hideMap();
-            }, 6000);
+            this.tutorialHooks.setGameConsole(gameConsole);
         } else if (GameInfo.observerMode) {
-            gameConsole.displayInitialMessage("You are a spectator; you will join after this game finishes");   
+            this.previousMessage = "You are a spectator; you will join after this game finishes";
 
         } else {
             // enlarge the display
-            gameConsole.displayInitialMessage("Welcome to Planet Blitz! Fight to the death!");   
+            this.previousMessage = "Welcome to Planet Blitz! Fight to the death!";
         }
+
+        // gameConsole.message = this.previousMessage;
+        gameConsole.append(this.previousMessage);
  
         this.gameConsole = gameConsole;
     },

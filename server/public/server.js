@@ -401,6 +401,15 @@ function listAvailableGames(games) {
   centerElement($(".ui-widget.name-dialog"));
 }
 
+function leaveGame() {
+  if (GameInfo.isLoading) {
+    sendLeaveMsg();
+  } else if (GameInfo.isStart) {
+    sendLeaveMsg();
+  }
+  mainMenu();
+}
+
 $(document).ready(function() {
   // disable text selection
   $("body").css("-webkit-user-select","none");
@@ -438,12 +447,7 @@ $(document).ready(function() {
 
   // TODO: reset game state?
   $('#leaveBtn').click(function() {
-    if (GameInfo.isLoading) {
-      sendLeaveMsg();
-    } else if (GameInfo.isStart) {
-      sendLeaveMsg();
-    }
-    mainMenu();
+    leaveGame();
   });
 
   hideButtons();

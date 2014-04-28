@@ -32,17 +32,16 @@ var GameConsole = function() {
 	// slow down jquery animations
 	jQuery.fx.interval = 30;
 
+	this.active = true;
+
 	return {
 		domElement: container,
-
-		displayInitialMessage: function(text) {
-			var box = $(scope.GAME_TEXT_DISPLAY);
-			box.val(box.val() + text + "\n");
-		},
 
 		append: function(text) {
 			var box = $(scope.GAME_TEXT_DISPLAY);
 			box.val(box.val() + text + "\n");
+			this.message = box.val();
+
 			box.animate({
 				scrollTop: box[0].scrollHeight - box.height()
 			}, 700);
@@ -54,6 +53,12 @@ var GameConsole = function() {
 
 		setHeight: function(height) {
 			$("#msgDisplay").height(height);
+		}, 
+
+		clear: function() {
+			var box = $(scope.GAME_TEXT_DISPLAY);
+			box.val("");
+			this.message = "";
 		}
 	}
 };

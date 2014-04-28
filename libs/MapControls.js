@@ -6,7 +6,7 @@
  * @author pc123 / http://github.com/pc123
  */
 
-THREE.MapControls = function ( object, scene, domElement ) {
+THREE.MapControls = function ( object, scene, domElement, enterCallback, exitCallback ) {
 
     // needed to add mouse cursor to scene
     this.scene = scene;
@@ -16,6 +16,8 @@ THREE.MapControls = function ( object, scene, domElement ) {
     // console.log(this.domElement);
 
     // API
+    this.enterCallback = enterCallback;
+    this.exitCallback = exitCallback;
 
     this.enabled = true;
 
@@ -66,7 +68,6 @@ THREE.MapControls = function ( object, scene, domElement ) {
     var STATE = { NONE: -1, ROTATE: 0, ZOOM: 1, PAN: 2 };
     var state = STATE.NONE;
 
-
     // merged in from trackball controls
     this.screen = { width: window.innerWidth, height: window.innerHeight, offsetLeft: 0, offsetTop: 0, top: 0, left: 0};
 
@@ -109,8 +110,8 @@ THREE.MapControls = function ( object, scene, domElement ) {
     var _panStart = new THREE.Vector2();
     var _panEnd = new THREE.Vector2();
 
-    // make sure this arbitrary mouse position is out of bounds...
-    var ARBITRARY_MOUSE_POS = 50;
+    // make sure this arbitrary mouse position is out of bounds... (increased for retina purposes)
+    var ARBITRARY_MOUSE_POS = 100;
     this.mousePosition = {x: ARBITRARY_MOUSE_POS, y: ARBITRARY_MOUSE_POS};
 
     this.CURSOR_IMAGE_PATH = "images/pointer.cur";
@@ -401,6 +402,7 @@ THREE.MapControls = function ( object, scene, domElement ) {
 
         // recalculate mouse vector
         if (scope.checkIfMouseAtScreenEdge()) {
+            PubSub.publish(Topic.CAMERA_PAN, this);
             scope.updateMouseVector();
         }
 
@@ -701,11 +703,18 @@ THREE.MapControls = function ( object, scene, domElement ) {
             function(event) {
                 // console.log("Pointerlock enabled");
                 scope.handleResize();
+                if (scope.enterCallback) {
+                    scope.enterCallback();
+                }
                 // console.log(document.body);
                 document.addEventListener("mousemove", moveCallback, false);
             }, 
             // on pointerlock disable
             function(event) {
+                if (scope.exitCallback) {
+                    scope.exitCallback();
+                }
+
                 document.removeEventListener("mousemove", moveCallback, false);
                 scope.resetMousePosition();
             }, 

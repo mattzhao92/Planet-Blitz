@@ -13,7 +13,7 @@ Constants.BULLET_LEVEL = 15;
 // used to listen for clock updates
 Constants.TOPIC_DELTA = "delta";
 
-Constants.HOTKEYS = ["q", "e", "space", "r", "t", "tab", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "ctrl", "command"];
+Constants.HOTKEYS = ["q", "e", "space", "r", "t", "tab", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "ctrl", "shift", "command"];
 
 Constants.ACTIVE_KEYBINDINGS = {};
 
@@ -122,6 +122,28 @@ Sounds['unit-select.mp3'] = new Howl({
     volume: 0.4,
 });
 
+Sounds['tutorial-msg'] = new Howl({
+    urls: ['tutorial-msg.mp3'],
+    volume: 0.6,
+});
+
+Sounds['game-create'] = new Howl({
+    urls: ['game-create.mp3'],
+    volume: 0.6,
+});
+
+Sounds['game-start'] = new Howl({
+    urls: ['game-start.mp3'],
+    volume: 0.6,
+});
+
+Sounds['game-join'] = new Howl({
+    urls: ['game-join.mp3'],
+    volume: 0.6,
+});
+
+
+
 // used for tutorials
 function Topic() {
 
@@ -133,6 +155,8 @@ Topic.CHARACTER_MULTI_SELECTED = "character.multiSelect";
 Topic.CHARACTER_SHOOT = "character.shoot";
 Topic.CHARACTER_MOVE = "character.move";
 Topic.CAMERA_PAN = "camera.pan";
+Topic.CHARACTER_ROTATION = "character.lookAround";
+Topic.ENTER_POINTERLOCK = "controls.enterPointerlock";
 
 Topic.CHARACTER_DESELECTED = "character.deselected";
 Topic.HOTKEY_ASSIGNED = "hotkey.assigned";

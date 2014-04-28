@@ -249,6 +249,7 @@ var Character = Sprite.extend({
             }
 
             this.isSelected = true;
+            PubSub.publish(Topic.CHARACTER_SELECTED, this);
         }
     },
 
@@ -269,6 +270,7 @@ var Character = Sprite.extend({
     },
 
     enqueueMotion: function(destX, destZ) {
+        PubSub.publish(Topic.CHARACTER_MOVE, this);
         var path = this.world.findPath(this.getTileXPos(), this.getTileZPos(), destX, destZ);        
         this.destX = destX;
         this.destZ = destZ;
@@ -423,6 +425,7 @@ var Character = Sprite.extend({
     },
 
     onMouseMovement: function(mouseLocation) {
+        PubSub.publish(Topic.CHARACTER_ROTATION, this);
         // Set the direction's angle, and the difference between it and our Object3D's current rotation
         this.mesh.rotation.y = Math.atan2(mouseLocation.x - this.mesh.position.x, mouseLocation.z - this.mesh.position.z);
     },

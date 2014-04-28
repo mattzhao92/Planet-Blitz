@@ -1,9 +1,10 @@
 /* Game world */
 var Grid = Class.extend({
     // Class constructor
-    init: function(gameApp, tileSize, scene, camera, controls) {
+    init: function(gameApp, tileSize, scene, camera, controls, isTutorialMode) {
         'use strict';
 
+        this.isTutorialMode = isTutorialMode;
         this.unsubscribeTokens = [];
 
         var mapContent = GameInfo.mapContent;
@@ -289,8 +290,11 @@ var Grid = Class.extend({
         if (this.getMyTeamCharacters().length > 0) {
             // focus camera on start position
             this.controls.focusOnPosition(this.getMyTeamCharacters()[0].mesh.position);
-            this.getMyTeamCharacters()[0].onSelect();
-            Sounds['unit-select.mp3'].play();            
+            
+            if (!this.isTutorialMode) {
+                this.getMyTeamCharacters()[0].onSelect();
+                Sounds['unit-select.mp3'].play();                            
+            }
         }
 
         var mapLoader = GameInfo.mapLoader;
@@ -457,7 +461,7 @@ var Grid = Class.extend({
          KeyboardJS.on("space",
             function(event, keysPressed, keyCombo) {
                 var characters = scope.getCurrentSelectedUnits();
-                if (characters.length > 0 && character.active) {
+                if (characters.length > 0 && characters[0].active) {
                     scope.controls.focusOnPosition(characters[0].mesh.position);
                 }
             }
@@ -539,6 +543,7 @@ var Grid = Class.extend({
     },
 
     handleCharacterDead: function(character) {
+        PubSub.publish(Topic.CHARACTER_DEAD, character);
         this.silentlyRemoveCharacter(character);
     },
 
@@ -661,7 +666,11 @@ var Grid = Class.extend({
         }
 
         this.mouseDoubleClickListener = doubleListener;
-        window.addEventListener('dblclick', doubleListener, false);
+
+        if (!this.isTutorialMode) {
+            // double click causes problems in tutorial
+            window.addEventListener('dblclick', doubleListener, false);
+        }
     },
 
     onMouseMove: function(event) {
@@ -758,7 +767,6 @@ var Grid = Class.extend({
             var scope = this;
             var intersects = raycaster.intersectObjects(characterMeshes, true);
             var intersectsWithTiles = raycaster.intersectObjects(this.tiles.children);
-            var unitIsCurrentlySelected = (this.getCurrentSelectedUnits().length > 0);
 
             if (intersects.length > 0) {
                 var clickedObject = intersects[0].object.owner;
@@ -837,6 +845,10 @@ var Grid = Class.extend({
                     }
                     if (didSelect) {
                         Sounds['unit-select.mp3'].play();
+                        if (characters.length > 1) {
+                            // was a multi-select
+                            PubSub.publish(Topic.CHARACTER_MULTI_SELECTED, null);
+                        }
                     }
                 }
             }
