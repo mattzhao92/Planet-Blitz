@@ -122,6 +122,28 @@ Sounds['unit-select.mp3'] = new Howl({
     volume: 0.4,
 });
 
+Sounds['tutorial-msg'] = new Howl({
+    urls: ['tutorial-msg.mp3'],
+    volume: 0.6,
+});
+
+Sounds['game-create'] = new Howl({
+    urls: ['game-create.mp3'],
+    volume: 0.6,
+});
+
+Sounds['game-start'] = new Howl({
+    urls: ['game-start.mp3'],
+    volume: 0.6,
+});
+
+Sounds['game-join'] = new Howl({
+    urls: ['game-join.mp3'],
+    volume: 0.6,
+});
+
+
+
 // used for tutorials
 function Topic() {
 

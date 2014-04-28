@@ -106,6 +106,7 @@ socket.on(Message.START, function(score) {
   var grid = game.getWorld();
   game.updateScoreBoard(score);
   console.log('start game');
+  // Sounds['game-start'].play();
   grid.onGameStart();
 });
 

@@ -35,14 +35,11 @@ var GameConsole = function() {
 	return {
 		domElement: container,
 
-		displayInitialMessage: function(text) {
-			var box = $(scope.GAME_TEXT_DISPLAY);
-			box.val(box.val() + text + "\n");
-		},
-
 		append: function(text) {
 			var box = $(scope.GAME_TEXT_DISPLAY);
 			box.val(box.val() + text + "\n");
+			this.message = box.val();
+
 			box.animate({
 				scrollTop: box[0].scrollHeight - box.height()
 			}, 700);
