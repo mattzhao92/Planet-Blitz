@@ -110,8 +110,8 @@ THREE.MapControls = function ( object, scene, domElement, enterCallback, exitCal
     var _panStart = new THREE.Vector2();
     var _panEnd = new THREE.Vector2();
 
-    // make sure this arbitrary mouse position is out of bounds...
-    var ARBITRARY_MOUSE_POS = 50;
+    // make sure this arbitrary mouse position is out of bounds... (increased for retina purposes)
+    var ARBITRARY_MOUSE_POS = 100;
     this.mousePosition = {x: ARBITRARY_MOUSE_POS, y: ARBITRARY_MOUSE_POS};
 
     this.CURSOR_IMAGE_PATH = "images/pointer.cur";
