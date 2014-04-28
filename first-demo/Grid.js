@@ -758,7 +758,6 @@ var Grid = Class.extend({
             var scope = this;
             var intersects = raycaster.intersectObjects(characterMeshes, true);
             var intersectsWithTiles = raycaster.intersectObjects(this.tiles.children);
-            var unitIsCurrentlySelected = (this.getCurrentSelectedUnits().length > 0);
 
             if (intersects.length > 0) {
                 var clickedObject = intersects[0].object.owner;

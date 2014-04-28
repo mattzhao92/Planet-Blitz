@@ -6,7 +6,7 @@
  * @author pc123 / http://github.com/pc123
  */
 
-THREE.MapControls = function ( object, scene, domElement ) {
+THREE.MapControls = function ( object, scene, domElement, enterCallback, exitCallback ) {
 
     // needed to add mouse cursor to scene
     this.scene = scene;
@@ -16,6 +16,8 @@ THREE.MapControls = function ( object, scene, domElement ) {
     // console.log(this.domElement);
 
     // API
+    this.enterCallback = enterCallback;
+    this.exitCallback = exitCallback;
 
     this.enabled = true;
 
@@ -701,11 +703,18 @@ THREE.MapControls = function ( object, scene, domElement ) {
             function(event) {
                 // console.log("Pointerlock enabled");
                 scope.handleResize();
+                if (scope.enterCallback) {
+                    scope.enterCallback();
+                }
                 // console.log(document.body);
                 document.addEventListener("mousemove", moveCallback, false);
             }, 
             // on pointerlock disable
             function(event) {
+                if (scope.exitCallback) {
+                    scope.exitCallback();
+                }
+
                 document.removeEventListener("mousemove", moveCallback, false);
                 scope.resetMousePosition();
             }, 
