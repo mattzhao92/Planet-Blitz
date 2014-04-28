@@ -3,7 +3,6 @@ var flag = process.argv[2];
 var debugMode = false;
 if (flag != null && flag == 'debug') {
   debugMode = true;
-  console.log = function() {}
 }
 
 // Web framework.
@@ -195,7 +194,7 @@ io.sockets.on('connection', function(socket) {
               }
             } else {
               var playerState = gameToJoin.getPlayerInfo();
-              console.log(playerState);
+              gameLog(playerState);
               socket.broadcast.to(gameToJoin.room).emit(Message.JOIN, playerState);
               socket.emit(Message.JOIN, playerState);
               if (gameToJoin.isFull()) {

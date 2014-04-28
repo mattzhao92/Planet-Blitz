@@ -128,16 +128,14 @@ function showRestartDialog(message, additionalMsg, score) {
     resizable: false,
     buttons: {
       "Play again": function() {
+        $('#Message-dialog').unbind('dialogclose');
         GameInfo.inPostGame = false;
         $(this).dialog("close");
         sendRestartMsg();
         restartLoading();
       },
       "Quit": function() {
-        GameInfo.inPostGame = false;
         $(this).dialog("close");
-        mainMenu();
-        sendLeaveMsg();
       }
     }
   });
