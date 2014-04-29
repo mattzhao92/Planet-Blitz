@@ -82,7 +82,7 @@ var MenuBackground = Class.extend({
 
 	addLighting: function() {
 	    // really subtle ambient lighting
-	    var ambientLight = new THREE.AmbientLight( 0x191919 );
+	    var ambientLight = new THREE.AmbientLight( 0x262626 );
 	    this.scene.add( ambientLight );
 
 	    // this.scene.remove( ambientLight );
