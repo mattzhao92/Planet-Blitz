@@ -248,9 +248,11 @@ function showSettings() {
   });
   $('#bgSwtich').click(function() {
     if ($('#bgSwtich').is(':checked')) {
-      // Howler.unmute();
+      Sounds['bg-music'].unmute();
+      Sounds['bg-music'].play();
     } else {
-      // Howler.mute();
+      Sounds['bg-music'].pause();
+      Sounds['bg-music'].mute();
     }
   });
 }

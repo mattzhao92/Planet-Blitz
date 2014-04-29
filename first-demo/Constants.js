@@ -142,7 +142,13 @@ Sounds['game-join'] = new Howl({
     volume: 0.6,
 });
 
+Sounds['bg-music'] = new Howl({
+	urls: ['bg-music.m4a'],
+	volume: 0.65,
+	loop: true
+});
 
+Sounds['bg-music'].play();
 
 // used for tutorials
 function Topic() {
