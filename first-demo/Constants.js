@@ -13,7 +13,7 @@ Constants.BULLET_LEVEL = 15;
 // used to listen for clock updates
 Constants.TOPIC_DELTA = "delta";
 
-Constants.HOTKEYS = ["q", "e", "space", "r", "t", "tab", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "ctrl", "shift", "command"];
+Constants.HOTKEYS = ["q", "e", "space", "r", "t", "tab", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "ctrl", "shift", "command", "alt"];
 
 Constants.ACTIVE_KEYBINDINGS = {};
 

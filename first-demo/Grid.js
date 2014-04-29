@@ -342,7 +342,7 @@ var Grid = Class.extend({
         // dynamic hotkey mapping to characters
         unitNumbers.forEach(function(number) {
             var hotkey = number.toString();
-            KeyboardJS.on("ctrl, command > " + hotkey,
+            KeyboardJS.on("ctrl, command, alt > " + hotkey,
                 function(event, keysPressed, keyCombo) {
                     event.preventDefault();
 
@@ -380,7 +380,7 @@ var Grid = Class.extend({
         });
 
         
-        KeyboardJS.on("ctrl, command",
+        KeyboardJS.on("ctrl, command, alt",
             function(event, keysPressed, keyCombo) {
                 event.preventDefault();
                 scope.keyCommandDown = true;
@@ -809,7 +809,7 @@ var Grid = Class.extend({
     },
 
     isCtrlKeyDown: function() {
-        return this.keyCommandDown || this.isKeyBeingHeldDown("command") || this.isKeyBeingHeldDown("ctrl");
+        return this.keyCommandDown || this.isKeyBeingHeldDown("command") || this.isKeyBeingHeldDown("ctrl") || this.isKeyBeingHeldDown("alt");
     },
 
     onMouseUp: function(event) {
