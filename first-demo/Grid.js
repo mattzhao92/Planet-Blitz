@@ -342,7 +342,7 @@ var Grid = Class.extend({
         // dynamic hotkey mapping to characters
         unitNumbers.forEach(function(number) {
             var hotkey = number.toString();
-            KeyboardJS.on("ctrl, command, alt > " + hotkey,
+            KeyboardJS.on("ctrl > " + hotkey + ", command > " + hotkey + ", alt > " + hotkey,
                 function(event, keysPressed, keyCombo) {
                     event.preventDefault();
 
