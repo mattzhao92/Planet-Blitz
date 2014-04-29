@@ -76,6 +76,8 @@ var EditorModel = Class.extend({
 		}, false);
 
 		this.setupControls();
+		this.drawGridSquares(this.map_width, this.map_height, this.map_tileSize);
+
 	},
 
 
@@ -277,7 +279,6 @@ var EditorModel = Class.extend({
 		this.onObstacleCreation("crate");
 		this.onPowerupCreation("powerup-health");
 		this.current_obstacle_prototype = this.obstacle_cards[0].obstacle;
-		this.drawGridSquares(this.map_width, this.map_height, this.map_tileSize);
 	},
 
 	getTileSize: function() {
@@ -469,6 +470,7 @@ var EditorModel = Class.extend({
 		for (var i = 0; i < numberSquaresOnXAxis; i++) {
 			this.tilesArray[i] = new Array(this.numberSquaresOnZAxis);
 		}
+		debugger;
 
 		for (var i = 0; i < numberSquaresOnXAxis; i++) {
 			for (var j = 0; j < numberSquaresOnZAxis; j++) {
@@ -918,7 +920,7 @@ var EditorModel = Class.extend({
 				var mapJson = data;
 
 				mapJson = JSON.parse(JSON.parse(mapJson).obj);
-				console.log(mapJson);
+				//console.log(mapJson);
 		
 				scope.map_width  = mapJson.board.width;
 				scope.map_height = mapJson.board.height;
@@ -976,6 +978,22 @@ var EditorModel = Class.extend({
 						scope.created_obstacles.push(new_obj);
 					});
 				}
+
+
+
+			// var numberSquaresOnXAxis = scope.map_width / scope.map_tileSize;
+			// var numberSquaresOnZAxis = scope.map_height / scope.map_tileSize;
+
+			// 	console.log(">>>>>>>>> importJson");
+			// 	console.log(numberSquaresOnXAxis + " "+ numberSquaresOnZAxis);
+			// 	for (var i = 0; i < numberSquaresOnXAxis; i++) {
+			// 		for (var j = 0; j < numberSquaresOnZAxis; j++) {
+			// 			var tile = scope.tilesArray[i][j];
+			// 			console.log(tile);
+			// 		}
+			// 	}
+
+
 
 				scope.setupControls(teams);
 
