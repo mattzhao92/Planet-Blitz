@@ -15,21 +15,21 @@ var Obstacle = Sprite.extend({
     	var size = Constants.ORIGINAL_TILESIZE;
 
       this.box_mesh = new THREE.Object3D();
-      var path_to_mesh = "blendermodels/rock.js";
+      var path_to_mesh = "rock.js";
 
       switch(this.obstacleType)
       {
         case "rock":
-          path_to_mesh = "blendermodels/rock.js";
+          path_to_mesh = "rock.js";
           break;
         case "crate":
-          path_to_mesh = "blendermodels/obstacle-exCrate.js";
+          path_to_mesh = "obstacle-exCrate.js";
           break;
         case "powerup-health":
-          path_to_mesh = "blendermodels/powerup-health.js"
+          path_to_mesh = "powerup-health.js"
           break;
         default:
-          path_to_mesh = "blendermodels/rock.js";
+          path_to_mesh = "rock.js";
           break;
       }
 

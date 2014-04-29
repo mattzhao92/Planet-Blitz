@@ -40,7 +40,7 @@ var Character = Sprite.extend({
         this.addUnitSelector();
 
         this.loader = new THREE.JSONLoader();
-        this.loadFile("blendermodels/" + args.modelName);
+        this.loadFile(args.modelName);
 
         this.maximumHealth = 100;
         this.health = this.maximumHealth;
