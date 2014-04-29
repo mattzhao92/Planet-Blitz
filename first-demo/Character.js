@@ -39,7 +39,6 @@ var Character = Sprite.extend({
 
         this.addUnitSelector();
 
-        this.loader = new THREE.JSONLoader();
         this.loadFile(args.modelName);
 
         this.maximumHealth = 100;
@@ -117,27 +116,46 @@ var Character = Sprite.extend({
 
         var fullFilename = filename;
 
-        this.loader.load(fullFilename, function(geometry, materials) {
-            // TODO: key this in by name
-            // set team color for "wheels"
-            _.forEach(materials, function(material) {
-                if (material.name == "Wheels" || material.name == "pupil") {
-                    material.color = scope.teamColor;
-                }
+        if (LoaderCache[fullFilename]["geometry"] && LoaderCache[fullFilename]["materials"]) {
+            scope.addMainModelMesh(LoaderCache[fullFilename]["geometry"], LoaderCache[fullFilename]["materials"]);
+            console.log("Loaded from cache");
+        }
+        else {
+            this.loader = new THREE.JSONLoader();
+
+            this.loader.load(fullFilename, function(geometry, materials) {
+                // TODO: key this in by name
+                // set team color for "wheels"
+                scope.addMainModelMesh(geometry, materials);
             });
+        }
+    },
 
-            var combinedMaterials = new THREE.MeshFaceMaterial(materials);
-            mesh = new THREE.Mesh(geometry, combinedMaterials);
+    addMainModelMesh: function(geometry, materials) {
+        var scope = this;
 
-            Utils.resize(mesh, scope.characterSize);
+        var freshMaterials = [];
 
-            // link the mesh with the character owner object
-            this.mesh.owner = scope;
-            scope.mesh.add(mesh);
-            scope.characterMesh = mesh;
+        for (var i = 0; i < materials.length; i++) {
+            if (materials[i].name == "Wheels" || materials[i].name == "pupil") {
+                var cloneMaterial = materials[i].clone();
+                cloneMaterial.color = scope.teamColor;
+                materials[i] = cloneMaterial;
+            }
+            freshMaterials.push(materials[i].clone());
+        }
 
-            mesh.position.y += scope.characterSize / 2;
-        });
+        var combinedMaterials = new THREE.MeshFaceMaterial(freshMaterials);
+        mesh = new THREE.Mesh(geometry, combinedMaterials);
+
+        Utils.resize(mesh, scope.characterSize);
+
+        // link the mesh with the character owner object
+        this.mesh.owner = scope;
+        scope.mesh.add(mesh);
+        scope.characterMesh = mesh;
+
+        mesh.position.y += scope.characterSize / 2;
     },
 
     getRadius: function() {

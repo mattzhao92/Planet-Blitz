@@ -4,7 +4,7 @@ function Constants() {
 };
 
 // dark red, light blue, dark green, gold
-Constants.TEAM_COLORS = [0x990000, 0x007A29, 0x0066CC, 0xD4A017];
+Constants.TEAM_COLORS = [0x990000, 0x007A29, 0x0066CC, 0xD4A017, 0xFFCC66, 0x669900, 0x0099CC];
 
 Constants.GLOW_COLORS = {green: new THREE.Color(0x66E066)};
 
@@ -161,3 +161,20 @@ Topic.ENTER_POINTERLOCK = "controls.enterPointerlock";
 Topic.CHARACTER_DESELECTED = "character.deselected";
 Topic.HOTKEY_ASSIGNED = "hotkey.assigned";
 
+function LoaderCache() {
+
+}
+
+
+var JSONloader = new THREE.JSONLoader();
+
+var modelNames = ['soldier-artilleryDetailed.js', 'soldier-artillery.js', 'soldier-regular.js', 'soldier-flamethrower.js', 'soldier-flamethrowerDetailed.js'];
+
+_.forEach(modelNames, function(modelName) {
+	
+	JSONloader.load(modelName, function(geometry, materials) {
+		LoaderCache[modelName] = {};
+		LoaderCache[modelName]["geometry"] = geometry;
+		LoaderCache[modelName]["materials"] = materials;
+	});
+});
